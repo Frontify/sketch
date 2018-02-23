@@ -1,0 +1,106 @@
+.a-badge {
+    display: inline-block;
+    border-radius: 9px;
+    padding: 0 6px;
+    font-size: 11px;
+    min-width: 7px;
+    line-height: 18px;
+    text-align: center;
+    font-weight: normal;
+}
+
+.a-badge--small {
+    border-radius: 7px;
+    padding: 0 5px;
+    font-size: 10px;
+    min-width: 7px;
+    line-height: 15px;
+}
+
+.a-badge--large {
+    padding: 5px 10px;
+    border-radius: 15px;
+}
+
+.a-badge--default {
+    background: rgba(95,200,215,1);
+    color: rgba(255,255,255,0.9);
+}
+
+.a-badge--icon {
+    border-radius: 50%;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.a-badge--icon.a-badge--small {
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+.a-badge--neutral {
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.2);
+    background: transparent;
+    color: rgba(0,0,0,0.4);
+}
+
+.a-badge--neutral-light {
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.8);
+    background: transparent;
+    color: rgba(255,255,255,0.8);
+}
+
+.a-badge--dark {
+    background: #4d535f;
+    color: rgba(255,255,255,0.5);
+}
+.a-badge--green {
+    background: rgba(163, 206, 98, 0.5);
+    color: #83B438;
+}
+.a-badge--grey {
+    background: rgba(54,61,74,0.05);
+    color: #717780;
+}
+.a-badge--yuma {
+    background: rgba(192,181,138,0.5);
+    color: rgba(126,114,68,1);
+}
+.a-badge--gold {
+    background: rgba(250,177,23,0.5);
+    color: rgba(234,160,5,1);
+}
+.a-badge--label {
+    padding-left: 5px;
+}
+.a-badge__multiple {
+    padding: 0;
+    font-size: 0;
+}
+.a-badge--split-left,
+.a-badge--split-right {
+
+}
+.a-badge--split-left {
+    border-right: 1px solid rgba(54,61,74,0.05);
+    border-radius: 9px 0 0 9px;
+}
+.a-badge--split-right {
+    border-radius: 0 9px 9px 0;
+}
+.a-badge--uppercase {
+    text-transform: uppercase;
+}
+.a-badge--link:hover {
+    background: rgba(245,245,246,1);
+    color: rgba(133,139,146,1);
+}
+.a-badge__bubble {
+    height: 8px;
+    width: 8px;
+    display: inline-block;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    border-radius: 50%;
+    margin-right: 3px;
+}

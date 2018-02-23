@@ -1,0 +1,32 @@
+.a-loader {
+	margin: 32px auto;
+	width: 80px;
+	text-align: center;
+}
+
+.a-loader__dot {
+	width: 10px;
+	height: 10px;
+	background-color: #898989;
+	margin: 0 5px;
+	border-radius: 100%;
+	display: inline-block;
+	animation: spinner-bouncedelay 1s infinite ease-in-out both;
+}
+
+.a-loader__dot-1 {
+	animation-delay: -.32s;
+}
+
+.a-loader__dot-2 {
+	animation-delay: -.16s;
+}
+
+@keyframes spinner-bouncedelay {
+	0%, 80%, 100% {
+		transform: scale(0);
+	}
+	40% {
+		transform: scale(1.0);
+	}
+}

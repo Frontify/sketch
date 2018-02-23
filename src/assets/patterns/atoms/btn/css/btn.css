@@ -1,0 +1,225 @@
+.a-btn {
+	display: inline-block;
+	margin-bottom: 0;
+	text-align: center;
+	vertical-align: middle;
+	-ms-touch-action: manipulation;
+	touch-action: manipulation;
+	cursor: default;
+	background-image: none;
+	background-color: transparent;
+	border: 1px solid transparent;
+	border-radius: 20px;
+	white-space: nowrap;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	-webkit-transition: background-color 0.15s linear, color 0.15s linear;
+	transition: background-color 0.15s linear, color 0.15s linear;
+	text-decoration: none;
+	font-size: 13px;
+	font-weight: normal;
+	line-height: 18px;
+	padding: 8px 15px;
+}
+
+/* Sizes */
+.a-btn--xs {
+	padding: 3px 6px;
+	font-size: 11px;
+	line-height: 15px;
+}
+
+.a-btn--sm {
+	padding: 7px 13px;
+}
+
+.a-btn--lg {
+	padding: 14px 30px;
+	font-size: 16px;
+	line-height: 18px;
+	border-radius: 24px;
+}
+
+.a-btn--xl {
+	padding: 6px 18px;
+	font-size: 20px;
+	line-height: 24px;
+}
+
+/* General */
+.a-btn:focus,
+.a-btn:active:focus,
+.a-btn.state-active:focus,
+.a-btn.state-focus,
+.a-btn:active.state-focus,
+.a-btn.state-active.state-focus {
+	outline: 0;
+}
+.a-btn:hover,
+.a-btn:focus,
+.a-btn.state-focus {
+	text-decoration: none;
+}
+.a-btn:active,
+.a-btn.state-active {
+	outline: 0;
+}
+.a-btn.state-disabled,
+.a-btn[disabled],
+fieldset[disabled] .a-btn {
+	cursor: not-allowed;
+}
+a.a-btn.state-disabled,
+fieldset[disabled] a.a-btn {
+	pointer-events: none;
+}
+.a-btn--full {
+	display: block;
+	width: auto;
+}
+
+/* Default Button */
+.a-btn--default {
+	color: #ABABAB;
+	background-color: #ffffff;
+	border-color: #E6E6E6;
+}
+.a-btn--default:hover,
+.a-btn--default:focus,
+.a-btn--default.focus {
+	color: #7A898D;
+}
+.a-btn--default:active,
+.a-btn--default.state-active {
+	color: #2b2b2b;
+}
+.a-btn--default.state-disabled,
+.a-btn--default[disabled],
+fieldset[disabled] .a-btn--default,
+.a-btn--default.state-disabled:hover,
+.a-btn--default[disabled]:hover,
+fieldset[disabled] .a-btn--default:hover,
+.a-btn--default.state-disabled:focus,
+.a-btn--default[disabled]:focus,
+fieldset[disabled] .a-btn--default:focus,
+.a-btn--default.state-disabled.state-focus,
+.a-btn--default[disabled].state-focus,
+fieldset[disabled] .a-btn--default.state-focus,
+.a-btn--default.state-disabled:active,
+.a-btn--default[disabled]:active,
+fieldset[disabled] .a-btn--default:active,
+.a-btn--default.state-disabled.state-active,
+.a-btn--default[disabled].state-active,
+fieldset[disabled] .a-btn--default.state-active {
+	opacity: 0.5;
+}
+
+/* Primary Button */
+.a-btn--primary {
+	color: #FFF;
+	background-color: #5FC8D7;
+	border-color: #5FC8D7;
+	font-weight: bold;
+}
+.a-btn--primary:hover,
+.a-btn--primary:focus,
+.a-btn--primary.focus {
+	background-color: #55B3C1;
+	border-color: #55B3C1;
+}
+.a-btn--primary:active,
+.a-btn--primary.state-active {
+	background-color: #55B3C1;
+}
+.a-btn--primary.state-disabled,
+.a-btn--primary[disabled],
+fieldset[disabled] .a-btn--primary,
+.a-btn--primary.state-disabled:hover,
+.a-btn--primary[disabled]:hover,
+fieldset[disabled] .a-btn--primary:hover,
+.a-btn--primary.state-disabled:focus,
+.a-btn--primary[disabled]:focus,
+fieldset[disabled] .a-btn--primary:focus,
+.a-btn--primary.state-disabled.state-focus,
+.a-btn--primary[disabled].state-focus,
+fieldset[disabled] .a-btn--primary.state-focus,
+.a-btn--primary.state-disabled:active,
+.a-btn--primary[disabled]:active,
+fieldset[disabled] .a-btn--primary:active,
+.a-btn--primary.state-disabled.state-active,
+.a-btn--primary[disabled].state-active,
+fieldset[disabled] .a-btn--primary.state-active {
+    opacity: 0.5;;
+}
+
+/* Warning Button */
+.a-btn--warn {
+	color: #FFF;
+	background-color: #FAB117;
+	border-color: #FAB117;
+	font-weight: bold;
+}
+.a-btn--warn:hover,
+.a-btn--warn:focus,
+.a-btn--warn.focus {
+	background-color: #DE9703;
+	border-color: #DE9703;
+}
+.a-btn--warn:active,
+.a-btn--warn.state-active {
+	background-color: #DE9703;
+}
+.a-btn--warn.state-disabled,
+.a-btn--warn[disabled],
+fieldset[disabled] .a-btn--warn,
+.a-btn--warn.state-disabled:hover,
+.a-btn--warn[disabled]:hover,
+fieldset[disabled] .a-btn--warn:hover,
+.a-btn--warn.state-disabled:focus,
+.a-btn--warn[disabled]:focus,
+fieldset[disabled] .a-btn--warn:focus,
+.a-btn--warn.state-disabled.state-focus,
+.a-btn--warn[disabled].state-focus,
+fieldset[disabled] .a-btn--warn.state-focus,
+.a-btn--warn.state-disabled:active,
+.a-btn--warn[disabled]:active,
+fieldset[disabled] .a-btn--warn:active,
+.a-btn--warn.state-disabled.state-active,
+.a-btn--warn[disabled].state-active,
+fieldset[disabled] .a-btn--warn.state-active {
+    opacity: 0.5;;
+}
+
+/* Link Button */
+.a-btn--link {
+	color: #ABABAB;
+	border: 0;
+
+}
+
+.a-btn--link:hover,
+.a-btn--link:focus {
+	color: #7A898D;
+}
+.a-btn--link:active {
+	color: #2b2b2b;
+}
+
+.a-btn--link-primary {
+	color: #5FC8D7;
+	border: 0;
+}
+
+.a-btn--link-primary:hover,
+.a-btn--link-primary:focus {
+	color: #55B3C1;
+}
+.a-btn--link-primary:active {
+	color: #55B3C1;
+}
+
+.a-btn.state-hidden {
+	display: none;
+}

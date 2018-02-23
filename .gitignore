@@ -1,0 +1,15 @@
+# build artifacts
+frontify.sketchplugin/Contents/Sketch/*.*
+frontify.sketchplugin/Contents/Sketch/config/*.json
+frontify.sketchplugin/Contents/Resources
+
+# npm
+node_modules
+.npm
+npm-debug.log
+
+# mac
+.DS_Store
+
+# WebStorm
+.idea

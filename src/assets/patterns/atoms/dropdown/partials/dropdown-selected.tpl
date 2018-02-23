@@ -1,0 +1,1 @@
+<span>{{=it.label}}<i class="a-dropdown__arrow icon-angle-down"></i></span>

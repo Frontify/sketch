@@ -1,0 +1,159 @@
+.m-sources {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 90px);
+}
+
+m-sources__header {
+    border-bottom: 1px solid rgba(216,216,216,.2);
+}
+
+.m-sources__export-label {
+    float: left;
+    font-size: 11px;
+    line-height: 13px;
+    color: rgba(54,61,74,0.75);
+    padding: 6px 10px 7px 18px;
+    border-right: 1px solid rgba(216,216,216,.2);
+}
+
+.m-sources__export-target {
+    overflow: hidden;
+    font-size: 11px;
+    line-height: 13px;
+    color: #363D4A;
+}
+
+.m-sources__export-path {
+    display: inline-block;
+    padding: 6px 0px 7px 10px;
+}
+
+.m-sources__export-action {
+    float: right;
+    padding: 3px 12px 3px 0;
+}
+
+.m-sources__list {
+    flex: 1 0;
+    overflow: auto;
+}
+
+.m-sources__item {
+    overflow: hidden;
+    background: #fff;
+    padding: 8px 18px;
+    transition: background 0.2s linear
+}
+
+.m-sources__item:first-child {
+    margin-top: 10px;
+}
+
+.m-sources__item:last-child {
+    margin-bottom: 10px;
+}
+
+.m-sources__item:hover {
+    background: rgba(216,216,216,0.2);
+}
+
+.m-sources__content {
+    text-decoration: none;
+    display: block;
+    overflow: hidden;
+    color: #363D4A;
+    cursor: default;
+}
+
+.m-sources__actions {
+    visibility: hidden;
+    padding-left: 8px;
+    padding-top: 5px;
+    float: right;
+    opacity: 0;
+    transition: opacity 0.2s linear
+}
+
+.m-sources__item:hover .m-sources__actions {
+    visibility: visible;
+    opacity: 1;
+}
+
+.m-sources__type {
+    float: left;
+    padding-right: 8px;
+}
+
+.m-sources__badge {
+    width: 14px;
+    height: 14px;
+    background: #cdcdcd;
+    display: block;
+    padding: 2px;
+    border-radius: 3px;
+    text-align: center;
+}
+
+.m-sources__icon {
+    display: inline-block;
+    vertical-align: top;
+    width: 14px;
+    height: 14px;
+    font-size: 14px;
+    line-height: 1;
+    fill: rgba(255,255,255,.7);
+    color: rgba(255,255,255,.7);
+}
+
+.m-sources__item.state-new .m-sources__type,
+.m-sources__item.state-addable .m-sources__type {
+    opacity: 0.5;
+}
+
+.m-sources__item.state-push .m-sources__badge,
+.m-sources__item.state-pull .m-sources__badge {
+    background: #5FC8D7;
+}
+
+.m-sources__item.state-conflict .m-sources__badge {
+    background: #FAB117;
+}
+
+.m-sources__item.state-failed .m-sources__badge {
+    background: #EF6756;
+}
+
+.m-sources__item.state-success .m-sources__badge,
+.m-sources__item.state-same .m-sources__badge {
+    background: #A3CE62;
+}
+
+.m-sources__item.state-syncing .m-sources__badge {
+    background: none;
+}
+
+.m-sources__item.state-syncing .m-sources__icon {
+    color: #4d535f;
+}
+
+.m-sources__title {
+    font-size: 14px;
+    line-height: 16px;
+    color: #363D4A;
+}
+
+.m-sources__ext {
+    color: rgba(0,0,0,0.2);
+}
+
+.m-sources__modified {
+    font-size: 11px;
+    line-height: 13px;
+    font-weight: 100;
+    color: #717780;
+}
+
+.m-sources__current {
+    vertical-align: bottom;
+}

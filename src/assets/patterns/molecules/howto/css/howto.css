@@ -1,0 +1,58 @@
+.m-howto {
+    overflow: hidden;
+    background: #fff;
+    transition: background 0.2s linear;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.m-howto__header {
+    margin: 30px;
+}
+
+.m-howto__ordered-list {
+    margin: 10px 30px 0 30px;
+    flex: 1 0;
+}
+
+.m-howto__ordered-list-item {
+    margin: 0 0 10px 34px;
+    position: relative;
+    line-height: 20px;
+}
+
+.m-howto__ordered-list-item:before {
+    border-radius: 50%;
+    border: 1px solid #000;
+    display: inline-block;
+    height: 22px;
+    line-height: 22px;
+    margin: 0 12px 0 0;
+    text-align: center;
+    width: 22px;
+    position: absolute;
+    left: -34px;
+}
+
+.m-howto__ordered-list-item:last-of-type {
+    margin-bottom: 0;
+}
+
+.m-howto__ordered-list-item--first:before {
+    border-color: #f16651;
+    color: #f16651;
+    content: '1';
+}
+
+.m-howto__ordered-list-item--second:before {
+    border-color: #fab117;
+    color: #fab117;
+    content: '2';
+}
+
+.m-howto__ordered-list-item--third:before {
+    border-color: #a3ce62;
+    color: #a3ce62;
+    content: '3';
+}

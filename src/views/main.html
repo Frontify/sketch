@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script>
+        var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+
+        if (!isChrome) {
+            document.writeln('<link rel="stylesheet" type="text/css" href="../statics.css">');
+            document.writeln('<scr' + 'ipt src="../statics.js"></scr' + 'ipt>');
+            document.writeln('<scr' + 'ipt src="../app.js"></scr' + 'ipt>');
+        }
+        else {
+            document.writeln('<link rel="stylesheet" type="text/css" href="/frontify.sketchplugin/Contents/Resources/statics.css">');
+            document.writeln('<scr' + 'ipt src="/frontify.sketchplugin/Contents/Resources/statics.js"></scr' + 'ipt>');
+            document.writeln('<scr' + 'ipt src="/frontify.sketchplugin/Contents/Resources/app.js"></scr' + 'ipt>');
+        }
+    </script>
+    <title>Artboards</title>
+</head>
+<body>
+<div class="a-colorbar"></div>
+<div class="mod mod-target m-target"></div>
+<script>
+    document.writeln(window.tpl.tabs({
+        items: [
+            {id: 'artboards', active: false, title: 'Artboards', content: window.tpl.artboards()},
+            {id: 'sources', active: false, title: 'Sources', content:  window.tpl.sources() }
+        ]
+    }));
+</script>
+
+<div class="m-modal__overlay js-m-modal__overlay"></div>
+<script>
+    document.writeln(window.tpl.modal({ id: 'modal' }));
+</script>
+
+<div class="mod mod-folder-chooser m-folder-chooser"></div>
+<div class="mod mod-project-chooser m-project-chooser"></div>
+
+<script>
+    // Terrific Bootstrap
+    var $page = $('body');
+    var application = new Tc.Application($page);
+
+    application.registerModules();
+    application.registerModule($('body'), 'BtnDropdown');
+    application.start();
+
+    // Callbacks from Sketch Plugin
+    function showTarget(data) {
+        var target = application.sandbox.getModuleById($('.mod-target').data('terrificId'));
+        target.render(data);
+    }
+
+    function switchTab(id) {
+        var tabs = application.sandbox.getModuleById($('.mod-tabs').data('terrificId'));
+        tabs.switchTab(id);
+    }
+
+    function refresh() {
+        var tabs = application.sandbox.getModuleById($('.mod-tabs').data('terrificId'));
+        tabs.refresh();
+    }
+
+    // Artboards
+    function showArtboards(data) {
+        var artboards = application.sandbox.getModuleById($('.mod-artboards').data('terrificId'));
+        artboards.render(data);
+    }
+
+    function artboardUploaded(artboard) {
+        var artboards = application.sandbox.getModuleById($('.mod-artboards').data('terrificId'));
+        artboards.artboardUploaded(artboard);
+    }
+
+    function artboardUploadFailed(artboard) {
+        var artboards = application.sandbox.getModuleById($('.mod-artboards').data('terrificId'));
+        artboards.artboardUploadFailed(artboard);
+    }
+
+    function artboardsUploaded() {
+        var artboards = application.sandbox.getModuleById($('.mod-artboards').data('terrificId'));
+        artboards.artboardsUploaded();
+    }
+
+    // Sources
+    function showSources(data) {
+        var sources = application.sandbox.getModuleById($('.mod-sources').data('terrificId'));
+        sources.render(data);
+    }
+
+    function showSourcesHowTo(data) {
+        var sources = application.sandbox.getModuleById($('.mod-sources').data('terrificId'));
+        sources.showHowTo();
+    }
+
+    function showSourcesConflict(source) {
+        var sources = application.sandbox.getModuleById($('.mod-sources').data('terrificId'));
+        sources.showConflict(source);
+    }
+
+    function sourceUploaded(source) {
+        var sources = application.sandbox.getModuleById($('.mod-sources').data('terrificId'));
+        sources.sourceUploaded(source);
+    }
+
+    function sourceUploadFailed(source) {
+        var sources = application.sandbox.getModuleById($('.mod-sources').data('terrificId'));
+        sources.sourceUploadFailed(source);
+    }
+
+    function sourceDownloaded(source) {
+        var sources = application.sandbox.getModuleById($('.mod-sources').data('terrificId'));
+        sources.sourceDownloaded(source);
+    }
+
+    function sourceDownloadFailed(source) {
+        var sources = application.sandbox.getModuleById($('.mod-sources').data('terrificId'));
+        sources.sourceDownloadFailed(source);
+    }
+
+    // Folder Chooser
+    function showFolderChooser(folders, current) {
+       var folderChooser = application.sandbox.getModuleById($('.mod-folder-chooser').data('terrificId'));
+
+       // render chooser
+       folderChooser.render(folders, current);
+    }
+
+    // Project Chooser
+    function showProjectChooser(brands, current) {
+       var projectChooser = application.sandbox.getModuleById($('.mod-project-chooser').data('terrificId'));
+
+       // render chooser
+       projectChooser.render(brands, current);
+    }
+
+    if (isChrome) {
+        document.writeln('<scr' + 'ipt src="./test/target.js"></scr' + 'ipt>');
+
+        // Change this to whatever you are testing
+        document.writeln('<scr' + 'ipt src="./test/sources.js"></scr' + 'ipt>');
+    }
+</script>
+</body>
+</html>

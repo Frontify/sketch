@@ -1,0 +1,70 @@
+/* Small */
+.m-setting-toggle--sm.m-setting__elem,
+.m-setting-toggle--sm.m-setting
+{
+    border-bottom: 0;
+}
+
+.m-setting-toggle--sm .m-btn-toggle__toggle
+{
+    width: 25px;
+    height: 15px;
+
+    border-radius: 9px;
+}
+
+.m-setting-toggle--sm .m-btn-toggle__toggle:after
+{
+    width: 15px;
+    height: 15px;
+}
+
+.m-setting-toggle--sm .m-btn-toggle__input:checked + .m-btn-toggle__toggle:after
+{
+    transform: translateX(10px);
+}
+
+.m-setting-toggle--sm .m-setting__preview
+{
+    padding: 5px 0;
+}
+
+.m-setting-toggle--sm .m-setting__label--inline
+{
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.m-setting-toggle--sm .m-setting__value--inline
+{
+    float: left;
+
+    padding-right: 10px;
+}
+
+/* Section Style */
+.m-setting-toggle--section.m-setting__elem,
+.m-setting-toggle--section.m-setting
+{
+    padding: 0;
+
+    border-bottom: 0;
+}
+
+.m-setting-toggle--section
+{
+    display: inline-block;
+}
+
+.m-setting-toggle--section .m-setting__value--inline
+{
+    float: left;
+
+    padding-right: 10px;
+}
+
+.m-setting-toggle--modal
+{
+    margin: 0 -35px;
+    padding: 0 35px;
+}

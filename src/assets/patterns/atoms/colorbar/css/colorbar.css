@@ -1,0 +1,27 @@
+.a-colorbar {
+    background: #F16651;
+    height: 4px;
+    overflow: hidden;
+    position: relative;
+    z-index: 100;
+}
+
+.a-colorbar:before {
+    background: #FAB117;
+    content: '';
+    display: block;
+    height: 100%;
+    left: 0;
+    position: absolute;
+    width: 28.5%;
+}
+
+.a-colorbar:after {
+    background: #5FC8D7;
+    content: '';
+    display: block;
+    height: 100%;
+    position: absolute;
+    right: 0;
+    width: 43%;
+}

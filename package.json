@@ -1,0 +1,38 @@
+{
+  "name": "frontify-plugin",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Frontify/sketch-plugin.git"
+  },
+  "engines": {
+    "sketch": ">=3.0"
+  },
+  "skpm": {
+    "name": "frontify-plugin",
+    "manifest": "src/manifest.json",
+    "main": "frontify.sketchplugin"
+  },
+  "scripts": {
+    "build": "skpm-build",
+    "watch": "skpm-build --watch",
+    "start": "skpm-build --watch --run",
+    "postinstall": "npm run build && skpm-link"
+  },
+  "devDependencies": {
+    "@skpm/builder": "^0.2.12",
+    "@skpm/extract-loader": "^1.0.1",
+    "css-loader": "^0.28.9",
+    "dot-tpl-loader": "^1.2.1",
+    "file-loader": "^1.1.6",
+    "html-loader": "^0.5.5",
+    "regexp-replace-loader": "^1.0.1",
+    "style-loader": "^0.19.1",
+    "webpack-concat-plugin": "^2.4.2"
+  },
+  "resources": [
+    "src/assets/js/*.js"
+  ],
+  "dependencies": {
+    "sketch-module-web-view": "^0.2.6"
+  }
+}

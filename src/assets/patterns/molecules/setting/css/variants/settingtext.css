@@ -1,0 +1,39 @@
+.m-setting-text--code textarea.m-setting__input {
+    font-size: 10px;
+    line-height: 13px;
+    font-family: Menlo, Courier, monospace;
+}
+
+.m-setting-text--token textarea.m-setting__input {
+    border-radius: 3px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    font-size: 11px;
+    line-height: 1;
+}
+
+.m-setting-text--avatar.m-setting__elem {
+    padding-left: 10px;
+}
+
+.m-setting-text--avatar .m-setting__input {
+    cursor: text;
+}
+
+.m-setting__input--right {
+    text-align: right;
+}
+
+.m-setting-text--avatar .m-setting__group-prefix {
+    vertical-align: top;
+    padding-right: 10px;
+}
+
+.m-setting-text--modal {
+    margin: 0 -35px;
+    padding: 0 35px;
+}
+
+.m-setting__prefix--atomic {
+    vertical-align: bottom;
+}
