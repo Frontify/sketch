@@ -1,4 +1,13 @@
-# frontify-plugin
+# Frontify for Sketch
+
+A [Sketch] plugin that provides integration with Frontify. Get it @ [sketch.frontify.com]
+
+This README.md is primarily for developers. The latest plugin version,
+documentation etc. are hosted at [sketch.frontify.com].
+
+Contributions are welcome!
+
+## Development
 
 _This plugin was created using `skpm`. For a detailed explanation on how things work, checkout the [skpm Readme](https://github.com/skpm/skpm/blob/master/README.md)._
 
@@ -74,6 +83,9 @@ The `-f` option causes `skpm log` to not stop when the end of logs is reached, b
 
 ## Frontend
 
-To make working on the Frontend independent from Sketch make the `sketch-plugin` folder the document root of your webserver.
+To make working on the Frontend independent from Sketch make the `sketch` folder the document root of your webserver.
 
 The views are accessible by using: local-sketch.frontify.com/src/views/…
+
+[Sketch]: https://sketchapp.com/
+[sketch.frontify.com]: https://frontify.com/sketch
