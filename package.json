@@ -2,7 +2,7 @@
   "name": "frontify-plugin",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Frontify/sketch-plugin.git"
+    "url": "https://github.com/Frontify/sketch.git"
   },
   "engines": {
     "sketch": ">=3.0"
