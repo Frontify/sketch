@@ -2,7 +2,6 @@
   "name": "Frontify",
   "compatibleVersion": 3,
   "identifier": "com.frontify.sketch-plugin",
-  "version": "0.1.0",
   "description": "Connect your Frontify account to Sketch.",
   "bundleVersion": 2,
   "authorEmail": "hello@frontify.com",
