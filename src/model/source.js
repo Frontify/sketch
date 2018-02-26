@@ -16,7 +16,7 @@ class Source {
     getSources() {
         return target.getTarget('sources').then(function (target) {
             // load remote assets status
-            return fetch(this.context, '/v1/assets/status/' + target.project.id + '?ext=sketch&path=' + encodeURIComponent(target.set.path)).then(function (result) {
+            return fetch(this.context, '/v1/assets/status/' + target.project.id + '?depth=0&ext=sketch&path=' + encodeURIComponent(target.set.path)).then(function (result) {
                 var assets = result.assets;
                 var sources = [];
                 var status = readJSON(context, 'project-' + target.project.id) || {};
@@ -100,9 +100,11 @@ class Source {
 
                     var data = {
                         sources: sources,
-                        path: target.set.path,
+                        target: target,
                         already_added: alreadyAdded
                     };
+
+                    console.log(data);
 
                     return data;
                 }.bind(this));

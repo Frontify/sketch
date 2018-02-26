@@ -16,7 +16,7 @@ class Artboard {
     getArtboards() {
         return target.getTarget().then(function (target) {
             // load remote assets status
-            return fetch(this.context, '/v1/assets/status/' + target.project.id + '?path=' + encodeURIComponent(target.set.path)).then(function (result) {
+            return fetch(this.context, '/v1/assets/status/' + target.project.id + '?depth=0&path=' + encodeURIComponent(target.set.path)).then(function (result) {
                 var assets = result.assets;
 
                 // get artboards
@@ -61,7 +61,7 @@ class Artboard {
 
                 var data = {
                     artboards: artboards.reverse(),
-                    path: target.set.path
+                    target: target
                 }
 
                 return data;

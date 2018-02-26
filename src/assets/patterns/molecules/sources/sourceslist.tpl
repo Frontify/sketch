@@ -1,9 +1,21 @@
 <div class="m-sources__header">
-    <div class="m-sources__export-label">Frontify sync folder</div>
+    <div class="m-sources__export-label">Upload to</div>
     <div class="m-sources__export-action">
-        <a class="a-btn a-btn--xs a-btn--link-primary js-m-sources__change-target">change folder</a>
+        <a class="a-btn a-btn--xs a-btn--link-primary js-m-sources__change-target">change</a>
+        <a class="a-btn a-btn--xs a-btn--link-primary js-m-sources__finder">reveal in finder</a>
     </div>
-    <div class="m-sources__export-target"><span class="m-sources__export-path">{{= it.path }}</span> <a class="a-btn a-btn--xs a-btn--link js-m-sources__finder"><i class="icon-external-link"></i></a></div>
+    <div class="m-sources__export-target js-m-sources__export-target" data-url="/projects/{{= it.target.project.id }}/{{= it.target.project.slug }}/{{= it.target.set.id }}">
+        <span class="m-sources__export-target-part"><i class="fi-projects"></i> {{= it.target.project.name }}</span>
+        {{? it.target.set.folders.length > 0 }}
+            {{~ it.target.set.folders : folder:index }}
+                {{? it.target.set.folders.length - 1 === index }}
+                   <span class="m-artboards__export-target-part"><i class="fi-folder"></i> {{= folder }}</span>
+                {{??}}
+                    <span class="m-sources__export-target-part"><i class="fi-folder"></i> …</span>
+                {{?}}
+            {{~}}
+        {{?}}
+    </div>
 </div>
 <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
   <symbol id="sketch" viewBox="0 0 18 16">

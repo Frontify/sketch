@@ -1,4 +1,4 @@
-<li class="m-sources__item js-m-sources__item state-{{= it.state }}" data-id="{{= it.id || '' }}">
+<li class="m-sources__item js-m-sources__item clearfix state-{{= it.state }}" data-id="{{= it.id || '' }}">
     <div class="m-sources__type">
         <span class="m-sources__badge">
             {{? it.state === 'syncing'}}
@@ -13,10 +13,10 @@
         </span>
     </div>
     <div class="m-sources__actions">
-        {{? !((it.state === 'new' || it.state === 'same') && it.current) && it.state !== 'syncing' }}
-        <button class="a-btn a-btn--xs {{? it.state === 'conflict'}}a-btn--warn{{??}}a-btn--primary{{?}} {{? it.state === 'new' }}js-m-sources__download{{?? it.state === 'same' }}js-m-sources__open{{?? it.state === 'addable' }}js-m-sources__add{{?? it.state === 'conflict' }}js-m-sources__conflict{{?? it.state === 'push'}}js-m-sources__push{{?? it.state === 'pull'}}js-m-sources__pull{{?}}">
-            {{? it.state === 'new' || it.state === 'same' }}
-                Open
+        {{? it.state !== 'syncing' && it.state !== 'same' }}
+        <button class="a-btn a-btn--xs a-btn--default {{? it.state === 'new' }}js-m-sources__download{{?? it.state === 'addable' }}js-m-sources__add{{?? it.state === 'conflict' }}js-m-sources__conflict{{?? it.state === 'push'}}js-m-sources__push{{?? it.state === 'pull'}}js-m-sources__pull{{?}}">
+            {{? it.state === 'new'}}
+                Download
             {{?? it.state === 'pull'}}
                 Pull Changes
             {{?? it.state === 'push'}}
@@ -29,8 +29,8 @@
         </button>
         {{?}}
     </div>
-    <a class="m-sources__content js-m-sources__target" {{? it.id && it.state !== 'addable'}}href="/screens/{{= it.id }}"{{?}}>
-        <h3 class="m-sources__title">{{= it.filename.substring(0, it.filename.length - 7)}}<span class="m-sources__ext">.sketch</span> {{? it.current }}<span class="m-sources__current a-badge a-badge--neutral a-badge--small">Current</span>{{?}}</h3>
+    <a class="m-sources__content {{? !(it.current || it.state === 'new' || it.state === 'syncing')}}js-m-sources__open{{?}}" {{? it.id && it.state !== 'addable'}}href="/screens/{{= it.id }}"{{?}}>
+        <h3 class="m-sources__title">{{= it.filename.substring(0, it.filename.length - 7)}}<span class="m-sources__ext">.sketch</span></h3>
         <span class="m-sources__modified">
             {{? it.state === 'new'}}
                 Not yet downloaded

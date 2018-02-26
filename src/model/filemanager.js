@@ -84,7 +84,8 @@ class FileManager {
                 mimetype: 'image/png',
                 id: info.id,
                 filename: info.name,
-                folder_id: info.folder_id
+                folder_id: info.folder_id,
+                origin: 'SKETCH'
             };
 
             var url = '/v1/assets/';

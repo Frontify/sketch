@@ -19,20 +19,21 @@
 .m-target__content {
     display: block;
     overflow: hidden;
-    padding: 2px 18px 0 10px;
+    padding: 1px 18px 0 10px;
 }
 
 .m-target__brand {
     font-size: 14px;
     line-height: 16px;
-    color: #363D4A;
+    margin-bottom: 2px;
+    color: #48505D;
     font-weight: bold;
 }
 
 .m-target__project {
     font-size: 14px;
     line-height: 16px;
-    color: #363D4A;
+    color: #49505C;
 }
 
 .m-target__action {

@@ -8,18 +8,11 @@
   "author": "Frontify AG",
   "commands": [
     {
-      "name": "Artboards",
-      "identifier": "artboards",
+      "name": "Frontify",
+      "identifier": "frontify",
       "script": "./commands/frontify.js",
-      "shortcut": "ctrl shift a",
-      "handler": "artboardsCommand"
-    },
-    {
-      "name": "Sources",
-      "identifier": "sources",
-      "script": "./commands/frontify.js",
-      "shortcut": "ctrl shift s",
-      "handler": "sourcesCommand"
+      "shortcut": "ctrl shift f",
+      "handler": "runCommand"
     },
     {
       "name": "Saved",
@@ -44,8 +37,8 @@
   ],
   "menu": {
     "items": [
-      "artboards",
-      "sources"
-    ]
+      "frontify"
+    ],
+    "isRoot": true
   }
 }

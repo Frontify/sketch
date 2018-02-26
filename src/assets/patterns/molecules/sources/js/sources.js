@@ -11,6 +11,12 @@ Tc.Module.Sources = Tc.Module.extend({
 
         $ctx.html(window.tpl.loader());
 
+        $ctx.on('click', '.js-m-sources__export-target', function (e) {
+            var url = $(e.currentTarget).data('url');
+
+            // open export target in frontify
+            pluginCall('openUrl', url);
+        }.bind(this));
 
         $ctx.on('click', '.js-m-sources__change-target', function (e) {
             // open modal with loader
@@ -89,15 +95,6 @@ Tc.Module.Sources = Tc.Module.extend({
 
         $ctx.on('click', '.js-m-sources__finder', function () {
             pluginCall('openFinder');
-        }.bind(this));
-
-        $ctx.on('click', '.js-m-sources__target', function (e) {
-            var $this = $(e.currentTarget);
-            var url = $this.attr('href');
-
-            if (url) {
-                pluginCall('openUrl', url);
-            }
         }.bind(this));
 
         callback();

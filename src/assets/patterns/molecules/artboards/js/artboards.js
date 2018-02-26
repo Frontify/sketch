@@ -10,6 +10,13 @@ Tc.Module.Artboards = Tc.Module.extend({
 
         $ctx.html(window.tpl.loader());
 
+        $ctx.on('click', '.js-m-artboards__export-target', function (e) {
+          var url = $(e.currentTarget).data('url');
+
+          // open export target in frontify
+          pluginCall('openUrl', url);
+        }.bind(this));
+
         $ctx.on('click', '.js-m-artboards__change-target', function(e) {
             // open modal with loader
             this.fire('openModal', { modifier: 'default', $content: $(window.tpl.loader())}, ['events']);

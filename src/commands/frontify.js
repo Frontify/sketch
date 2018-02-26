@@ -11,21 +11,12 @@ import executeSafely from '../helpers/executeSafely';
 var threadDictionary = NSThread.mainThread().threadDictionary();
 var MochaJSDelegate = require('mocha-js-delegate');
 
-export function artboardsCommand(context) {
+export function runCommand(context) {
     COScript.currentCOScript().setShouldKeepAround(true);
 
     executeSafely(context, function () {
         setContext(context);
         threadDictionary['frontifymainui'] = main(context, 'artboards');
-    });
-}
-
-export function sourcesCommand(context) {
-    COScript.currentCOScript().setShouldKeepAround(true);
-
-    executeSafely(context, function () {
-        setContext(context);
-        threadDictionary['frontifymainui'] = main(context, 'sources');
     });
 }
 
