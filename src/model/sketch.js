@@ -40,6 +40,10 @@ class Sketch {
     // generic search functions (from https://medium.com/sketch-app-sources/sketch-plugin-snippets-for-plugin-developers-e9e1d2ab6827)
     findLayers(predicate, container, layerType) {
         var doc = NSDocumentController.sharedDocumentController().currentDocument();
+        if(!doc) {
+            return NSArray.array();
+        }
+
         var scope;
         switch (layerType) {
             case MSPage :

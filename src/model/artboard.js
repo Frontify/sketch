@@ -7,6 +7,7 @@ import filemanager from './filemanager';
 class Artboard {
     constructor() {
         this.context = null;
+        this.pixelRatio = 2;
     }
 
     setContext(context) {
@@ -16,44 +17,47 @@ class Artboard {
     getArtboards() {
         return target.getTarget().then(function (target) {
             // load remote assets status
-            return fetch(this.context, '/v1/assets/status/' + target.project.id + '?depth=0&path=' + encodeURIComponent(target.set.path)).then(function (result) {
+            return fetch('/v1/assets/status/' + target.project.id + '?depth=0&path=' + encodeURIComponent(target.set.path)).then(function (result) {
                 var assets = result.assets;
 
                 // get artboards
-                var msdocument = NSDocumentController.sharedDocumentController().currentDocument();
-                var mspage = msdocument.currentPage();
-                var msartboards = mspage.artboards();
                 var artboards = [];
+                var doc = NSDocumentController.sharedDocumentController().currentDocument();
 
-                for (var i = 0; i < msartboards.length; i++) {
-                    var msartboard = msartboards[i];
+                if(doc) {
+                    var mspage = doc.currentPage();
+                    var msartboards = mspage.artboards();
 
-                    artboards.push({
-                        id: null,
-                        id_external: '' + msartboard.objectID(),
-                        name: '' + msartboard.name().replace('/', '&#47;'),
-                        sha: null,
-                        state: 'new',
-                        target: '',
-                        modified: null,
-                        modified_localized_ago: null
-                    });
-                }
+                    for (var i = 0; i < msartboards.length; i++) {
+                        var msartboard = msartboards[i];
 
-                // compare with remote status
-                for (var i = 0; i < artboards.length; i++) {
-                    var artboard = artboards[i];
+                        artboards.push({
+                            id: null,
+                            id_external: '' + msartboard.objectID(),
+                            name: '' + msartboard.name().replace('/', '&#47;'),
+                            sha: null,
+                            state: 'new',
+                            target: '',
+                            modified: null,
+                            modified_localized_ago: null
+                        });
+                    }
 
-                    for (var id in assets) {
-                        if (assets.hasOwnProperty(id)) {
-                            var asset = assets[id];
+                    // compare with remote status
+                    for (var i = 0; i < artboards.length; i++) {
+                        var artboard = artboards[i];
 
-                            if (asset.filename == artboard.name + '.' + asset.ext) {
-                                artboard.id = asset.id;
-                                artboard.sha = asset.sha;
-                                artboard.state = 'uploaded';
-                                artboard.modified = asset.modified;
-                                artboard.modified_localized_ago = asset.modified_localized_ago;
+                        for (var id in assets) {
+                            if (assets.hasOwnProperty(id)) {
+                                var asset = assets[id];
+
+                                if (asset.filename == artboard.name + '.' + asset.ext) {
+                                    artboard.id = asset.id;
+                                    artboard.sha = asset.sha;
+                                    artboard.state = 'uploaded';
+                                    artboard.modified = asset.modified;
+                                    artboard.modified_localized_ago = asset.modified_localized_ago;
+                                }
                             }
                         }
                     }
@@ -62,7 +66,7 @@ class Artboard {
                 var data = {
                     artboards: artboards.reverse(),
                     target: target
-                }
+                };
 
                 return data;
             }.bind(this));
@@ -72,9 +76,14 @@ class Artboard {
     exportArtboard(artboard) {
         return new Promise(function (resolve, reject) {
             var doc = NSDocumentController.sharedDocumentController().currentDocument();
+            if(!doc) {
+                reject();
+            }
+
             var path = filemanager.getExportPath() + artboard.name + '.png';
             var format = MSExportFormat.alloc().init();
-            format.fileFormat = 'png';
+            format.setFileFormat('png');
+            format.setScale(this.pixelRatio); // @2x
 
             var predicate = NSPredicate.predicateWithFormat('objectID == %@', artboard.id_external);
             var msartboard = sketch.findFirstLayer(predicate, nil, MSArtboardGroup);
@@ -105,7 +114,8 @@ class Artboard {
                             path: result.path,
                             name: result.name + '.' + result.ext,
                             id: result.id,
-                            id_external: result.id_external
+                            id_external: result.id_external,
+                            pixelRatio: this.pixelRatio
                         }).then(function (data) {
                             filemanager.deleteFile(result.path);
                             artboard.id = data.id;

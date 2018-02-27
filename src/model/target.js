@@ -14,13 +14,19 @@ class Target {
 
     getTarget(view) {
         // load brand and project name
-        var target = readJSON(this.context, 'target');
+        var target = readJSON('target') || {};
 
-        if(view == 'sources') {
-            target.set = target.set_sources;
+        if (target.project) {
+            var project = readJSON('project-' + target.project) || {};
+            if (view == 'sources') {
+                target.set = project.set_sources || 0;
+            }
+            else {
+                target.set = project.set || 0;
+            }
         }
 
-        return fetch(this.context, '/v1/info/target', {
+        return fetch('/v1/info/target', {
             method: 'POST',
             body: JSON.stringify(target)
         }).then(function (result) {
@@ -36,17 +42,23 @@ class Target {
     }
 
     getSimpleTarget() {
-        var target = readJSON(this.context, 'target');
+        var target = readJSON('target');
 
         if (!target) {
             return Promise.resolve(false);
+        }
+
+        if (target.project) {
+            var project = readJSON('project-' + target.project) || {};
+            target.set = project.set || 0;
+            target.set_sources = project.set_sources || 0;
         }
 
         return Promise.resolve(target);
     }
 
     getDomain() {
-        var token = readJSON(this.context, 'token');
+        var token = readJSON('token');
 
         if (token && token.domain) {
             return Promise.resolve(token.domain);
@@ -56,22 +68,29 @@ class Target {
     }
 
     updateTarget(data) {
-        return Promise.resolve().then(function() {
-            var target = readJSON(this.context, 'target');
-            if(data.brand >= 0) {
+        return Promise.resolve().then(function () {
+            var target = readJSON('target');
+            if (data.brand >= 0) {
                 target.brand = data.brand;
             }
-            if(data.project >= 0) {
+            if (data.project >= 0) {
                 target.project = data.project;
             }
-            if(data.set >= 0) {
-                target.set = data.set;
-            }
-            if(data.set_sources >= 0) {
-               target.set_sources = data.set_sources;
+
+            if (target.project) {
+                var project = readJSON('project-' + target.project) || {};
+
+                if (data.set >= 0) {
+                    project.set = data.set;
+                }
+                if (data.set_sources >= 0) {
+                    project.set_sources = data.set_sources;
+                }
+
+                writeJSON('project-' + target.project, project);
             }
 
-            writeJSON(this.context, 'target', target);
+            writeJSON('target', target);
 
             return target;
         }.bind(this));
@@ -79,16 +98,15 @@ class Target {
 
     showTarget(ui) {
         this.getTarget().then(function (data) {
-            if(!data) {
+            if (!data) {
                 project.showProjectChooser(ui);
             }
             else {
                 // write target to JSON
-                var target =  readJSON(this.context, 'target') || {};
+                var target = readJSON('target') || {};
                 target.brand = data.brand.id;
                 target.project = data.project.id;
-
-                writeJSON(this.context, 'target', target);
+                writeJSON('target', target);
 
                 ui.eval('showTarget(' + JSON.stringify(data) + ')');
             }

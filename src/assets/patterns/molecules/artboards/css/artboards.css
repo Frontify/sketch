@@ -87,6 +87,11 @@
     background: rgba(216, 216, 216, 0.2);
 }
 
+.m-artboards__link-external {
+    padding-left: 3px;
+    color: #9A9EA4;
+}
+
 .m-artboards__content {
     text-decoration: none;
     display: block;

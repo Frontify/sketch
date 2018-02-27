@@ -1,5 +1,6 @@
 var webpack = require("webpack");
 var ConcatPlugin = require('webpack-concat-plugin');
+var CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = function (config) {
     config.target = 'web';
@@ -81,5 +82,12 @@ module.exports = function (config) {
             fileName: '[name].css',
             filesToConcat: ['./src/assets/css/reset.css', './src/assets/css/fronticons.css', './src/assets/css/unicons.css', './src/assets/patterns/**/css/*.css', './src/assets/patterns/**/css/variants/*.css']
         })
+    );
+
+    config.plugins.push(
+        new CopyPlugin([{
+            from: './src/assets/fonts',
+            to: 'fonts'
+        }])
     );
 };

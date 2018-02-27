@@ -88,11 +88,9 @@ export default function (context, view) {
                 return project.showProjectChooser(mainUI);
             },
             projectSelected: function (data) {
-                data.set = 0;
-                data.set_sources = 0;
                 target.updateTarget(data).then(function () {
                     target.showTarget(mainUI);
-                    artboard.showArtboards(mainUI);
+                    mainUI.eval('refresh()');
                 }.bind(this));
             },
             changeFolder: function (set) {
@@ -131,8 +129,10 @@ export default function (context, view) {
 
             pullSource: function (source) {
                 filemanager.downloadFile(source).then(function (path) {
-                    NSDocumentController.sharedDocumentController().currentDocument().presentedItemDidChange();
                     mainUI.eval('sourceDownloaded(' + JSON.stringify(source) + ')');
+                    if(source.current == true && NSDocumentController.sharedDocumentController().currentDocument()) {
+                        NSDocumentController.sharedDocumentController().currentDocument().close();
+                    }
                     filemanager.openFile(path);
                 }.bind(this)).catch(function (err) {
                     mainUI.eval('sourceDownloadFailed(' + JSON.stringify(source) + ')');

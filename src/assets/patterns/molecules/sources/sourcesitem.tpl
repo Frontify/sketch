@@ -4,9 +4,11 @@
             {{? it.state === 'syncing'}}
                 <i class="m-sources__icon icon-spinner anim-spin"></i>
             {{?? it.state === 'push'}}
-                <i class="m-sources__icon icon-arrow-up"></i>
-            {{?? it.state === 'pull'}}
-                <i class="m-sources__icon icon-arrow-down"></i>
+                <i class="m-sources__icon fi-arrow-up"></i>
+            {{?? it.state === 'pull' || it.state === 'new' }}
+                <i class="m-sources__icon fi-arrow-down"></i>
+            {{?? it.state === 'same' }}
+                <i class="m-sources__icon fi-checkmark"></i>
             {{??}}
                 <svg class="m-sources__icon"><use xlink:href="#sketch"/></svg>
             {{?}}
@@ -14,14 +16,14 @@
     </div>
     <div class="m-sources__actions">
         {{? it.state !== 'syncing' && it.state !== 'same' }}
-        <button class="a-btn a-btn--xs a-btn--default {{? it.state === 'new' }}js-m-sources__download{{?? it.state === 'addable' }}js-m-sources__add{{?? it.state === 'conflict' }}js-m-sources__conflict{{?? it.state === 'push'}}js-m-sources__push{{?? it.state === 'pull'}}js-m-sources__pull{{?}}">
+        <button class="a-btn a-btn--xs a-btn--default {{? it.state === 'new' }}js-m-sources__download{{?? it.state === 'addable' || it.state === 'failed'}}js-m-sources__add{{?? it.state === 'conflict' }}js-m-sources__conflict{{?? it.state === 'push'}}js-m-sources__push{{?? it.state === 'pull'}}js-m-sources__pull{{?}}">
             {{? it.state === 'new'}}
                 Download
             {{?? it.state === 'pull'}}
                 Pull Changes
             {{?? it.state === 'push'}}
                 Push Changes
-            {{?? it.state === 'addable' }}
+            {{?? it.state === 'addable' || it.state === 'failed'}}
                 Add to Frontify
             {{?? it.state === 'conflict'}}
                 Resolve Conflict
@@ -38,6 +40,8 @@
                 Syncing with Frontify…
             {{?? it.state === 'addable'}}
                 Not yet added
+            {{?? it.state === 'failed'}}
+                Upload failed
             {{?? it.state === 'push'}}
                 Local changes by you
             {{?? it.state === 'pull'}}

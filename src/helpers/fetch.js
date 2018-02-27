@@ -2,9 +2,9 @@ import fetch from 'sketch-polyfill-fetch'
 import readJSON from './readJSON'
 import extend from '../helpers/extend'
 
-export default function(context, uri, options) {
+export default function(uri, options) {
     // get token
-    var token = readJSON(context, 'token');
+    var token = readJSON('token');
     var defaults = {
         method: 'GET',
         headers: {

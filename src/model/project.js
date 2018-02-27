@@ -11,7 +11,7 @@ class Project {
     }
 
     getProjects() {
-        return fetch(this.context, '/v1/brand/list/').then(function (data) {
+        return fetch('/v1/brand/list/').then(function (data) {
             return data.brands;
         }.bind(this));
     }
@@ -24,7 +24,7 @@ class Project {
                url += '/' + folder;
            }
 
-           return fetch(this.context, url).then(function (result) {
+           return fetch(url).then(function (result) {
                return {
                    folder: result.folder,
                    folders: result.folders

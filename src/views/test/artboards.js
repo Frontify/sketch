@@ -3,6 +3,7 @@ switchTab('artboards');
 showArtboards({
         "artboards": [
             {
+                "id": "1",
                 "id_external": "119",
                 "name": "Overview",
                 "state": "new",

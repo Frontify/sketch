@@ -88,19 +88,23 @@ class FileManager {
                 origin: 'SKETCH'
             };
 
+            if(info.pixelRatio) {
+                data.pixelRatio = info.pixelRatio;
+            }
+
             var url = '/v1/assets/';
             if (info.id) {
                 url += info.id;
             }
 
-            return fetch(this.context, url, {method: 'POST', body: JSON.stringify(data)});
+            return fetch(url, {method: 'POST', body: JSON.stringify(data)});
         }.bind(this));
     }
 
     downloadFile(info) {
         var promises = [
-            fetch(this.context, '/v1/screen/download/' + info.id),
-            fetch(this.context, '/v1/screen/modified/' + info.id)
+            fetch('/v1/screen/download/' + info.id),
+            fetch('/v1/screen/modified/' + info.id)
         ];
 
         return Promise.all(promises).then(function (result) {
@@ -117,12 +121,13 @@ class FileManager {
     }
 
     updateAssetStatus(project, asset) {
-        var status = readJSON(this.context, 'project-' + project) || {};
-        status[asset.id] = status[asset.id] || {};
-        status[asset.id].id = asset.id;
-        status[asset.id].modified = asset.modified;
-        status[asset.id].sha = asset.sha;
-        writeJSON(context, 'project-' + project, status);
+        var status = readJSON('project-' + project) || {};
+        status.assets = status.assets || {};
+        status.assets[asset.id] = status[asset.id] || {};
+        status.assets[asset.id].id = asset.id;
+        status.assets[asset.id].modified = asset.modified;
+        status.assets[asset.id].sha = asset.sha;
+        writeJSON('project-' + project, status);
     }
 
     openFile(path) {

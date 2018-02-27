@@ -12,26 +12,26 @@ class User {
     }
 
     isAuthenticated() {
-        var token = readJSON(this.context, 'token');
+        var token = readJSON('token');
 
         return token && token.access_token;
     }
 
     getUser() {
-        return fetch(this.context, '/v1/user/info/');
+        return fetch('/v1/user/info/');
     }
 
     logout() {
         return Promise.resolve().then(function () {
-            return fetch(this.context, '/v1/user/logout/').then(function( ) {
-                writeJSON(this.context, 'token', {});
+            return fetch('/v1/user/logout/').then(function( ) {
+                writeJSON('token', {});
                 return true;
             }.bind(this));
         }.bind(this));
     }
 
     login(data) {
-        writeJSON(this.context, 'token', data);
+        writeJSON('token', data);
     }
 }
 

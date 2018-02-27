@@ -1,6 +1,6 @@
 var fileManager = NSFileManager.defaultManager();
 
-export default function (context, key, data) {
+export default function (key, data) {
     var jsContent = JSON.stringify(data);
     var jsContentNSSString = NSString.stringWithFormat("%@", jsContent);
     var jsFolderPath =  '' + NSHomeDirectory() + '/Frontify/.config/';

@@ -16,10 +16,10 @@ class Source {
     getSources() {
         return target.getTarget('sources').then(function (target) {
             // load remote assets status
-            return fetch(this.context, '/v1/assets/status/' + target.project.id + '?depth=0&ext=sketch&path=' + encodeURIComponent(target.set.path)).then(function (result) {
+            return fetch('/v1/assets/status/' + target.project.id + '?depth=0&ext=sketch&path=' + encodeURIComponent(target.set.path)).then(function (result) {
                 var assets = result.assets;
                 var sources = [];
-                var status = readJSON(context, 'project-' + target.project.id) || {};
+                var status = readJSON('project-' + target.project.id) || { assets: {} };
                 var alreadyAdded = false;
 
                 // compare with local status
@@ -32,21 +32,21 @@ class Source {
                                     file.existing = true;
 
                                     // force conflict if the asset has not been downloaded via plugin
-                                    status[asset.id] = status[asset.id] || { id: asset.id, modified: '0000-00-00 00:00:00', sha: '0' };
+                                    status.assets[asset.id] = status.assets[asset.id] || { id: asset.id, modified: '0000-00-00 00:00:00', sha: '0' };
 
                                     if (asset.sha == file.sha) {
                                         // remote file and local file are the same
                                         asset.state = 'same';
                                     }
-                                    else if(file.sha != status[asset.id].sha && asset.modified > status[asset.id].modified) {
+                                    else if(file.sha != status.assets[asset.id].sha && asset.modified > status.assets[asset.id].modified) {
                                         // there are local and remote changes
                                         asset.state = 'conflict';
                                     }
-                                    else if (asset.modified > status[asset.id].modified) {
+                                    else if (asset.modified > status.assets[asset.id].modified) {
                                         // there is a newer version of this asset on frontify
                                         asset.state = 'pull';
                                     }
-                                    else if (asset.modified <= status[asset.id].modified) {
+                                    else if (asset.modified <= status.assets[asset.id].modified) {
                                         asset.state = 'push';
                                     }
 
@@ -104,8 +104,6 @@ class Source {
                         already_added: alreadyAdded
                     };
 
-                    console.log(data);
-
                     return data;
                 }.bind(this));
             }.bind(this));
@@ -117,11 +115,12 @@ class Source {
             var files = [];
             var filenames = NSFileManager.defaultManager().contentsOfDirectoryAtPath_error(dir, null);
 
-            var nsurl = NSDocumentController.sharedDocumentController().currentDocument().fileURL();
+            var doc = NSDocumentController.sharedDocumentController().currentDocument();
             var currentFilename = '';
 
-            if (nsurl) {
-                var path = nsurl.path();
+            if (doc && doc.fileURL()) {
+                var nsurl = doc.fileURL();
+                var path = '' + nsurl.path();
                 var parts = path.split('/');
                 currentFilename = parts.pop();
             }
