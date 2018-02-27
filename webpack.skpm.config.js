@@ -87,7 +87,7 @@ module.exports = function (config) {
     config.plugins.push(
         new CopyPlugin([{
             from: './src/assets/fonts',
-            to: 'fonts'
+            to: '../Resources/fonts'
         }])
     );
 };

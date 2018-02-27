@@ -1,7 +1,5 @@
 # build artifacts
-frontify.sketchplugin/Contents/Sketch/*.*
-frontify.sketchplugin/Contents/Sketch/config/*.json
-frontify.sketchplugin/Contents/Resources
+frontify.sketchplugin
 
 # npm
 node_modules
