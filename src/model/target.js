@@ -17,12 +17,12 @@ class Target {
         var target = readJSON('target') || {};
 
         if (target.project) {
-            var project = readJSON('project-' + target.project) || {};
+            var set = readJSON('set-' + target.project) || {};
             if (view == 'sources') {
-                target.set = project.set_sources || 0;
+                target.set = set.set_sources || 0;
             }
             else {
-                target.set = project.set || 0;
+                target.set = set.set || 0;
             }
         }
 
@@ -49,9 +49,9 @@ class Target {
         }
 
         if (target.project) {
-            var project = readJSON('project-' + target.project) || {};
-            target.set = project.set || 0;
-            target.set_sources = project.set_sources || 0;
+            var set = readJSON('set-' + target.project) || {};
+            target.set = set.set || 0;
+            target.set_sources = set.set_sources || 0;
         }
 
         return Promise.resolve(target);
@@ -78,16 +78,16 @@ class Target {
             }
 
             if (target.project) {
-                var project = readJSON('project-' + target.project) || {};
+                var set = readJSON('set-' + target.project) || {};
 
                 if (data.set >= 0) {
-                    project.set = data.set;
+                    set.set = data.set;
                 }
                 if (data.set_sources >= 0) {
-                    project.set_sources = data.set_sources;
+                    set.set_sources = data.set_sources;
                 }
 
-                writeJSON('project-' + target.project, project);
+                writeJSON('set-' + target.project, set);
             }
 
             writeJSON('target', target);

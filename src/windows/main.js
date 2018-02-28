@@ -117,7 +117,6 @@ export default function (context, view) {
             downloadSource: function (source) {
                 filemanager.downloadFile(source).then(function (path) {
                     mainUI.eval('sourceDownloaded(' + JSON.stringify(source) + ')');
-                    filemanager.openFile(path);
                 }.bind(this)).catch(function (err) {
                     mainUI.eval('sourceDownloadFailed(' + JSON.stringify(source) + ')');
                 }.bind(this));

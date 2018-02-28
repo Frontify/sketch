@@ -16,6 +16,6 @@
     </div>
     <a class="m-artboards__content js-m-artboards__target" {{? it.id }}href="/screens/{{= it.id }}"{{?}}>
         <h3 class="m-artboards__title">{{= it.name }} {{? it.id }}<i class="m-artboards__link-external fi-link-external"></i>{{?}}</h3>
-        <span class="m-artboards__modified">{{? it.state === 'uploading'}}Uploading…{{??}}{{? it.modified_localized_ago }}{{? !it.nochanges}}Updated {{?}}{{= it.modified_localized_ago }}{{??}}Not yet uploaded{{?}}{{?}}</span>
+        <span class="m-artboards__modified">{{? it.state === 'uploading'}}Uploading…{{??}}{{? it.modified_localized_ago }}{{? !it.nochanges}}Updated {{?}}{{= it.modified_localized_ago }} by {{= it.modifier_name }}{{??}}Not yet uploaded{{?}}{{?}}</span>
     </a>
 </li>

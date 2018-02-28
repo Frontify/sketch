@@ -56,6 +56,7 @@ class Artboard {
                                     artboard.sha = asset.sha;
                                     artboard.state = 'uploaded';
                                     artboard.modified = asset.modified;
+                                    artboard.modifier_name = asset.modifier_name;
                                     artboard.modified_localized_ago = asset.modified_localized_ago;
                                 }
                             }
@@ -115,7 +116,7 @@ class Artboard {
                             name: result.name + '.' + result.ext,
                             id: result.id,
                             id_external: result.id_external,
-                            pixelRatio: this.pixelRatio
+                            pixel_ratio: this.pixelRatio
                         }).then(function (data) {
                             filemanager.deleteFile(result.path);
                             artboard.id = data.id;

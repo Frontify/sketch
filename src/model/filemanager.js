@@ -1,7 +1,6 @@
 import readJSON from '../helpers/readJSON'
 import readFile from '../helpers/readFile'
 import writeJSON from '../helpers/writeJSON'
-import writeFile from '../helpers/writeFile'
 import fetch from '../helpers/fetch'
 import createFolder from '../helpers/createFolder'
 import target from './target'
@@ -88,8 +87,8 @@ class FileManager {
                 origin: 'SKETCH'
             };
 
-            if(info.pixelRatio) {
-                data.pixelRatio = info.pixelRatio;
+            if(info.pixel_ratio) {
+                data.pixel_ratio = info.pixel_ratio;
             }
 
             var url = '/v1/assets/';
@@ -102,32 +101,24 @@ class FileManager {
     }
 
     downloadFile(info) {
-        var promises = [
-            fetch('/v1/screen/download/' + info.id),
-            fetch('/v1/screen/modified/' + info.id)
-        ];
-
-        return Promise.all(promises).then(function (result) {
-            var file = result[0];
-            var meta = result[1];
-
+        return fetch('/v1/screen/modified/' + info.id).then(function (meta) {
             this.updateAssetStatus(meta.screen.project, meta.screen);
 
-            // save file
             return target.getTarget('sources').then(function (target) {
-                return writeFile(target.path + info.filename, file);
+                var path = target.path + info.filename;
+                return fetch('/v1/screen/download/' + info.id, { is_file: true, filepath: path });
             }.bind(this));
         }.bind(this));
     }
 
     updateAssetStatus(project, asset) {
-        var status = readJSON('project-' + project) || {};
+        var status = readJSON('sources-' + project) || {};
         status.assets = status.assets || {};
         status.assets[asset.id] = status[asset.id] || {};
         status.assets[asset.id].id = asset.id;
         status.assets[asset.id].modified = asset.modified;
         status.assets[asset.id].sha = asset.sha;
-        writeJSON('project-' + project, status);
+        writeJSON('sources-' + project, status);
     }
 
     openFile(path) {

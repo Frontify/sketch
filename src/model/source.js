@@ -19,7 +19,7 @@ class Source {
             return fetch('/v1/assets/status/' + target.project.id + '?depth=0&ext=sketch&path=' + encodeURIComponent(target.set.path)).then(function (result) {
                 var assets = result.assets;
                 var sources = [];
-                var status = readJSON('project-' + target.project.id) || { assets: {} };
+                var status = readJSON('sources-' + target.project.id) || { assets: {} };
                 var alreadyAdded = false;
 
                 // compare with local status
