@@ -1,3 +1,5 @@
+import pluginCall from 'sketch-module-web-view/client'
+
 Tc.Module.Status = Tc.Module.extend({
     on: function (callback) {
         var $ctx = this.$ctx;
@@ -10,6 +12,7 @@ Tc.Module.Status = Tc.Module.extend({
 
         window.addEventListener('online', function () {
             this.setStatus(navigator.onLine);
+            pluginCall('online');
         }.bind(this));
 
         callback();

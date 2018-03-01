@@ -15,12 +15,12 @@
       "handler": "runCommand"
     },
     {
-      "name": "Saved",
-      "identifier": "saved",
+      "name": "Init",
+      "identifier": "init",
       "script": "./commands/frontify.js",
       "handlers": {
         "actions": {
-          "DocumentSaved": "savedCommand"
+          "OpenDocument": "initCommand"
         }
       }
     },
@@ -35,15 +35,25 @@
       }
     },
     {
-      "name": "Init",
-      "identifier": "init",
+      "name": "Saved",
+      "identifier": "saved",
       "script": "./commands/frontify.js",
       "handlers": {
         "actions": {
-          "OpenDocument": "initCommand"
+          "DocumentSaved": "savedCommand"
         }
       }
-    }
+    },
+    {
+       "name": "SelectionChanged",
+       "identifier": "selectionchanged",
+       "script": "./commands/frontify.js",
+       "handlers": {
+         "actions": {
+           "SelectionChanged.finish": "selectionCommand"
+         }
+       }
+     }
   ],
   "menu": {
     "items": [

@@ -21,11 +21,6 @@ export default function (uri, options) {
                 return response.json();
             }
 
-            var contentDisposition = response.headers.get("content-disposition");
-            if (contentDisposition && contentDisposition.indexOf('attachment') !== false) {
-                return response.blob();
-            }
-
             throw new TypeError("Oops, we haven't got JSON!");
         }.bind(this)).catch(function (err) {
             if (err.localizedDescription) {
@@ -34,8 +29,9 @@ export default function (uri, options) {
             else {
                 console.error(err);
             }
-        }.bind(this));
 
+            throw err;
+        }.bind(this));
     }
     else if (options.is_file && options.filepath) {
         return new Promise(function (resolve, reject) {

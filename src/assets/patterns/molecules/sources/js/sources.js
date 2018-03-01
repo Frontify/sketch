@@ -30,7 +30,7 @@ Tc.Module.Sources = Tc.Module.extend({
 
             // update item
             var source = this.getSource($item.data('id'));
-            source.state = 'syncing';
+            source.state = 'uploading';
             this.updateItem($item, source);
 
             pluginCall('addSource', source);
@@ -42,7 +42,7 @@ Tc.Module.Sources = Tc.Module.extend({
 
             // update item
             var source = this.getSource($item.data('id'));
-            source.state = 'syncing';
+            source.state = 'pushing';
             this.updateItem($item, source);
 
             pluginCall('pushSource', source);
@@ -54,7 +54,7 @@ Tc.Module.Sources = Tc.Module.extend({
 
             // update item
             var source = this.getSource($item.data('id'));
-            source.state = 'syncing';
+            source.state = 'pulling';
             this.updateItem($item, source);
 
             pluginCall('pullSource', source);
@@ -83,7 +83,7 @@ Tc.Module.Sources = Tc.Module.extend({
 
             // update item
             var source = this.getSource($item.data('id'));
-            source.state = 'syncing';
+            source.state = 'downloading';
             this.updateItem($item, source);
 
             pluginCall('downloadSource', source);
@@ -131,7 +131,17 @@ Tc.Module.Sources = Tc.Module.extend({
 
         var source = this.getSource(data.id);
         source.modified_localized_ago = 'just now';
-        source.state = 'failed';
+
+        var currentState = source.state;
+
+        switch (currentState) {
+            case 'pushing':
+                source.state = 'failedpush';
+                break;
+            case 'uploading':
+                source.state = 'failedadd';
+                break;
+        }
 
         this.updateItem($item, source);
     },
@@ -154,7 +164,17 @@ Tc.Module.Sources = Tc.Module.extend({
 
         var source = this.getSource(data.id);
         source.modified_localized_ago = 'just now';
-        source.state = 'failed';
+
+        var currentState = source.state;
+
+        switch (currentState) {
+            case 'pulling':
+                source.state = 'failedpull';
+                break;
+            case 'downloading':
+                source.state = 'faileddownload';
+                break;
+        }
 
         this.updateItem($item, source);
     },
@@ -187,7 +207,7 @@ Tc.Module.Sources = Tc.Module.extend({
 
         // update item
         var source = this.getSource(data.id);
-        source.state = 'syncing';
+        source.state = 'pushing';
         this.updateItem($item, source);
 
         pluginCall('pushSource', source);
@@ -199,7 +219,7 @@ Tc.Module.Sources = Tc.Module.extend({
 
         // update item
         var source = this.getSource(data.id);
-        source.state = 'syncing';
+        source.state = 'pulling';
         this.updateItem($item, source);
 
         pluginCall('pullSource', source);

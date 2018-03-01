@@ -44,9 +44,19 @@ export function closeCommand(context) {
     });
 }
 
+export function selectionCommand(context) {
+    COScript.currentCOScript().setShouldKeepAround(true);
+
+    executeSafely(context, function () {
+        if (threadDictionary['frontifymainui']) {
+          threadDictionary['frontifymainui'].selectionChanged(context.actionContext);
+        }
+    });
+}
+
 function refresh() {
    if (threadDictionary['frontifymainui']) {
-       threadDictionary['frontifymainui'].eval('refresh()');
+       threadDictionary['frontifymainui'].refresh();
    }
 }
 

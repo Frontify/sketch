@@ -106,7 +106,9 @@ class FileManager {
 
             return target.getTarget('sources').then(function (target) {
                 var path = target.path + info.filename;
-                return fetch('/v1/screen/download/' + info.id, { is_file: true, filepath: path });
+                if(createFolder(target.path)) {
+                    return fetch('/v1/screen/download/' + info.id, { is_file: true, filepath: path });
+                }
             }.bind(this));
         }.bind(this));
     }

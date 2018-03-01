@@ -14,16 +14,27 @@
     font-size: 11px;
     line-height: 13px;
     color: #9A9EA4;
-    padding: 6px 10px 7px 18px;
-    border-right: 1px solid rgba(216, 216, 216, .2);
+    padding: 6px 0 7px 18px;
 }
 
 .m-artboards__export-target {
+    display: block;
     overflow: hidden;
     font-size: 11px;
     line-height: 13px;
     color: #9A9EA4;
+    cursor: pointer;
+    transition: color 0.2s linear;
 }
+
+.m-artboards__export-target:hover,
+.m-artboards__export-target:focus {
+	color: #363D4A;
+}
+.m-artboards__export-target:active {
+	color: #2b2b2b;
+}
+
 
 .m-artboards__export-target-part {
     display: inline-block;
@@ -54,7 +65,7 @@
     visibility: hidden;
     top: 0;
     right: 0;
-    padding: 2px 12px 4px 0;
+    padding: 2px 12px 3px 0;
     background: #fff;
     transition: all 0.2s linear;
 }
@@ -72,6 +83,7 @@
 .m-artboards__item {
     background: #fff;
     padding: 9px 18px;
+    position: relative;
     transition: background 0.2s linear
 }
 

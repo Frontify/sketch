@@ -1,10 +1,10 @@
 <div class="m-sources__header">
-    <div class="m-sources__export-label">Upload to</div>
+    <div class="m-sources__export-label">Upload to:</div>
     <div class="m-sources__export-action">
         <a class="a-btn a-btn--xs a-btn--link-primary js-m-sources__change-target">change</a>
         <a class="a-btn a-btn--xs a-btn--link-primary js-m-sources__finder">reveal in finder</a>
     </div>
-    <div class="m-sources__export-target js-m-sources__export-target" data-url="/projects/{{= it.target.project.id }}/{{= it.target.project.slug }}/{{= it.target.set.id }}">
+    <a class="m-sources__export-target js-m-sources__export-target" data-url="/projects/{{= it.target.project.id }}/{{= it.target.project.slug }}/{{= it.target.set.id }}">
         <span class="m-sources__export-target-part"><i class="fi-projects"></i> {{= it.target.project.name }}</span>
         {{? it.target.set.folders.length > 0 }}
             {{~ it.target.set.folders : folder:index }}
@@ -15,7 +15,7 @@
                 {{?}}
             {{~}}
         {{?}}
-    </div>
+    </a>
 </div>
 <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
   <symbol id="sketch" viewBox="0 0 18 16">
@@ -34,5 +34,5 @@
     {{?}}
 </ul>
 <div class="m-btn-bar m-btn-bar--centered m-btn-bar--footer">
-   <button {{? it.already_added }}disabled{{?}} class="a-btn a-btn--primary js-m-sources__add-current">Add Current Sketch File</button>
+   <button {{? it.already_added || !it.has_document }}disabled{{?}} class="a-btn a-btn--primary js-m-sources__add-current">Add Current Sketch File</button>
 </div>

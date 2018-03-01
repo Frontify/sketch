@@ -47,6 +47,9 @@ export default function (context, view) {
                 }
             }
         },
+        onPanelClose: function () {
+            threadDictionary.removeObjectForKey('frontifymainui');
+        },
         handlers: {
             logout: function () {
                 user.logout().then(function () {
@@ -136,8 +139,8 @@ export default function (context, view) {
                     mainUI.eval('sourceDownloaded(' + JSON.stringify(source) + ')');
                     if (source.current == true && NSDocumentController.sharedDocumentController().currentDocument()) {
                         NSDocumentController.sharedDocumentController().currentDocument().close();
+                        filemanager.openFile(path);
                     }
-                    filemanager.openFile(path);
                 }.bind(this)).catch(function (err) {
                     mainUI.eval('sourceDownloadFailed(' + JSON.stringify(source) + ')');
                 }.bind(this));
@@ -153,14 +156,27 @@ export default function (context, view) {
 
             resolveConflict: function (id) {
                 mainUI.eval('showSourcesConflict(' + id + ')');
+            },
+
+            online: function() {
+                target.showTarget(mainUI);
+                mainUI.eval('switchTab("' + view + '")');
             }
         }
     });
 
     mainUI.panel.setTitlebarAppearsTransparent(true);
 
+    mainUI.refresh = function() {
+        mainUI.eval('refresh()');
+    };
+
+    mainUI.selectionChanged = function(context) {
+        var document = context.document;
+        console.log(context.document);
+    };
+
     return mainUI;
 }
-
 
 

@@ -101,7 +101,8 @@ class Source {
                     var data = {
                         sources: sources,
                         target: target,
-                        already_added: alreadyAdded
+                        already_added: alreadyAdded,
+                        has_document: !!NSDocumentController.sharedDocumentController().currentDocument()
                     };
 
                     return data;
@@ -184,10 +185,10 @@ class Source {
                 filemanager.updateAssetStatus(target.project.id, data);
 
                 return true;
-            }.bind(this)).catch(function (err) {
-                ui.eval('sourceUploadFailed(' + JSON.stringify(file) + ')');
-                return true;
             }.bind(this));
+        }.bind(this)).catch(function (err) {
+            ui.eval('sourceUploadFailed(' + JSON.stringify(source) + ')');
+            return true;
         }.bind(this));
     }
 
@@ -208,12 +209,10 @@ class Source {
 
                 // reload source file list
                 return this.showSources(ui);
-            }.bind(this)).catch(function (err) {
-                file.id = source.id;
-                ui.eval('sourceUploadFailed(' + JSON.stringify(file) + ')');
-
-                return true;
             }.bind(this));
+        }.bind(this)).catch(function (err) {
+            ui.eval('sourceUploadFailed(' + JSON.stringify(source) + ')');
+            return true;
         }.bind(this));
     }
 

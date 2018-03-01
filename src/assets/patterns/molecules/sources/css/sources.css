@@ -14,16 +14,27 @@
     font-size: 11px;
     line-height: 13px;
     color: #9A9EA4;
-    padding: 6px 10px 7px 18px;
-    border-right: 1px solid rgba(216, 216, 216, .2);
+    padding: 6px 0 7px 18px;
 }
 
 .m-sources__export-target {
+    display: block;
     overflow: hidden;
     font-size: 11px;
     line-height: 13px;
     color: #9A9EA4;
+    cursor: pointer;
+    transition: color 0.2s linear;
 }
+
+.m-sources__export-target:hover,
+.m-sources__export-target:focus {
+	color: #363D4A;
+}
+.m-sources__export-target:active {
+	color: #2b2b2b;
+}
+
 
 .m-sources__export-target-part {
     display: inline-block;
@@ -54,7 +65,7 @@
     visibility: hidden;
     top: 0;
     right: 0;
-    padding: 2px 12px 4px 0;
+    padding: 2px 12px 3px 0;
     background: #fff;
     transition: all 0.2s linear;
 }
@@ -141,7 +152,10 @@
     background: #FAB117;
 }
 
-.m-sources__item.state-failed .m-sources__badge {
+.m-sources__item.state-failedadd .m-sources__badge,
+.m-sources__item.state-faileddownload .m-sources__badge,
+.m-sources__item.state-failedpull .m-sources__badge,
+.m-sources__item.state-failedpush .m-sources__badge {
     background: #EF6756;
 }
 

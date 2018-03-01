@@ -11,7 +11,7 @@ class Project {
     }
 
     getProjects() {
-        return fetch('/v1/brand/list/').then(function (data) {
+        return fetch('/v1/brand/list/?project_limit=999').then(function (data) {
             return data.brands;
         }.bind(this));
     }
