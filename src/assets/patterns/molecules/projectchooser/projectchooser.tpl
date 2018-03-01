@@ -5,10 +5,10 @@
         <p class="a-p">Choose the project you are current working on</p>
     </header>
     <div class="m-projectchooser__content">
-        {{= window.tpl.settingelemdropdown({ id: 'brand', label: 'Brand', value: it.current.brand.id , options: it.brands }) }}
+        {{= window.tpl.settingelemdropdown({ id: 'brand', label: 'Brand', modifier: 'limit-3', value: it.current.brand.id , options: it.brands }) }}
 
         {{? it.projects.length > 0 }}
-            {{= window.tpl.settingelemdropdown({ id: 'project', label: 'Project', value: it.current.project ? it.current.project.id : '', options: it.projects }) }}
+            {{= window.tpl.settingelemdropdown({ id: 'project', label: 'Project', modifier: 'limit-3', value: it.current.project ? it.current.project.id : '', options: it.projects }) }}
         {{??}}
             <div class="o-settings__blank">No projects found in this brand.
                 <div class="m-btn-bar m-btn-bar--centered m-btn-bar--xs">

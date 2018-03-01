@@ -92,10 +92,9 @@ Tc.Module.Artboards = Tc.Module.extend({
 
         artboard.nochanges = data.nochanges;
 
-        if (data.nochanges) {
-            artboard.modified_localized_ago = 'Nothing changed';
-        } else {
+        if (!data.nochanges) {
             artboard.modified_localized_ago = 'just now';
+            artboard.modifier_name = 'you'
         }
         artboard.state = 'success';
         artboard.id = data.id;

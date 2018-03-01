@@ -8,12 +8,12 @@
       var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
 
       if(!isChrome) {
-          document.writeln('<link rel="stylesheet" type="text/css" href="../statics.css">');
+          document.writeln('<link rel="stylesheet" type="text/css" href="../css/statics.css">');
           document.writeln('<scr' + 'ipt src="../statics.js"></scr' + 'ipt>');
           document.writeln('<scr' + 'ipt src="../app.js"></scr' + 'ipt>');
       }
       else {
-          document.writeln('<link rel="stylesheet" type="text/css" href="/frontify.sketchplugin/Contents/Resources/statics.css">');
+          document.writeln('<link rel="stylesheet" type="text/css" href="/frontify.sketchplugin/Contents/Resources/css/statics.css">');
           document.writeln('<scr' + 'ipt src="/frontify.sketchplugin/Contents/Resources/statics.js"></scr' + 'ipt>');
           document.writeln('<scr' + 'ipt src="/frontify.sketchplugin/Contents/Resources/app.js"></scr' + 'ipt>');
       }
@@ -21,7 +21,6 @@
     <title>Login</title>
 </head>
 <body>
-<script>document.writeln(window.tpl.header({ title: 'Frontify Login'}));</script>
 <div class="a-colorbar"></div>
 <div class="mod mod-login"></div>
 <script>

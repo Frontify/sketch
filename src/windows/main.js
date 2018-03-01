@@ -12,8 +12,8 @@ var threadDictionary = NSThread.mainThread().threadDictionary();
 
 export default function (context, view) {
     var viewData = sketch.getViewData();
-    var mainURL = require('../views/main.html');
-    var loginURL = require('../views/login.html');
+    var mainURL = require('../assets/views/main.html');
+    var loginURL = require('../assets/views/login.html');
     var domain = '';
 
     var mainUI = new WebUI(context, viewData.url, {
@@ -29,32 +29,32 @@ export default function (context, view) {
             'webView:didFinishLoadForFrame:': function (webView, webFrame) {
                 sketch.resize(mainUI);
 
-                if(decodeURI(webView.mainFrameURL()) == mainURL) {
+                if (decodeURI(webView.mainFrameURL()) == mainURL) {
                     target.showTarget(mainUI);
                     mainUI.eval('switchTab("' + view + '")');
                 }
             },
             'webView:didReceiveServerRedirectForProvisionalLoadForFrame:': function (webView, navigation) {
                 if (webView.mainFrameURL().startsWith('https://frontify.com/sketchplugin')) {
-                   var access_token = webView.mainFrameURL().split('?#access_token=')[1].split('&expires_in=31536000&token_type=bearer')[0];
+                    var access_token = webView.mainFrameURL().split('?#access_token=')[1].split('&expires_in=31536000&token_type=bearer')[0];
 
-                   user.login({
-                      access_token: access_token,
-                      domain: domain
-                   });
+                    user.login({
+                        access_token: access_token,
+                        domain: domain
+                    });
 
                     webView.mainFrameURL = mainURL;
                 }
             }
         },
         handlers: {
-            logout: function() {
-                user.logout().then(function() {
+            logout: function () {
+                user.logout().then(function () {
                     mainUI.webView.mainFrameURL = loginURL;
                 }.bind(this));
             },
             memorizeDomain: function (url) {
-               domain = url;
+                domain = url;
             },
             showArtboards: function () {
                 view = 'artboards';
@@ -72,14 +72,19 @@ export default function (context, view) {
                     mainUI.eval('artboardsUploaded()');
                 }.bind(this));
             },
-            openUrl: function (url) {
-                target.getDomain().then(function (data) {
-                    NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString(data + url));
-                }.bind(this));
+            openUrl: function (url, absolute) {
+                if (absolute) {
+                    NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString(url));
+                }
+                else {
+                    target.getDomain().then(function (data) {
+                        NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString(data + url));
+                    }.bind(this))
+                }
             },
             openFinder: function () {
                 target.getTarget('sources').then(function (data) {
-                    if(createFolder(data.path)) {
+                    if (createFolder(data.path)) {
                         NSWorkspace.sharedWorkspace().openFile(data.path);
                     }
                 }.bind(this));
@@ -129,7 +134,7 @@ export default function (context, view) {
             pullSource: function (source) {
                 filemanager.downloadFile(source).then(function (path) {
                     mainUI.eval('sourceDownloaded(' + JSON.stringify(source) + ')');
-                    if(source.current == true && NSDocumentController.sharedDocumentController().currentDocument()) {
+                    if (source.current == true && NSDocumentController.sharedDocumentController().currentDocument()) {
                         NSDocumentController.sharedDocumentController().currentDocument().close();
                     }
                     filemanager.openFile(path);

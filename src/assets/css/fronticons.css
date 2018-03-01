@@ -1,9 +1,9 @@
 @font-face {
   font-family: 'fronticons';
-  /*src:
+  src:
     url('../fonts/icons/fronticons.ttf?v1') format('truetype'),
     url('../fonts/icons/fronticons.woff?v1') format('woff'),
-    url('../fonts/icons/fronticons.svg?v1#fronticons') format('svg'); */
+    url('../fonts/icons/fronticons.svg?v1#fronticons') format('svg');
   font-weight: normal;
   font-style: normal;
 }

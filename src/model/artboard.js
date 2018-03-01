@@ -39,6 +39,7 @@ class Artboard {
                             state: 'new',
                             target: '',
                             modified: null,
+                            modifier_name: null,
                             modified_localized_ago: null
                         });
                     }

@@ -8,12 +8,12 @@
         var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
 
         if (!isChrome) {
-            document.writeln('<link rel="stylesheet" type="text/css" href="../statics.css">');
+            document.writeln('<link rel="stylesheet" type="text/css" href="../css/statics.css">');
             document.writeln('<scr' + 'ipt src="../statics.js"></scr' + 'ipt>');
             document.writeln('<scr' + 'ipt src="../app.js"></scr' + 'ipt>');
         }
         else {
-            document.writeln('<link rel="stylesheet" type="text/css" href="/frontify.sketchplugin/Contents/Resources/statics.css">');
+            document.writeln('<link rel="stylesheet" type="text/css" href="/frontify.sketchplugin/Contents/Resources/css/statics.css">');
             document.writeln('<scr' + 'ipt src="/frontify.sketchplugin/Contents/Resources/statics.js"></scr' + 'ipt>');
             document.writeln('<scr' + 'ipt src="/frontify.sketchplugin/Contents/Resources/app.js"></scr' + 'ipt>');
         }
@@ -48,6 +48,10 @@
     application.registerModules();
     application.registerModule($('body'), 'BtnDropdown');
     application.start();
+
+    window.utils = {
+        tpl: new Tc.Utils.Template(),
+    };
 
     // Callbacks from Sketch Plugin
     function showTarget(data) {
@@ -142,7 +146,7 @@
         document.writeln('<scr' + 'ipt src="./test/target.js"></scr' + 'ipt>');
 
         // Change this to whatever you are testing
-        document.writeln('<scr' + 'ipt src="./test/sources.js"></scr' + 'ipt>');
+        document.writeln('<scr' + 'ipt src="./test/artboards.js"></scr' + 'ipt>');
     }
 </script>
 </body>

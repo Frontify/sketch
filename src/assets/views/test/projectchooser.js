@@ -1,11 +1,5 @@
 switchTab('artboards');
 
-showArtboards({
-        "artboards": [],
-        "target": "/Design/"
-    }
-);
-
 showProjectChooser([
     {
         "id": "105",

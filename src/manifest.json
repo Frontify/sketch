@@ -25,6 +25,16 @@
       }
     },
     {
+      "name": "Close",
+      "identifier": "close",
+      "script": "./commands/frontify.js",
+      "handlers": {
+        "actions": {
+          "CloseDocument": "closeCommand"
+        }
+      }
+    },
+    {
       "name": "Init",
       "identifier": "init",
       "script": "./commands/frontify.js",

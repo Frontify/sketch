@@ -15,7 +15,20 @@
         <button {{? it.state == 'uploading' }}disabled{{?}} class="a-btn a-btn--xs a-btn--default js-m-artboards__upload">Upload</button>
     </div>
     <a class="m-artboards__content js-m-artboards__target" {{? it.id }}href="/screens/{{= it.id }}"{{?}}>
-        <h3 class="m-artboards__title">{{= it.name }} {{? it.id }}<i class="m-artboards__link-external fi-link-external"></i>{{?}}</h3>
-        <span class="m-artboards__modified">{{? it.state === 'uploading'}}Uploading…{{??}}{{? it.modified_localized_ago }}{{? !it.nochanges}}Updated {{?}}{{= it.modified_localized_ago }} by {{= it.modifier_name }}{{??}}Not yet uploaded{{?}}{{?}}</span>
+        <h3 class="m-artboards__title">{{= window.utils.tpl.truncate(it.name, 10, 45, 35)}} {{? it.id }}<i class="m-artboards__link-external fi-link-external"></i>{{?}}</h3>
+        <span class="m-artboards__modified">
+            {{? it.state === 'uploading'}}
+                Uploading…
+            {{?? it.nochanges}}
+                Nothing changed
+            {{?? it.state === 'new'}}
+                Not yet uploaded
+            {{??}}
+                {{? it.modified_localized_ago }}
+                    {{= it.modified_localized_ago }}
+                    {{? it.modifier_name }} by {{= it.modifier_name }}{{?}}
+                {{?}}
+            {{?}}
+        </span>
     </a>
 </li>

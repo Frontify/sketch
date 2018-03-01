@@ -23,6 +23,7 @@ showArtboards({
                 "state": "uploaded",
                 "target": "/design/",
                 "modified": "2018-01-15 20:51:58",
+                "modifier_name": "Remo Brunschwiler",
                 "modified_localized_ago": "5 days ago"
             },
             {
@@ -31,6 +32,7 @@ showArtboards({
                 "state": "success",
                 "target": "/design/",
                 "modified": "2018-01-15 20:51:58",
+                "modifier_name": "Remo Brunschwiler",
                 "modified_localized_ago": "2 days ago"
             },
             {
@@ -39,6 +41,7 @@ showArtboards({
                 "state": "failed",
                 "target": "/design/",
                 "modified": "2018-01-15 20:51:58",
+                "modifier_name": "Remo Brunschwiler",
                 "modified_localized_ago": "2 days ago"
             }
         ],

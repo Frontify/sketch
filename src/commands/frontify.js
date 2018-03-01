@@ -24,14 +24,19 @@ export function initCommand(context) {
     COScript.currentCOScript().setShouldKeepAround(true);
 
     executeSafely(context, function () {
-        // refresh webview initially
         refresh();
-
-        // setWindowDelegate(context.actionContext);
     });
 }
 
 export function savedCommand(context) {
+    COScript.currentCOScript().setShouldKeepAround(true);
+
+    executeSafely(context, function () {
+        refresh();
+    });
+}
+
+export function closeCommand(context) {
     COScript.currentCOScript().setShouldKeepAround(true);
 
     executeSafely(context, function () {
@@ -44,25 +49,6 @@ function refresh() {
        threadDictionary['frontifymainui'].eval('refresh()');
    }
 }
-
-function setWindowDelegate(context) {
-    COScript.currentCOScript().scheduleWithRepeatingInterval_jsFunction(0.2, function (interval) {
-        if (context.document.documentWindow()) {
-            var documentWindow = context.document.documentWindow();
-            var windowDelegate = new MochaJSDelegate({
-                'windowDidBecomeMain:': function (notification) {
-                    // refresh webview on window switch
-                    refresh();
-                }
-            });
-
-            documentWindow.setDelegate_(windowDelegate.getClassInstance());
-
-            interval.cancel();
-        }
-    });
-}
-
 
 function setContext(context) {
     // init model singletons

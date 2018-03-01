@@ -7,6 +7,14 @@ Tc.Module.Login = Tc.Module.extend({
 
         this.render();
 
+        $ctx.on('click', '.js-o-login__link', function(e) {
+            e.preventDefault();
+            var $this = $(e.currentTarget);
+            var url = $this.attr('href');
+
+            pluginCall('openUrl', url, true);
+        }.bind(this));
+
         callback();
     },
 

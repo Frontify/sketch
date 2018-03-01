@@ -71,6 +71,9 @@ Tc.Module.Sources = Tc.Module.extend({
             var $item = $this.closest('.js-m-sources__item');
 
             var source = this.getSource($item.data('id'));
+            source.state = 'opening';
+            this.updateItem($item, source);
+
             pluginCall('openSource', source);
         }.bind(this));
 

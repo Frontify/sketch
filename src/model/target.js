@@ -36,7 +36,7 @@ class Target {
 
             delete result.success;
 
-            result.path = '' + NSHomeDirectory() + '/Frontify/' + result.brand.name + '/' + result.project.name + result.set.path;
+            result.path = '' + NSHomeDirectory() + '/Frontify/' + result.brand.name + '/Projects/' + result.project.name + result.set.path;
             return result;
         }.bind(this));
     }

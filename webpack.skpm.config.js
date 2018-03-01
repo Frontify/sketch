@@ -10,23 +10,6 @@ module.exports = function (config) {
     };
 
     config.module.rules.push({
-        test: /\.(html)$/,
-        use: [{
-            loader: "@skpm/extract-loader"
-        },
-            {
-                loader: "html-loader",
-                options: {
-                    attrs: [
-                        'img:src'
-                    ],
-                    interpolate: true
-                }
-            }
-        ]
-    });
-
-    config.module.rules.push({
         test: /\.(css)$/,
         use: [
             {
@@ -77,7 +60,7 @@ module.exports = function (config) {
             uglify: false,
             sourceMap: false,
             name: 'statics',
-            outputPath: '../Resources/',
+            outputPath: '../Resources/css/',
             injectType: 'none',
             fileName: '[name].css',
             filesToConcat: ['./src/assets/css/reset.css', './src/assets/css/fronticons.css', './src/assets/css/unicons.css', './src/assets/patterns/**/css/*.css', './src/assets/patterns/**/css/variants/*.css']
@@ -88,6 +71,9 @@ module.exports = function (config) {
         new CopyPlugin([{
             from: './src/assets/fonts',
             to: '../Resources/fonts'
+        },{
+            from: './src/assets/images',
+            to: '../Resources/images'
         }])
     );
 };

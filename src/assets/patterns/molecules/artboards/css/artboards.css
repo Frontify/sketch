@@ -88,8 +88,9 @@
 }
 
 .m-artboards__link-external {
-    padding-left: 3px;
+    padding-left: 6px;
     color: #9A9EA4;
+    position: absolute;
 }
 
 .m-artboards__content {

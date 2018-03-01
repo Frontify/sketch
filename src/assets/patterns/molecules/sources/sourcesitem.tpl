@@ -15,7 +15,7 @@
         </span>
     </div>
     <div class="m-sources__actions">
-        {{? it.state !== 'syncing' && it.state !== 'same' }}
+        {{? it.state !== 'syncing' && it.state !== 'same' && it.state !== 'opening' }}
         <button class="a-btn a-btn--xs a-btn--default {{? it.state === 'new' }}js-m-sources__download{{?? it.state === 'addable' || it.state === 'failed'}}js-m-sources__add{{?? it.state === 'conflict' }}js-m-sources__conflict{{?? it.state === 'push'}}js-m-sources__push{{?? it.state === 'pull'}}js-m-sources__pull{{?}}">
             {{? it.state === 'new'}}
                 Download
@@ -31,8 +31,8 @@
         </button>
         {{?}}
     </div>
-    <a class="m-sources__content {{? !(it.current || it.state === 'new' || it.state === 'syncing')}}js-m-sources__open{{?}}" {{? it.id && it.state !== 'addable'}}href="/screens/{{= it.id }}"{{?}}>
-        <h3 class="m-sources__title">{{= it.filename.substring(0, it.filename.length - 7)}}<span class="m-sources__ext">.sketch</span></h3>
+    <a class="m-sources__content {{? !(it.current || it.state === 'new' || it.state === 'opening' || it.state === 'syncing')}}js-m-sources__open{{?}}" {{? it.id && it.state !== 'addable'}}href="/screens/{{= it.id }}"{{?}}>
+        <h3 class="m-sources__title">{{= window.utils.tpl.truncate(it.filename.substring(0, it.filename.length - 7), 10, 40, 30)}}<span class="m-sources__ext">.sketch</span></h3>
         <span class="m-sources__modified">
             {{? it.state === 'new'}}
                 Not yet downloaded
@@ -50,6 +50,8 @@
                 Up to date
             {{?? it.state === 'conflict'}}
                 Conflicting versions
+            {{?? it.state === 'opening'}}
+                Opening file…
             {{?}}
         </span>
     </a>

@@ -85,7 +85,7 @@ The `-f` option causes `skpm log` to not stop when the end of logs is reached, b
 
 To make working on the Frontend independent from Sketch make the `sketch` folder the document root of your webserver.
 
-The views are accessible by using: local-sketch.frontify.com/src/views/…
+The views are accessible by using: local-sketch.frontify.com/src/assets/views/…
 
 [Sketch]: https://sketchapp.com/
 [sketch.frontify.com]: https://frontify.com/sketch
