@@ -1,4 +1,4 @@
-<li class="m-artboards__item js-m-artboards__item clearfix state-{{= it.state }}" data-id-external="{{= it.id_external }}">
+<li class="m-artboards__item js-m-artboards__item clearfix state-{{= it.state }}" data-id-external="{{= it.id_external }}" {{? it.id }}data-url="/screens/{{= it.id }}"{{?}}>
     <div class="m-artboards__type">
         <span class="m-artboards__badge">
             {{? it.state === 'uploading'}}
@@ -14,7 +14,7 @@
     <div class="m-artboards__actions">
         <button {{? it.state == 'uploading' }}disabled{{?}} class="a-btn a-btn--xs a-btn--default js-m-artboards__upload">Upload</button>
     </div>
-    <a class="m-artboards__content js-m-artboards__target" {{? it.id }}href="/screens/{{= it.id }}"{{?}}>
+    <div class="m-artboards__content">
         <h3 class="m-artboards__title">{{= window.utils.tpl.truncate(it.name, 10, 45, 35)}} {{? it.id }}<i class="m-artboards__link-external fi-link-external"></i>{{?}}</h3>
         <span class="m-artboards__modified">
             {{? it.state === 'uploading'}}
@@ -30,5 +30,5 @@
                 {{?}}
             {{?}}
         </span>
-    </a>
+    </div>
 </li>

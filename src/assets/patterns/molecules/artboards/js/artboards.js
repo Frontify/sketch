@@ -11,19 +11,25 @@ Tc.Module.Artboards = Tc.Module.extend({
         $ctx.html(window.tpl.loader());
 
         $ctx.on('click', '.js-m-artboards__export-target', function (e) {
-          var url = $(e.currentTarget).data('url');
+            e.stopPropagation();
 
-          // open export target in frontify
-          pluginCall('openUrl', url);
+            var url = $(e.currentTarget).data('url');
+
+            // open export target in frontify
+            pluginCall('openUrl', url);
         }.bind(this));
 
         $ctx.on('click', '.js-m-artboards__change-target', function(e) {
+            e.stopPropagation();
+
             // open modal with loader
-            this.fire('openModal', { modifier: 'default', $content: $(window.tpl.loader())}, ['events']);
+            this.fire('openModal', { modifier: 'default', closeable: false, $content: $(window.tpl.loader())}, ['events']);
             pluginCall('changeFolder');
         }.bind(this));
 
         $ctx.on('click', '.js-m-artboards__upload', function (e) {
+            e.stopPropagation();
+
             var $this = $(e.currentTarget);
             var $item = $this.closest('.js-m-artboards__item');
 
@@ -35,7 +41,9 @@ Tc.Module.Artboards = Tc.Module.extend({
             pluginCall('uploadArtboard', artboard);
         }.bind(this));
 
-        $ctx.on('click', '.js-m-artboards__upload-all', function () {
+        $ctx.on('click', '.js-m-artboards__upload-all', function (e) {
+            e.stopPropagation();
+
             var artboards = [];
 
             $ctx.find('.js-m-artboards__upload-all').attr('disabled', 'disabled');
@@ -57,9 +65,11 @@ Tc.Module.Artboards = Tc.Module.extend({
             }, 20);
         }.bind(this));
 
-        $ctx.on('click', '.js-m-artboards__target', function(e) {
+        $ctx.on('click', '.js-m-artboards__item', function(e) {
+            e.stopPropagation();
+
             var $this = $(e.currentTarget);
-            var url = $this.attr('href');
+            var url = $this.data('url');
 
             if(url) {
                 pluginCall('openUrl', url);

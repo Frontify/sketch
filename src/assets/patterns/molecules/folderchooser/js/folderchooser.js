@@ -13,7 +13,7 @@ Tc.Module.FolderChooser = Tc.Module.extend({
             current: current
         }));
 
-        this.fire('openModal', {modifier: 'default', $content: $content}, ['events']);
+        this.fire('openModal', {modifier: 'default', closeable: false, $content: $content}, ['events']);
 
         $content.on('submit', function (e) {
             e.preventDefault();

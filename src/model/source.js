@@ -222,10 +222,7 @@ class Source {
                 ui.eval('refresh()');
             }
         } else {
-            if (filemanager.moveCurrent()) {
-                ui.eval('refresh()');
-                ui.eval('showSourcesHowTo()')
-            }
+            ui.eval('showSourcesHowTo()');
         }
     }
 }

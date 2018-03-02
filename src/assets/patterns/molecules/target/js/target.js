@@ -7,13 +7,22 @@ Tc.Module.Target = Tc.Module.extend({
         this.sandbox.subscribe('events', this);
 
         $ctx.on('click', '.js-m-target__change-project', function(e) {
-            // open modal with loader
+            e.preventDefault();
+
             this.fire('openModal', { modifier: 'default', closeable: false, $content: $(window.tpl.loader())}, ['events']);
             pluginCall('changeProject');
         }.bind(this));
 
+        $ctx.on('click', '.js-m-target__help', function(e) {
+            e.preventDefault();
+
+            var $this = $(e.currentTarget);
+            pluginCall('openUrl', $this.attr('href'), true);
+        }.bind(this));
+
         $ctx.on('click', '.js-m-target__logout', function(e) {
-           pluginCall('logout');
+            e.preventDefault();
+            pluginCall('logout');
         }.bind(this));
 
         callback();

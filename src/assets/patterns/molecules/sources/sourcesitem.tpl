@@ -1,4 +1,4 @@
-<li class="m-sources__item js-m-sources__item clearfix state-{{= it.state }}" data-id="{{= it.id || '' }}">
+<li class="m-sources__item js-m-sources__item clearfix state-{{= it.state }} {{? !(it.current || it.state === 'new' || it.state === 'opening' || it.state === 'downloading' || it.state === 'uploading' || it.state === 'pushing' || it.state === 'pulling')}}js-m-sources__open{{?}}" data-id="{{= it.id || '' }}">
     <div class="m-sources__type">
         <span class="m-sources__badge">
             {{? it.state === 'uploading' || it.state === 'downloading' || it.state === 'pushing' || it.state === 'pulling'}}
@@ -31,7 +31,7 @@
         </button>
         {{?}}
     </div>
-    <a class="m-sources__content {{? !(it.current || it.state === 'new' || it.state === 'opening' || it.state === 'downloading' || it.state === 'uploading' || it.state === 'pushing' || it.state === 'pulling')}}js-m-sources__open{{?}}" {{? it.id && it.state !== 'addable'}}href="/screens/{{= it.id }}"{{?}}>
+    <div class="m-sources__content">
         <h3 class="m-sources__title">{{= window.utils.tpl.truncate(it.filename.substring(0, it.filename.length - 7), 10, 40, 30)}}<span class="m-sources__ext">.sketch</span></h3>
         <span class="m-sources__modified">
             {{? it.state === 'new'}}
@@ -59,12 +59,12 @@
             {{?? it.state === 'failedpull'}}
                 Pulling remote changes failed
             {{?? it.state === 'same'}}
-                Up to date
+                Last modified {{= it.modified_localized_ago }} by {{= it.modifier_name }}
             {{?? it.state === 'conflict'}}
                 Conflicting versions
             {{?? it.state === 'opening'}}
                 Opening file…
             {{?}}
         </span>
-    </a>
+    </div>
 </li>

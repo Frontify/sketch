@@ -19,7 +19,7 @@
             }.bind(this));
 
             $ctx.on('click', '.js-m-modal__close', function () {
-                this.close();
+                this.close(true);
             }.bind(this));
 
             $(document).keyup(function (e) {
@@ -66,7 +66,7 @@
             this.isOpen = true;
             Tc.Module.Modal.count++;
 
-            var $close = $ctx.find('.js-m-modal__close');
+            var $close = $ctx.find('> .js-m-modal__close');
 
             if(!this.closeable) {
                 // hide close button

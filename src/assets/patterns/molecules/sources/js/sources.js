@@ -12,6 +12,7 @@ Tc.Module.Sources = Tc.Module.extend({
         $ctx.html(window.tpl.loader());
 
         $ctx.on('click', '.js-m-sources__export-target', function (e) {
+            e.stopPropagation();
             var url = $(e.currentTarget).data('url');
 
             // open export target in frontify
@@ -19,12 +20,16 @@ Tc.Module.Sources = Tc.Module.extend({
         }.bind(this));
 
         $ctx.on('click', '.js-m-sources__change-target', function (e) {
+            e.stopPropagation();
+
             // open modal with loader
-            this.fire('openModal', {modifier: 'default', $content: $(window.tpl.loader())}, ['events']);
+            this.fire('openModal', {modifier: 'default', closeable: false, $content: $(window.tpl.loader())}, ['events']);
             pluginCall('changeFolder');
         }.bind(this));
 
         $ctx.on('click', '.js-m-sources__add', function (e) {
+            e.stopPropagation();
+
             var $this = $(e.currentTarget);
             var $item = $this.closest('.js-m-sources__item');
 
@@ -37,6 +42,8 @@ Tc.Module.Sources = Tc.Module.extend({
         }.bind(this));
 
         $ctx.on('click', '.js-m-sources__push', function (e) {
+            e.stopPropagation();
+
             var $this = $(e.currentTarget);
             var $item = $this.closest('.js-m-sources__item');
 
@@ -49,6 +56,8 @@ Tc.Module.Sources = Tc.Module.extend({
         }.bind(this));
 
         $ctx.on('click', '.js-m-sources__pull', function (e) {
+            e.stopPropagation();
+
             var $this = $(e.currentTarget);
             var $item = $this.closest('.js-m-sources__item');
 
@@ -61,15 +70,17 @@ Tc.Module.Sources = Tc.Module.extend({
         }.bind(this));
 
         $ctx.on('click', '.js-m-sources__conflict', function (e) {
+            e.stopPropagation();
+
             var $this = $(e.currentTarget);
             var $item = $this.closest('.js-m-sources__item');
             pluginCall('resolveConflict', $item.data('id'));
         }.bind(this));
 
         $ctx.on('click', '.js-m-sources__open', function (e) {
-            var $this = $(e.currentTarget);
-            var $item = $this.closest('.js-m-sources__item');
+            e.stopPropagation();
 
+            var $item = $(e.currentTarget);
             var source = this.getSource($item.data('id'));
             source.state = 'opening';
             this.updateItem($item, source);
@@ -78,6 +89,8 @@ Tc.Module.Sources = Tc.Module.extend({
         }.bind(this));
 
         $ctx.on('click', '.js-m-sources__download', function (e) {
+            e.stopPropagation();
+
             var $this = $(e.currentTarget);
             var $item = $this.closest('.js-m-sources__item');
 
@@ -89,14 +102,18 @@ Tc.Module.Sources = Tc.Module.extend({
             pluginCall('downloadSource', source);
         }.bind(this));
 
-        $ctx.on('click', '.js-m-sources__add-current', function () {
+        $ctx.on('click', '.js-m-sources__add-current', function (e) {
+            e.stopPropagation();
+
             // give button time to gray out
             setTimeout(function () {
                 pluginCall('addCurrentFile');
             }, 20);
         }.bind(this));
 
-        $ctx.on('click', '.js-m-sources__finder', function () {
+        $ctx.on('click', '.js-m-sources__finder', function (e) {
+            e.stopPropagation();
+
             pluginCall('openFinder');
         }.bind(this));
 
@@ -186,12 +203,12 @@ Tc.Module.Sources = Tc.Module.extend({
     },
 
     showHowTo: function () {
-        this.fire('openModal', {modifier: 'default', $content: $(window.tpl.howto())}, ['events']);
+        this.fire('openModal', {modifier: 'default', closeable: false, $content: $(window.tpl.howto())}, ['events']);
     },
 
     showConflict: function (id) {
         var source = this.getSource(id);
-        this.fire('openModal', {modifier: 'default', $content: $(window.tpl.conflict(source))}, ['events']);
+        this.fire('openModal', {modifier: 'default', closeable: false, $content: $(window.tpl.conflict(source))}, ['events']);
     },
 
     onTabSwitched(data) {

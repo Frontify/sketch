@@ -8,6 +8,9 @@
                 <li class="m-btn-dropdown__item">
                     <a class="m-btn-dropdown__link js-m-target__change-project">Change Project</a>
                 </li>
+                <li class="m-btn-dropdown__item">
+                    <a href="https://help.frontify.com/faq-workspace/how-to-use-the-frontify-sketch-plugin" class="m-btn-dropdown__link js-m-target__help">Help</a>
+                </li>
                 <li class="m-btn-dropdown__item m-btn-dropdown__item--danger">
                     <a class="m-btn-dropdown__link js-m-target__logout">Logout</a>
                 </li>

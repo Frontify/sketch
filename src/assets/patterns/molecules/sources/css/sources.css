@@ -83,6 +83,7 @@
 .m-sources__item {
     background: #fff;
     padding: 9px 18px;
+    position: relative;
     transition: background 0.2s linear
 }
 
@@ -108,7 +109,6 @@
 
 .m-sources__actions {
     padding-left: 8px;
-    padding-top: 1px;
     float: right;
 }
 

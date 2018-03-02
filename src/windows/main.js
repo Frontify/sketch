@@ -154,6 +154,12 @@ export default function (context, view) {
                 source.addCurrentFile(mainUI);
             },
 
+            moveCurrentFile: function() {
+                if (filemanager.moveCurrent()) {
+                   mainUI.eval('refresh()');
+                }
+            },
+
             resolveConflict: function (id) {
                 mainUI.eval('showSourcesConflict(' + id + ')');
             },

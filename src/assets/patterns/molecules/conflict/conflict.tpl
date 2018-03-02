@@ -1,5 +1,5 @@
-<div class="a-colorbar"></div>
 <div class="m-conflict mod mod-conflict" data-source-id="{{= it.id }}">
+    <div class="a-colorbar"></div>
     <header class="m-conflict__header">
               <h2 class="a-h2">Sync Conflict</h2>
     </header>
