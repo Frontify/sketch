@@ -20,7 +20,7 @@ class Sketch {
         else {
             data.url = require('../assets/views/login.html');
             data.width = 360;
-            data.height = 470;
+            data.height = 500;
         }
 
         return data;

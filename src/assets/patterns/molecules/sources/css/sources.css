@@ -65,7 +65,7 @@
     visibility: hidden;
     top: 0;
     right: 0;
-    padding: 2px 12px 3px 0;
+    padding: 2px 12px 2px 0;
     background: #fff;
     transition: all 0.2s linear;
 }
@@ -108,6 +108,7 @@
 
 .m-sources__actions {
     padding-left: 8px;
+    padding-top: 1px;
     float: right;
 }
 
@@ -164,11 +165,17 @@
     background: #A3CE62;
 }
 
-.m-sources__item.state-syncing .m-sources__badge {
+.m-sources__item.state-downloading .m-sources__badge,
+.m-sources__item.state-uploading .m-sources__badge,
+.m-sources__item.state-pushing .m-sources__badge,
+.m-sources__item.state-pulling .m-sources__badge {
     background: none;
 }
 
-.m-sources__item.state-syncing .m-sources__icon {
+.m-sources__item.state-downloading .m-sources__icon,
+.m-sources__item.state-uploading .m-sources__icon,
+.m-sources__item.state-pushing .m-sources__icon,
+.m-sources__item.state-pulling .m-sources__icon {
     color: #4d535f;
 }
 

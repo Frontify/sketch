@@ -10,5 +10,5 @@
 </form>
 <footer class="o-login__footer">
    <p class="o-login__p">Not sure what to do?</p>
-   <p class="o-login__p"><a class="o-login__link js-o-login__link" href="https://sketch.frontify.com/">Get help</a> or <a class="o-login__link js-o-login__link" href="https://frontify.com/signup">create an account</a></p>
+   <p class="o-login__p"><a class="o-login__link js-o-login__link" href="https://help.frontify.com/faq-workspace/how-to-use-the-frontify-sketch-plugin">Get help</a> or <a class="o-login__link js-o-login__link" href="https://frontify.com/signup">create an account</a></p>
 </footer>

@@ -45,10 +45,11 @@
 .m-target__logo-wrap {
     width: 36px;
     height: 36px;
+    border-radius: 4px;
+    overflow: hidden;
 }
 
 .m-target__logo {
-    border-radius: 4px;
     background: #FFF;
     display: block;
     max-width: 100%;

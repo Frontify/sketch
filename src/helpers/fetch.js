@@ -21,7 +21,11 @@ export default function (uri, options) {
                 return response.json();
             }
 
-            throw new TypeError("Oops, we haven't got JSON!");
+            if (contentType && contentType.includes("text/html")) {
+                return response.text();
+            }
+
+            throw new TypeError("Invalid response");
         }.bind(this)).catch(function (err) {
             if (err.localizedDescription) {
                 console.error(err.localizedDescription);

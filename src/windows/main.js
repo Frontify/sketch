@@ -173,7 +173,7 @@ export default function (context, view) {
 
     mainUI.selectionChanged = function(context) {
         var document = context.document;
-        console.log(context.document);
+        // console.log(context.document);
     };
 
     return mainUI;

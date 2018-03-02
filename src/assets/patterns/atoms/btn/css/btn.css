@@ -26,26 +26,9 @@
 
 /* Sizes */
 .a-btn--xs {
-	padding: 3px 6px;
+	padding: 3px 6px 4px 6px;
 	font-size: 11px;
 	line-height: 15px;
-}
-
-.a-btn--sm {
-	padding: 7px 13px;
-}
-
-.a-btn--lg {
-	padding: 14px 30px;
-	font-size: 16px;
-	line-height: 18px;
-	border-radius: 24px;
-}
-
-.a-btn--xl {
-	padding: 6px 18px;
-	font-size: 20px;
-	line-height: 24px;
 }
 
 /* General */

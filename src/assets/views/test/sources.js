@@ -13,7 +13,7 @@ showSources({
             {
                 "id": "2",
                 "filename": "frontify-sketch-integration.sketch",
-                "state": "syncing",
+                "state": "downloading",
                 "target": "/",
                 "modified": null,
                 "modifier": "Remo Brunschwiler"
