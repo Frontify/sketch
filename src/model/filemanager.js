@@ -7,13 +7,8 @@ import target from './target'
 
 class FileManager {
     constructor() {
-        this.context = null;
         this.exportPath = NSTemporaryDirectory() + 'sketch-frontify/';
         this.clearExportFolder();
-    }
-
-    setContext(context) {
-        this.context = context;
     }
 
     getExportPath() {

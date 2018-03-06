@@ -8,7 +8,8 @@ showTarget({
         },
         "project": {
             "id": 3,
-            "name": "Muuto Website"
+            "name": "Muuto Website",
+            "hub_id": 1
         },
         "set": {
             "id": 11,

@@ -33,16 +33,21 @@ Tc.Module.Login = Tc.Module.extend({
     login: function() {
         var urlParams = '/api/oauth/authorize?response_type=token&client_id=sketch&redirect_uri=https://frontify.com/sketchplugin';
 
-        var addHttps = function (url) {
-            const pattern = /^(ht)tps?:\/\//i;
+        var sanitize = function (url) {
+            // protocol
+            var pattern = /^(ht)tps?:\/\//i;
             if (!pattern.test(url)) {
-             url = "https://" + url;
+                url = "https://" + url;
             }
+
+            // strip path
+            var parts = url.split('/');
+            url = parts.slice(0, 3).join('/');
 
             return url;
         };
 
-        var domain = addHttps(this.settings.serialize().domain);
+        var domain = sanitize(this.settings.serialize().domain);
 
         pluginCall('memorizeDomain', domain);
 

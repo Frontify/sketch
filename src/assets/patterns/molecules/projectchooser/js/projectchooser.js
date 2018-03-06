@@ -19,8 +19,11 @@ Tc.Module.ProjectChooser = Tc.Module.extend({
                 return current.brand.id == brand.id;
             }.bind(this));
         }
-        else {
+        else if(brands.length > 0) {
             var currentBrand = brands[0];
+        }
+        else {
+            currentBrand = { projects: [] }
         }
 
         if (currentBrand) {
@@ -47,7 +50,7 @@ Tc.Module.ProjectChooser = Tc.Module.extend({
 
         var $content = $(window.tpl.projectchooser({brands: brands, projects: projects, current: current }));
 
-        $content.on('click', '.js-m-projectchooser__create-project', function(e) {
+        $content.on('click', '.js-m-projectchooser__create', function(e) {
             var $this = $(e.currentTarget);
             var $refresh = $content.find('.js-m-projectchooser__refresh');
 
@@ -56,6 +59,10 @@ Tc.Module.ProjectChooser = Tc.Module.extend({
 
             pluginCall('openUrl', $this.data('url'));
             e.preventDefault();
+        }.bind(this));
+
+        $content.on('click', '.js-m-projectchooser__logout', function(e) {
+            pluginCall('logout');
         }.bind(this));
 
         $content.on('click', '.js-m-projectchooser__refresh', function(e) {

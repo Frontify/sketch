@@ -3,11 +3,6 @@ import target from './target';
 
 class Project {
     constructor() {
-        this.context = null;
-    }
-
-    setContext(context) {
-        this.context = context;
     }
 
     getProjects() {

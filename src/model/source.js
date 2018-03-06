@@ -6,11 +6,6 @@ import filemanager from './filemanager'
 
 class Source {
     constructor() {
-        this.context = null;
-    }
-
-    setContext(context) {
-        this.context = context;
     }
 
     getSources() {

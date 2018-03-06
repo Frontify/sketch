@@ -4,11 +4,6 @@ import fetch from '../helpers/fetch'
 
 class User {
     constructor() {
-        this.context = null;
-    }
-
-    setContext(context) {
-        this.context = context;
     }
 
     isAuthenticated() {
@@ -25,6 +20,7 @@ class User {
         return Promise.resolve().then(function () {
             return fetch('/v1/user/logout/').then(function( ) {
                 writeJSON('token', {});
+                writeJSON('target', {});
                 return true;
             }.bind(this));
         }.bind(this));

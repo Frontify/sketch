@@ -5,11 +5,6 @@ import project from "./project";
 
 class Target {
     constructor() {
-        this.context = null;
-    }
-
-    setContext(context) {
-        this.context = context;
     }
 
     getTarget(view) {

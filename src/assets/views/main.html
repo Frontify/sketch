@@ -24,10 +24,11 @@
 <div class="a-colorbar"></div>
 <div class="mod mod-target m-target"></div>
 <script>
-    document.writeln(window.tpl.tabs({
+    document.writeln(window.tpl.tabsmain({
         items: [
             {id: 'artboards', active: false, title: 'Artboards', content: window.tpl.artboards()},
-            {id: 'sources', active: false, title: 'Sources', content:  window.tpl.sources() }
+            {id: 'sources', active: false, title: 'Sources', content:  window.tpl.sources() },
+            {id: 'brandassets', active: false, title: 'Brand Assets', content:  window.tpl.brandassets() }
         ]
     }));
 </script>
@@ -58,6 +59,9 @@
     function showTarget(data) {
         var target = application.sandbox.getModuleById($('.mod-target').data('terrificId'));
         target.render(data);
+
+        var tabs = application.sandbox.getModuleById($('#tabs-brandassets').data('terrificId'));
+        tabs.setTarget(data);
     }
 
     function switchTab(id) {
@@ -127,6 +131,12 @@
         sources.sourceDownloadFailed(source);
     }
 
+    // Colors
+    function showColors(data) {
+        var colors = application.sandbox.getModuleById($('.mod-colors').data('terrificId'));
+        colors.render(data);
+    }
+
     // Folder Chooser
     function showFolderChooser(folders, current) {
        var folderChooser = application.sandbox.getModuleById($('.mod-folder-chooser').data('terrificId'));
@@ -147,7 +157,7 @@
         document.writeln('<scr' + 'ipt src="./test/target.js"></scr' + 'ipt>');
 
         // Change this to whatever you are testing
-        document.writeln('<scr' + 'ipt src="./test/sources.js"></scr' + 'ipt>');
+        document.writeln('<scr' + 'ipt src="./test/colors.js"></scr' + 'ipt>');
     }
 </script>
 </body>

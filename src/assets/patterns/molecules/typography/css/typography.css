@@ -1,0 +1,26 @@
+.m-typography {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.m-typography__comingsoon {
+    margin: auto;
+}
+
+.m-typography__comingsoon-image {
+    display: block;
+    width: 70px;
+    height: auto;
+    margin: 0 auto;
+}
+
+
+.m-typography__comingsoon-text {
+    font-size: 13px;
+    line-height: 1.4;
+    color: rgba(57, 64, 77, 0.5);
+    margin: 0 auto;
+    padding: 30px;
+    text-align: center;
+}

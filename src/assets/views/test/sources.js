@@ -80,5 +80,5 @@ showSources({
     }
 );
 
-showSourcesHowTo();
+// showSourcesHowTo();
 // showSourcesConflict(6);

@@ -2,11 +2,6 @@ import user from './user';
 
 class Sketch {
     constructor() {
-        this.context = null;
-    }
-
-    setContext(context) {
-        this.context = context;
     }
 
     getViewData() {

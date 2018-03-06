@@ -1,0 +1,35 @@
+.m-colors {
+}
+
+.m-colors__title {
+    font-size: 14px;
+    line-height: 18px;
+    color: #363D4A;
+    margin-bottom: 8px;
+}
+
+.m-colors__desc {
+    font-size: 11px;
+    color: rgba(54,61,74,0.75);
+    line-height: 13px;
+    margin-bottom: 16px;
+}
+
+.m-colors__palette {
+    margin: 24px 18px 24px 18px;
+}
+
+.m-colors__colors {
+    margin-left: -5px;
+}
+
+.m-colors__color {
+    display: block;
+    float: left;
+    border-radius: 2px;
+    box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.025);
+    width: 40px;
+    height: 32px;
+    margin-left: 5px;
+    cursor: pointer;
+}

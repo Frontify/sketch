@@ -5,6 +5,7 @@ import filemanager from '../model/filemanager';
 import source from '../model/source';
 import target from '../model/target';
 import sketch from '../model/sketch';
+import color from '../model/color';
 import user from '../model/user';
 import createFolder from '../helpers/createFolder'
 
@@ -164,6 +165,15 @@ export default function (context, view) {
                 mainUI.eval('showSourcesConflict(' + id + ')');
             },
 
+            showColors: function () {
+               view = 'colors';
+               color.showColors(mainUI);
+            },
+
+            applyColor: function(data) {
+                color.applyColor(data);
+            },
+
             online: function() {
                 target.showTarget(mainUI);
                 mainUI.eval('switchTab("' + view + '")');
@@ -177,9 +187,8 @@ export default function (context, view) {
         mainUI.eval('refresh()');
     };
 
-    mainUI.selectionChanged = function(context) {
-        var document = context.document;
-        // console.log(context.document);
+    mainUI.selectionChanged = function(selection) {
+        color.setSelection(selection);
     };
 
     return mainUI;

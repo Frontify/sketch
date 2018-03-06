@@ -6,12 +6,7 @@ import filemanager from './filemanager';
 
 class Artboard {
     constructor() {
-        this.context = null;
         this.pixelRatio = 2;
-    }
-
-    setContext(context) {
-        this.context = context;
     }
 
     getArtboards() {
