@@ -104,6 +104,15 @@
     margin-left: 5px;
     margin-bottom: 5px;
     cursor: pointer;
+    transition: all 0.1s ease-in-out;
+}
+
+.m-colors__color:hover {
+    transform: scale(1.1);
+}
+
+.m-colors__color:active, .m-colors__color:focus {
+    opacity: 0.8;
 }
 
 .m-colors__dropdown {
