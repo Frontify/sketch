@@ -75,6 +75,10 @@ Tc.Module.Colors = Tc.Module.extend({
         // expand / collapse button visibility
         $ctx.on('mouseenter', '.js-m-colors__desc-wrap', function (e) {
             var $this = $(e.currentTarget);
+
+            // hide all
+            $ctx.find('.js-m-colors__expand, .js-m-colors__collapse').removeClass('state-visible');
+
             var $expand = $this.find('.js-m-colors__expand');
             var $collapse = $this.find('.js-m-colors__collapse');
 
