@@ -174,6 +174,22 @@ export default function (context, view) {
                 color.applyColor(data);
             },
 
+            addDocumentColors: function(colors) {
+                color.addDocumentColors(colors);
+            },
+
+            replaceDocumentColors: function(colors) {
+               color.replaceDocumentColors(colors);
+            },
+
+            addGlobalColors: function(colors) {
+                color.addGlobalColors(colors);
+            },
+
+            replaceGlobalColors: function(colors) {
+               color.replaceGlobalColors(colors);
+            },
+
             online: function() {
                 target.showTarget(mainUI);
                 mainUI.eval('switchTab("' + view + '")');
@@ -187,8 +203,9 @@ export default function (context, view) {
         mainUI.eval('refresh()');
     };
 
-    mainUI.selectionChanged = function(selection) {
-        color.setSelection(selection);
+    mainUI.selectionChanged = function(context) {
+        color.setDocument(context.document);
+        color.setSelection(context.newSelection);
     };
 
     return mainUI;

@@ -53,12 +53,6 @@
     display: block;
 }
 
-.m-btn-dropdown__desc-small {
-    padding-left: 8px;
-    font-size: 0.8em;
-    color: #999;
-}
-
 .m-btn-dropdown__link, .m-btn-dropdown__desc {
     overflow: hidden;
     display: block;
@@ -69,6 +63,19 @@
     line-height: 1.4;
     white-space: nowrap;
     outline: 0;
+}
+
+.m-btn-dropdown__desc-small {
+    padding: 4px 8px;
+    font-size: 11px;
+    line-height: 15px;
+    color: #999;
+}
+
+.m-btn-dropdown__link--small {
+    padding: 4px 8px;
+    font-size: 11px;
+    line-height: 15px;
 }
 
 .m-btn-dropdown__link:hover,

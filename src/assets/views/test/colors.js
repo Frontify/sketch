@@ -6,7 +6,7 @@ showColors({
             "id": "1",
             "name": "Primary Colors",
             "project": "1",
-            "description": "The primary colors are used to…",
+            "description": "The primary colors are used to… Very long text The primary colors are used to… Very long text The primary colors are used to… Very long text The primary colors are used to… Very long text The primary colors are used to… Very long text",
             "project_name": "Muuto",
             "colorspaces": null,
             "colors": [

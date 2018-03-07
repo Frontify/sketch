@@ -4,10 +4,15 @@ import fetch from '../helpers/fetch'
 class Color {
     constructor() {
         this.selection = null;
+        this.document = null;
     }
 
     setSelection(selection) {
         this.selection = selection;
+    }
+
+    setDocument(document) {
+        this.document = document;
     }
 
     getColors() {
@@ -36,6 +41,52 @@ class Color {
                 this.applyColorToLayer(item, color);
             }
         }
+
+        this.document.reloadInspector();
+    }
+
+    addDocumentColors(colors) {
+        var app = NSApp.delegate();
+        var assets = this.document.documentData().assets();
+        var mscolors = this.convertColors(colors);
+        assets.addColors(mscolors);
+        app.refreshCurrentDocument();
+    }
+
+    replaceDocumentColors(colors) {
+        var app = NSApp.delegate();
+        var assets = this.document.documentData().assets();
+        var mscolors = this.convertColors(colors);
+        assets.setColors([]);
+        assets.addColors(mscolors);
+        app.refreshCurrentDocument();
+    }
+
+    addGlobalColors(colors) {
+        var app = NSApp.delegate();
+        var assets = app.globalAssets();
+        var mscolors = this.convertColors(colors);
+        assets.addColors(mscolors);
+        app.refreshCurrentDocument();
+    }
+
+    replaceGlobalColors(colors) {
+        var app = NSApp.delegate();
+        var assets = app.globalAssets();
+        var mscolors = this.convertColors(colors);
+        assets.setColors([]);
+        assets.addColors(mscolors);
+        app.refreshCurrentDocument();
+    }
+
+    convertColors(colors) {
+        var mscolors = [];
+        colors.forEach(function (color) {
+            var mscolor = MSColor.colorWithRed_green_blue_alpha(color.r / 255, color.g / 255, color.b / 255, color.alpha / 255);
+            mscolors.push(mscolor);
+        });
+
+        return mscolors;
     }
 
     applyColorToLayer(layer, color) {

@@ -40,7 +40,7 @@ export function selectionCommand(context) {
 
     executeSafely(context, function () {
         if (threadDictionary['frontifymainui']) {
-              threadDictionary['frontifymainui'].selectionChanged(context.actionContext.newSelection);
+              threadDictionary['frontifymainui'].selectionChanged(context.actionContext);
         }
     });
 }
