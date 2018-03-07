@@ -200,12 +200,14 @@ export default function (context, view) {
     mainUI.panel.setTitlebarAppearsTransparent(true);
 
     mainUI.refresh = function() {
-        mainUI.eval('refresh()');
+        if(view == 'sources' || view == 'artboards') {
+            mainUI.eval('refresh()');
+        }
     };
 
     mainUI.selectionChanged = function(context) {
         color.setDocument(context.document);
-        color.setSelection(context.newSelection);
+        color.setSelection(context.document.selectedLayers().layers());
     };
 
     return mainUI;

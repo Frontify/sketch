@@ -1,8 +1,8 @@
 <div class="m-sources__header">
     <div class="m-sources__export-label">Upload to:</div>
     <div class="m-sources__export-action">
-        <a class="a-btn a-btn--xs a-btn--link-primary js-m-sources__change-target">change</a>
         <a class="a-btn a-btn--xs a-btn--link-primary js-m-sources__finder">reveal in finder</a>
+        <a class="a-btn a-btn--xs a-btn--link-primary js-m-sources__change-target">change</a>
     </div>
     <a class="m-sources__export-target js-m-sources__export-target" data-url="/projects/{{= it.target.project.id }}/{{= it.target.project.slug }}/{{= it.target.set.id }}">
         <span class="m-sources__export-target-part"><i class="fi-projects"></i> {{= it.target.project.name }}</span>

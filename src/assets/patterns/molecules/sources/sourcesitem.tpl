@@ -16,19 +16,27 @@
     </div>
     <div class="m-sources__actions">
         {{? it.state !== 'downloading' && it.state !== 'uploading' && it.state !== 'pulling' && it.state !== 'pushing' && it.state !== 'same' && it.state !== 'opening' }}
-        <button class="a-btn a-btn--xs a-btn--default {{? it.state === 'new' || it.state === 'faileddownload' }}js-m-sources__download{{?? it.state === 'addable' || it.state === 'failedadd'}}js-m-sources__add{{?? it.state === 'conflict' }}js-m-sources__conflict{{?? it.state === 'push' || it.state === 'failedpush'}}js-m-sources__push{{?? it.state === 'pull' || it.state === 'failedpull'}}js-m-sources__pull{{?}}">
-            {{? it.state === 'new' || it.state === 'faileddownload' }}
-                Download
-            {{?? it.state === 'pull' || it.state === 'failedpull' }}
-                Pull Changes
-            {{?? it.state === 'push' || it.state === 'failedpush'}}
-                Push Changes
-            {{?? it.state === 'addable' || it.state === 'failedadd'}}
-                Add to Frontify
-            {{?? it.state === 'conflict'}}
-                Resolve Conflict
+            {{? it.state === 'push' || it.state === 'failedpush'}}
+                <div class="m-btn-dropdown m-btn-bar__group">
+                    <button class="a-btn a-btn--xs a-btn--default js-m-sources__push">Push Changes</button>
+                    <button class="a-btn a-btn--xs a-btn--default js-m-btn-dropdown__toggle js-m-sources__toggle"><i class="icon-angle-down"></i></button>
+                    <ul class="m-btn-dropdown__menu m-btn-dropdown__menu--right m-sources__menu-push js-m-btn-dropdown__menu ">
+                       <li class="m-btn-dropdown__item m-btn-dropdown__item--danger"><a class="m-btn-dropdown__link m-btn-dropdown__link--small js-m-sources__pull">Discard my Changes</a></li>
+                   </ul>
+                </div>
+            {{??}}
+                <button class="a-btn a-btn--xs a-btn--default {{? it.state === 'new' || it.state === 'faileddownload' }}js-m-sources__download{{?? it.state === 'addable' || it.state === 'failedadd'}}js-m-sources__add{{?? it.state === 'conflict' }}js-m-sources__conflict{{?? it.state === 'pull' || it.state === 'failedpull'}}js-m-sources__pull{{?}}">
+                    {{? it.state === 'new' || it.state === 'faileddownload' }}
+                        Download
+                    {{?? it.state === 'pull' || it.state === 'failedpull' }}
+                        Pull Changes
+                    {{?? it.state === 'addable' || it.state === 'failedadd'}}
+                        Add to Frontify
+                    {{?? it.state === 'conflict'}}
+                        Resolve Conflict
+                    {{?}}
+                </button>
             {{?}}
-        </button>
         {{?}}
     </div>
     <div class="m-sources__content">

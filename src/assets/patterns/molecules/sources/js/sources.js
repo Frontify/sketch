@@ -78,14 +78,17 @@ Tc.Module.Sources = Tc.Module.extend({
         }.bind(this));
 
         $ctx.on('click', '.js-m-sources__open', function (e) {
-            e.stopPropagation();
+            var $target = $(e.target);
 
-            var $item = $(e.currentTarget);
-            var source = this.getSource($item.data('id'));
-            source.state = 'opening';
-            this.updateItem($item, source);
+            // skip toggle
+            if($target.closest('.js-m-sources__toggle').length === 0) {
+                var $item = $(e.currentTarget);
+                var source = this.getSource($item.data('id'));
+                source.state = 'opening';
+                this.updateItem($item, source);
 
-            pluginCall('openSource', source);
+                pluginCall('openSource', source);
+            }
         }.bind(this));
 
         $ctx.on('click', '.js-m-sources__download', function (e) {

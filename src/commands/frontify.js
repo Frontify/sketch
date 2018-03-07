@@ -8,6 +8,7 @@ export function runCommand(context) {
 
     executeSafely(context, function () {
         threadDictionary['frontifymainui'] = main(context, 'artboards');
+        threadDictionary['frontifymainui'].selectionChanged(context);
     });
 }
 
