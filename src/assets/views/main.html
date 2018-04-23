@@ -137,6 +137,12 @@
         colors.render(data);
     }
 
+    // Typography
+    function showTypography(data) {
+       var colors = application.sandbox.getModuleById($('.mod-typography').data('terrificId'));
+       colors.render(data);
+    }
+
     // Folder Chooser
     function showFolderChooser(folders, current) {
        var folderChooser = application.sandbox.getModuleById($('.mod-folder-chooser').data('terrificId'));
@@ -157,7 +163,7 @@
         document.writeln('<scr' + 'ipt src="./test/target.js"></scr' + 'ipt>');
 
         // Change this to whatever you are testing
-        document.writeln('<scr' + 'ipt src="./test/colors.js"></scr' + 'ipt>');
+        document.writeln('<scr' + 'ipt src="./test/typography.js"></scr' + 'ipt>');
     }
 </script>
 </body>

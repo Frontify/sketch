@@ -6,6 +6,7 @@ import source from '../model/source';
 import target from '../model/target';
 import sketch from '../model/sketch';
 import color from '../model/color';
+import typography from '../model/typography';
 import user from '../model/user';
 import createFolder from '../helpers/createFolder'
 
@@ -155,9 +156,9 @@ export default function (context, view) {
                 source.addCurrentFile(mainUI);
             },
 
-            moveCurrentFile: function() {
+            moveCurrentFile: function () {
                 if (filemanager.moveCurrent()) {
-                   mainUI.eval('refresh()');
+                    mainUI.eval('refresh()');
                 }
             },
 
@@ -166,31 +167,40 @@ export default function (context, view) {
             },
 
             showColors: function () {
-               view = 'colors';
-               color.showColors(mainUI);
+                view = 'colors';
+                color.showColors(mainUI);
             },
 
-            applyColor: function(data) {
+            applyColor: function (data) {
                 color.applyColor(data);
             },
 
-            addDocumentColors: function(colors) {
+            addDocumentColors: function (colors) {
                 color.addDocumentColors(colors);
             },
 
-            replaceDocumentColors: function(colors) {
-               color.replaceDocumentColors(colors);
+            replaceDocumentColors: function (colors) {
+                color.replaceDocumentColors(colors);
             },
 
-            addGlobalColors: function(colors) {
+            addGlobalColors: function (colors) {
                 color.addGlobalColors(colors);
             },
 
-            replaceGlobalColors: function(colors) {
-               color.replaceGlobalColors(colors);
+            replaceGlobalColors: function (colors) {
+                color.replaceGlobalColors(colors);
             },
 
-            online: function() {
+            showTypography: function () {
+                view = 'typography';
+                typography.showTypography(mainUI);
+            },
+
+            addFontStyles: function (styles) {
+                typography.addFontStyles(styles);
+            },
+
+            online: function () {
                 target.showTarget(mainUI);
                 mainUI.eval('switchTab("' + view + '")');
             }
@@ -199,15 +209,17 @@ export default function (context, view) {
 
     mainUI.panel.setTitlebarAppearsTransparent(true);
 
-    mainUI.refresh = function() {
-        if(view == 'sources' || view == 'artboards') {
+    mainUI.refresh = function () {
+        if (view == 'sources' || view == 'artboards') {
             mainUI.eval('refresh()');
         }
     };
 
-    mainUI.selectionChanged = function(context) {
+    mainUI.selectionChanged = function (context) {
         color.setDocument(context.document);
         color.setSelection(context.document.selectedLayers().layers());
+        typography.setDocument(context.document);
+        typography.setSelection(context.document.selectedLayers().layers());
     };
 
     return mainUI;

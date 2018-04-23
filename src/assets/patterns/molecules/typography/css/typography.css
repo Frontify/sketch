@@ -1,7 +1,5 @@
 .m-typography {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
+
 }
 
 .m-typography__comingsoon {
@@ -23,4 +21,201 @@
     margin: 0 auto;
     padding: 30px;
     text-align: center;
+}
+
+.m-typography__title {
+    font-size: 14px;
+    line-height: 18px;
+    color: #363D4A;
+    margin-bottom: 8px;
+    position: relative;
+}
+
+.m-typography__desc {
+    font-size: 11px;
+    color: rgba(54,61,74,0.75);
+    line-height: 13px;
+}
+
+.m-typography__desc-wrap {
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.m-typography__desc-wrap.state-collapsed {
+    max-height: 26px;
+}
+
+.m-typography__desc-wrap.state-collapsed:after {
+    z-index: 4;
+    display: block;
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 8px;
+    left: 0;
+    height: 18px;
+    border-radius: 0 0 3px 3px;
+    background-image: -webkit-linear-gradient(top,rgba(255,255,255,0) 0,#fff 100%);
+    background-image: -moz-linear-gradient(top,rgba(255,255,255,0) 0,#fff 100%);
+    background-image: -o-linear-gradient(top,rgba(255,255,255,0) 0,#fff 100%);
+    background-image: linear-gradient(top,rgba(255,255,255,0) 0,#fff 100%);
+    pointer-events: none;
+}
+
+.m-typography__expand-collapse {
+    display: block;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 0;
+    text-align: center;
+    z-index: 5;
+}
+
+.m-typography__desc-wrap.state-collapsed .m-typography__expand-collapse {
+    top: 26px;
+    bottom: auto;
+}
+
+.m-typography__collapse,
+.m-typography__expand {
+    visibility: hidden;
+    display: inline-block;
+    font-size: 11px;
+    line-height: 13px;
+    opacity: 0;
+    background: linear-gradient(rgba(85,84,89,.8),rgba(85,84,89,.8)),linear-gradient(rgba(255,255,255,.3),rgba(255,255,255,.3));
+    border-radius: 9px;
+    border: none;
+    outline: 0;
+    color: #fff;
+    cursor: pointer;
+    transform: translateY(-13px);
+    -webkit-transition: -webkit-transform .1s cubic-bezier(.2,.3,.25,.9),opacity .1s cubic-bezier(.2,.3,.25,.9);
+    -moz-transition: -moz-transform .1s cubic-bezier(.2,.3,.25,.9),opacity .1s cubic-bezier(.2,.3,.25,.9);
+    transition: transform .1s cubic-bezier(.2,.3,.25,.9),opacity .1s cubic-bezier(.2,.3,.25,.9);
+    padding: 2px 5px 3px 5px;
+}
+
+.m-typography__collapse.state-visible,
+.m-typography__expand.state-visible {
+    transform: translateY(-23px);
+    opacity: 1;
+    visibility: visible;
+}
+
+.m-typography__group {
+    margin: 24px 18px 19px 18px;
+}
+
+.m-typography__styles {
+
+}
+
+.m-typography__style {
+    border: 1px solid #EAEBEC;
+    position: relative;
+    margin-bottom: 12px;
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+.m-typography__style-name {
+    font-size: 13px;
+    line-height: 15px;
+    position: absolute;
+    white-space: nowrap;
+    top: 0;
+    right: 0;
+    background: #fff;
+    padding: 5px 8px;
+}
+
+.m-typography__style-desc {
+    background: #F5F5F6;
+    font-size: 11px;
+    color: rgba(54,61,74,0.75);
+    line-height: 13px;
+    padding: 9px 18px;
+}
+
+.m-typography__example-wrap {
+    position: relative;
+    min-height: 57px;
+    display: block;
+}
+
+.m-typography__example {
+    display: inline-block;
+    padding: 10px;
+}
+
+.m-typography__style.state-light .m-typography__example {
+    background: rgba(54,61,74,0.3);
+}
+
+.m-typography__colors {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    margin: 8px 8px 4px 8px;
+}
+
+.m-typography__color {
+    display: block;
+    float: right;
+    position: relative;
+    border-radius: 2px;
+    box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.025);
+    width: 16px;
+    height: 16px;
+    margin-left: 4px;
+    margin-bottom: 4px;
+    cursor: pointer;
+    transition: all 0.1s ease-in-out;
+}
+
+.m-typography__color:hover {
+    transform: scale(1.1);
+}
+
+.m-typography__color:active, .m-typography__color:focus {
+    opacity: 0.8;
+}
+
+.m-typography__color.state-active:before {
+    font-family: 'unicons';
+    content: "\e928";
+    display: block;
+    position: absolute;
+    font-size: 8px;
+    line-height: 8px;
+    padding: 4px;
+    color: #fff;
+}
+
+.m-typography__style.state-light .m-typography__color.state-active:before {
+    color: rgba(54,61,74,1);
+}
+
+.m-typography__dropdown {
+    position: absolute;
+}
+
+.m-typography__btn {
+    padding: 0 10px;
+}
+
+.m-typography__menu {
+    min-width: 0;
+}
+
+.m-typography__info {
+    font-weight: normal;
+    color: rgba(54,61,74,0.5);
+    margin-right: 2px;
 }

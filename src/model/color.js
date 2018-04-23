@@ -82,11 +82,14 @@ class Color {
     convertColors(colors) {
         var mscolors = [];
         colors.forEach(function (color) {
-            var mscolor = MSColor.colorWithRed_green_blue_alpha(color.r / 255, color.g / 255, color.b / 255, color.alpha / 255);
-            mscolors.push(mscolor);
+            mscolors.push(this.convertColor(color));
         });
 
         return mscolors;
+    }
+
+    convertColor(color) {
+        return MSColor.colorWithRed_green_blue_alpha(color.r / 255, color.g / 255, color.b / 255, color.alpha / 255);
     }
 
     applyColorToLayer(layer, color) {
