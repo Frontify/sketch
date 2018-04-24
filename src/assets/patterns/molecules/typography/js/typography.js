@@ -21,8 +21,20 @@ Tc.Module.Typography = Tc.Module.extend({
         // Apply font style
         $ctx.on('click', '.js-m-typography__style', function(e) {
             var $this = $(e.currentTarget);
-            var fontStyle = this.getFontStyle($this.data('group'), $this.data('id'));
-            pluginCall('applyFontStyles', fontStyle);
+            var fontStyle = $.extend(true, {}, this.getFontStyle($this.data('group'), $this.data('id')));
+
+            // reduce colors to current selected color
+            var currentColor = $this.data('color');
+            if(fontStyle.colors && fontStyle.colors.foreground && currentColor) {
+                for (var id in fontStyle.colors.foreground) {
+                   if (fontStyle.colors.foreground.hasOwnProperty(id)) {
+                       if(currentColor != id) {
+                           delete fontStyle.colors.foreground[id];
+                       }
+                   }
+               }
+            }
+            pluginCall('applyFontStyle', fontStyle);
         }.bind(this));
 
         // change preview color
@@ -41,6 +53,7 @@ Tc.Module.Typography = Tc.Module.extend({
                 $style.removeClass('state-light');
             }
 
+            $style.data('color', $this.data('id'));
             $colors.removeClass('state-active');
             $this.addClass('state-active');
             $example.css({ color: color.css_value });
@@ -94,6 +107,25 @@ Tc.Module.Typography = Tc.Module.extend({
         }.bind(this));
 
 
+        $ctx.on('click', '.js-m-typography__learn', function (e) {
+            e.preventDefault();
+            var $this = $(e.currentTarget);
+            var url = $this.data('url');
+            if (url) {
+                pluginCall('openUrl', url, true);
+            }
+        }.bind(this));
+
+        $ctx.on('click', '.js-m-typography__styleguide', function (e) {
+            e.preventDefault();
+            var $this = $(e.currentTarget);
+            var url = $this.data('url');
+            if (url) {
+                pluginCall('openUrl', url);
+            }
+        }.bind(this));
+
+
         callback();
     },
 
@@ -127,7 +159,7 @@ Tc.Module.Typography = Tc.Module.extend({
     },
 
     getFontStyle: function(group, id) {
-        return this.getFontStyles(group).filter(function(style) {
+        return this.getFontStyles(group).find(function(style) {
             return style.id == id;
         });
     },
@@ -138,7 +170,7 @@ Tc.Module.Typography = Tc.Module.extend({
 
     onTabSwitched(data) {
         if (data.id === 'typography') {
-            this.$ctx.html(window.tpl.loader());
+            this.$ctx.html(window.tpl.loaderspinner());
             pluginCall('showTypography');
         }
     }

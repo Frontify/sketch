@@ -2,6 +2,18 @@
 
 }
 
+.m-typography__fonts {
+    margin: 24px 18px;
+}
+
+.m-typography__fonts-included {
+    padding-left: 12px;
+    display: inline-block;
+    font-size: 11px;
+    line-height: 13px;
+    color: #AFB1B7;
+}
+
 .m-typography__comingsoon {
     margin: auto;
 }

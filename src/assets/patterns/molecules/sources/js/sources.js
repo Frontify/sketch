@@ -9,7 +9,7 @@ Tc.Module.Sources = Tc.Module.extend({
 
         this.sources = [];
 
-        $ctx.html(window.tpl.loader());
+        $ctx.html(window.tpl.loaderspinner());
 
         $ctx.on('click', '.js-m-sources__export-target', function (e) {
             e.stopPropagation();
@@ -23,7 +23,7 @@ Tc.Module.Sources = Tc.Module.extend({
             e.stopPropagation();
 
             // open modal with loader
-            this.fire('openModal', {modifier: 'default', closeable: false, $content: $(window.tpl.loader())}, ['events']);
+            this.fire('openModal', {modifier: 'default', closeable: false, $content: $(window.tpl.loaderspinner())}, ['events']);
             pluginCall('changeFolder');
         }.bind(this));
 
@@ -216,7 +216,7 @@ Tc.Module.Sources = Tc.Module.extend({
 
     onTabSwitched(data) {
         if (data.id === 'sources') {
-            this.$ctx.html(window.tpl.loader());
+            this.$ctx.html(window.tpl.loaderspinner());
             pluginCall('showSources');
         }
     },

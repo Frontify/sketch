@@ -9,7 +9,7 @@ Tc.Module.Target = Tc.Module.extend({
         $ctx.on('click', '.js-m-target__change-project', function(e) {
             e.preventDefault();
             var $this = $(e.currentTarget);
-            this.fire('openModal', { modifier: 'default', closeable: false, $content: $(window.tpl.loader())}, ['events']);
+            this.fire('openModal', { modifier: 'default', closeable: false, $content: $(window.tpl.loaderspinner())}, ['events']);
             this.fire('closeDropdown', $this.closest('.js-m-btn-dropdown__menu'), ['events']);
             pluginCall('changeProject');
         }.bind(this));

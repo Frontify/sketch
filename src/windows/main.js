@@ -200,6 +200,10 @@ export default function (context, view) {
                 typography.addFontStyles(styles);
             },
 
+            applyFontStyle: function (style) {
+                typography.applyFontStyle(style);
+            },
+
             online: function () {
                 target.showTarget(mainUI);
                 mainUI.eval('switchTab("' + view + '")');

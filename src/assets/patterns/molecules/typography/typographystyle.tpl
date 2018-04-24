@@ -6,7 +6,7 @@
       {{?}}
   {{ } }}
 {{?}}
-<div class="m-typography__style js-m-typography__style {{? color && color.light }}state-light{{?}}" data-group="{{= it.group }}" data-id="{{= it.style.id }}">
+<div class="m-typography__style js-m-typography__style {{? color && color.light }}state-light{{?}}" {{? color }}data-color="{{= color.id }}"{{?}} data-group="{{= it.group }}" data-id="{{= it.style.id }}">
     <h4 class="m-typography__style-name"><i class="m-typography__info icon-align-{{= it.style.align ? it.style.align.toLowerCase() : 'left' }}"></i> {{= it.style.name || 'Untitled Style' }}</h4>
     <div class="m-typography__example-wrap">
         {{? it.style.colors && !$.isEmptyObject(it.style.colors.foreground) }}
@@ -14,7 +14,7 @@
                {{ for(var id in it.style.colors.foreground) { }}
                    {{? it.style.colors.foreground.hasOwnProperty(id) }}
                        {{ var current = it.colors[id]; }}
-                       <li class="m-typography__color js-m-typography__color {{? current.css_value == color.css_value }}state-active{{?}}" data-id="{{= id }}" style="background: {{= current.hex }}"></li>
+                       <li class="m-typography__color js-m-typography__color {{? current.id == color.id }}state-active{{?}}" data-id="{{= id }}" style="background: {{= current.hex }}"></li>
                    {{?}}
                {{ } }}
            </ul>

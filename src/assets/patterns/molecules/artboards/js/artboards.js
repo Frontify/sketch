@@ -8,7 +8,7 @@ Tc.Module.Artboards = Tc.Module.extend({
         this.sandbox.subscribe('tabs', this);
         this.artboards = [];
 
-        $ctx.html(window.tpl.loader());
+        $ctx.html(window.tpl.loaderspinner());
 
         $ctx.on('click', '.js-m-artboards__export-target', function (e) {
             e.stopPropagation();
@@ -23,7 +23,7 @@ Tc.Module.Artboards = Tc.Module.extend({
             e.stopPropagation();
 
             // open modal with loader
-            this.fire('openModal', { modifier: 'default', closeable: false, $content: $(window.tpl.loader())}, ['events']);
+            this.fire('openModal', { modifier: 'default', closeable: false, $content: $(window.tpl.loaderspinner())}, ['events']);
             pluginCall('changeFolder');
         }.bind(this));
 
@@ -131,7 +131,7 @@ Tc.Module.Artboards = Tc.Module.extend({
 
     onTabSwitched(data) {
         if(data.id === 'artboards') {
-            this.$ctx.html(window.tpl.loader());
+            this.$ctx.html(window.tpl.loaderspinner());
             pluginCall('showArtboards');
         }
     }

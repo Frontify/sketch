@@ -153,7 +153,7 @@ Tc.Module.Colors = Tc.Module.extend({
 
     onTabSwitched(data) {
         if (data.id === 'colors') {
-            this.$ctx.html(window.tpl.loader());
+            this.$ctx.html(window.tpl.loaderspinner());
             pluginCall('showColors');
         }
     }

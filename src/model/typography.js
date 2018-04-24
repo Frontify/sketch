@@ -38,126 +38,142 @@ class Typography {
             if (item.class() == MSLayerGroup) {
                 var layers = item.layers();
                 layers.forEach(function (layer) {
-                    this.applyColorToLayer(layer, color);
+                    this.applyFontStyleToLayer(layer, fontStyle);
                 }.bind(this));
             }
             else {
-                this.applyColorToLayer(item, color);
+                this.applyFontStyleToLayer(item, fontStyle);
             }
         }
 
         this.document.reloadInspector();
     }
 
+    applyFontStyleToLayer(layer, fontStyle) {
+        var msstyle = this.convertFontStyle(fontStyle)[0];
+
+        if (layer.class() == MSTextLayer) {
+            layer.style = msstyle.style();
+        }
+    }
+
     convertFontStyles(fontStyles) {
         var msstyles = [];
-        var fontManager = NSFontManager.sharedFontManager();
 
         fontStyles.forEach(function (fontStyle) {
-            // create a text style for each foreground color
-            var colors = [];
-            if (!(fontStyle.colors && fontStyle.colors.foreground)) {
-                colors.push({name: 'Default', r: 54, g: 61, b: 74, alpha: 255, css_value: 'rgba(54,61,74,1)'});
-            }
-            else {
-                for (var id in fontStyle.colors.foreground) {
-                    if (fontStyle.colors.foreground.hasOwnProperty(id)) {
-                        if (this.colors[id]) {
-                            colors.push(this.colors[id])
-                        }
+            msstyles = msstyles.concat(this.convertFontStyle(fontStyle));
+        }.bind(this));
+
+        return msstyles;
+    }
+
+    convertFontStyle(fontStyle) {
+        var fontManager = NSFontManager.sharedFontManager();
+        var msstyles = [];
+
+        // create a text style for each foreground color
+        var colors = [];
+        if (!(fontStyle.colors && fontStyle.colors.foreground)) {
+            colors.push({name: 'Default', r: 54, g: 61, b: 74, alpha: 255, css_value: 'rgba(54,61,74,1)'});
+        }
+        else {
+            for (var id in fontStyle.colors.foreground) {
+                if (fontStyle.colors.foreground.hasOwnProperty(id)) {
+                    if (this.colors[id]) {
+                        colors.push(this.colors[id])
                     }
                 }
             }
+        }
 
-            colors.forEach(function (colorValue) {
-                var rectTextFrame = NSMakeRect(0, 0, 250, 50);
-                var msstyle = MSTextLayer.alloc().initWithFrame(rectTextFrame);
+        colors.forEach(function (colorValue) {
+            var rectTextFrame = NSMakeRect(0, 0, 250, 50);
+            var msstyle = MSTextLayer.alloc().initWithFrame(rectTextFrame);
 
-                var fontSize = parseFloat(fontStyle.size);
-                var spacing = parseFloat(fontStyle.spacing);
-                var lineHeight = parseFloat(fontStyle.line_height);
+            var fontSize = parseFloat(fontStyle.size);
+            var spacing = parseFloat(fontStyle.spacing);
+            var lineHeight = parseFloat(fontStyle.line_height);
 
-                msstyle.textColor = color.convertColor(colorValue);
-                msstyle.name = (fontStyle.name || 'Untitled Style') + '/' + colorValue.name;
-                msstyle.stringValue = fontStyle.example || 'Untitled Style';
-                msstyle.fontSize = fontSize;
+            msstyle.textColor = color.convertColor(colorValue);
+            msstyle.name = (fontStyle.name || 'Untitled Style') + '/' + colorValue.name;
+            msstyle.stringValue = fontStyle.example || 'Untitled Style';
+            msstyle.fontSize = fontSize;
 
-                // Get font name
-                var weightNumeric = !isNaN(parseInt(fontStyle.weight)) ? parseInt(fontStyle.weight) : 400;
-                if (fontStyle.weight && (fontStyle.weight == 'bold' || fontStyle.weight == 'bolder')) {
-                    weightNumeric = 700;
+            // Get font name
+            var weightNumeric = !isNaN(parseInt(fontStyle.weight)) ? parseInt(fontStyle.weight) : 400;
+            if (fontStyle.weight && (fontStyle.weight == 'bold' || fontStyle.weight == 'bolder')) {
+                weightNumeric = 700;
+            }
+
+            var traits = null;
+            if (fontStyle.style && (fontStyle.style == 'ITALIC' || fontStyle.style == 'OBLIQUE')) {
+                traits = NSItalicFontMask;
+            }
+
+            var font = fontManager.fontWithFamily_traits_weight_size(fontStyle.family, traits, weightNumeric, 75);
+            if (!font) {
+                fontManager.fontWithFamily_traits_weight_size('Times', null, weightNumeric, 75);
+            }
+
+            msstyle.fontPostscriptName = font.fontName();
+
+            if (fontStyle.align) {
+                var possibleAligns = ['LEFT', 'RIGHT', 'CENTER', 'JUSTIFY'];
+                var align = possibleAligns.indexOf(fontStyle.align);
+
+                if (align >= 0) {
+                    msstyle.textAlignment = align;
+                }
+            }
+
+            if (spacing) {
+                switch (fontStyle.spacing_unit) {
+                    case '%':
+                        spacing = spacing / 100 * fontSize;
+                        break;
+
                 }
 
-                var traits = null;
-                if (fontStyle.style && (fontStyle.style == 'ITALIC' || fontStyle.style == 'OBLIQUE')) {
-                    traits = NSItalicFontMask;
+                msstyle.characterSpacing = spacing;
+            }
+
+            if (lineHeight) {
+                switch (fontStyle.line_height_unit) {
+                    case 'px':
+                        lineHeight = lineHeight;
+                        break;
+                    case '%':
+                        lineHeight = lineHeight / 100 * fontSize;
+                        break;
+                    default:
+                        lineHeight = lineHeight * fontSize;
                 }
 
-                var font = fontManager.fontWithFamily_traits_weight_size(fontStyle.family, traits, weightNumeric, 75);
-                if (!font) {
-                    fontManager.fontWithFamily_traits_weight_size('Times', null, weightNumeric, 75);
+                msstyle.lineHeight = lineHeight;
+            }
+
+
+            if (fontStyle.decoration) {
+                switch (fontStyle.decoration) {
+                    case 'underline':
+                        msstyle.addAttribute_value('NSUnderline', 1);
+                        break;
+                    case 'line-through':
+                        msstyle.addAttribute_value('NSStrikethrough', 1);
+                        break;
                 }
+            }
 
-                msstyle.fontPostscriptName = font.fontName();
+            if (fontStyle.transform) {
+                var possibleTransforms = ['UPPERCASE', 'LOWERCASE', 'RIGHT', 'JUSTIFY'];
+                var transform = possibleTransforms.indexOf(fontStyle.transform);
 
-                if (fontStyle.align) {
-                    var possibleAligns = ['LEFT', 'RIGHT', 'CENTER', 'JUSTIFY'];
-                    var align = possibleAligns.indexOf(fontStyle.align);
-
-                    if (align >= 0) {
-                        msstyle.textAlignment = align;
-                    }
+                if (transform >= 0) {
+                    msstyle.addAttribute_value("MSAttributedStringTextTransformAttribute", transform + 1);
                 }
+            }
 
-                if (spacing) {
-                    switch (fontStyle.spacing_unit) {
-                        case '%':
-                            spacing = spacing / 100 * fontSize;
-                            break;
-
-                    }
-
-                    msstyle.characterSpacing = spacing;
-                }
-
-                if (lineHeight) {
-                    switch (fontStyle.line_height_unit) {
-                        case 'px':
-                            lineHeight = lineHeight;
-                            break;
-                        case '%':
-                            lineHeight = lineHeight / 100 * fontSize;
-                            break;
-                        default:
-                            lineHeight = lineHeight * fontSize;
-                    }
-
-                    msstyle.lineHeight = lineHeight;
-                }
-
-
-                if (fontStyle.decoration) {
-                    switch (fontStyle.decoration) {
-                        case 'underline':
-                            msstyle.addAttribute_value('NSUnderline', 1);
-                            break;
-                        case 'line-through':
-                            msstyle.addAttribute_value('NSStrikethrough', 1);
-                            break;
-                    }
-                }
-
-                if (fontStyle.transform) {
-                    var possibleTransforms = ['UPPERCASE', 'LOWERCASE', 'RIGHT', 'JUSTIFY'];
-                    var transform = possibleTransforms.indexOf(fontStyle.transform);
-
-                    if (transform >= 0) {
-                        msstyle.addAttribute_value("MSAttributedStringTextTransformAttribute", transform + 1);
-                    }
-                }
-
-                msstyles.push(msstyle);
-            }.bind(this));
+            msstyles.push(msstyle);
         }.bind(this));
 
         return msstyles;
