@@ -3,7 +3,7 @@
     <button type="button" class="a-btn a-btn--default m-typography__fonts-download js-m-typography__fonts-download"><i class="icon-download"></i> Download Fonts</button>
     <span class="m-typography__fonts-included">
         {{~ it.fonts :font:index }}
-            {{= font.name }}{{? index < it.fonts.length - 1 }}, {{?}}
+            {{= font.install_name }}{{? index < it.fonts.length - 1 }}, {{?}}
         {{~}}
     </span>
 </div>

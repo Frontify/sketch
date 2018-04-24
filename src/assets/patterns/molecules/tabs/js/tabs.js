@@ -58,7 +58,7 @@ Tc.Module.Tabs = Tc.Module.extend({
         var $ctx = this.$ctx;
 
         if(id) {
-            var $tab = $ctx.find('[href=#tab-' + id + ']');
+            var $tab = $ctx.find('> .js-m-tabs__list .js-m-tabs__link[href=#tab-' + id + ']');
             if($tab.length > 0) {
                 this.showContent($tab);
             }
@@ -75,6 +75,16 @@ Tc.Module.Tabs = Tc.Module.extend({
             $styleguide.addClass('state-hidden');
         }
     },
+
+    getCurrentTab: function() {
+        var $ctx = this.$ctx;
+        var $current = $ctx.find('> .js-m-tabs__list .js-m-tabs__link.state-active');
+        if($current.length > 0) {
+            return $current.attr('href').substring(5);
+        }
+
+        return null;
+     },
 
     refresh: function() {
         var $ctx = this.$ctx;

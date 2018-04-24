@@ -27,15 +27,15 @@
     document.writeln(window.tpl.tabsmain({
         items: [
             {id: 'artboards', active: false, title: 'Artboards', content: window.tpl.artboards()},
-            {id: 'sources', active: false, title: 'Sources', content:  window.tpl.sources() },
-            {id: 'brandassets', active: false, title: 'Brand Assets', content:  window.tpl.brandassets() }
+            {id: 'sources', active: false, title: 'Sources', content: window.tpl.sources()},
+            {id: 'brandassets', active: false, title: 'Brand Assets', content: window.tpl.brandassets()}
         ]
     }));
 </script>
 
 <div class="m-modal__overlay js-m-modal__overlay"></div>
 <script>
-    document.writeln(window.tpl.modal({ id: 'modal' }));
+    document.writeln(window.tpl.modal({id: 'modal'}));
     document.writeln(window.tpl.status());
 </script>
 
@@ -66,8 +66,13 @@
     }
 
     function switchTab(id) {
-        var tabs = application.sandbox.getModuleById($('.mod-tabs').data('terrificId'));
-        tabs.switchTab(id);
+        var tabsMain = application.sandbox.getModuleById($('#tabs-main').data('terrificId'));
+        tabsMain.switchTab(id);
+
+        if (tabsMain.getCurrentTab() == 'brandassets') {
+            var tabsBrandAssets = application.sandbox.getModuleById($('#tabs-brandassets').data('terrificId'));
+            tabsBrandAssets.switchTab(id);
+        }
     }
 
     function refresh() {
@@ -140,39 +145,39 @@
 
     // Typography
     function showTypography(data) {
-       var colors = application.sandbox.getModuleById($('.mod-typography').data('terrificId'));
-       colors.render(data);
+        var colors = application.sandbox.getModuleById($('.mod-typography').data('terrificId'));
+        colors.render(data);
     }
 
     // Folder Chooser
     function showFolderChooser(folders, current) {
-       var folderChooser = application.sandbox.getModuleById($('.mod-folder-chooser').data('terrificId'));
+        var folderChooser = application.sandbox.getModuleById($('.mod-folder-chooser').data('terrificId'));
 
-       // render chooser
-       folderChooser.render(folders, current);
+        // render chooser
+        folderChooser.render(folders, current);
     }
 
     // No Projects
     function showNoProjects() {
-      var error = application.sandbox.getModuleById($('.mod-error').data('terrificId'));
+        var error = application.sandbox.getModuleById($('.mod-error').data('terrificId'));
 
-      // render error
-      error.render('noprojects');
+        // render error
+        error.render('noprojects');
     }
 
     // Project Chooser
     function showProjectChooser(brands, current) {
-       var projectChooser = application.sandbox.getModuleById($('.mod-project-chooser').data('terrificId'));
+        var projectChooser = application.sandbox.getModuleById($('.mod-project-chooser').data('terrificId'));
 
-       // render chooser
-       projectChooser.render(brands, current);
+        // render chooser
+        projectChooser.render(brands, current);
     }
 
     if (isChrome) {
         document.writeln('<scr' + 'ipt src="./test/target.js"></scr' + 'ipt>');
 
         // Change this to whatever you are testing
-        document.writeln('<scr' + 'ipt src="./test/artboards.js"></scr' + 'ipt>');
+        document.writeln('<scr' + 'ipt src="./test/typography.js"></scr' + 'ipt>');
     }
 </script>
 </body>

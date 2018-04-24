@@ -1,7 +1,9 @@
 import target from './target';
 import color from './color';
 import sketch from './sketch';
+import filemanager from './filemanager';
 import fetch from '../helpers/fetch';
+import createFolder from '../helpers/createFolder'
 
 class Typography {
     constructor() {
@@ -18,12 +20,30 @@ class Typography {
         this.document = document;
     }
 
+    downloadFonts() {
+        target.getTarget().then(function (target) {
+            var folder = '' + NSHomeDirectory() + '/Frontify/' + target.brand.name + '/Fonts';
+            if(createFolder(folder)) {
+                var path = folder + '/' + target.project.name + '.zip';
+               return fetch('/v1/font/download/' + target.project.hub_id, { is_file: true, filepath: path }).then(function() {
+                    filemanager.openFile(path); // open and extract
+               }.bind(this));
+            }
+        }.bind(this));
+    }
+
     getFontStyles() {
         return target.getTarget().then(function (target) {
             // load typography styles
             return fetch('/v1/typography/styles/' + target.project.hub_id).then(function (data) {
                 data.hub_id = target.project.hub_id;
                 this.colors = data.colors;
+
+                // only include installable fonts
+                data.fonts = data.fonts.filter(function(font) {
+                    return !!font.install_name;
+                });
+
                 return data;
             }.bind(this));
         }.bind(this));

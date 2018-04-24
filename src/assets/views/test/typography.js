@@ -1,8 +1,8 @@
 switchTab('brandassets');
+switchTab('typography');
 
 showTypography({
     "success": true,
-    "hub_id": 1,
     "groups": {
         "2": {
             "id": "2",
@@ -373,9 +373,9 @@ showTypography({
             "light": true,
             "saturation": "8",
             "lightness": "80",
-            "r": null,
-            "g": null,
-            "b": null,
+            "r": "200",
+            "g": "209",
+            "b": "201",
             "alpha": "255",
             "css_value": "#c8d1c9",
             "hue": "126"
@@ -388,9 +388,9 @@ showTypography({
             "light": false,
             "saturation": "0",
             "lightness": "12",
-            "r": null,
-            "g": null,
-            "b": null,
+            "r": "33",
+            "g": "33",
+            "b": "33",
             "alpha": "255",
             "css_value": "#212121",
             "hue": "0"
@@ -403,9 +403,9 @@ showTypography({
             "light": true,
             "saturation": "7",
             "lightness": "64",
-            "r": null,
-            "g": null,
-            "b": null,
+            "r": "157",
+            "g": "166",
+            "b": "171",
             "alpha": "255",
             "css_value": "#9da6ab",
             "hue": "201"
@@ -418,9 +418,9 @@ showTypography({
             "light": true,
             "saturation": "44",
             "lightness": "73",
-            "r": null,
-            "g": null,
-            "b": null,
+            "r": "218",
+            "g": "181",
+            "b": "159",
             "alpha": "255",
             "css_value": "#dab59f",
             "hue": "22"
@@ -433,9 +433,9 @@ showTypography({
             "light": true,
             "saturation": "13",
             "lightness": "81",
-            "r": null,
-            "g": null,
-            "b": null,
+            "r": "215",
+            "g": "210",
+            "b": "203",
             "alpha": "255",
             "css_value": "#d7d2cb",
             "hue": "34"
@@ -448,9 +448,9 @@ showTypography({
             "light": false,
             "saturation": "20",
             "lightness": "40",
-            "r": null,
-            "g": null,
-            "b": null,
+            "r": "81",
+            "g": "123",
+            "b": "123",
             "alpha": "127",
             "css_value": "rgba(81,123,123,0.498039215686)",
             "hue": "180"
@@ -463,9 +463,9 @@ showTypography({
             "light": true,
             "saturation": "3",
             "lightness": "94",
-            "r": null,
-            "g": null,
-            "b": null,
+            "r": "242",
+            "g": "241",
+            "b": "241",
             "alpha": "255",
             "css_value": "#f2f1f1",
             "hue": "0"
@@ -478,9 +478,9 @@ showTypography({
             "light": true,
             "saturation": "3",
             "lightness": "84",
-            "r": null,
-            "g": null,
-            "b": null,
+            "r": "218",
+            "g": "215",
+            "b": "215",
             "alpha": "255",
             "css_value": "#dad7d7",
             "hue": "0"
@@ -488,16 +488,46 @@ showTypography({
     },
     "fonts": [
         {
-            "id": 1,
-            "name": "Montserrat"
+            "id": "1",
+            "name": "Montserrat",
+            "font_weight": "400",
+            "font_style": "normal",
+            "ttf": "1861",
+            "otf": null,
+            "install_name": "montserrat-400"
         },
         {
-            "id": 2,
-            "name": "OpenSans"
+            "id": "2",
+            "name": "Montserrat",
+            "font_weight": "700",
+            "font_style": "normal",
+            "ttf": "1866",
+            "otf": null,
+            "install_name": "montserrat-700"
         },
         {
-            "id": 3,
-            "name": "Vollkorn"
+            "id": "3",
+            "name": "euclid_flexregular",
+            "font_weight": "normal",
+            "font_style": "normal",
+            "ttf": null,
+            "otf": null
+        },
+        {
+            "id": "4",
+            "name": "euclid_flexbold",
+            "font_weight": "normal",
+            "font_style": "normal",
+            "ttf": null,
+            "otf": null
+        },
+        {
+            "id": "5",
+            "name": "euclid_flexlight",
+            "font_weight": "normal",
+            "font_style": "normal",
+            "ttf": null,
+            "otf": null
         }
     ]
 });

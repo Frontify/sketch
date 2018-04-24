@@ -4,21 +4,21 @@
 
 .m-typography__fonts {
     margin: 24px 18px;
+    display: flex;
+    flex-direction: row;
 }
 
 .m-typography__fonts-download {
-    float: left;
+    align-self: flex-start;
 }
 
 .m-typography__fonts-included {
     overflow: hidden;
-    display: block;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    padding: 12px;
+    padding: 0 12px;
     font-size: 11px;
     line-height: 13px;
     color: #AFB1B7;
+    align-self: center;
 }
 
 .m-typography__comingsoon {
