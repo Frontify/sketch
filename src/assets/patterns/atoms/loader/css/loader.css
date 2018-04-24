@@ -1,17 +1,21 @@
 .a-loader {
-    margin: 32px auto;
+    display: flex;
+    margin: 0 auto;
+    padding: 32px 0;
+    box-sizing: border-box;
     width: 80px;
+    height: 100%;
     text-align: center;
 }
 
 .a-loader--spinner {
     width: 32px;
-    height: 32px;
 }
 
 .a-loader__spinner {
     width: 32px;
     height: 32px;
+    margin: auto;
 }
 
 .a-loader__dot {

@@ -120,6 +120,12 @@ export default function (context, view) {
                 }
             },
 
+            addFolder: function(name, set) {
+                project.addFolder(name, set).then(function() {
+                    project.showFolderChooser(mainUI, set, view);
+                }.bind(this));
+            },
+
             openSource: function (data) {
                 source.openSource(data);
             },

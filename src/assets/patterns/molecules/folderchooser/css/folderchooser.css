@@ -34,6 +34,36 @@
     line-height: 18px;
     color: #363D4A;
     overflow: hidden;
+    border: 0;
+}
+
+.m-folderchooser__item--create {
+    color: rgba(54,61,74,0.5);
+    transition: color 0.2s linear;
+}
+
+.m-folderchooser__item--create:hover {
+    color:  rgba(54,61,74,0.75);
+}
+
+.m-folderchooser__item--create .m-folderchooser__name {
+    color: rgba(54,61,74,0.5);
+    outline: none;
+    display: block;
+    transition: color 0.2s linear;
+    min-width: 60vw;
+}
+
+.m-folderchooser__item--create .m-folderchooser__name:focus {
+    color:  rgba(54,61,74,0.75);
+}
+
+.m-folderchooser__item--create .m-folderchooser__name::-webkit-input-placeholder {
+    color: rgba(54,61,74,0.5);
+}
+
+.m-folderchooser__item--create:hover .m-folderchooser__name::-webkit-input-placeholder {
+    color:  rgba(54,61,74,0.75);
 }
 
 .m-folderchooser__item {

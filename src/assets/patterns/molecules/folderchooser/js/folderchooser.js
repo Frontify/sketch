@@ -36,5 +36,34 @@ Tc.Module.FolderChooser = Tc.Module.extend({
             var id = $(e.currentTarget).data('id');
             pluginCall('changeFolder', id);
         }.bind(this));
+
+        // Add folders
+        $content.on('blur', '.js-m-folderchooser__folder-create', function (e) {
+            var $this = $(e.currentTarget);
+            var folder = $.trim($this.val());
+
+            if (folder !== '') {
+                // add new folder
+                var set = $content.find('.js-m-folderchooser__target').data('id');
+                pluginCall('addFolder', folder, set);
+            }
+            else {
+                $this.val('');
+            }
+        }.bind(this));
+
+        $content.on('keydown', '.js-m-folderchooser__folder-create', function (e) {
+            var $this = $(e.currentTarget);
+
+            if (e.which === 13 && !e.ctrlKey && !e.metaKey) {
+                $this.trigger('blur');
+                return false;
+            }
+            else if (e.which === 27 && !e.ctrlKey && !e.metaKey) {
+                $this.val('');
+                $this.trigger('blur');
+                return false;
+            }
+        }.bind(this));
     }
 });

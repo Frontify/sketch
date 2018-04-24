@@ -44,6 +44,17 @@ class Project {
             }.bind(this));
         }.bind(this));
     }
+
+    addFolder(name, folder) {
+        return target.getSimpleTarget().then(function(target) {
+            return fetch('/v1/set/create/' + target.project, {
+                method: 'POST',
+                body: JSON.stringify({name: name, parent: folder, color: '#EEEEEE' })
+            }).then(function (data) {
+                return data.folder;
+            }.bind(this));
+        }.bind(this));
+    }
 }
 
 export default new Project();

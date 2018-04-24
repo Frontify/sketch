@@ -24,11 +24,11 @@
                     <h3 class="m-folderchooser__name">{{= folder.name }}</h3>
                 </li>
             {{~}}
-        {{??}}
-            <div class="o-settings__blank">
-                No subfolders found
-            </div>
         {{?}}
+        <li class="m-folderchooser__item m-folderchooser__item--create">
+           <div class="m-folderchooser__type"><i class="fi-folder"></i></div>
+           <input class="m-folderchooser__name js-m-folderchooser__folder-create" placeholder="Create new folder" />
+        </li>
     </ul>
     <div class="m-btn-bar m-btn-bar--centered m-btn-bar--footer">
        <button type="submit" class="a-btn a-btn--primary">Select</button>

@@ -1,4 +1,5 @@
 .m-colors {
+    height: calc(100vh - 126px);
 }
 
 .m-colors__title {
