@@ -1,0 +1,23 @@
+.m-error {
+    overflow: hidden;
+    background: #fff;
+    transition: background 0.2s linear;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.m-error__header {
+    margin: 30px;
+    text-align: center;
+}
+
+.m-error__body {
+    margin: 30px auto;
+    flex: 1 0;
+    font-size: 13px;
+    line-height: 1.4;
+    color: rgba(57, 64, 77, 0.5);
+    padding: 30px;
+    text-align: center;
+}

@@ -1,9 +1,9 @@
 {{? it.fonts.length > 0 }}
 <div class="m-typography__fonts">
-    <button type="button" class="a-btn a-btn--default"><i class="icon-download"></i> Download Fonts</button>
+    <button type="button" class="a-btn a-btn--default m-typography__fonts-download js-m-typography__fonts-download"><i class="icon-download"></i> Download Fonts</button>
     <span class="m-typography__fonts-included">
         {{~ it.fonts :font:index }}
-            {{= font.name }}{{? index < it.fonts.length }}, {{?}}
+            {{= font.name }}{{? index < it.fonts.length - 1 }}, {{?}}
         {{~}}
     </span>
 </div>

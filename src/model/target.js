@@ -25,7 +25,7 @@ class Target {
             method: 'POST',
             body: JSON.stringify(target)
         }).then(function (result) {
-            if (result.target_changed || result.success == false) {
+            if (result.success == false) {
                 return false;
             }
 
@@ -94,9 +94,13 @@ class Target {
     showTarget(ui) {
         this.getTarget().then(function (data) {
             if (!data) {
-                project.showProjectChooser(ui);
+                ui.eval('showNoProjects()');
             }
             else {
+                if (data.target_changed) {
+                    project.showFolderChooser(ui);
+                }
+
                 // write target to JSON
                 var target = readJSON('target') || {};
                 target.brand = data.brand.id;

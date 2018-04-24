@@ -1,4 +1,4 @@
-showTarget({
+/* showTarget({
         "success": true,
         "brand": {
             "id": 1,
@@ -20,4 +20,6 @@ showTarget({
             ]
         }
     }
-);
+); */
+
+showNoProjects();

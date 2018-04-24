@@ -6,9 +6,16 @@
     margin: 24px 18px;
 }
 
+.m-typography__fonts-download {
+    float: left;
+}
+
 .m-typography__fonts-included {
-    padding-left: 12px;
-    display: inline-block;
+    overflow: hidden;
+    display: block;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    padding: 12px;
     font-size: 11px;
     line-height: 13px;
     color: #AFB1B7;

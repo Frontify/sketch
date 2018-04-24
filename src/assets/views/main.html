@@ -41,6 +41,7 @@
 
 <div class="mod mod-folder-chooser m-folder-chooser"></div>
 <div class="mod mod-project-chooser m-project-chooser"></div>
+<div class="mod mod-error m-error"></div>
 
 <script>
     // Terrific Bootstrap
@@ -151,6 +152,14 @@
        folderChooser.render(folders, current);
     }
 
+    // No Projects
+    function showNoProjects() {
+      var error = application.sandbox.getModuleById($('.mod-error').data('terrificId'));
+
+      // render error
+      error.render('noprojects');
+    }
+
     // Project Chooser
     function showProjectChooser(brands, current) {
        var projectChooser = application.sandbox.getModuleById($('.mod-project-chooser').data('terrificId'));
@@ -163,7 +172,7 @@
         document.writeln('<scr' + 'ipt src="./test/target.js"></scr' + 'ipt>');
 
         // Change this to whatever you are testing
-        document.writeln('<scr' + 'ipt src="./test/folderchooser.js"></scr' + 'ipt>');
+        document.writeln('<scr' + 'ipt src="./test/typography.js"></scr' + 'ipt>');
     }
 </script>
 </body>

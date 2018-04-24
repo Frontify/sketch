@@ -59,6 +59,12 @@ Tc.Module.Typography = Tc.Module.extend({
             $example.css({ color: color.css_value });
         }.bind(this));
 
+        // download fonts
+        $ctx.on('click', '.js-m-typography__fonts-download', function (e) {
+            e.stopPropagation();
+            pluginCall('downloadFonts');
+        }.bind(this));
+
         // expand / collapse button visibility
         $ctx.on('mouseenter', '.js-m-typography__desc-wrap', function (e) {
             var $this = $(e.currentTarget);
