@@ -68,17 +68,22 @@ class FileManager {
     }
 
     uploadFile(info) {
-        return target.getSimpleTarget().then(function (target) {
+        return target.getTarget().then(function (target) {
             var content = readFile(info.path, 'base64');
 
+            // remap slashes in filename to folders
+            var parts = info.name.split('/');
+            var name = parts.pop();
+            var path = parts.join('/');
+
             var data = {
-                project_id: target.project,
+                project_id: target.project.id,
                 encoding: 'base64',
                 content: '' + content,
                 mimetype: 'image/png',
                 id: info.id,
-                filename: info.name,
-                folder_id: info.folder_id,
+                filename: name,
+                path: target.set.path + path,
                 origin: 'SKETCH'
             };
 

@@ -12,7 +12,7 @@ class Artboard {
     getArtboards() {
         return target.getTarget().then(function (target) {
             // load remote assets status
-            return fetch('/v1/assets/status/' + target.project.id + '?depth=0&path=' + encodeURIComponent(target.set.path)).then(function (result) {
+            return fetch('/v1/assets/status/' + target.project.id + '?path=' + encodeURIComponent(target.set.path)).then(function (result) {
                 var assets = result.assets;
 
                 // get artboards
@@ -29,7 +29,7 @@ class Artboard {
                         artboards.push({
                             id: null,
                             id_external: '' + msartboard.objectID(),
-                            name: '' + msartboard.name().replace('/', '&#47;'),
+                            name: '' + msartboard.name(),
                             sha: null,
                             state: 'new',
                             target: '',
@@ -46,8 +46,9 @@ class Artboard {
                         for (var id in assets) {
                             if (assets.hasOwnProperty(id)) {
                                 var asset = assets[id];
+                                var path = asset.path.replace(new RegExp('^' + target.set.path), '');
 
-                                if (asset.filename == artboard.name + '.' + asset.ext) {
+                                if (path + asset.filename == artboard.name + '.' + asset.ext) {
                                     artboard.id = asset.id;
                                     artboard.sha = asset.sha;
                                     artboard.state = 'uploaded';
