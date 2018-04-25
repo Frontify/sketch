@@ -9,6 +9,14 @@
     font-weight: normal;
 }
 
+.a-badge--xs {
+    border-radius: 7px;
+    padding: 0 2px;
+    font-size: 8px;
+    min-width: 8px;
+    line-height: 12px;
+}
+
 .a-badge--small {
     border-radius: 7px;
     padding: 0 5px;

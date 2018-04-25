@@ -8,7 +8,8 @@ showArtboards({
                 "name": "Overview",
                 "state": "new",
                 "target": "",
-                "modified": null
+                "modified": null,
+                "count_annotation_open": 2
             },
             {
                 "id_external": "119",
@@ -24,7 +25,9 @@ showArtboards({
                 "target": "/design/",
                 "modified": "2018-01-15 20:51:58",
                 "modifier_name": "Remo Brunschwiler",
-                "modified_localized_ago": "5 days ago"
+                "modified_localized_ago": "5 days ago",
+                "count_annotation_open": 5
+
             },
             {
                 "id_external": "121",
@@ -42,7 +45,7 @@ showArtboards({
                 "target": "/design/",
                 "modified": "2018-01-15 20:51:58",
                 "modifier_name": "Remo Brunschwiler",
-                "modified_localized_ago": "2 days ago"
+                "modified_localized_ago": "2 days ago",
             }
         ],
         "target": {

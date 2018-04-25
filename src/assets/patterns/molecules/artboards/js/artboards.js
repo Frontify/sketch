@@ -76,6 +76,18 @@ Tc.Module.Artboards = Tc.Module.extend({
             }
         }.bind(this));
 
+        $ctx.on('click', '.js-m-artboards__annotation', function(e) {
+           e.stopPropagation();
+           e.preventDefault();
+
+           var $this = $(e.currentTarget);
+           var url = $this.attr('href');
+
+           if(url) {
+               pluginCall('openUrl', url);
+           }
+        }.bind(this));
+
         callback();
     },
 

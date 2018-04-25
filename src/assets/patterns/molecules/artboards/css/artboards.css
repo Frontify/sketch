@@ -99,12 +99,27 @@
     background: rgba(216, 216, 216, 0.2);
 }
 
-.m-artboards__link-external {
-    padding-left: 6px;
-    color: #AFB1B7;
+.m-artboards__meta {
     position: absolute;
+}
+
+.m-artboards__meta-icon {
+    color: #AFB1B7;
     font-size: 10px;
     padding-top: 1px;
+}
+
+.m-artboards__annotation {
+    position: relative;
+    padding-left: 6px;
+    padding-right: 2px;
+    text-decoration: none;
+}
+
+.m-artboards__annotation-badge {
+    position: relative;
+    top: -5px;
+    left: -2px;
 }
 
 .m-artboards__content {

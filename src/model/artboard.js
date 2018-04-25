@@ -12,7 +12,7 @@ class Artboard {
     getArtboards() {
         return target.getTarget().then(function (target) {
             // load remote assets status
-            return fetch('/v1/assets/status/' + target.project.id + '?path=' + encodeURIComponent(target.set.path)).then(function (result) {
+            return fetch('/v1/assets/status/' + target.project.id + '?include_count_annotation=true&path=' + encodeURIComponent(target.set.path)).then(function (result) {
                 var assets = result.assets;
 
                 // get artboards
@@ -52,6 +52,7 @@ class Artboard {
                                     artboard.id = asset.id;
                                     artboard.sha = asset.sha;
                                     artboard.state = 'uploaded';
+                                    artboard.count_annotation_open = asset.count_annotation_open;
                                     artboard.modified = asset.modified;
                                     artboard.modifier_name = asset.modifier_name;
                                     artboard.modified_localized_ago = asset.modified_localized_ago;
