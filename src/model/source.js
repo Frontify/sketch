@@ -168,9 +168,10 @@ class Source {
             // map source to file structure
             var file = {
                 path: target.path + source.filename,
-                folder_id: target.set.id,
                 name: source.filename,
-                id: source.id
+                id: source.id,
+                folder: target.set.path,
+                project: target.project.id
             };
 
             return filemanager.uploadFile(file).then(function (data) {
@@ -193,9 +194,10 @@ class Source {
             // map source to file structure
             var file = {
                 path: target.path + source.filename,
-                folder_id: target.set.id,
                 name: source.filename,
-                id: null
+                id: null,
+                folder: target.set.path,
+                project: target.project.id
             };
 
             return filemanager.uploadFile(file).then(function (data) {

@@ -19,7 +19,7 @@ class Artboard {
                 var artboards = [];
                 var doc = NSDocumentController.sharedDocumentController().currentDocument();
 
-                if(doc) {
+                if (doc) {
                     var mspage = doc.currentPage();
                     var msartboards = mspage.artboards();
 
@@ -74,7 +74,7 @@ class Artboard {
     exportArtboard(artboard) {
         return new Promise(function (resolve, reject) {
             var doc = NSDocumentController.sharedDocumentController().currentDocument();
-            if(!doc) {
+            if (!doc) {
                 reject();
             }
 
@@ -100,20 +100,21 @@ class Artboard {
     }
 
     uploadArtboards(ui, artboards) {
-        return target.getSimpleTarget().then(function (target) {
-            // sequence artboard export and upload
+        // sequence artboard export and upload
+        return target.getTarget().then(function(target) {
             return artboards.reduce(function (sequence, artboard) {
                 return sequence.then(function () {
                     return this.exportArtboard(artboard);
                 }.bind(this)).then(function (result) {
                     if (artboard.sha != shaFile(result.path)) {
                         return filemanager.uploadFile({
-                            folder_id: target.set,
                             path: result.path,
                             name: result.name + '.' + result.ext,
                             id: result.id,
                             id_external: result.id_external,
-                            pixel_ratio: this.pixelRatio
+                            pixel_ratio: this.pixelRatio,
+                            folder: target.set.path,
+                            project: target.project.id
                         }).then(function (data) {
                             filemanager.deleteFile(result.path);
                             artboard.id = data.id;

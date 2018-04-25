@@ -68,36 +68,34 @@ class FileManager {
     }
 
     uploadFile(info) {
-        return target.getTarget().then(function (target) {
-            var content = readFile(info.path, 'base64');
+        var content = readFile(info.path, 'base64');
 
-            // remap slashes in filename to folders
-            var parts = info.name.split('/');
-            var name = parts.pop();
-            var path = parts.join('/');
+        // remap slashes in filename to folders
+        var parts = info.name.split('/');
+        var name = parts.pop();
+        var path = parts.join('/');
 
-            var data = {
-                project_id: target.project.id,
-                encoding: 'base64',
-                content: '' + content,
-                mimetype: 'image/png',
-                id: info.id,
-                filename: name,
-                path: target.set.path + path,
-                origin: 'SKETCH'
-            };
+        var data = {
+            project_id: info.project,
+            encoding: 'base64',
+            content: '' + content,
+            mimetype: 'image/png',
+            id: info.id,
+            filename: name,
+            path: info.folder + path,
+            origin: 'SKETCH'
+        };
 
-            if(info.pixel_ratio) {
-                data.pixel_ratio = info.pixel_ratio;
-            }
+        if(info.pixel_ratio) {
+            data.pixel_ratio = info.pixel_ratio;
+        }
 
-            var url = '/v1/assets/';
-            if (info.id) {
-                url += info.id;
-            }
+        var url = '/v1/assets/';
+        if (info.id) {
+            url += info.id;
+        }
 
-            return fetch(url, {method: 'POST', body: JSON.stringify(data)});
-        }.bind(this));
+        return fetch(url, {method: 'POST', body: JSON.stringify(data)});
     }
 
     downloadFile(info) {
