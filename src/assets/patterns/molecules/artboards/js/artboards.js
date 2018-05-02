@@ -83,7 +83,20 @@ Tc.Module.Artboards = Tc.Module.extend({
     },
 
     updateItem: function ($item, artboard) {
-        $item.replaceWith(window.tpl.artboardsitem(artboard));
+        var $replaceItem = $(window.tpl.artboardsitem(artboard));
+        $item.replaceWith($replaceItem);
+
+        if(artboard.state === 'success') {
+            // flash icon green
+            var $badge = $replaceItem.find('.js-m-artboards__badge');
+            $badge.velocity({backgroundColor: '#A3CE62'}, {
+                duration: 200, complete: function () {
+                    $badge.velocity('reverse', {
+                        duration: 200, delay: 1000
+                    });
+                }
+            });
+        }
     },
 
     getArtboard: function (id_external) {
@@ -113,6 +126,7 @@ Tc.Module.Artboards = Tc.Module.extend({
         artboard.id = data.id;
 
         this.updateItem($item, artboard);
+
     },
 
     artboardUploadFailed: function (data) {

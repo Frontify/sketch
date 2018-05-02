@@ -170,10 +170,6 @@
     background: #EF6756;
 }
 
-.m-artboards__item.state-success .m-artboards__badge {
-    background: #A3CE62;
-}
-
 .m-artboards__item.state-uploading .m-artboards__badge {
     background: none;
 }

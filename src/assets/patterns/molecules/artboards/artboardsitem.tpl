@@ -1,6 +1,6 @@
 <li class="m-artboards__item js-m-artboards__item clearfix state-{{= it.state }}" data-id-external="{{= it.id_external }}" {{? it.id }}data-url="/screens/{{= it.id }}"{{?}}>
     <div class="m-artboards__type">
-        <span class="m-artboards__badge">
+        <span class="m-artboards__badge js-m-artboards__badge">
             {{? it.state === 'uploading'}}
                 <i class="m-artboards__icon icon-spinner anim-spin"></i>
             {{?? it.state === 'success'}}
