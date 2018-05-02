@@ -2,6 +2,8 @@ import writeJSON from '../helpers/writeJSON'
 import readJSON from '../helpers/readJSON'
 import fetch from '../helpers/fetch'
 
+var threadDictionary = NSThread.mainThread().threadDictionary();
+
 class User {
     constructor() {
     }
@@ -13,7 +15,16 @@ class User {
     }
 
     getUser() {
-        return fetch('/v1/user/info/');
+        if (threadDictionary['frontifyuser']) {
+            return Promise.resolve(threadDictionary['frontifyuser']);
+        }
+        return fetch('/v1/user/info/').then(function(data) {
+            if(data.success) {
+                threadDictionary['frontifyuser'] = data;
+            }
+
+            return data;
+        }.bind(this));
     }
 
     logout() {

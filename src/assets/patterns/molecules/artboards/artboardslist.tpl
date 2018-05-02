@@ -3,7 +3,7 @@
     <div class="m-artboards__export-action">
         <a class="a-btn a-btn--xs a-btn--link-primary js-m-artboards__change-target">change</a>
     </div>
-    <a class="m-artboards__export-target js-m-artboards__export-target" data-url="/projects/{{= it.target.project.id }}/{{= it.target.project.slug }}/{{= it.target.set.id }}">
+    <a class="m-artboards__export-target js-m-artboards__change-target">
         <span class="m-artboards__export-target-part"><i class="fi-projects"></i> {{= it.target.project.name }}</span>
         {{? it.target.set.folders.length > 0 }}
             {{~ it.target.set.folders : folder:index }}

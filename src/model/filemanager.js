@@ -17,7 +17,6 @@ class FileManager {
 
     isCurrentSaved() {
         return !!NSDocumentController.sharedDocumentController().currentDocument().fileURL();
-
     }
 
     saveCurrent() {

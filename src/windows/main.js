@@ -120,8 +120,8 @@ export default function (context, view) {
                 }
             },
 
-            addFolder: function(name, set) {
-                project.addFolder(name, set).then(function() {
+            addFolder: function (name, set) {
+                project.addFolder(name, set).then(function () {
                     project.showFolderChooser(mainUI, set, view);
                 }.bind(this));
             },
@@ -210,7 +210,7 @@ export default function (context, view) {
                 typography.applyFontStyle(style);
             },
 
-            downloadFonts: function() {
+            downloadFonts: function () {
                 typography.downloadFonts();
             },
 

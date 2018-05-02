@@ -42,36 +42,44 @@
     <div class="m-sources__content">
         <h3 class="m-sources__title">{{= window.utils.tpl.truncate(it.filename.substring(0, it.filename.length - 7), 10, 40, 30)}}<span class="m-sources__ext">.sketch</span></h3>
         <span class="m-sources__modified">
-            {{? it.state === 'new'}}
-                Not yet downloaded
-            {{?? it.state === 'downloading'}}
-                Downloading…
-            {{?? it.state === 'faileddownload'}}
-                Download failed
-            {{?? it.state === 'addable'}}
-                Not yet added
-            {{?? it.state === 'uploading'}}
-                Uploading…
-            {{?? it.state === 'failedadd'}}
-                Upload failed
-            {{?? it.state === 'push'}}
-                Local changes by you
-            {{?? it.state === 'pushing'}}
-                Pushing local changes…
-            {{?? it.state === 'failedpush'}}
-                Pushing local changes failed
-            {{?? it.state === 'pull'}}
-                Remote changes {{= it.modified_localized_ago }} by {{= it.modifier_name }}
-            {{?? it.state === 'pulling'}}
-                Pulling remote changes…
-            {{?? it.state === 'failedpull'}}
-                Pulling remote changes failed
-            {{?? it.state === 'same'}}
-                Last modified {{= it.modified_localized_ago }} by {{= it.modifier_name }}
-            {{?? it.state === 'conflict'}}
-                Conflicting versions
-            {{?? it.state === 'opening'}}
-                Opening file…
+            {{? it.activity }}
+                Currently working on:
+                {{~ it.activity:item:index }}
+                    {{= item.name }}{{? it.activity.length < index}},{{?}}
+                {{~}}
+                <span class="m-sources__bubble"></span>
+            {{??}}
+                {{? it.state === 'new'}}
+                    Not yet downloaded
+                {{?? it.state === 'downloading'}}
+                    Downloading…
+                {{?? it.state === 'faileddownload'}}
+                    Download failed
+                {{?? it.state === 'addable'}}
+                    Not yet added
+                {{?? it.state === 'uploading'}}
+                    Uploading…
+                {{?? it.state === 'failedadd'}}
+                    Upload failed
+                {{?? it.state === 'push'}}
+                    Local changes by you
+                {{?? it.state === 'pushing'}}
+                    Pushing local changes…
+                {{?? it.state === 'failedpush'}}
+                    Pushing local changes failed
+                {{?? it.state === 'pull'}}
+                    Remote changes {{= it.modified_localized_ago }} by {{= it.modifier_name }}
+                {{?? it.state === 'pulling'}}
+                    Pulling remote changes…
+                {{?? it.state === 'failedpull'}}
+                    Pulling remote changes failed
+                {{?? it.state === 'same'}}
+                    Last modified {{= it.modified_localized_ago }} by {{= it.modifier_name }}
+                {{?? it.state === 'conflict'}}
+                    Conflicting versions
+                {{?? it.state === 'opening'}}
+                    Opening file…
+                {{?}}
             {{?}}
         </span>
     </div>

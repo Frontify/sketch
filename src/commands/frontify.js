@@ -1,5 +1,6 @@
 import main from '../windows/main';
 import executeSafely from '../helpers/executeSafely';
+import source from '../model/source';
 
 var threadDictionary = NSThread.mainThread().threadDictionary();
 
@@ -12,11 +13,18 @@ export function runCommand(context) {
     });
 }
 
-export function initCommand(context) {
+export function openCommand(context) {
     COScript.currentCOScript().setShouldKeepAround(true);
 
     executeSafely(context, function () {
-        refresh();
+        var interval = setInterval(function () {
+            if (context.actionContext.document.documentWindow()) {
+                clearInterval(interval);
+                source.opened().then(function () {
+                    refresh();
+                }.bind(this));
+            }
+        }, 200);
     });
 }
 
@@ -24,7 +32,9 @@ export function savedCommand(context) {
     COScript.currentCOScript().setShouldKeepAround(true);
 
     executeSafely(context, function () {
-        refresh();
+        source.saved().then(function () {
+            refresh();
+        }.bind(this));
     });
 }
 
@@ -32,7 +42,10 @@ export function closeCommand(context) {
     COScript.currentCOScript().setShouldKeepAround(true);
 
     executeSafely(context, function () {
-        refresh();
+        source.closed().then(function () {
+            refresh();
+        }.bind(this));
+
     });
 }
 
@@ -41,14 +54,13 @@ export function selectionCommand(context) {
 
     executeSafely(context, function () {
         if (threadDictionary['frontifymainui']) {
-              threadDictionary['frontifymainui'].selectionChanged(context.actionContext);
+            threadDictionary['frontifymainui'].selectionChanged(context.actionContext);
         }
     });
 }
 
 function refresh() {
-   if (threadDictionary['frontifymainui']) {
-       threadDictionary['frontifymainui'].refresh();
-   }
+    if (threadDictionary['frontifymainui']) {
+        threadDictionary['frontifymainui'].refresh();
+    }
 }
-

@@ -3,6 +3,7 @@ import shaFile from '../helpers/shaFile'
 import fetch from '../helpers/fetch'
 import target from './target'
 import filemanager from './filemanager'
+import notification from './notification'
 
 class Source {
     constructor() {
@@ -11,55 +12,55 @@ class Source {
     getSources() {
         return target.getTarget('sources').then(function (target) {
             // load remote assets status
-            return fetch('/v1/assets/status/' + target.project.id + '?depth=0&ext=sketch&path=' + encodeURIComponent(target.set.path)).then(function (result) {
-                var assets = result.assets;
+            return this.getAssets().then(function (assets) {
                 var sources = [];
-                var status = readJSON('sources-' + target.project.id) || { assets: {} };
+                var status = readJSON('sources-' + target.project.id) || {assets: {}};
                 var alreadyAdded = false;
 
                 // compare with local status
                 return this.getFiles(target.path).then(function (files) {
-                    for (var id in assets) {
-                        if (assets.hasOwnProperty(id)) {
-                            var asset = assets[id];
-                            files.forEach(function (file) {
-                                if (file.filename == asset.filename) {
-                                    file.existing = true;
+                    assets.forEach(function (asset) {
+                        files.forEach(function (file) {
+                            if (file.filename == asset.filename) {
+                                file.existing = true;
 
-                                    // force conflict if the asset has not been downloaded via plugin
-                                    status.assets[asset.id] = status.assets[asset.id] || { id: asset.id, modified: '0000-00-00 00:00:00', sha: '0' };
+                                // force conflict if the asset has not been downloaded via plugin
+                                status.assets[asset.id] = status.assets[asset.id] || {
+                                    id: asset.id,
+                                    modified: '0000-00-00 00:00:00',
+                                    sha: '0'
+                                };
 
-                                    if (asset.sha == file.sha) {
-                                        // remote file and local file are the same
-                                        asset.state = 'same';
-                                    }
-                                    else if(file.sha != status.assets[asset.id].sha && asset.modified > status.assets[asset.id].modified) {
-                                        // there are local and remote changes
-                                        asset.state = 'conflict';
-                                    }
-                                    else if (asset.modified > status.assets[asset.id].modified) {
-                                        // there is a newer version of this asset on frontify
-                                        asset.state = 'pull';
-                                    }
-                                    else if (asset.modified <= status.assets[asset.id].modified) {
-                                        asset.state = 'push';
-                                    }
-
-                                    asset.current = file.current;
-
-                                    if(asset.current) {
-                                        alreadyAdded = true;
-                                    }
+                                if (asset.sha == file.sha) {
+                                    // remote file and local file are the same
+                                    asset.state = 'same';
                                 }
-                            }.bind(this));
+                                else if (file.sha != status.assets[asset.id].sha && asset.modified > status.assets[asset.id].modified) {
+                                    // there are local and remote changes
+                                    asset.state = 'conflict';
+                                }
+                                else if (asset.modified > status.assets[asset.id].modified) {
+                                    // there is a newer version of this asset on frontify
+                                    asset.state = 'pull';
+                                }
+                                else if (asset.modified <= status.assets[asset.id].modified) {
+                                    asset.state = 'push';
+                                }
 
-                            if (!asset.state) {
-                                asset.state = 'new';
+                                asset.current = file.current;
+
+                                if (asset.current) {
+                                    alreadyAdded = true;
+                                }
                             }
+                        }.bind(this));
 
-                            sources.push(asset);
+                        if (!asset.state) {
+                            asset.state = 'new';
                         }
-                    }
+
+                        sources.push(asset);
+                    }.bind(this));
 
                     files.forEach(function (file) {
                         if (!file.existing) {
@@ -106,20 +107,30 @@ class Source {
         }.bind(this));
     }
 
+    getAssets() {
+        return target.getTarget('sources').then(function (target) {
+            return fetch('/v1/assets/status/' + target.project.id + '?include_screen_activity=true&depth=0&&ext=sketch&path=' + encodeURIComponent(target.set.path)).then(function (result) {
+                var assets = [];
+                for (var id in result.assets) {
+                    if (result.assets.hasOwnProperty(id)) {
+                        var asset = result.assets[id];
+                        asset.localpath = target.path + '/' + asset.filename;
+                        assets.push(asset);
+                    }
+                }
+
+                this.assets = assets;
+                return assets;
+            }.bind(this));
+        }.bind(this));
+    }
+
     getFiles(dir) {
         return Promise.resolve().then(function () {
             var files = [];
             var filenames = NSFileManager.defaultManager().contentsOfDirectoryAtPath_error(dir, null);
 
-            var doc = NSDocumentController.sharedDocumentController().currentDocument();
-            var currentFilename = '';
-
-            if (doc && doc.fileURL()) {
-                var nsurl = doc.fileURL();
-                var path = '' + nsurl.path();
-                var parts = path.split('/');
-                currentFilename = parts.pop();
-            }
+            var currentFilename = this.getCurrentFilename();
 
             if (filenames) {
                 filenames.forEach(function (filename) {
@@ -160,6 +171,47 @@ class Source {
             ui.eval('showSources(' + JSON.stringify(data) + ')');
             return true;
         }.bind(this));
+    }
+
+    opened() {
+        return this.getCurrentAsset().then(function (asset) {
+           if (asset) {
+               return fetch('/v1/screen/activity/' + asset.id, {
+                   method: 'POST',
+                   body: JSON.stringify({activity: 'OPEN'})
+               });
+           }
+
+           return null;
+        });
+    }
+
+    saved() {
+        return this.getCurrentAsset().then(function (asset) {
+            if (asset) {
+                var sha = shaFile(asset.localpath);
+                if (sha != asset.sha) {
+                    return fetch('/v1/screen/activity/' + asset.id, {
+                        method: 'POST',
+                        body: JSON.stringify({activity: 'LOCAL_CHANGE'})
+                    });
+                }
+            }
+
+            return null;
+        });
+    }
+
+    closed() {
+        return this.getCurrentAsset().then(function (asset) {
+            if (asset) {
+                return fetch('/v1/screen/activity/' + asset.id, {
+                    method: 'DELETE'
+                });
+            }
+
+            return null;
+        });
     }
 
     pushSource(ui, source) {
@@ -221,6 +273,29 @@ class Source {
         } else {
             ui.eval('showSourcesHowTo()');
         }
+    }
+
+    getCurrentAsset() {
+        var currentFilename = this.getCurrentFilename();
+        return this.getAssets().then(function (assets) {
+            return assets.find(function (asset) {
+                return asset.filename == currentFilename;
+            });
+        }.bind(this));
+    }
+
+    getCurrentFilename() {
+        var doc = NSDocumentController.sharedDocumentController().currentDocument();
+        var currentFilename = '';
+
+        if (doc && doc.fileURL()) {
+            var nsurl = doc.fileURL();
+            var path = '' + nsurl.path();
+            var parts = path.split('/');
+            currentFilename = parts.pop();
+        }
+
+        return currentFilename;
     }
 }
 

@@ -74,6 +74,9 @@ module.exports = function (config) {
         },{
             from: './src/assets/images',
             to: '../Resources/images'
+        },{
+            from: './src/frameworks',
+            to: '../Sketch/frameworks'
         }])
     );
 };

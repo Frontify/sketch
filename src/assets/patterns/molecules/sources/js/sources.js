@@ -11,14 +11,6 @@ Tc.Module.Sources = Tc.Module.extend({
 
         $ctx.html(window.tpl.loaderspinner());
 
-        $ctx.on('click', '.js-m-sources__export-target', function (e) {
-            e.stopPropagation();
-            var url = $(e.currentTarget).data('url');
-
-            // open export target in frontify
-            pluginCall('openUrl', url);
-        }.bind(this));
-
         $ctx.on('click', '.js-m-sources__change-target', function (e) {
             e.stopPropagation();
 

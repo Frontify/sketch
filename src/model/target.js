@@ -2,11 +2,9 @@ import readJSON from '../helpers/readJSON'
 import fetch from '../helpers/fetch'
 import writeJSON from "../helpers/writeJSON";
 import project from "./project";
+import notification from "./notification";
 
 class Target {
-    constructor() {
-    }
-
     getTarget(view) {
         // load brand and project name
         var target = readJSON('target') || {};
@@ -65,6 +63,14 @@ class Target {
     updateTarget(data) {
         return Promise.resolve().then(function () {
             var target = readJSON('target');
+
+            // handle pusher channel subscription if project changes
+            if(target.project >= 0 && data.project >= 0 && target.project != data.project) {
+                notification.unsubscribe(target.project);
+                notification.subscribe(data.project);
+            }
+
+            // update target
             if (data.brand >= 0) {
                 target.brand = data.brand;
             }
