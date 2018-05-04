@@ -8,8 +8,13 @@ export function runCommand(context) {
     COScript.currentCOScript().setShouldKeepAround(true);
 
     executeSafely(context, function () {
-        threadDictionary['frontifymainui'] = main(context, 'artboards');
-        threadDictionary['frontifymainui'].selectionChanged(context);
+        if(!threadDictionary['frontifymainui']) {
+            threadDictionary['frontifymainui'] = main(context, 'artboards');
+            threadDictionary['frontifymainui'].selectionChanged(context);
+        }
+        else {
+            threadDictionary['frontifymainui'].close();
+        }
     });
 }
 
