@@ -43,7 +43,7 @@
         <h3 class="m-sources__title">{{= window.utils.tpl.truncate(it.filename.substring(0, it.filename.length - 7), 10, 40, 30)}}<span class="m-sources__ext">.sketch</span></h3>
         <span class="m-sources__modified">
             {{? it.activity }}
-                Currently working on:
+                Currently working on file:
                 {{~ it.activity:item:index }}
                     {{= item.name }}{{? it.activity.length < index}},{{?}}
                 {{~}}
