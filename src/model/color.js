@@ -83,13 +83,13 @@ class Color {
         var mscolors = [];
         colors.forEach(function (color) {
             mscolors.push(this.convertColor(color));
-        });
+        }.bind(this));
 
         return mscolors;
     }
 
     convertColor(color) {
-        return MSColor.colorWithRed_green_blue_alpha(color.r / 255, color.g / 255, color.b / 255, color.alpha / 255);
+        return MSColor.colorWithRed_green_blue_alpha(color.r / 255, color.g / 255, color.b / 255, (color.alpha || color.a) / 255);
     }
 
     applyColorToLayer(layer, color) {

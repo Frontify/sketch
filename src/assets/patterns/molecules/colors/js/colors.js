@@ -142,7 +142,10 @@ Tc.Module.Colors = Tc.Module.extend({
     },
 
     getColors: function (id) {
-        return this.palettes[id].colors;
+        var palette = this.palettes.find(function(palette) {
+            return palette.id == id;
+        });
+        return palette.colors;
     },
 
     render: function (data) {
