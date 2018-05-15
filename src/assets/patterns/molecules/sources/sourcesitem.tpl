@@ -45,7 +45,7 @@
             {{? it.activity }}
                 Currently working on file:
                 {{~ it.activity:item:index }}
-                    {{= item.name }}{{? it.activity.length < index}},{{?}}
+                    {{= item.name }}{{? it.activity.length - 1 > index}},{{?}}
                 {{~}}
                 <span class="m-sources__bubble"></span>
             {{??}}

@@ -22,15 +22,16 @@ export default function () {
                     // bind events
                     notification.on('screen-activity', function (event) {
                         var eventData = event.data();
+                        console.log(eventData);
                         if (possibleActivities.indexOf('' + eventData.type) > -1) {
                             source.getCurrentAsset().then(function (asset) {
                                 if ('' + asset.id == '' + eventData.screen) {
                                     user.getUser().then(function (userData) {
-                                        if ('' + eventData.actor != '' + userData.id) {
+                                        if ('' + eventData.actor.id != '' + userData.id) {
                                             notification.showNotification({
                                                 title: 'You are not alone',
-                                                image: userData.image,
-                                                description: userData.name + ' is currently working on ' + asset.filename + '. This might lead to conflicts.'
+                                                image: eventData.actor.image,
+                                                description: eventData.actor.name + ' is currently working on ' + asset.filename + '. This might lead to conflicts.'
                                             });
                                         }
                                     }.bind(this));
