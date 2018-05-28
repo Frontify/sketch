@@ -2,7 +2,7 @@
    {{~ it.palettes :palette }}
         {{? palette.colors.length > 0 }}
             <div class="m-colors__palette js-m-colors__palette" data-id="{{= palette.id }}">
-                <h3 class="m-colors__title">{{= palette.name }}
+                <h3 class="m-colors__title">{{= palette.name || 'Untitled Palette'}}
                     <div class="m-btn-dropdown m-colors__dropdown">
                         <a class="a-btn a-btn--link m-colors__btn js-m-colors__toggle js-m-btn-dropdown__toggle"><i class="js-m-colors__add fi-plus"></i></a>
                         <ul class="m-btn-dropdown__menu m-colors__menu js-m-btn-dropdown__menu ">
