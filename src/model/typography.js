@@ -25,7 +25,7 @@ class Typography {
             var folder = '' + NSHomeDirectory() + '/Frontify/' + target.brand.name + '/Fonts';
             if(createFolder(folder)) {
                 var path = folder + '/' + target.project.name + '.zip';
-               return fetch('/v1/font/download/' + target.project.hub_project_id, { is_file: true, filepath: path }).then(function() {
+               return fetch('/v1/font/download/' + target.project.hub_project_id, { is_file_download: true, filepath: path }).then(function() {
                     filemanager.openFile(path); // open and extract
                }.bind(this));
             }

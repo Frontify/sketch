@@ -22,7 +22,6 @@ export default function () {
                     // bind events
                     notification.on('screen-activity', function (event) {
                         var eventData = event.data();
-                        console.log(eventData);
                         if (possibleActivities.indexOf('' + eventData.type) > -1) {
                             source.getCurrentAsset().then(function (asset) {
                                 if ('' + asset.id == '' + eventData.screen) {

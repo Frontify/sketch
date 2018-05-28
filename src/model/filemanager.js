@@ -67,8 +67,6 @@ class FileManager {
     }
 
     uploadFile(info) {
-        var content = readFile(info.path, 'base64');
-
         // remap slashes in filename to folders
         var parts = info.name.split('/');
         var name = parts.pop();
@@ -76,8 +74,6 @@ class FileManager {
 
         var data = {
             project_id: info.project,
-            encoding: 'base64',
-            content: '' + content,
             mimetype: 'image/png',
             id: info.id,
             filename: name,
@@ -94,7 +90,7 @@ class FileManager {
             url += info.id;
         }
 
-        return fetch(url, {method: 'POST', body: JSON.stringify(data)});
+        return fetch(url, {method: 'POST', filepath: info.path, is_file_upload: true, body: JSON.stringify(data)});
     }
 
     downloadFile(info) {
@@ -104,7 +100,7 @@ class FileManager {
             return target.getTarget('sources').then(function (target) {
                 var path = target.path + info.filename;
                 if(createFolder(target.path)) {
-                    return fetch('/v1/screen/download/' + info.id, { is_file: true, filepath: path });
+                    return fetch('/v1/screen/download/' + info.id, { is_file_download: true, filepath: path });
                 }
             }.bind(this));
         }.bind(this));
