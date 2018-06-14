@@ -46,7 +46,10 @@ class Artboard {
                         for (var id in assets) {
                             if (assets.hasOwnProperty(id)) {
                                 var asset = assets[id];
-                                var path = asset.path.replace(new RegExp('^' + target.set.path), '');
+                                var path = asset.path;
+                                if(asset.path.indexOf(target.set.path) === 0) {
+                                    path =  asset.path.replace(target.set.path, '');
+                                }
 
                                 if (path + asset.filename == artboard.name + '.' + asset.ext) {
                                     artboard.id = asset.id;
