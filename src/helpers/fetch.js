@@ -25,6 +25,7 @@ export default function (uri, options) {
             // http method
             args.push('-X');
             args.push(options.method);
+            args.push('-k');
 
             // http headers
             for (var id in options.headers) {
@@ -79,6 +80,7 @@ export default function (uri, options) {
             task.setLaunchPath("/usr/bin/curl");
 
             var args = [];
+            args.push('-k');
 
             // http headers
             for (var id in options.headers) {
