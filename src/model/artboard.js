@@ -121,6 +121,7 @@ class Artboard {
                             project: target.project.id
                         }).then(function (data) {
                             filemanager.deleteFile(result.path);
+                            artboard.sha = data.sha;
                             artboard.id = data.id;
                             artboard.nochanges = false;
                             ui.eval('artboardUploaded(' + JSON.stringify(artboard) + ')');

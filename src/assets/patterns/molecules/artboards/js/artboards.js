@@ -124,6 +124,7 @@ Tc.Module.Artboards = Tc.Module.extend({
         }
         artboard.state = 'success';
         artboard.id = data.id;
+        artboard.sha = data.sha;
 
         this.updateItem($item, artboard);
 
