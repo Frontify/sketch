@@ -27,14 +27,7 @@
             {{ var group = it.groups[id]; }}
             {{? group.styles.length > 0 }}
                 <div class="m-typography__group js-m-typography__group" data-id="{{= group.id }}">
-                    <h3 class="m-typography__title">{{= group.title || 'Font Styles' }}
-                        <div class="m-btn-dropdown m-typography__dropdown">
-                            <a class="a-btn a-btn--link m-typography__btn js-m-typography__toggle js-m-btn-dropdown__toggle"><i class="js-m-typography__add fi-plus"></i></a>
-                            <ul class="m-btn-dropdown__menu m-typography__menu js-m-btn-dropdown__menu ">
-                                <li class="m-btn-dropdown__item"><a class="m-btn-dropdown__link m-btn-dropdown__link--small js-m-typography__styles-add">Add to text styles</a></li>
-                            </ul>
-                        </div>
-                    </h3>
+                    <h3 class="m-typography__title">{{= group.title || 'Font Styles' }}</h3>
                     {{? group.description }}
                         <div class="m-typography__desc-wrap js-m-typography__desc-wrap state-collapsed">
                             <p class="m-typography__desc">{{= group.description }}</p>
