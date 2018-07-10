@@ -10,7 +10,7 @@ export function runCommand(context) {
     executeSafely(context, function () {
         if(!threadDictionary['frontifymainui']) {
             threadDictionary['frontifymainui'] = main(context, 'artboards');
-            threadDictionary['frontifymainui'].selectionChanged(context);
+            // threadDictionary['frontifymainui'].selectionChanged(context);
         }
         else {
             threadDictionary['frontifymainui'].close();
@@ -59,13 +59,13 @@ export function selectionCommand(context) {
 
     executeSafely(context, function () {
         if (threadDictionary['frontifymainui']) {
-            threadDictionary['frontifymainui'].selectionChanged(context.actionContext);
+            // threadDictionary['frontifymainui'].selectionChanged(context.actionContext);
         }
     });
 }
 
 function refresh() {
     if (threadDictionary['frontifymainui']) {
-        threadDictionary['frontifymainui'].refresh();
+        // threadDictionary['frontifymainui'].refresh();
     }
 }
