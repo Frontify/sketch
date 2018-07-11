@@ -1,16 +1,16 @@
 import main from '../windows/main';
 import executeSafely from '../helpers/executeSafely';
 import source from '../model/source';
-
-var threadDictionary = NSThread.mainThread().threadDictionary();
+import typography from "../model/typography";
+import color from "../model/color";
 
 export function runCommand(context) {
-    COScript.currentCOScript().setShouldKeepAround(true);
+    var threadDictionary = NSThread.mainThread().threadDictionary();
 
     executeSafely(context, function () {
         if(!threadDictionary['frontifymainui']) {
             threadDictionary['frontifymainui'] = main(context, 'artboards');
-            // threadDictionary['frontifymainui'].selectionChanged(context);
+            selectionChanged(context);
         }
         else {
             threadDictionary['frontifymainui'].close();
@@ -19,53 +19,57 @@ export function runCommand(context) {
 }
 
 export function openCommand(context) {
-    COScript.currentCOScript().setShouldKeepAround(true);
-
     executeSafely(context, function () {
         var interval = setInterval(function () {
             if (context.actionContext.document.documentWindow()) {
                 clearInterval(interval);
                 source.opened().then(function () {
                     refresh();
-                }.bind(this));
+                });
             }
         }, 200);
     });
 }
 
 export function savedCommand(context) {
-    COScript.currentCOScript().setShouldKeepAround(true);
-
     executeSafely(context, function () {
         source.saved().then(function () {
             refresh();
-        }.bind(this));
+        });
     });
 }
 
 export function closeCommand(context) {
-    COScript.currentCOScript().setShouldKeepAround(true);
-
     executeSafely(context, function () {
         source.closed().then(function () {
             refresh();
-        }.bind(this));
-
+        });
     });
 }
 
 export function selectionCommand(context) {
-    COScript.currentCOScript().setShouldKeepAround(true);
+    var threadDictionary = NSThread.mainThread().threadDictionary();
 
     executeSafely(context, function () {
         if (threadDictionary['frontifymainui']) {
-            // threadDictionary['frontifymainui'].selectionChanged(context.actionContext);
+            selectionChanged(context.actionContext);
         }
     });
 }
 
 function refresh() {
+    var threadDictionary = NSThread.mainThread().threadDictionary();
+
     if (threadDictionary['frontifymainui']) {
-        // threadDictionary['frontifymainui'].refresh();
+        threadDictionary['frontifymainui'].eval('refresh()');
+    }
+}
+
+function selectionChanged(context) {
+    if (context) {
+        color.setDocument(context.document);
+        color.setSelection(context.document.selectedLayers().layers());
+        typography.setDocument(context.document);
+        typography.setSelection(context.document.selectedLayers().layers());
     }
 }

@@ -3,7 +3,6 @@ import shaFile from '../helpers/shaFile'
 import fetch from '../helpers/fetch'
 import target from './target'
 import filemanager from './filemanager'
-import notification from './notification'
 
 class Source {
     constructor() {
@@ -109,7 +108,7 @@ class Source {
 
     getAssets() {
         return target.getTarget('sources').then(function (target) {
-            return fetch('/v1/assets/status/' + target.project.id + '?include_screen_activity=true&depth=0&&ext=sketch&path=' + encodeURIComponent(target.set.path)).then(function (result) {
+            return fetch('/v1/assets/status/' + target.project.id + '?include_screen_activity=true&depth=0&ext=sketch&path=' + encodeURIComponent(target.set.path)).then(function (result) {
                 var assets = [];
                 for (var id in result.assets) {
                     if (result.assets.hasOwnProperty(id)) {
@@ -300,4 +299,3 @@ class Source {
 }
 
 export default new Source();
-

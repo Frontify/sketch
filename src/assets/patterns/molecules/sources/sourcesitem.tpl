@@ -45,7 +45,7 @@
             {{? it.activity }}
                 Currently working on file:
                 {{~ it.activity:item:index }}
-                    {{= item.name }}{{? it.activity.length - 1 > index}},{{?}}
+                    {{= item.name || item.email }}{{? it.activity.length - 1 > index}},{{?}}
                 {{~}}
                 <span class="m-sources__bubble"></span>
             {{??}}
@@ -68,13 +68,13 @@
                 {{?? it.state === 'failedpush'}}
                     Pushing local changes failed
                 {{?? it.state === 'pull'}}
-                    Remote changes {{= it.modified_localized_ago }} by {{= it.modifier_name }}
+                    Remote changes {{= it.modified_localized_ago }} by {{= it.modifier_name || it.modifier_email }}
                 {{?? it.state === 'pulling'}}
                     Pulling remote changes…
                 {{?? it.state === 'failedpull'}}
                     Pulling remote changes failed
                 {{?? it.state === 'same'}}
-                    Last modified {{= it.modified_localized_ago }} by {{= it.modifier_name }}
+                    Last modified {{= it.modified_localized_ago }} by {{= it.modifier_name || it.modifier_email }}
                 {{?? it.state === 'conflict'}}
                     Conflicting versions
                 {{?? it.state === 'opening'}}
