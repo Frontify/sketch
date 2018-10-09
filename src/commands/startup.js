@@ -8,7 +8,6 @@ import target from '../model/target';
  * Sketch restarts).
  */
 export default function () {
-    // COScript.currentCOScript().setShouldKeepAround(true);
     loadFramework('pusher', 'PTPusher', context);
 
     var possibleActivities = ['OPEN', 'LOCAL_CHANGE', 'CLOSE'];

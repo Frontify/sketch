@@ -4,6 +4,7 @@ import writeJSON from '../helpers/writeJSON'
 import fetch from '../helpers/fetch'
 import createFolder from '../helpers/createFolder'
 import target from './target'
+import sketch from './sketch'
 
 class FileManager {
     constructor() {
@@ -16,7 +17,7 @@ class FileManager {
     }
 
     isCurrentSaved() {
-        return !!NSDocumentController.sharedDocumentController().currentDocument().fileURL();
+        return !!sketch.getDocument().fileURL();
     }
 
     saveCurrent() {
@@ -33,7 +34,11 @@ class FileManager {
 
                 if (clicked == NSOKButton) {
                     var url = dialog.URL();
-                    NSDocumentController.sharedDocumentController().currentDocument().saveToURL_ofType_forSaveOperation_error_(url, "com.bohemiancoding.sketch.drawing", NSSaveOperation, null);
+                    var doc = sketch.getDocument();
+
+                    if(doc) {
+                        doc.saveToURL_ofType_forSaveOperation_error_(url, "com.bohemiancoding.sketch.drawing", NSSaveOperation, null);
+                    }
 
                     return true;
                 }
@@ -50,14 +55,18 @@ class FileManager {
     moveCurrent() {
         return target.getTarget('sources').then(function (data) {
             if (createFolder(data.path)) {
-                var nsurl = NSDocumentController.sharedDocumentController().currentDocument().fileURL();
-                var path = nsurl.path();
-                var parts = path.split('/');
-                var currentFilename = parts.pop();
-                var newNsurl =  NSURL.fileURLWithPath(data.path + currentFilename);
+                var doc = sketch.getDocument();
 
-                // move to the target folder
-                NSDocumentController.sharedDocumentController().currentDocument().moveToURL_completionHandler_(newNsurl, null);
+                if(doc) {
+                    var nsurl = doc.fileURL();
+                    var path = nsurl.path();
+                    var parts = path.split('/');
+                    var currentFilename = parts.pop();
+                    var newNsurl =  NSURL.fileURLWithPath(data.path + currentFilename);
+
+                    // move to the target folder
+                    doc.moveToURL_completionHandler_(newNsurl, null);
+                }
 
                 return true;
             }

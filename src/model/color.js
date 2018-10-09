@@ -1,20 +1,8 @@
 import target from './target';
 import fetch from '../helpers/fetch'
+import sketch from './sketch';
 
 class Color {
-    constructor() {
-        this.selection = null;
-        this.document = null;
-    }
-
-    setSelection(selection) {
-        this.selection = selection;
-    }
-
-    setDocument(document) {
-        this.document = document;
-    }
-
     getColors() {
         return target.getTarget().then(function (target) {
             // load remote assets status
@@ -26,7 +14,7 @@ class Color {
     }
 
     applyColor(color) {
-        var selection = this.selection;
+        var selection = sketch.getSelection();
         var loop = selection.objectEnumerator();
         var item = null;
 
@@ -42,24 +30,34 @@ class Color {
             }
         }
 
-        this.document.reloadInspector();
+        var doc = sketch.getDocument();
+        if(doc) {
+            doc.reloadInspector();
+        }
     }
 
     addDocumentColors(colors) {
         var app = NSApp.delegate();
-        var assets = this.document.documentData().assets();
-        var mscolors = this.convertColors(colors);
-        assets.addColors(mscolors);
-        app.refreshCurrentDocument();
+        var doc = sketch.getDocument();
+        if(doc) {
+            var assets = doc.documentData().assets();
+            var mscolors = this.convertColors(colors);
+            assets.addColors(mscolors);
+            app.refreshCurrentDocument();
+        }
     }
 
     replaceDocumentColors(colors) {
         var app = NSApp.delegate();
-        var assets = this.document.documentData().assets();
-        var mscolors = this.convertColors(colors);
-        assets.setColors([]);
-        assets.addColors(mscolors);
-        app.refreshCurrentDocument();
+        var doc = sketch.getDocument();
+        if(doc) {
+            var assets = doc.documentData().assets();
+            var mscolors = this.convertColors(colors);
+            assets.setColors([]);
+            assets.addColors(mscolors);
+            app.refreshCurrentDocument();
+        }
+
     }
 
     addGlobalColors(colors) {
@@ -94,11 +92,12 @@ class Color {
 
     applyColorToLayer(layer, color) {
         var mscolor = MSColor.colorWithRed_green_blue_alpha(color.r / 255, color.g / 255, color.b / 255, color.a / 255);
+        var clazz = layer.class();
 
-        if (layer.class() == MSTextLayer) {
+        if (clazz == MSTextLayer) {
             layer.setTextColor(mscolor);
         }
-        else if (layer.class() == MSShapeGroup) {
+        else if(clazz == MSRectangleShape || clazz == MSOvalShape || clazz == MSTriangleShape || clazz == MSStarShape || clazz == MSPolygonShape || clazz == MSShapePathLayer) {
             var fills = layer.style().fills();
             if (fills.count() <= 0) {
                 fills.addNewStylePart();

@@ -7,17 +7,7 @@ import createFolder from '../helpers/createFolder'
 
 class Typography {
     constructor() {
-        this.selection = null;
-        this.document = null;
         this.colors = {};
-    }
-
-    setSelection(selection) {
-        this.selection = selection;
-    }
-
-    setDocument(document) {
-        this.document = document;
     }
 
     downloadFonts() {
@@ -50,7 +40,7 @@ class Typography {
     }
 
     applyFontStyle(fontStyle) {
-        var selection = this.selection;
+        var selection = sketch.getSelection();
         var loop = selection.objectEnumerator();
         var item = null;
 
@@ -66,7 +56,10 @@ class Typography {
             }
         }
 
-        this.document.reloadInspector();
+        var doc = sketch.getDocument();
+        if(doc) {
+            doc.reloadInspector();
+        }
     }
 
     applyFontStyleToLayer(layer, fontStyle) {
@@ -115,6 +108,7 @@ class Typography {
             var lineHeight = parseFloat(fontStyle.line_height);
 
             msstyle.textColor = color.convertColor(colorValue);
+
             msstyle.name = (fontStyle.name || 'Untitled Style') + '/' + colorValue.name;
             msstyle.stringValue = fontStyle.example || 'Untitled Style';
             msstyle.fontSize = fontSize;
@@ -132,7 +126,7 @@ class Typography {
 
             var font = fontManager.fontWithFamily_traits_weight_size(fontStyle.family, traits, weightNumeric, 75);
             if (!font) {
-                fontManager.fontWithFamily_traits_weight_size('Times', null, weightNumeric, 75);
+                font = fontManager.fontWithFamily_traits_weight_size('Times', null, weightNumeric, 75);
             }
 
             msstyle.fontPostscriptName = font.fontName();
@@ -201,16 +195,18 @@ class Typography {
 
     addFontStyles(fontStyles) {
         var app = NSApp.delegate();
+        var doc = sketch.getDocument();
+        if(doc) {
+            var msstyles = this.convertFontStyles(fontStyles);
+            var sharedStyles = doc.documentData().layerTextStyles();
 
-        var msstyles = this.convertFontStyles(fontStyles);
-        var sharedStyles = this.document.documentData().layerTextStyles();
+            msstyles.forEach(function (msstyle) {
+                this.updateMatchingSharedStyles(sharedStyles, sharedStyles.objects(), msstyle.name(), msstyle.style());
+                this.updateLayersWithStyle(sharedStyles.objects(), msstyle.name(), msstyle.style())
+            }.bind(this));
 
-        msstyles.forEach(function (msstyle) {
-            this.updateMatchingSharedStyles(sharedStyles, sharedStyles.objects(), msstyle.name(), msstyle.style());
-            this.updateLayersWithStyle(sharedStyles.objects(), msstyle.name(), msstyle.style())
-        }.bind(this));
-
-        app.refreshCurrentDocument();
+            app.refreshCurrentDocument();
+        }
     }
 
     updateMatchingSharedStyles(sharedStyles, existingTextObjects, styleName, style) {

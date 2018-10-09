@@ -46,16 +46,6 @@
       }
     },
     {
-      "name": "SelectionChanged",
-      "identifier": "selectionchanged",
-      "script": "./commands/frontify.js",
-      "handlers": {
-        "actions": {
-          "SelectionChanged.finish": "selectionCommand"
-        }
-      }
-    },
-    {
       "name": "StartUp",
       "identifier": "startup",
       "script": "./commands/startup.js",

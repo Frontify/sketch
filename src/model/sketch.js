@@ -34,7 +34,7 @@ class Sketch {
 
     // generic search functions (from https://medium.com/sketch-app-sources/sketch-plugin-snippets-for-plugin-developers-e9e1d2ab6827)
     findLayers(predicate, container, layerType) {
-        var doc = NSDocumentController.sharedDocumentController().currentDocument();
+        var doc = this.getDocument();
         if(!doc) {
             return NSArray.array();
         }
@@ -85,6 +85,19 @@ class Sketch {
     findFirstLayer(predicate, container, layerType) {
         var filteredArray = this.findLayers(predicate, container, layerType);
         return filteredArray.firstObject();
+    }
+
+    getSelection() {
+        var doc = this.getDocument();
+        if(!doc) {
+            return NSArray.array();
+        }
+
+        return doc.selectedLayers().layers();
+    }
+
+    getDocument() {
+        return NSDocumentController.sharedDocumentController().currentDocument();
     }
 }
 

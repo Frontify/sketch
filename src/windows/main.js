@@ -229,13 +229,6 @@ export default function (context, view) {
         }
     };
 
-    mainUI.selectionChanged = function (context) {
-        color.setDocument(context.document);
-        color.setSelection(context.document.selectedLayers().layers());
-        typography.setDocument(context.document);
-        typography.setSelection(context.document.selectedLayers().layers());
-    };
-
     return mainUI;
 }
 

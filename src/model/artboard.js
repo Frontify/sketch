@@ -17,7 +17,7 @@ class Artboard {
 
                 // get artboards
                 var artboards = [];
-                var doc = NSDocumentController.sharedDocumentController().currentDocument();
+                var doc = sketch.getDocument();
 
                 if (doc) {
                     var mspage = doc.currentPage();
@@ -77,7 +77,7 @@ class Artboard {
 
     exportArtboard(artboard) {
         return new Promise(function (resolve, reject) {
-            var doc = NSDocumentController.sharedDocumentController().currentDocument();
+            var doc = sketch.getDocument();
             if (!doc) {
                 reject();
             }

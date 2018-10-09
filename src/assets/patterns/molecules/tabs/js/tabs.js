@@ -23,6 +23,7 @@ Tc.Module.Tabs = Tc.Module.extend({
 
         // open style guide
         $ctx.on('click', '.js-m-tabs__styleguide', function (e) {
+            e.stopPropagation();
             e.preventDefault();
             var $this = $(e.currentTarget);
             var url = $this.attr('href');

@@ -2,6 +2,7 @@ import readJSON from '../helpers/readJSON'
 import shaFile from '../helpers/shaFile'
 import fetch from '../helpers/fetch'
 import target from './target'
+import sketch from './sketch'
 import filemanager from './filemanager'
 
 class Source {
@@ -97,7 +98,7 @@ class Source {
                         sources: sources,
                         target: target,
                         already_added: alreadyAdded,
-                        has_document: !!NSDocumentController.sharedDocumentController().currentDocument()
+                        has_document: !!sketch.getDocument()
                     };
 
                     return data;
@@ -284,7 +285,7 @@ class Source {
     }
 
     getCurrentFilename() {
-        var doc = NSDocumentController.sharedDocumentController().currentDocument();
+        var doc = sketch.getDocument();
         var currentFilename = '';
 
         if (doc && doc.fileURL()) {
