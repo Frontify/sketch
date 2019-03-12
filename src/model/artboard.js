@@ -4,6 +4,9 @@ import sketch from './sketch'
 import target from './target';
 import filemanager from './filemanager';
 
+var threadDictionary = NSThread.mainThread().threadDictionary();
+var dom = require('sketch/dom');
+
 class Artboard {
     constructor() {
         this.pixelRatio = 2;
@@ -92,6 +95,8 @@ class Artboard {
             var exportRequest = MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(msartboard, [format], true).firstObject();
             doc.saveArtboardOrSlice_toFile(exportRequest, path);
 
+            // var artboard = dom.Artboard.fromNative(msartboard);
+
             resolve({
                 name: artboard.name,
                 ext: 'png',
@@ -103,7 +108,7 @@ class Artboard {
         }.bind(this));
     }
 
-    uploadArtboards(ui, artboards) {
+    uploadArtboards(artboards) {
         // sequence artboard export and upload
         return target.getTarget().then(function(target) {
             return artboards.reduce(function (sequence, artboard) {
@@ -118,23 +123,31 @@ class Artboard {
                             id_external: result.id_external,
                             pixel_ratio: this.pixelRatio,
                             folder: target.set.path,
-                            project: target.project.id
+                            project: target.project.id,
+                            type: 'artboard'
                         }).then(function (data) {
                             filemanager.deleteFile(result.path);
                             artboard.sha = data.sha;
                             artboard.id = data.id;
                             artboard.nochanges = false;
-                            ui.eval('artboardUploaded(' + JSON.stringify(artboard) + ')');
+                            // source file download
+                            if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
+                                threadDictionary['frontifywindow'].webContents.executeJavaScript('artboardUploaded(' + JSON.stringify(artboard) + ')');
+                            }
                             return true;
                         }).catch(function (err) {
-                            ui.eval('artboardUploadFailed(' + JSON.stringify(artboard) + ')');
+                            if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
+                                threadDictionary['frontifywindow'].webContents.executeJavaScript('artboardUploadFailed(' + JSON.stringify(artboard) + ')');
+                            }
                             return true;
                         });
                     }
                     else {
                         filemanager.deleteFile(result.path);
                         artboard.nochanges = true;
-                        ui.eval('artboardUploaded(' + JSON.stringify(artboard) + ')');
+                        if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
+                            threadDictionary['frontifywindow'].webContents.executeJavaScript('artboardUploaded(' + JSON.stringify(artboard) + ')');
+                        }
                         return true;
                     }
                 }.bind(this));
@@ -142,9 +155,11 @@ class Artboard {
         }.bind(this));
     }
 
-    showArtboards(ui) {
+    showArtboards() {
         this.getArtboards().then(function (data) {
-            ui.eval('showArtboards(' + JSON.stringify(data) + ')');
+            if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
+                threadDictionary['frontifywindow'].webContents.executeJavaScript('showArtboards(' + JSON.stringify(data) + ')');
+            }
         }.bind(this));
     }
 }

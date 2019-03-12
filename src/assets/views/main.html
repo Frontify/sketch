@@ -86,6 +86,11 @@
         artboards.render(data);
     }
 
+    function artboardUploadProgress(artboard) {
+        var artboards = application.sandbox.getModuleById($('.mod-artboards').data('terrificId'));
+        artboards.artboardUploadProgress(artboard);
+    }
+
     function artboardUploaded(artboard) {
         var artboards = application.sandbox.getModuleById($('.mod-artboards').data('terrificId'));
         artboards.artboardUploaded(artboard);
@@ -117,6 +122,11 @@
         sources.showConflict(source);
     }
 
+    function sourceUploadProgress(source) {
+        var sources = application.sandbox.getModuleById($('.mod-sources').data('terrificId'));
+        sources.sourceUploadProgress(source);
+    }
+
     function sourceUploaded(source) {
         var sources = application.sandbox.getModuleById($('.mod-sources').data('terrificId'));
         sources.sourceUploaded(source);
@@ -125,6 +135,11 @@
     function sourceUploadFailed(source) {
         var sources = application.sandbox.getModuleById($('.mod-sources').data('terrificId'));
         sources.sourceUploadFailed(source);
+    }
+
+    function sourceDownloadProgress(source) {
+        var sources = application.sandbox.getModuleById($('.mod-sources').data('terrificId'));
+        sources.sourceDownloadProgress(source);
     }
 
     function sourceDownloaded(source) {
@@ -177,7 +192,7 @@
         document.writeln('<scr' + 'ipt src="./test/target.js"></scr' + 'ipt>');
 
         // Change this to whatever you are testing
-        document.writeln('<scr' + 'ipt src="./test/artboards.js"></scr' + 'ipt>');
+        document.writeln('<scr' + 'ipt src="./test/sources.js"></scr' + 'ipt>');
     }
 </script>
 </body>

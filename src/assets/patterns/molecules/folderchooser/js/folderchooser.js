@@ -1,5 +1,3 @@
-import pluginCall from 'sketch-module-web-view/client'
-
 Tc.Module.FolderChooser = Tc.Module.extend({
     on: function (callback) {
         this.sandbox.subscribe('events', this);
@@ -19,7 +17,7 @@ Tc.Module.FolderChooser = Tc.Module.extend({
             e.preventDefault();
             var id = $content.find('.js-m-folderchooser__target').data('id');
             this.fire('closeModal', ['events']);
-            pluginCall('folderSelected', id);
+            window.postMessage('folderSelected', id);
         }.bind(this));
 
         $content.on('reset', function (e) {
@@ -29,12 +27,12 @@ Tc.Module.FolderChooser = Tc.Module.extend({
 
         $content.on('click', '.js-m-folderchooser__back', function (e) {
             var parent = $(e.currentTarget).data('parent');
-            pluginCall('changeFolder', parent);
+            window.postMessage('changeFolder', parent);
         }.bind(this));
 
         $content.on('click', '.js-m-folderchooser__item', function (e) {
             var id = $(e.currentTarget).data('id');
-            pluginCall('changeFolder', id);
+            window.postMessage('changeFolder', id);
         }.bind(this));
 
         // Add folders
@@ -45,7 +43,7 @@ Tc.Module.FolderChooser = Tc.Module.extend({
             if (folder !== '') {
                 // add new folder
                 var set = $content.find('.js-m-folderchooser__target').data('id');
-                pluginCall('addFolder', folder, set);
+                window.postMessage('addFolder', folder, set);
             }
             else {
                 $this.val('');

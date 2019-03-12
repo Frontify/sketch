@@ -13,7 +13,7 @@
             {{??}}
                 <div class="o-settings__blank">No projects found in this brand
                     <div class="m-btn-bar m-btn-bar--centered m-btn-bar--xs">
-                        <button class="a-btn a-btn--link-primary js-m-projectchooser__create" data-url="/brands/{{= it.current.brand.id }}/">Create project</button>
+                        <button class="a-btn a-btn--link-primary js-m-projectchooser__create" data-url="/brands/{{= it.current.brand.id }}/{{= it.current.brand.slug }}/projects">Create project</button>
                         <button class="state-hidden a-btn a-btn--link-primary js-m-projectchooser__refresh"><i class="icon-refresh"></i></button>
                     </div>
                 </div>

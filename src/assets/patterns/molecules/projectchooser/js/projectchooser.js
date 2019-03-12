@@ -1,5 +1,3 @@
-import pluginCall from 'sketch-module-web-view/client'
-
 Tc.Module.ProjectChooser = Tc.Module.extend({
     on: function (callback) {
         var $ctx = this.$ctx;
@@ -57,16 +55,16 @@ Tc.Module.ProjectChooser = Tc.Module.extend({
             $this.addClass('state-hidden');
             $refresh.removeClass('state-hidden');
 
-            pluginCall('openUrl', $this.data('url'));
+            window.postMessage('openUrl', $this.data('url'));
             e.preventDefault();
         }.bind(this));
 
         $content.on('click', '.js-m-projectchooser__logout', function(e) {
-            pluginCall('logout');
+            window.postMessage('logout');
         }.bind(this));
 
         $content.on('click', '.js-m-projectchooser__refresh', function(e) {
-            pluginCall('changeProject');
+            window.postMessage('changeProject');
         }.bind(this));
 
         this.fire('openModal', { modifier: 'default', $content: $content, closeable: false });
@@ -96,6 +94,6 @@ Tc.Module.ProjectChooser = Tc.Module.extend({
     save: function () {
         var data = this.settings.serialize();
         this.fire('closeModal', ['events']);
-        pluginCall('projectSelected', data);
+        window.postMessage('projectSelected', data);
     }
 });

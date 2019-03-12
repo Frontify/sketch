@@ -37,6 +37,12 @@ Additionally, if you wish to run the plugin every time it is built:
 npm run start
 ```
 
+This defaults prevents you from to many Sketch restarts
+
+```bash
+defaults write com.bohemiancoding.sketch3 AlwaysReloadScript -bool YES
+```
+
 ## Custom Configuration
 
 ### Babel

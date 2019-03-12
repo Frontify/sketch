@@ -28,24 +28,6 @@ module.exports = function (config) {
         }]
     });
 
-    config.module.rules.push({
-        /*
-        Several sketch modules clear the coscript shouldKeepAround flag, which
-        can cause the Mocha context to be prematurely destroyed, which crashes
-        Sketch. This loader removes those statements, allowing our plugin to
-        explicitly handle its own coscript lifecycle.
-        */
-        test: /node_modules\/sketch-.*\/.*\.js/,
-        loader: 'regexp-replace-loader',
-        options: {
-            match: {
-                pattern: '(coscript\\.setShouldKeepAround\\(false\\)|coscript\\.shouldKeepAround = false)',
-                flags: 'ig'
-            },
-            replaceWith: '/* REMOVED coscript shouldKeepAround false */'
-        }
-    });
-
     config.plugins.push(
         new ConcatPlugin({
             uglify: false,

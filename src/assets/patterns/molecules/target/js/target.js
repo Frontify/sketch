@@ -1,5 +1,3 @@
-import pluginCall from 'sketch-module-web-view/client'
-
 Tc.Module.Target = Tc.Module.extend({
     on: function (callback) {
         var $ctx = this.$ctx;
@@ -11,19 +9,19 @@ Tc.Module.Target = Tc.Module.extend({
             var $this = $(e.currentTarget);
             this.fire('openModal', { modifier: 'default', closeable: false, $content: $(window.tpl.loaderspinner())}, ['events']);
             this.fire('closeDropdown', $this.closest('.js-m-btn-dropdown__menu'), ['events']);
-            pluginCall('changeProject');
+            window.postMessage('changeProject');
         }.bind(this));
 
         $ctx.on('click', '.js-m-target__help', function(e) {
             e.preventDefault();
             var $this = $(e.currentTarget);
             this.fire('closeDropdown', $this.closest('.js-m-btn-dropdown__menu'), ['events']);
-            pluginCall('openUrl', $this.attr('href'), true);
+            window.postMessage('openUrl', $this.attr('href'), true);
         }.bind(this));
 
         $ctx.on('click', '.js-m-target__logout', function(e) {
             e.preventDefault();
-            pluginCall('logout');
+            window.postMessage('logout');
         }.bind(this));
 
         callback();

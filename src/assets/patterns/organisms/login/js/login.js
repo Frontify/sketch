@@ -1,5 +1,3 @@
-import pluginCall from 'sketch-module-web-view/client'
-
 Tc.Module.Login = Tc.Module.extend({
     on: function(callback) {
         var $ctx = this.$ctx;
@@ -12,7 +10,7 @@ Tc.Module.Login = Tc.Module.extend({
             var $this = $(e.currentTarget);
             var url = $this.attr('href');
 
-            pluginCall('openUrl', url, true);
+            window.postMessage('openUrl', url, true);
         }.bind(this));
 
         callback();
@@ -47,7 +45,7 @@ Tc.Module.Login = Tc.Module.extend({
 
     login: function(domain) {
         var urlParams = '/api/oauth/authorize?response_type=token&client_id=sketch&redirect_uri=https://frontify.com/sketchplugin';
-        pluginCall('memorizeDomain', domain);
+        window.postMessage('memorizeDomain', domain);
         window.location.href = domain + urlParams;
     },
 

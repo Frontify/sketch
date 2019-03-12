@@ -146,14 +146,13 @@
     background: #D7D8DB;
     box-sizing: border-box;
     display: block;
-    padding: 5px;
-    border-radius: 2px;
+    border-radius: 50%;
     text-align: center;
 }
 
 .m-artboards__icon {
-    display: inline-block;
-    vertical-align: top;
+    display: block;
+    padding: 5px;
     width: 14px;
     height: 14px;
     font-size: 14px;

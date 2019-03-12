@@ -21,15 +21,10 @@ class Sketch {
         return data;
     }
 
-    resize(ui) {
+    resize(win) {
         var viewData = this.getViewData();
+        win.setSize(viewData.width, viewData.height, true);
 
-        var frame = ui.panel.frame();
-
-        frame.size.width = viewData.width;
-        frame.size.height = viewData.height;
-
-        ui.panel.setFrame_display_animate(frame, true, true);
     }
 
     // generic search functions (from https://medium.com/sketch-app-sources/sketch-plugin-snippets-for-plugin-developers-e9e1d2ab6827)

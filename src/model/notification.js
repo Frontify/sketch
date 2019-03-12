@@ -77,6 +77,10 @@ class Notification {
                     callback(event);
                 }
             });
+
+            // Keep script around, otherwise everything will be dumped once its run
+            COScript.currentCOScript().setShouldKeepAround(true);
+
             var delegateInstance = delegate.getClassInstance();
             var sel = NSSelectorFromString('didReceiveChannelEventNotification:');
 

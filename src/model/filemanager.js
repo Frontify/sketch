@@ -85,6 +85,7 @@ class FileManager {
             project_id: info.project,
             mimetype: 'image/png',
             id: info.id,
+            id_external: info.id_external,
             filename: name,
             path: info.folder + path,
             origin: 'SKETCH'
@@ -99,7 +100,7 @@ class FileManager {
             url += info.id;
         }
 
-        return fetch(url, {method: 'POST', filepath: info.path, is_file_upload: true, body: JSON.stringify(data)});
+        return fetch(url, {method: 'POST', filepath: info.path, is_file_upload: true, type: info.type, id: info.id, id_external: info.id_external, body: JSON.stringify(data)});
     }
 
     downloadFile(info) {
@@ -109,7 +110,7 @@ class FileManager {
             return target.getTarget('sources').then(function (target) {
                 var path = target.path + info.filename;
                 if(createFolder(target.path)) {
-                    return fetch('/v1/screen/download/' + info.id, { is_file_download: true, filepath: path });
+                    return fetch('/v1/screen/download/' + info.id, { is_file_download: true, filepath: path, type: info.type, id: info.id });
                 }
             }.bind(this));
         }.bind(this));

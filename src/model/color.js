@@ -2,6 +2,8 @@ import target from './target';
 import fetch from '../helpers/fetch'
 import sketch from './sketch';
 
+var threadDictionary = NSThread.mainThread().threadDictionary();
+
 class Color {
     getColors() {
         return target.getTarget().then(function (target) {
@@ -109,9 +111,11 @@ class Color {
         }
     }
 
-    showColors(ui) {
+    showColors() {
         this.getColors().then(function (data) {
-            ui.eval('showColors(' + JSON.stringify(data) + ')');
+            if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
+                threadDictionary['frontifywindow'].webContents.executeJavaScript('showColors(' + JSON.stringify(data) + ')');
+            }
         }.bind(this));
     }
 }

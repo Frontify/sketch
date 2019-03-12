@@ -1,6 +1,9 @@
 import readJSON from './readJSON'
 import extend from '../helpers/extend'
 import fetch from 'sketch-polyfill-fetch'
+import childProcess from '@skpm/child_process';
+
+var threadDictionary = NSThread.mainThread().threadDictionary();
 
 export default function (uri, options) {
     // get token
@@ -17,9 +20,6 @@ export default function (uri, options) {
     if (options.is_file_download) {
         // download file
         return new Promise(function (resolve, reject) {
-            var task = NSTask.alloc().init();
-            task.setLaunchPath("/usr/bin/curl");
-
             var args = [];
 
             // http method
@@ -47,37 +47,38 @@ export default function (uri, options) {
             args.push('-o');
             args.push(options.filepath);
 
+            // display progress
+            args.push('-#');
+
             // uri
             args.push(token.domain + uri);
 
-            task.setArguments(args);
+            var spawn = childProcess.spawn('/usr/bin/curl', args);
 
-            var outputPipe = NSPipe.pipe();
-            var errorPipe = NSPipe.pipe();
+            spawn.on('close', function(status) {
+                if (status == 0) {
+                    resolve(options.filepath);
+                } else {
+                    console.log('File download exited with status ' + status);
+                    reject('File download failed');
+                }
+            }.bind(this));
 
-            task.setStandardOutput(outputPipe);
-            task.setStandardError(errorPipe);
-            task.launch();
-            task.waitUntilExit();
+            spawn.stderr.on('data', function(data) {
+                // get progress information
+                var progress = parseInt(data.replace(/#*/gi, '').trim());
 
-            var status = task.terminationStatus();
-
-            if (status == 0) {
-                resolve(options.filepath);
-            } else {
-                var errorData = errorPipe.fileHandleForReading().readDataToEndOfFile();
-                var errorString = NSString.alloc().initWithData_encoding(errorData, NSUTF8StringEncoding);
-                console.log(errorString);
-                reject('File download failed');
-            }
-
+                if(options.type === 'source') {
+                    if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
+                        threadDictionary['frontifywindow'].webContents.executeJavaScript('sourceDownloadProgress(' + JSON.stringify({ id: options.id, progress: progress }) + ')');
+                    }
+                }
+            }.bind(this));
         }.bind(this));
     }
     else if (options.is_file_upload) {
         // upload file
         return new Promise(function (resolve, reject) {
-            var task = NSTask.alloc().init();
-            task.setLaunchPath("/usr/bin/curl");
 
             var args = [];
             args.push('-k');
@@ -108,32 +109,41 @@ export default function (uri, options) {
                 }
             }
 
+            // display progress
+            args.push('-#');
+
             // uri
             args.push(token.domain + uri);
 
-            task.setArguments(args);
+            var spawn = childProcess.spawn('/usr/bin/curl', args);
+            var result = "";
 
-            var outputPipe = NSPipe.pipe();
-            var errorPipe = NSPipe.pipe();
+            spawn.on('close', function(status) {
+                if (status == 0) {
+                    resolve(JSON.parse(result));
+                } else {
+                    console.log('File upload exited with status ' + status);
+                    reject('File Upload failed');
+                }
+            }.bind(this));
 
-            task.setStandardOutput(outputPipe);
-            task.setStandardError(errorPipe);
-            task.launch();
-            task.waitUntilExit();
+            spawn.stdout.on('data', function(data) {
+                result += data.toString();
+            }.bind(this));
 
-            var status = task.terminationStatus();
+            spawn.stderr.on('data', function(data) {
+                // get progress information
+                var progress = parseInt(data.replace(/#*/gi, '').trim());
 
-            if (status == 0) {
-                var outputData = outputPipe.fileHandleForReading().readDataToEndOfFile();
-                var outputString = NSString.alloc().initWithData_encoding(outputData, NSUTF8StringEncoding);
-                resolve(JSON.parse(outputString));
-            } else {
-                var errorData = errorPipe.fileHandleForReading().readDataToEndOfFile();
-                var errorString = NSString.alloc().initWithData_encoding(errorData, NSUTF8StringEncoding);
-                console.log(errorString);
-                reject('File Upload failed');
-            }
-
+                if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
+                    if(options.type === 'source') {
+                        threadDictionary['frontifywindow'].webContents.executeJavaScript('sourceUploadProgress(' + JSON.stringify({ id: options.id, id_external: options.id_external, progress: progress }) + ')');
+                    }
+                    else if(options.type === 'artboard') {
+                        threadDictionary['frontifywindow'].webContents.executeJavaScript('artboardUploadProgress(' + JSON.stringify({ id: options.id,  id_external: options.id_external, progress: progress }) + ')');
+                    }
+                }
+            }.bind(this));
         }.bind(this));
     }
     else {

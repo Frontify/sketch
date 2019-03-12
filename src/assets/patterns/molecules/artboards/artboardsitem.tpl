@@ -2,7 +2,7 @@
     <div class="m-artboards__type">
         <span class="m-artboards__badge js-m-artboards__badge">
             {{? it.state === 'uploading'}}
-                <i class="m-artboards__icon icon-spinner anim-spin"></i>
+                {{= window.tpl.progress() }}
             {{?? it.state === 'success'}}
                 <i class="m-artboards__icon fi-image"></i>
             {{?? it.state === 'failed'}}

@@ -1,5 +1,3 @@
-import pluginCall from 'sketch-module-web-view/client'
-
 Tc.Module.Artboards = Tc.Module.extend({
     on: function (callback) {
         var $ctx = this.$ctx;
@@ -15,7 +13,7 @@ Tc.Module.Artboards = Tc.Module.extend({
 
             // open modal with loader
             this.fire('openModal', { modifier: 'default', closeable: false, $content: $(window.tpl.loaderspinner())}, ['events']);
-            pluginCall('changeFolder');
+            window.postMessage('changeFolder');
         }.bind(this));
 
         $ctx.on('click', '.js-m-artboards__upload', function (e) {
@@ -29,7 +27,7 @@ Tc.Module.Artboards = Tc.Module.extend({
             artboard.state = 'uploading';
             this.updateItem($item, artboard);
 
-            pluginCall('uploadArtboard', artboard);
+            window.postMessage('uploadArtboard', artboard);
         }.bind(this));
 
         $ctx.on('click', '.js-m-artboards__upload-all', function (e) {
@@ -52,7 +50,7 @@ Tc.Module.Artboards = Tc.Module.extend({
 
             // give button time to gray out
             setTimeout(function() {
-                pluginCall('uploadArtboards', artboards);
+                window.postMessage('uploadArtboards', artboards);
             }, 20);
         }.bind(this));
 
@@ -63,7 +61,7 @@ Tc.Module.Artboards = Tc.Module.extend({
             var url = $this.data('url');
 
             if(url) {
-                pluginCall('openUrl', url);
+                window.postMessage('openUrl', url);
             }
         }.bind(this));
 
@@ -75,7 +73,7 @@ Tc.Module.Artboards = Tc.Module.extend({
            var url = $this.attr('href');
 
            if(url) {
-               pluginCall('openUrl', url);
+               window.postMessage('openUrl', url);
            }
         }.bind(this));
 
@@ -103,6 +101,13 @@ Tc.Module.Artboards = Tc.Module.extend({
         return this.artboards.find(function (artboard) {
             return artboard.id_external == id_external;
         }.bind(this));
+    },
+
+
+    artboardUploadProgress: function (data) {
+        var $ctx = this.$ctx;
+        var $item = $ctx.find('.js-m-artboards__item[data-id-external="' + data.id_external + '"]');
+        $item.find('.js-a-progress__progress').css({'stroke-dasharray': data.progress + ' 100'});
     },
 
     artboardsUploaded: function () {
@@ -150,7 +155,7 @@ Tc.Module.Artboards = Tc.Module.extend({
     onTabSwitched(data) {
         if(data.id === 'artboards') {
             this.$ctx.html(window.tpl.loaderspinner());
-            pluginCall('showArtboards');
+            window.postMessage('showArtboards');
         }
     }
 });

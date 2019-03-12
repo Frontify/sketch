@@ -4,6 +4,8 @@ import writeJSON from "../helpers/writeJSON";
 import project from "./project";
 import notification from "./notification";
 
+var threadDictionary = NSThread.mainThread().threadDictionary();
+
 class Target {
     getTarget(view) {
         // load brand and project name
@@ -97,14 +99,16 @@ class Target {
         }.bind(this));
     }
 
-    showTarget(ui) {
+    showTarget() {
         this.getTarget().then(function (data) {
             if (!data) {
-                ui.eval('showNoProjects()');
+                if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
+                    threadDictionary['frontifywindow'].webContents.executeJavaScript('showNoProjects()');
+                }
             }
             else {
                 if (data.target_changed) {
-                    project.showFolderChooser(ui);
+                    project.showFolderChooser();
                 }
 
                 // write target to JSON
@@ -113,7 +117,9 @@ class Target {
                 target.project = data.project.id;
                 writeJSON('target', target);
 
-                ui.eval('showTarget(' + JSON.stringify(data) + ')');
+                if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
+                    threadDictionary['frontifywindow'].webContents.executeJavaScript('showTarget(' + JSON.stringify(data) + ')');
+                }
             }
         }.bind(this));
     }

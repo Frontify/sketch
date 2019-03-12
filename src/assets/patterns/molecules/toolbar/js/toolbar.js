@@ -1,23 +1,21 @@
-import pluginCall from 'sketch-module-web-view/client'
-
 Tc.Module.Toolbar = Tc.Module.extend({
     on: function(callback) {
         var $ctx = this.$ctx;
 
         $ctx.on('click', '.js-m-toolbar__login', function() {
-            pluginCall('showLogin')
+            window.postMessage('showLogin')
         }.bind(this));
 
         $ctx.on('click', '.js-m-toolbar__profile', function() {
-            pluginCall('showProfile')
+            window.postMessage('showProfile')
         }.bind(this));
 
         $ctx.on('click', '.js-m-toolbar__artboards', function() {
-            pluginCall('showArtboards')
+            window.postMessage('showArtboards')
         }.bind(this));
 
         $ctx.on('click', '.js-m-toolbar__sources', function() {
-            pluginCall('showSources')
+            window.postMessage('showSources')
         }.bind(this));
 
         callback();

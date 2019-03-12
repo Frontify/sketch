@@ -1,5 +1,3 @@
-import pluginCall from 'sketch-module-web-view/client'
-
 Tc.Module.Error = Tc.Module.extend({
     on: function (callback) {
         var $ctx = this.$ctx;
@@ -19,7 +17,7 @@ Tc.Module.Error = Tc.Module.extend({
                 var url = $this.data('url');
 
                 if(url) {
-                    pluginCall('openUrl', url);
+                    window.postMessage('openUrl', url);
                 }
             }.bind(this));
         }

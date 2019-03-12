@@ -1,16 +1,17 @@
 import main from '../windows/main';
 import executeSafely from '../helpers/executeSafely';
 import source from '../model/source';
+import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote'
 
 export function runCommand(context) {
     var threadDictionary = NSThread.mainThread().threadDictionary();
 
     executeSafely(context, function () {
-        if(!threadDictionary['frontifymainui']) {
-            threadDictionary['frontifymainui'] = main(context, 'artboards');
+        if(!threadDictionary['frontifywindow']) {
+            threadDictionary['frontifywindow'] = main(context, 'artboards');
         }
         else {
-            threadDictionary['frontifymainui'].close();
+            threadDictionary['frontifywindow'].close();
         }
     });
 }
@@ -45,9 +46,7 @@ export function closeCommand(context) {
 }
 
 function refresh() {
-    var threadDictionary = NSThread.mainThread().threadDictionary();
-
-    if (threadDictionary['frontifymainui']) {
-        threadDictionary['frontifymainui'].eval('refresh()');
+    if (isWebviewPresent('frontifymain')) {
+        sendToWebview('frontifymain', 'refresh()');
     }
 }

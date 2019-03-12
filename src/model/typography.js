@@ -5,6 +5,8 @@ import filemanager from './filemanager';
 import fetch from '../helpers/fetch';
 import createFolder from '../helpers/createFolder'
 
+var threadDictionary = NSThread.mainThread().threadDictionary();
+
 class Typography {
     constructor() {
         this.colors = {};
@@ -245,9 +247,11 @@ class Typography {
         }
     }
 
-    showTypography(ui) {
+    showTypography() {
         this.getFontStyles().then(function (data) {
-            ui.eval('showTypography(' + JSON.stringify(data) + ')');
+            if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
+                threadDictionary['frontifywindow'].webContents.executeJavaScript('showTypography(' + JSON.stringify(data) + ')');
+            }
         }.bind(this));
     }
 }

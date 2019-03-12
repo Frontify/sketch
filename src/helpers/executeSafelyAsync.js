@@ -2,7 +2,7 @@ export default async function executeSafelyAsync(context, func) {
     try {
         await func(context)
     } catch (e) {
-        console.err(e);
+        console.error(e);
     }
 }
 

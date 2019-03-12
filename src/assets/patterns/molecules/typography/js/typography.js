@@ -1,5 +1,3 @@
-import pluginCall from 'sketch-module-web-view/client'
-
 Tc.Module.Typography = Tc.Module.extend({
     on: function (callback) {
         var $ctx = this.$ctx;
@@ -15,7 +13,7 @@ Tc.Module.Typography = Tc.Module.extend({
             var id = $(e.currentTarget).closest('.js-m-typography__group').data('id');
             var fontStyles = this.getFontStyles(id);
             this.showSuccess(id);
-            pluginCall('addFontStyles', fontStyles);
+            window.postMessage('addFontStyles', fontStyles);
         }.bind(this));
 
         // Apply font style
@@ -34,7 +32,7 @@ Tc.Module.Typography = Tc.Module.extend({
                    }
                }
             }
-            pluginCall('applyFontStyle', fontStyle);
+            window.postMessage('applyFontStyle', fontStyle);
         }.bind(this));
 
         // change preview color
@@ -62,7 +60,7 @@ Tc.Module.Typography = Tc.Module.extend({
         // download fonts
         $ctx.on('click', '.js-m-typography__fonts-download', function (e) {
             e.stopPropagation();
-            pluginCall('downloadFonts');
+            window.postMessage('downloadFonts');
         }.bind(this));
 
         // expand / collapse button visibility
@@ -118,7 +116,7 @@ Tc.Module.Typography = Tc.Module.extend({
             var $this = $(e.currentTarget);
             var url = $this.data('url');
             if (url) {
-                pluginCall('openUrl', url, true);
+                window.postMessage('openUrl', url, true);
             }
         }.bind(this));
 
@@ -127,7 +125,7 @@ Tc.Module.Typography = Tc.Module.extend({
             var $this = $(e.currentTarget);
             var url = $this.data('url');
             if (url) {
-                pluginCall('openUrl', url);
+                window.postMessage('openUrl', url);
             }
         }.bind(this));
 
@@ -177,7 +175,7 @@ Tc.Module.Typography = Tc.Module.extend({
     onTabSwitched(data) {
         if (data.id === 'typography') {
             this.$ctx.html(window.tpl.loaderspinner());
-            pluginCall('showTypography');
+            window.postMessage('showTypography');
         }
     }
 });

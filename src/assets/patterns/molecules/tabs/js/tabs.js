@@ -1,5 +1,3 @@
-import pluginCall from 'sketch-module-web-view/client'
-
 Tc.Module.Tabs = Tc.Module.extend({
     on: function (callback) {
         var $ctx = this.$ctx;
@@ -28,7 +26,7 @@ Tc.Module.Tabs = Tc.Module.extend({
             var $this = $(e.currentTarget);
             var url = $this.attr('href');
             if(url) {
-                pluginCall('openUrl', url);
+                window.postMessage('openUrl', url);
             }
         }.bind(this));
 

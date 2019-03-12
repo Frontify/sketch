@@ -1,5 +1,3 @@
-import pluginCall from 'sketch-module-web-view/client'
-
 Tc.Module.Colors = Tc.Module.extend({
     on: function (callback) {
         var $ctx = this.$ctx;
@@ -21,7 +19,7 @@ Tc.Module.Colors = Tc.Module.extend({
                 a: $this.data('color-a')
             };
 
-            pluginCall('applyColor', color);
+            window.postMessage('applyColor', color);
         }.bind(this));
 
 
@@ -30,7 +28,7 @@ Tc.Module.Colors = Tc.Module.extend({
             var $this = $(e.currentTarget);
             var url = $this.data('url');
             if (url) {
-                pluginCall('openUrl', url, true);
+                window.postMessage('openUrl', url, true);
             }
         }.bind(this));
 
@@ -39,7 +37,7 @@ Tc.Module.Colors = Tc.Module.extend({
             var $this = $(e.currentTarget);
             var url = $this.data('url');
             if (url) {
-                pluginCall('openUrl', url);
+                window.postMessage('openUrl', url);
             }
         }.bind(this));
 
@@ -48,28 +46,28 @@ Tc.Module.Colors = Tc.Module.extend({
             var id = $(e.currentTarget).closest('.js-m-colors__palette').data('id');
             var colors = this.getColors(id);
             this.showSuccess(id);
-            pluginCall('addDocumentColors', colors);
+            window.postMessage('addDocumentColors', colors);
         }.bind(this));
 
         $ctx.on('click', '.js-m-colors__document-replace', function (e) {
             var id = $(e.currentTarget).closest('.js-m-colors__palette').data('id');
             var colors = this.getColors(id);
             this.showSuccess(id);
-            pluginCall('replaceDocumentColors', colors);
+            window.postMessage('replaceDocumentColors', colors);
         }.bind(this));
 
         $ctx.on('click', '.js-m-colors__global-add', function (e) {
             var id = $(e.currentTarget).closest('.js-m-colors__palette').data('id');
             var colors = this.getColors(id);
             this.showSuccess(id);
-            pluginCall('addGlobalColors', colors);
+            window.postMessage('addGlobalColors', colors);
         }.bind(this));
 
         $ctx.on('click', '.js-m-colors__global-replace', function (e) {
             var id = $(e.currentTarget).closest('.js-m-colors__palette').data('id');
             var colors = this.getColors(id);
             this.showSuccess(id);
-            pluginCall('replaceGlobalColors', colors);
+            window.postMessage('replaceGlobalColors', colors);
         }.bind(this));
 
         // expand / collapse button visibility
@@ -157,7 +155,7 @@ Tc.Module.Colors = Tc.Module.extend({
     onTabSwitched(data) {
         if (data.id === 'colors') {
             this.$ctx.html(window.tpl.loaderspinner());
-            pluginCall('showColors');
+            window.postMessage('showColors');
         }
     }
 });

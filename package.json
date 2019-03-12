@@ -21,21 +21,23 @@
     "postinstall": "npm run build && skpm-link"
   },
   "devDependencies": {
-    "@skpm/builder": "^0.2.12",
-    "@skpm/extract-loader": "^1.0.1",
-    "copy-webpack-plugin": "^4.4.2",
-    "css-loader": "^0.28.9",
+    "@skpm/builder": "^0.5.15",
+    "@skpm/extract-loader": "^2.0.2",
+    "copy-webpack-plugin": "^4.6.0",
+    "css-loader": "^0.28.11",
     "dot-tpl-loader": "^1.2.1",
-    "file-loader": "^1.1.6",
+    "file-loader": "^1.1.11",
     "html-loader": "^0.5.5",
     "regexp-replace-loader": "^1.0.1",
     "style-loader": "^0.19.1",
-    "webpack-concat-plugin": "^2.4.2"
+    "webpack-concat-plugin": "^3.0.0"
   },
   "resources": [
     "src/assets/js/*.js"
   ],
   "dependencies": {
-    "sketch-module-web-view": "^0.2.6"
+    "@skpm/child_process": "^0.3.1",
+    "mocha-js-delegate": "^0.1.1",
+    "sketch-module-web-view": "^2.1.7"
   }
 }

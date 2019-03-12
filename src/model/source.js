@@ -5,6 +5,8 @@ import target from './target'
 import sketch from './sketch'
 import filemanager from './filemanager'
 
+var threadDictionary = NSThread.mainThread().threadDictionary();
+
 class Source {
     constructor() {
     }
@@ -166,9 +168,11 @@ class Source {
         }.bind(this))
     }
 
-    showSources(ui) {
+    showSources() {
         return this.getSources().then(function (data) {
-            ui.eval('showSources(' + JSON.stringify(data) + ')');
+            if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
+                threadDictionary['frontifywindow'].webContents.executeJavaScript('showSources(' + JSON.stringify(data) + ')');
+            }
             return true;
         }.bind(this));
     }
@@ -214,33 +218,38 @@ class Source {
         });
     }
 
-    pushSource(ui, source) {
+    pushSource(source) {
         return target.getTarget('sources').then(function (target) {
-
             // map source to file structure
             var file = {
                 path: target.path + source.filename,
                 name: source.filename,
                 id: source.id,
+                id_external: source.id,
                 folder: target.set.path,
-                project: target.project.id
+                project: target.project.id,
+                type: 'source'
             };
 
             return filemanager.uploadFile(file).then(function (data) {
                 file.id = data.id;
-                ui.eval('sourceUploaded(' + JSON.stringify(file) + ')');
+                if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
+                    threadDictionary['frontifywindow'].webContents.executeJavaScript('sourceUploaded(' + JSON.stringify(file) + ')');
+                }
 
                 filemanager.updateAssetStatus(target.project.id, data);
 
                 return true;
             }.bind(this));
         }.bind(this)).catch(function (err) {
-            ui.eval('sourceUploadFailed(' + JSON.stringify(source) + ')');
+            if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
+                threadDictionary['frontifywindow'].webContents.executeJavaScript('sourceUploadFailed(' + JSON.stringify(source) + ')');
+            }
             return true;
         }.bind(this));
     }
 
-    addSource(ui, source) {
+    addSource(source) {
         return target.getTarget('sources').then(function (target) {
 
             // map source to file structure
@@ -248,8 +257,10 @@ class Source {
                 path: target.path + source.filename,
                 name: source.filename,
                 id: null,
+                id_external: source.id,
                 folder: target.set.path,
-                project: target.project.id
+                project: target.project.id,
+                type: 'source'
             };
 
             return filemanager.uploadFile(file).then(function (data) {
@@ -257,21 +268,27 @@ class Source {
                 filemanager.updateAssetStatus(target.project.id, data);
 
                 // reload source file list
-                return this.showSources(ui);
+                return this.showSources();
             }.bind(this));
         }.bind(this)).catch(function (err) {
-            ui.eval('sourceUploadFailed(' + JSON.stringify(source) + ')');
+            if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
+                threadDictionary['frontifywindow'].webContents.executeJavaScript('sourceUploadFailed(' + JSON.stringify(source) + ')');
+            }
             return true;
         }.bind(this));
     }
 
-    addCurrentFile(ui) {
+    addCurrentFile() {
         if (!filemanager.isCurrentSaved()) {
             if (filemanager.saveCurrent()) {
-                ui.eval('refresh()');
+                if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
+                    threadDictionary['frontifywindow'].webContents.executeJavaScript('refresh()');
+                }
             }
         } else {
-            ui.eval('showSourcesHowTo()');
+            if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
+                threadDictionary['frontifywindow'].webContents.executeJavaScript('showSourcesHowTo()');
+            }
         }
     }
 

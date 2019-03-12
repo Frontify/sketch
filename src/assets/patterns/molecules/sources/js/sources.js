@@ -1,5 +1,3 @@
-import pluginCall from 'sketch-module-web-view/client'
-
 Tc.Module.Sources = Tc.Module.extend({
     on: function (callback) {
         var $ctx = this.$ctx;
@@ -16,7 +14,7 @@ Tc.Module.Sources = Tc.Module.extend({
 
             // open modal with loader
             this.fire('openModal', {modifier: 'default', closeable: false, $content: $(window.tpl.loaderspinner())}, ['events']);
-            pluginCall('changeFolder');
+            window.postMessage('changeFolder');
         }.bind(this));
 
         $ctx.on('click', '.js-m-sources__add', function (e) {
@@ -30,7 +28,7 @@ Tc.Module.Sources = Tc.Module.extend({
             source.state = 'uploading';
             this.updateItem($item, source);
 
-            pluginCall('addSource', source);
+            window.postMessage('addSource', source);
         }.bind(this));
 
         $ctx.on('click', '.js-m-sources__push', function (e) {
@@ -44,7 +42,7 @@ Tc.Module.Sources = Tc.Module.extend({
             source.state = 'pushing';
             this.updateItem($item, source);
 
-            pluginCall('pushSource', source);
+            window.postMessage('pushSource', source);
         }.bind(this));
 
         $ctx.on('click', '.js-m-sources__pull', function (e) {
@@ -58,7 +56,7 @@ Tc.Module.Sources = Tc.Module.extend({
             source.state = 'pulling';
             this.updateItem($item, source);
 
-            pluginCall('pullSource', source);
+            window.postMessage('pullSource', source);
         }.bind(this));
 
         $ctx.on('click', '.js-m-sources__conflict', function (e) {
@@ -66,7 +64,7 @@ Tc.Module.Sources = Tc.Module.extend({
 
             var $this = $(e.currentTarget);
             var $item = $this.closest('.js-m-sources__item');
-            pluginCall('resolveConflict', $item.data('id'));
+            window.postMessage('resolveConflict', $item.data('id'));
         }.bind(this));
 
         $ctx.on('click', '.js-m-sources__open', function (e) {
@@ -79,7 +77,7 @@ Tc.Module.Sources = Tc.Module.extend({
                 source.state = 'opening';
                 this.updateItem($item, source);
 
-                pluginCall('openSource', source);
+                window.postMessage('openSource', source);
             }
         }.bind(this));
 
@@ -94,7 +92,7 @@ Tc.Module.Sources = Tc.Module.extend({
             source.state = 'downloading';
             this.updateItem($item, source);
 
-            pluginCall('downloadSource', source);
+            window.postMessage('downloadSource', source);
         }.bind(this));
 
         $ctx.on('click', '.js-m-sources__add-current', function (e) {
@@ -102,14 +100,14 @@ Tc.Module.Sources = Tc.Module.extend({
 
             // give button time to gray out
             setTimeout(function () {
-                pluginCall('addCurrentFile');
+                window.postMessage('addCurrentFile');
             }, 20);
         }.bind(this));
 
         $ctx.on('click', '.js-m-sources__finder', function (e) {
             e.stopPropagation();
 
-            pluginCall('openFinder');
+            window.postMessage('openFinder');
         }.bind(this));
 
         callback();
@@ -123,6 +121,12 @@ Tc.Module.Sources = Tc.Module.extend({
         return this.sources.find(function (source) {
             return source.id == id;
         }.bind(this));
+    },
+
+    sourceUploadProgress: function (data) {
+        var $ctx = this.$ctx;
+        var $item = $ctx.find('.js-m-sources__item[data-id="' + data.id_external + '"]');
+        $item.find('.js-a-progress__progress').css({'stroke-dasharray': data.progress + ' 100'});
     },
 
     sourceUploaded: function (data) {
@@ -156,6 +160,12 @@ Tc.Module.Sources = Tc.Module.extend({
         }
 
         this.updateItem($item, source);
+    },
+
+    sourceDownloadProgress: function (data) {
+        var $ctx = this.$ctx;
+        var $item = $ctx.find('.js-m-sources__item[data-id="' + data.id + '"]');
+        $item.find('.js-a-progress__progress').css({'stroke-dasharray': data.progress + ' 100'});
     },
 
     sourceDownloaded: function (data) {
@@ -209,7 +219,7 @@ Tc.Module.Sources = Tc.Module.extend({
     onTabSwitched(data) {
         if (data.id === 'sources') {
             this.$ctx.html(window.tpl.loaderspinner());
-            pluginCall('showSources');
+            window.postMessage('showSources');
         }
     },
 
@@ -222,7 +232,7 @@ Tc.Module.Sources = Tc.Module.extend({
         source.state = 'pushing';
         this.updateItem($item, source);
 
-        pluginCall('pushSource', source);
+        window.postMessage('pushSource', source);
     },
 
     onPullChanges(data) {
@@ -234,6 +244,6 @@ Tc.Module.Sources = Tc.Module.extend({
         source.state = 'pulling';
         this.updateItem($item, source);
 
-        pluginCall('pullSource', source);
+        window.postMessage('pullSource', source);
     }
 });

@@ -1,6 +1,8 @@
 import fetch from '../helpers/fetch'
 import target from './target';
 
+var threadDictionary = NSThread.mainThread().threadDictionary();
+
 class Project {
     constructor() {
     }
@@ -28,19 +30,23 @@ class Project {
        }.bind(this));
     }
 
-    showProjectChooser(ui) {
+    showProjectChooser() {
         this.getProjects().then(function (brands) {
             target.getTarget().then(function (target) {
                 target = target || {};
-                ui.eval('showProjectChooser(' + JSON.stringify(brands) + ', ' + JSON.stringify(target) + ')');
+                if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
+                    threadDictionary['frontifywindow'].webContents.executeJavaScript('showProjectChooser(' + JSON.stringify(brands) + ', ' + JSON.stringify(target) + ')');
+                }
             }.bind(this));
         }.bind(this));
     }
 
-    showFolderChooser(ui, folder, view) {
+    showFolderChooser(folder, view) {
         target.getTarget(view).then(function (target) {
             this.getFolders(folder >= 0 ? folder : target.set.id).then(function (folders) {
-                ui.eval('showFolderChooser(' + JSON.stringify(folders) + ', ' + JSON.stringify(target) + ')');
+                if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
+                    threadDictionary['frontifywindow'].webContents.executeJavaScript('showFolderChooser(' + JSON.stringify(folders) + ', ' + JSON.stringify(target) + ')');
+                }
             }.bind(this));
         }.bind(this));
     }

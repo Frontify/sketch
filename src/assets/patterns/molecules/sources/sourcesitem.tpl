@@ -2,7 +2,7 @@
     <div class="m-sources__type">
         <span class="m-sources__badge">
             {{? it.state === 'uploading' || it.state === 'downloading' || it.state === 'pushing' || it.state === 'pulling'}}
-                <i class="m-sources__icon icon-spinner anim-spin"></i>
+                {{= window.tpl.progress() }}
             {{?? it.state === 'push'}}
                 <i class="m-sources__icon fi-arrow-up"></i>
             {{?? it.state === 'pull' || it.state === 'new' }}

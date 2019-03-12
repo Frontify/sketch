@@ -1,5 +1,3 @@
-import pluginCall from 'sketch-module-web-view/client'
-
 Tc.Module.Howto = Tc.Module.extend({
     on: function (callback) {
         var $ctx = this.$ctx;
@@ -10,7 +8,7 @@ Tc.Module.Howto = Tc.Module.extend({
             e.preventDefault();
             this.fire('closeModal', ['events']);
 
-            pluginCall('moveCurrentFile');
+            window.postMessage('moveCurrentFile');
         }.bind(this));
 
         callback();

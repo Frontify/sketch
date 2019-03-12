@@ -1,5 +1,3 @@
-import pluginCall from 'sketch-module-web-view/client'
-
 Tc.Module.Conflict = Tc.Module.extend({
     on: function (callback) {
         var $ctx = this.$ctx;
