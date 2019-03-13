@@ -191,3 +191,16 @@
     color: #AFB1B7;
     font-weight: 100;
 }
+
+.m-artboards__no-results {
+    display: none;
+    position: absolute;
+    width: 100%;
+    height: 50%;
+    align-items: center;
+    justify-content: center;
+}
+
+.m-artboards__no-results.state-visible {
+    display: flex;
+}

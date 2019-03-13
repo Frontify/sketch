@@ -1,5 +1,5 @@
 Tc.Module.Artboards = Tc.Module.extend({
-    on: function (callback) {
+    on: function(callback) {
         var $ctx = this.$ctx;
 
         this.sandbox.subscribe('events', this);
@@ -12,11 +12,15 @@ Tc.Module.Artboards = Tc.Module.extend({
             e.stopPropagation();
 
             // open modal with loader
-            this.fire('openModal', { modifier: 'default', closeable: false, $content: $(window.tpl.loaderspinner())}, ['events']);
+            this.fire('openModal', {
+                modifier: 'default',
+                closeable: false,
+                $content: $(window.tpl.loaderspinner())
+            }, ['events']);
             window.postMessage('changeFolder');
         }.bind(this));
 
-        $ctx.on('click', '.js-m-artboards__upload', function (e) {
+        $ctx.on('click', '.js-m-artboards__upload', function(e) {
             e.stopPropagation();
 
             var $this = $(e.currentTarget);
@@ -30,14 +34,14 @@ Tc.Module.Artboards = Tc.Module.extend({
             window.postMessage('uploadArtboard', artboard);
         }.bind(this));
 
-        $ctx.on('click', '.js-m-artboards__upload-all', function (e) {
+        $ctx.on('click', '.js-m-artboards__upload-all', function(e) {
             e.stopPropagation();
 
             var artboards = [];
 
             $ctx.find('.js-m-artboards__upload-all').attr('disabled', 'disabled');
 
-            $.each($ctx.find('.js-m-artboards__item'), function (index, item) {
+            $.each($ctx.find('.js-m-artboards__item'), function(index, item) {
                 var $item = $(item);
                 var artboard = this.getArtboard($item.data('idExternal'));
                 artboard.state = 'uploading';
@@ -60,35 +64,35 @@ Tc.Module.Artboards = Tc.Module.extend({
             var $this = $(e.currentTarget);
             var url = $this.data('url');
 
-            if(url) {
+            if (url) {
                 window.postMessage('openUrl', url);
             }
         }.bind(this));
 
         $ctx.on('click', '.js-m-artboards__annotation', function(e) {
-           e.stopPropagation();
-           e.preventDefault();
+            e.stopPropagation();
+            e.preventDefault();
 
-           var $this = $(e.currentTarget);
-           var url = $this.attr('href');
+            var $this = $(e.currentTarget);
+            var url = $this.attr('href');
 
-           if(url) {
-               window.postMessage('openUrl', url);
-           }
+            if (url) {
+                window.postMessage('openUrl', url);
+            }
         }.bind(this));
 
         callback();
     },
 
-    updateItem: function ($item, artboard) {
+    updateItem: function($item, artboard) {
         var $replaceItem = $(window.tpl.artboardsitem(artboard));
         $item.replaceWith($replaceItem);
 
-        if(artboard.state === 'success') {
+        if (artboard.state === 'success') {
             // flash icon green
             var $badge = $replaceItem.find('.js-m-artboards__badge');
             $badge.velocity({backgroundColor: '#A3CE62'}, {
-                duration: 200, complete: function () {
+                duration: 200, complete: function() {
                     $badge.velocity('reverse', {
                         duration: 200, delay: 1000
                     });
@@ -97,25 +101,25 @@ Tc.Module.Artboards = Tc.Module.extend({
         }
     },
 
-    getArtboard: function (id_external) {
-        return this.artboards.find(function (artboard) {
+    getArtboard: function(id_external) {
+        return this.artboards.find(function(artboard) {
             return artboard.id_external == id_external;
         }.bind(this));
     },
 
 
-    artboardUploadProgress: function (data) {
+    artboardUploadProgress: function(data) {
         var $ctx = this.$ctx;
         var $item = $ctx.find('.js-m-artboards__item[data-id-external="' + data.id_external + '"]');
         $item.find('.js-a-progress__progress').css({'stroke-dasharray': data.progress + ' 100'});
     },
 
-    artboardsUploaded: function () {
+    artboardsUploaded: function() {
         var $ctx = this.$ctx;
         $ctx.find('.js-m-artboards__upload-all').removeAttr('disabled');
     },
 
-    artboardUploaded: function (data) {
+    artboardUploaded: function(data) {
         var $ctx = this.$ctx;
         var $item = $ctx.find('.js-m-artboards__item[data-id-external="' + data.id_external + '"]');
 
@@ -135,7 +139,7 @@ Tc.Module.Artboards = Tc.Module.extend({
 
     },
 
-    artboardUploadFailed: function (data) {
+    artboardUploadFailed: function(data) {
         var $ctx = this.$ctx;
         var $item = $ctx.find('.js-m-artboards__item[data-id-external="' + data.id_external + '"]');
 
@@ -146,14 +150,35 @@ Tc.Module.Artboards = Tc.Module.extend({
         this.updateItem($item, artboard);
     },
 
-    render: function (data) {
+    render: function(data) {
         var $ctx = this.$ctx;
         this.artboards = data.artboards;
         $ctx.html(window.tpl.artboardslist(data));
+
+        // initialize search
+        try {
+            var jets = new Jets({
+                searchTag: '.js-m-artboards__search',
+                contentTag: '.js-m-artboards__list',
+                didSearch: function(search_phrase) {
+                    var $nr = this.$ctx.find('.js-m-artboards__no-results');
+                    var hasResults = this.$ctx.find('.js-m-artboards__item:visible').length;
+                    if (!hasResults) {
+                        $nr.addClass('state-visible');
+                    }
+                    else {
+                        $nr.removeClass('state-visible');
+
+                    }
+                }.bind(this)
+            });
+        } catch (e) {
+            // prevent sketch from crashing
+        }
     },
 
     onTabSwitched(data) {
-        if(data.id === 'artboards') {
+        if (data.id === 'artboards') {
             this.$ctx.html(window.tpl.loaderspinner());
             window.postMessage('showArtboards');
         }

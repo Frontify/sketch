@@ -25,13 +25,13 @@ export default function () {
                             source.getCurrentAsset().then(function (asset) {
                                 if ('' + asset.id == '' + eventData.screen) {
                                     user.getUser().then(function (userData) {
-                                        // if ('' + eventData.actor.id != '' + userData.id) {
+                                        if ('' + eventData.actor.id != '' + userData.id) {
                                             notification.showNotification({
                                                 title: 'You are not alone',
                                                 image: eventData.actor.image,
                                                 description: eventData.actor.name + ' is currently working on ' + asset.filename + '. This might lead to conflicts.'
                                             });
-                                        // }
+                                        }
                                     }.bind(this));
                                 }
                             }.bind(this));

@@ -1,4 +1,4 @@
-<li class="m-sources__item js-m-sources__item clearfix state-{{= it.state }} {{? !(it.current || it.state === 'new' || it.state === 'opening' || it.state === 'downloading' || it.state === 'uploading' || it.state === 'pushing' || it.state === 'pulling')}}js-m-sources__open{{?}}" data-id="{{= it.id || '' }}">
+<li class="m-sources__item js-m-sources__item clearfix state-{{= it.state }} {{? !(it.current || it.state === 'new' || it.state === 'opening' || it.state === 'downloading' || it.state === 'uploading' || it.state === 'pushing' || it.state === 'pulling')}}js-m-sources__open{{?}}" data-id="{{= it.id || '' }}" data-jets="{{! it.filename.toLowerCase() }}">
     <div class="m-sources__type">
         <span class="m-sources__badge">
             {{? it.state === 'uploading' || it.state === 'downloading' || it.state === 'pushing' || it.state === 'pulling'}}

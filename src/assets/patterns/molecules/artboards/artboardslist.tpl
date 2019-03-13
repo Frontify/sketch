@@ -17,11 +17,15 @@
     </a>
 </div>
 {{? it.artboards.length > 0 }}
-<ul class="m-artboards__list">
-    {{~ it.artboards :artboard }}
-        {{= window.tpl.artboardsitem(artboard) }}
-    {{~}}
-</ul>
+    {{= window.tpl.search({ label: 'Search artboards', classes: 'js-m-artboards__search'}) }}
+    <ul class="m-artboards__list js-m-artboards__list">
+        {{~ it.artboards :artboard }}
+            {{= window.tpl.artboardsitem(artboard) }}
+        {{~}}
+    </ul>
+    <div class="o-settings__blank m-artboards__no-results js-m-artboards__no-results">
+        No matching artboards found
+    </div>
 {{??}}
    <div class="o-settings__blank">
        No artboards found

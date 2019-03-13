@@ -19,6 +19,11 @@ Tc.Module.Error = Tc.Module.extend({
                 if(url) {
                     window.postMessage('openUrl', url);
                 }
+
+            }.bind(this));
+
+            $content.on('click', '.js-m-error__logout', function(e) {
+                window.postMessage('logout');
             }.bind(this));
         }
     }

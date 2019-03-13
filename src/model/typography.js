@@ -32,6 +32,7 @@ class Typography {
                 this.colors = data.colors;
 
                 // only include installable fonts
+                data.fonts = data.fonts || [];
                 data.fonts = data.fonts.filter(function(font) {
                     return !!font.install_name;
                 });
