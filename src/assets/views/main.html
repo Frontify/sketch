@@ -80,6 +80,13 @@
         tabs.refresh();
     }
 
+    function selectionChanged() {
+        var tabs = application.sandbox.getModuleById($('.mod-tabs').data('terrificId'));
+        if(tabs.getCurrentTab() === 'artboards') {
+            window.postMessage('showArtboards', true);
+        }
+    }
+
     // Artboards
     function showArtboards(data) {
         var artboards = application.sandbox.getModuleById($('.mod-artboards').data('terrificId'));

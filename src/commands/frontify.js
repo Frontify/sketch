@@ -45,6 +45,14 @@ export function closeCommand(context) {
     });
 }
 
+export function selectionChangedCommand(context) {
+    executeSafely(context, function () {
+        if (isWebviewPresent('frontifymain')) {
+            sendToWebview('frontifymain', 'selectionChanged()');
+        }
+    });
+}
+
 function refresh() {
     if (isWebviewPresent('frontifymain')) {
         sendToWebview('frontifymain', 'refresh()');

@@ -3,8 +3,7 @@ import fetch from '../helpers/fetch'
 import writeJSON from "../helpers/writeJSON";
 import project from "./project";
 import notification from "./notification";
-
-var threadDictionary = NSThread.mainThread().threadDictionary();
+import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote'
 
 class Target {
     getTarget(view) {
@@ -102,8 +101,8 @@ class Target {
     showTarget() {
         this.getTarget().then(function (data) {
             if (!data) {
-                if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
-                    threadDictionary['frontifywindow'].webContents.executeJavaScript('showNoProjects()');
+                if (isWebviewPresent('frontifymain')) {
+                    sendToWebview('frontifymain', 'showNoProjects()');
                 }
             }
             else {
@@ -117,8 +116,8 @@ class Target {
                 target.project = data.project.id;
                 writeJSON('target', target);
 
-                if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
-                    threadDictionary['frontifywindow'].webContents.executeJavaScript('showTarget(' + JSON.stringify(data) + ')');
+                if (isWebviewPresent('frontifymain')) {
+                    sendToWebview('frontifymain', 'showTarget(' + JSON.stringify(data) + ')');
                 }
             }
         }.bind(this));

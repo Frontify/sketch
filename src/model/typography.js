@@ -4,8 +4,7 @@ import sketch from './sketch';
 import filemanager from './filemanager';
 import fetch from '../helpers/fetch';
 import createFolder from '../helpers/createFolder'
-
-var threadDictionary = NSThread.mainThread().threadDictionary();
+import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote'
 
 class Typography {
     constructor() {
@@ -250,8 +249,8 @@ class Typography {
 
     showTypography() {
         this.getFontStyles().then(function (data) {
-            if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
-                threadDictionary['frontifywindow'].webContents.executeJavaScript('showTypography(' + JSON.stringify(data) + ')');
+            if (isWebviewPresent('frontifymain')) {
+                sendToWebview('frontifymain', 'showTypography(' + JSON.stringify(data) + ')');
             }
         }.bind(this));
     }

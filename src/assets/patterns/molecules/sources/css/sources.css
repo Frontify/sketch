@@ -212,6 +212,10 @@
     background-color: #FAB117;
 }
 
+.m-sources__blank {
+    flex-grow: 1;
+}
+
 .m-sources__no-results {
     display: none;
     position: absolute;
@@ -219,6 +223,7 @@
     height: 50%;
     align-items: center;
     justify-content: center;
+    box-sizing: border-box;
 }
 
 .m-sources__no-results.state-visible {

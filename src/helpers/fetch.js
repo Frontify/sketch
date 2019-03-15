@@ -2,8 +2,7 @@ import readJSON from './readJSON'
 import extend from '../helpers/extend'
 import fetch from 'sketch-polyfill-fetch'
 import childProcess from '@skpm/child_process';
-
-var threadDictionary = NSThread.mainThread().threadDictionary();
+import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote'
 
 export default function (uri, options) {
     // get token
@@ -69,8 +68,8 @@ export default function (uri, options) {
                 var progress = parseInt(data.replace(/#*/gi, '').trim());
 
                 if(options.type === 'source') {
-                    if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
-                        threadDictionary['frontifywindow'].webContents.executeJavaScript('sourceDownloadProgress(' + JSON.stringify({ id: options.id, progress: progress }) + ')');
+                    if (isWebviewPresent('frontifymain')) {
+                        sendToWebview('frontifymain', 'sourceDownloadProgress(' + JSON.stringify({ id: options.id, progress: progress }) + ')');
                     }
                 }
             }.bind(this));
@@ -135,12 +134,12 @@ export default function (uri, options) {
                 // get progress information
                 var progress = parseInt(data.replace(/#*/gi, '').trim());
 
-                if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
+                if (isWebviewPresent('frontifymain')) {
                     if(options.type === 'source') {
-                        threadDictionary['frontifywindow'].webContents.executeJavaScript('sourceUploadProgress(' + JSON.stringify({ id: options.id, id_external: options.id_external, progress: progress }) + ')');
+                        sendToWebview('frontifymain', 'sourceUploadProgress(' + JSON.stringify({ id: options.id, id_external: options.id_external, progress: progress }) + ')');
                     }
                     else if(options.type === 'artboard') {
-                        threadDictionary['frontifywindow'].webContents.executeJavaScript('artboardUploadProgress(' + JSON.stringify({ id: options.id,  id_external: options.id_external, progress: progress }) + ')');
+                        sendToWebview('frontifymain', 'artboardUploadProgress(' + JSON.stringify({ id: options.id,  id_external: options.id_external, progress: progress }) + ')');
                     }
                 }
             }.bind(this));

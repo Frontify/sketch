@@ -3,20 +3,30 @@ import shaFile from '../helpers/shaFile'
 import sketch from './sketch'
 import target from './target';
 import filemanager from './filemanager';
+import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote'
 
-var threadDictionary = NSThread.mainThread().threadDictionary();
 var dom = require('sketch/dom');
 
 class Artboard {
     constructor() {
         this.pixelRatio = 2;
+        this.remoteAssets = null;
     }
 
-    getArtboards() {
+    getArtboards(skipRemote) {
         return target.getTarget().then(function (target) {
-            // load remote assets status
-            return fetch('/v1/assets/status/' + target.project.id + '?include_count_annotation=true&path=' + encodeURIComponent(target.set.path)).then(function (result) {
+            var remoteStatus = null;
+            if(skipRemote && this.remoteAssets) {
+                remoteStatus = Promise.resolve({ assets: this.remoteAssets });
+            }
+            else {
+                // load remote assets status
+                remoteStatus = fetch('/v1/assets/status/' + target.project.id + '?include_count_annotation=true&path=' + encodeURIComponent(target.set.path));
+            }
+
+            return remoteStatus.then(function (result) {
                 var assets = result.assets;
+                this.remoteAssets = result.assets;
 
                 // get artboards
                 var artboards = [];
@@ -64,6 +74,22 @@ class Artboard {
                                     artboard.modified_localized_ago = asset.modified_localized_ago;
                                 }
                             }
+                        }
+                    }
+
+                    // compare with selected artboards
+                    var selectedArtboards = [];
+                    var jsdoc = dom.getSelectedDocument();
+                    jsdoc.selectedLayers.forEach(function(layer) {
+                        if(layer.type === 'Artboard') {
+                            selectedArtboards.push(layer.id);
+                        }
+                    }.bind(this));
+
+                    for (var i = 0; i < artboards.length; i++) {
+                        var artboard = artboards[i];
+                        if(selectedArtboards.indexOf(artboard.id_external) > -1) {
+                            artboard.selected = true;
                         }
                     }
                 }
@@ -131,13 +157,13 @@ class Artboard {
                             artboard.id = data.id;
                             artboard.nochanges = false;
                             // source file download
-                            if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
-                                threadDictionary['frontifywindow'].webContents.executeJavaScript('artboardUploaded(' + JSON.stringify(artboard) + ')');
+                            if (isWebviewPresent('frontifymain')) {
+                                sendToWebview('frontifymain', 'artboardUploaded(' + JSON.stringify(artboard) + ')');
                             }
                             return true;
                         }).catch(function (err) {
-                            if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
-                                threadDictionary['frontifywindow'].webContents.executeJavaScript('artboardUploadFailed(' + JSON.stringify(artboard) + ')');
+                            if (isWebviewPresent('frontifymain')) {
+                                sendToWebview('frontifymain', 'artboardUploadFailed(' + JSON.stringify(artboard) + ')');
                             }
                             return true;
                         });
@@ -145,8 +171,8 @@ class Artboard {
                     else {
                         filemanager.deleteFile(result.path);
                         artboard.nochanges = true;
-                        if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
-                            threadDictionary['frontifywindow'].webContents.executeJavaScript('artboardUploaded(' + JSON.stringify(artboard) + ')');
+                        if (isWebviewPresent('frontifymain')) {
+                            sendToWebview('frontifymain', 'artboardUploaded(' + JSON.stringify(artboard) + ')');
                         }
                         return true;
                     }
@@ -155,10 +181,10 @@ class Artboard {
         }.bind(this));
     }
 
-    showArtboards() {
-        this.getArtboards().then(function (data) {
-            if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
-                threadDictionary['frontifywindow'].webContents.executeJavaScript('showArtboards(' + JSON.stringify(data) + ')');
+    showArtboards(skipRemote) {
+        this.getArtboards(skipRemote).then(function (data) {
+            if (isWebviewPresent('frontifymain')) {
+                sendToWebview('frontifymain', 'showArtboards(' + JSON.stringify(data) + ')');
             }
         }.bind(this));
     }

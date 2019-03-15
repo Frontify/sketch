@@ -1,7 +1,6 @@
 import fetch from '../helpers/fetch'
 import target from './target';
-
-var threadDictionary = NSThread.mainThread().threadDictionary();
+import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote'
 
 class Project {
     constructor() {
@@ -34,8 +33,8 @@ class Project {
         this.getProjects().then(function (brands) {
             target.getTarget().then(function (target) {
                 target = target || {};
-                if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
-                    threadDictionary['frontifywindow'].webContents.executeJavaScript('showProjectChooser(' + JSON.stringify(brands) + ', ' + JSON.stringify(target) + ')');
+                if (isWebviewPresent('frontifymain')) {
+                    sendToWebview('frontifymain', 'showProjectChooser(' + JSON.stringify(brands) + ', ' + JSON.stringify(target) + ')');
                 }
             }.bind(this));
         }.bind(this));
@@ -44,8 +43,8 @@ class Project {
     showFolderChooser(folder, view) {
         target.getTarget(view).then(function (target) {
             this.getFolders(folder >= 0 ? folder : target.set.id).then(function (folders) {
-                if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
-                    threadDictionary['frontifywindow'].webContents.executeJavaScript('showFolderChooser(' + JSON.stringify(folders) + ', ' + JSON.stringify(target) + ')');
+                if (isWebviewPresent('frontifymain')) {
+                    sendToWebview('frontifymain', 'showFolderChooser(' + JSON.stringify(folders) + ', ' + JSON.stringify(target) + ')');
                 }
             }.bind(this));
         }.bind(this));

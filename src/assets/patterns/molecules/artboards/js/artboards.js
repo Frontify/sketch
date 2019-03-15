@@ -58,6 +58,29 @@ Tc.Module.Artboards = Tc.Module.extend({
             }, 20);
         }.bind(this));
 
+        $ctx.on('click', '.js-m-artboards__upload-selected', function(e) {
+            e.stopPropagation();
+
+            var artboards = [];
+
+            $ctx.find('.js-m-artboards__upload-selected').attr('disabled', 'disabled');
+
+            $.each($ctx.find('.js-m-artboards__item.state-selected'), function(index, item) {
+                var $item = $(item);
+                var artboard = this.getArtboard($item.data('idExternal'));
+                artboard.state = 'uploading';
+                artboards.push(artboard);
+
+                // update item
+                this.updateItem($item, artboard);
+            }.bind(this));
+
+            // give button time to gray out
+            setTimeout(function() {
+                window.postMessage('uploadArtboards', artboards);
+            }, 20);
+        }.bind(this));
+
         $ctx.on('click', '.js-m-artboards__item', function(e) {
             e.stopPropagation();
 

@@ -84,9 +84,10 @@ export default function(context, view) {
         domain = url;
     });
 
-    webview.on('showArtboards', function() {
+    webview.on('showArtboards', function(skipRemote) {
+        skipRemote = skipRemote || false;
         view = 'artboards';
-        artboard.showArtboards();
+        artboard.showArtboards(skipRemote);
     });
 
     webview.on('showSources', function() {

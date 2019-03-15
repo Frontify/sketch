@@ -1,4 +1,4 @@
-<li class="m-artboards__item js-m-artboards__item clearfix state-{{= it.state }}" data-id-external="{{= it.id_external }}" {{? it.id }}data-url="/screens/{{= it.id }}"{{?}} data-jets="{{! it.name.toLowerCase() }}">
+<li class="m-artboards__item js-m-artboards__item clearfix state-{{= it.state }} {{? it.selected }}state-selected{{?}}" data-id-external="{{= it.id_external }}" {{? it.id }}data-url="/screens/{{= it.id }}"{{?}} data-jets="{{! it.name.toLowerCase() }}">
     <div class="m-artboards__type">
         <span class="m-artboards__badge js-m-artboards__badge">
             {{? it.state === 'uploading'}}

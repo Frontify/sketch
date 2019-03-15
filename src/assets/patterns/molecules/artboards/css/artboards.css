@@ -87,6 +87,10 @@
     transition: background 0.2s linear
 }
 
+.m-artboards__item.state-selected {
+    background: rgba(216, 216, 216, 0.2);
+}
+
 .m-artboards__item:first-child {
     margin-top: 10px;
 }
@@ -199,6 +203,7 @@
     height: 50%;
     align-items: center;
     justify-content: center;
+    box-sizing: border-box;
 }
 
 .m-artboards__no-results.state-visible {

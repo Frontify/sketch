@@ -4,8 +4,7 @@ import fetch from '../helpers/fetch'
 import target from './target'
 import sketch from './sketch'
 import filemanager from './filemanager'
-
-var threadDictionary = NSThread.mainThread().threadDictionary();
+import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote'
 
 class Source {
     constructor() {
@@ -170,8 +169,8 @@ class Source {
 
     showSources() {
         return this.getSources().then(function (data) {
-            if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
-                threadDictionary['frontifywindow'].webContents.executeJavaScript('showSources(' + JSON.stringify(data) + ')');
+            if (isWebviewPresent('frontifymain')) {
+                sendToWebview('frontifymain', 'showSources(' + JSON.stringify(data) + ')');
             }
             return true;
         }.bind(this));
@@ -233,8 +232,8 @@ class Source {
 
             return filemanager.uploadFile(file).then(function (data) {
                 file.id = data.id;
-                if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
-                    threadDictionary['frontifywindow'].webContents.executeJavaScript('sourceUploaded(' + JSON.stringify(file) + ')');
+                if (isWebviewPresent('frontifymain')) {
+                    sendToWebview('frontifymain', 'sourceUploaded(' + JSON.stringify(file) + ')');
                 }
 
                 filemanager.updateAssetStatus(target.project.id, data);
@@ -242,8 +241,8 @@ class Source {
                 return true;
             }.bind(this));
         }.bind(this)).catch(function (err) {
-            if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
-                threadDictionary['frontifywindow'].webContents.executeJavaScript('sourceUploadFailed(' + JSON.stringify(source) + ')');
+            if (isWebviewPresent('frontifymain')) {
+                sendToWebview('frontifymain', 'sourceUploadFailed(' + JSON.stringify(source) + ')');
             }
             return true;
         }.bind(this));
@@ -271,8 +270,8 @@ class Source {
                 return this.showSources();
             }.bind(this));
         }.bind(this)).catch(function (err) {
-            if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
-                threadDictionary['frontifywindow'].webContents.executeJavaScript('sourceUploadFailed(' + JSON.stringify(source) + ')');
+            if (isWebviewPresent('frontifymain')) {
+                sendToWebview('frontifymain', 'sourceUploadFailed(' + JSON.stringify(source) + ')');
             }
             return true;
         }.bind(this));
@@ -281,13 +280,13 @@ class Source {
     addCurrentFile() {
         if (!filemanager.isCurrentSaved()) {
             if (filemanager.saveCurrent()) {
-                if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
-                    threadDictionary['frontifywindow'].webContents.executeJavaScript('refresh()');
+                if (isWebviewPresent('frontifymain')) {
+                    sendToWebview('frontifymain', 'refresh()');
                 }
             }
         } else {
-            if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
-                threadDictionary['frontifywindow'].webContents.executeJavaScript('showSourcesHowTo()');
+            if (isWebviewPresent('frontifymain')) {
+                sendToWebview('frontifymain', 'showSourcesHowTo()');
             }
         }
     }

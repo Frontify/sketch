@@ -34,7 +34,7 @@
         No matching sources found
     </div>
 {{??}}
-    <div class="o-settings__blank">
+    <div class="o-settings__blank m-sources__blank">
         No sources found
     </div>
 {{?}}

@@ -1,8 +1,7 @@
 import target from './target';
 import fetch from '../helpers/fetch'
 import sketch from './sketch';
-
-var threadDictionary = NSThread.mainThread().threadDictionary();
+import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote'
 
 class Color {
     getColors() {
@@ -113,8 +112,8 @@ class Color {
 
     showColors() {
         this.getColors().then(function (data) {
-            if(threadDictionary['frontifywindow'] && threadDictionary['frontifywindow'].webContents) {
-                threadDictionary['frontifywindow'].webContents.executeJavaScript('showColors(' + JSON.stringify(data) + ')');
+            if (isWebviewPresent('frontifymain')) {
+                sendToWebview('frontifymain', 'showColors(' + JSON.stringify(data) + ')');
             }
         }.bind(this));
     }
