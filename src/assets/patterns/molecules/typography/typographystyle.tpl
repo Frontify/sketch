@@ -20,7 +20,7 @@
            </ul>
        {{?}}
         <p class="m-typography__example js-m-typography__example" style="
-            {{? it.style.family }}font-family: {{= it.style.family }};{{?}}
+            {{? it.style.family }}font-family: '{{= it.style.family }}';{{?}}
             {{? it.style.size }}font-size: {{= it.style.size }}{{= it.style.size_unit || 'px'}};{{?}}
             {{? it.style.weight }}font-weight: {{= it.style.weight }};{{?}}
             {{? it.style.line_height }}line-height: {{= it.style.line_height }}{{= it.style.line_height_unit || 'em'}};{{?}}
