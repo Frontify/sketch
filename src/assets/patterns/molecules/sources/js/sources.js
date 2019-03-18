@@ -6,6 +6,7 @@ Tc.Module.Sources = Tc.Module.extend({
         this.sandbox.subscribe('tabs', this);
 
         this.sources = [];
+        this.jets = null;
 
         $ctx.html(window.tpl.loaderspinner());
 
@@ -212,7 +213,11 @@ Tc.Module.Sources = Tc.Module.extend({
 
         // initialize search
         try {
-            var jets = new Jets({
+            if(this.jets) {
+                this.jets.destroy();
+            }
+
+            this.jets = new Jets({
                 searchTag: '.js-m-sources__search',
                 contentTag: '.js-m-sources__list',
                 didSearch: function(search_phrase) {

@@ -5,6 +5,7 @@ Tc.Module.Artboards = Tc.Module.extend({
         this.sandbox.subscribe('events', this);
         this.sandbox.subscribe('tabs', this);
         this.artboards = [];
+        this.jets = null;
 
         $ctx.html(window.tpl.loaderspinner());
 
@@ -180,7 +181,11 @@ Tc.Module.Artboards = Tc.Module.extend({
 
         // initialize search
         try {
-            var jets = new Jets({
+            if(this.jets) {
+                this.jets.destroy();
+            }
+
+            this.jets = new Jets({
                 searchTag: '.js-m-artboards__search',
                 contentTag: '.js-m-artboards__list',
                 didSearch: function(search_phrase) {
