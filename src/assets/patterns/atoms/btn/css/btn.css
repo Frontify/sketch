@@ -107,20 +107,20 @@ fieldset[disabled] .a-btn--default.state-active {
 
 /* Primary Button */
 .a-btn--primary {
-	color: #FFF;
-	background-color: #5FC8D7;
-	border-color: #5FC8D7;
-	font-weight: bold;
+    color: #FFF;
+    background-color: rgba(73,80,92,1);
+    border-color: rgba(73,80,92,1);
 }
 .a-btn--primary:hover,
 .a-btn--primary:focus,
 .a-btn--primary.focus {
-	background-color: #55B3C1;
-	border-color: #55B3C1;
+    background-color: rgba(54,61,74,1);
+    border-color: rgba(54,61,74,1);
 }
 .a-btn--primary:active,
 .a-btn--primary.state-active {
-	background-color: #55B3C1;
+    background-color: #282E38;
+    border-color: #282E38;
 }
 .a-btn--primary.state-disabled,
 .a-btn--primary[disabled],
@@ -140,7 +140,7 @@ fieldset[disabled] .a-btn--primary:active,
 .a-btn--primary.state-disabled.state-active,
 .a-btn--primary[disabled].state-active,
 fieldset[disabled] .a-btn--primary.state-active {
-    opacity: 0.5;;
+    opacity: 0.25;
 }
 
 /* Warning Button */

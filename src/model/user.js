@@ -1,6 +1,7 @@
 import writeJSON from '../helpers/writeJSON'
 import readJSON from '../helpers/readJSON'
 import fetch from '../helpers/fetch'
+import notification from './notification';
 
 var threadDictionary = NSThread.mainThread().threadDictionary();
 
@@ -32,6 +33,11 @@ class User {
             return fetch('/v1/user/logout/').then(function( ) {
                 writeJSON('token', {});
                 writeJSON('target', {});
+                threadDictionary.removeObjectForKey('frontifyuser');
+
+                // disconnect from pusher
+                notification.disconnect();
+
                 return true;
             }.bind(this));
         }.bind(this));

@@ -11,6 +11,7 @@ export default function () {
     loadFramework('pusher', 'PTPusher', context);
 
     var possibleActivities = ['OPEN', 'LOCAL_CHANGE', 'CLOSE'];
+
     notification.connect().then(function (client) {
         if (client) {
             // subscribe to current chosen project
@@ -21,17 +22,18 @@ export default function () {
                     // bind events
                     notification.on('screen-activity', function (event) {
                         var eventData = event.data();
+
                         if (possibleActivities.indexOf('' + eventData.type) > -1) {
                             source.getCurrentAsset().then(function (asset) {
                                 if ('' + asset.id == '' + eventData.screen) {
                                     user.getUser().then(function (userData) {
-                                        if ('' + eventData.actor.id != '' + userData.id) {
+                                        // if ('' + eventData.actor.id != '' + userData.id) {
                                             notification.showNotification({
                                                 title: 'You are not alone',
                                                 image: eventData.actor.image,
                                                 description: eventData.actor.name + ' is currently working on ' + asset.filename + '. This might lead to conflicts.'
                                             });
-                                        }
+                                        // }
                                     }.bind(this));
                                 }
                             }.bind(this));

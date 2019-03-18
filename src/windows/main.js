@@ -45,12 +45,14 @@ export default function(context, view) {
     }.bind(this));
 
     // Load tab if webview ready
-    webview.on('did-frame-finish-load', function() {
+    webview.on('did-finish-load', function() {
         sketch.resize(win);
 
         if (decodeURI(getURL()) == mainURL) {
-            target.showTarget();
-            webview.executeJavaScript('switchTab("' + view + '")');
+            setTimeout(function() {
+                target.showTarget();
+                webview.executeJavaScript('switchTab("' + view + '")');
+            }, 200);
         }
     }.bind(this));
 
@@ -58,14 +60,22 @@ export default function(context, view) {
     webview.on('did-get-redirect-request', function() {
         var url = getURL();
         if (url.startsWith('https://frontify.com/sketchplugin')) {
-            var access_token = url.split('?#access_token=')[1].split('&expires_in=31536000&token_type=bearer')[0];
+            var urlparts = url.split('?#access_token=');
 
-            user.login({
-                access_token: access_token,
-                domain: domain
-            });
+            if(urlparts.length === 1) {
+                // no access token part included -> back to login URL
+                win.loadURL(loginURL);
+            }
+            else {
+                // login with access token
+                var access_token = urlparts[1].split('&expires_in=31536000&token_type=bearer')[0];
+                user.login({
+                    access_token: access_token,
+                    domain: domain
+                });
 
-            win.loadURL(mainURL);
+                win.loadURL(mainURL);
+            }
         }
     }.bind(this));
 

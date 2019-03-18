@@ -7,11 +7,6 @@ class Notification {
     constructor() {
         this.pusher = null;
         this.channel = null;
-        this.bindings = {};
-
-        if (threadDictionary['frontifynotificationbindings']) {
-            this.bindings = threadDictionary['frontifynotificationbindings'];
-        }
 
         if (threadDictionary['frontifynotificationpusher']) {
             this.pusher = threadDictionary['frontifynotificationpusher'];
@@ -44,6 +39,26 @@ class Notification {
         }.bind(this));
     }
 
+    disconnect() {
+        if(this.pusher) {
+            if(this.channel) {
+                this.unsubscribe();
+            }
+
+            if(threadDictionary['frontifynotificationobservers']) {
+                threadDictionary['frontifynotificationobservers'].each(function(observer) {
+                    NSNotificationCenter.defaultCenter().removeObserver(observer);
+                }.bind(this));
+
+                threadDictionary.removeObjectForKey('frontifynotificationobservers');
+            }
+
+            threadDictionary.removeObjectForKey('frontifynotificationpusher');
+            this.pusher = null;
+
+        }
+    }
+
     showNotification(data) {
         var notification = NSUserNotification.alloc().init();
         notification.title = data.title;
@@ -61,10 +76,13 @@ class Notification {
         }
     }
 
-    unsubscribe(project) {
+    unsubscribe() {
         if (this.pusher) {
             if (this.channel) {
                 this.channel.unsubscribe();
+                threadDictionary.removeObjectForKey('frontifynotificationchannel');
+                this.channel = null;
+
             }
         }
     }
@@ -84,9 +102,13 @@ class Notification {
             var delegateInstance = delegate.getClassInstance();
             var sel = NSSelectorFromString('didReceiveChannelEventNotification:');
 
-            NSNotificationCenter
+            if(!threadDictionary['frontifynotificationobservers']) {
+                threadDictionary['frontifynotificationobservers'] = [];
+            }
+
+            threadDictionary['frontifynotificationobservers'].push(NSNotificationCenter
                 .defaultCenter()
-                .addObserver_selector_name_object(delegateInstance, sel, 'PTPusherEventReceivedNotification', this.pusher);
+                .addObserver_selector_name_object(delegateInstance, sel, 'PTPusherEventReceivedNotification', this.pusher));
         }
     }
 }

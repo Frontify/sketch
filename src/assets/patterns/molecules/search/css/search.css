@@ -2,7 +2,7 @@
     border-bottom: 1px solid rgba(216, 216, 216, .2);
     background: #FFF;
     position: relative;
-    padding: 10px;
+    padding: 10px 16px;
 }
 
 .m-search__bar {
@@ -18,7 +18,7 @@
     color: #9A9EA4;
     font-size: 14px;
     line-height: 18px;
-    padding-left: 12px;
+    padding-left: 11px;
 
 }
 
@@ -26,7 +26,7 @@
     width: 100%;
     font-size: 14px;
     line-height: 18px;
-    padding: 7px 15px 7px 13px;
+    padding: 7px 15px 7px 9px;
     outline: none;
     border: 0;
     color: rgba(54,61,74,1);

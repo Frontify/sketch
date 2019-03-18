@@ -1,6 +1,10 @@
 import main from '../windows/main';
 import executeSafely from '../helpers/executeSafely';
 import source from '../model/source';
+import notification from '../model/notification';
+import user from '../model/user';
+import target from '../model/target';
+
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote'
 
 export function runCommand(context) {

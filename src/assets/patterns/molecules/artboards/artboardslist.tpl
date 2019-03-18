@@ -35,7 +35,7 @@
 {{?}}
 {{? it.artboards.length > 0 }}
 <div class="m-btn-bar m-btn-bar--centered m-btn-bar--footer">
-    <button class="a-btn a-btn--primary js-m-artboards__upload-selected" {{? !hasSelected }}disabled{{?}}>Upload Selected Artboards</button>
-    <button class="a-btn a-btn--default js-m-artboards__upload-all">Upload All Artboards</button>
+    <button class="a-btn a-btn--primary js-m-artboards__upload-selected" {{? !hasSelected }}disabled{{?}}>Upload Selected</button>
+    <button class="a-btn a-btn--default js-m-artboards__upload-all">Upload All</button>
 </div>
 {{?}}

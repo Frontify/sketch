@@ -18,8 +18,8 @@
         </div>
     </div>
     <div class="m-target__left js-m-target__change-project">
-        <div class="m-target__logo-wrap">
-            <img class="m-target__logo" style="background: {{= it.brand.color }}" src="{{= it.brand.image }}"/>
+        <div class="m-target__logo-wrap {{? it.brand.image.indexOf('blankslate/brand/brand.png') > -1 }}state-empty{{?}}">
+            <img class="m-target__logo" src="{{= it.brand.image }}"/>
         </div>
     </div>
     <div class="m-target__content js-m-target__change-project">

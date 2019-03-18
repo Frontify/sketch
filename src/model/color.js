@@ -40,10 +40,13 @@ class Color {
     addDocumentColors(colors) {
         var app = NSApp.delegate();
         var doc = sketch.getDocument();
+
         if(doc) {
             var assets = doc.documentData().assets();
             var mscolors = this.convertColors(colors);
-            assets.addColors(mscolors);
+            assets.addColorAssets(mscolors);
+
+            doc.inspectorController().closeAnyColorPopover();
             app.refreshCurrentDocument();
         }
     }
@@ -51,11 +54,14 @@ class Color {
     replaceDocumentColors(colors) {
         var app = NSApp.delegate();
         var doc = sketch.getDocument();
+
         if(doc) {
             var assets = doc.documentData().assets();
             var mscolors = this.convertColors(colors);
-            assets.setColors([]);
-            assets.addColors(mscolors);
+            assets.setColorAssets([]);
+            assets.addColorAssets(mscolors);
+
+            doc.inspectorController().closeAnyColorPopover();
             app.refreshCurrentDocument();
         }
 
@@ -63,18 +69,26 @@ class Color {
 
     addGlobalColors(colors) {
         var app = NSApp.delegate();
-        var assets = app.globalAssets();
+        var doc = sketch.getDocument();
+
+        var assets = MSPersistentAssetCollection.sharedGlobalAssets();
         var mscolors = this.convertColors(colors);
-        assets.addColors(mscolors);
+        assets.addColorAssets(mscolors);
+
+        doc.inspectorController().closeAnyColorPopover();
         app.refreshCurrentDocument();
     }
 
     replaceGlobalColors(colors) {
         var app = NSApp.delegate();
+        var doc = sketch.getDocument();
+
         var assets = app.globalAssets();
         var mscolors = this.convertColors(colors);
-        assets.setColors([]);
-        assets.addColors(mscolors);
+        assets.setColorAssets([]);
+        assets.addColorAssets(mscolors);
+
+        doc.inspectorController().closeAnyColorPopover();
         app.refreshCurrentDocument();
     }
 
@@ -88,7 +102,7 @@ class Color {
     }
 
     convertColor(color) {
-        return MSColor.colorWithRed_green_blue_alpha(color.r / 255, color.g / 255, color.b / 255, (color.alpha || color.a) / 255);
+        return MSColorAsset.alloc().initWithAsset_name(MSColor.colorWithRed_green_blue_alpha(color.r / 255, color.g / 255, color.b / 255, (color.alpha || color.a) / 255), color.name);
     }
 
     applyColorToLayer(layer, color) {
