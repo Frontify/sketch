@@ -94,7 +94,7 @@ export default function (uri, options) {
             // Form encoded params
             if (options.filepath) {
                 args.push('-F');
-                args.push('file=@' + options.filepath);
+                args.push('file=@\"' + options.filepath + '\"');
             }
 
             if (options.body) {
