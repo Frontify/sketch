@@ -111,26 +111,85 @@ class Artboard {
                 reject();
             }
 
-            var path = filemanager.getExportPath() + artboard.name + '.png';
-            var format = MSExportFormat.alloc().init();
-            format.setFileFormat('png');
-            format.setScale(this.pixelRatio); // @2x
-
+            var files = [];
             var predicate = NSPredicate.predicateWithFormat('objectID == %@', artboard.id_external);
             var msartboard = sketch.findFirstLayer(predicate, nil, MSArtboardGroup);
-            var exportRequest = MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(msartboard, [format], true).firstObject();
+            var jsartboard = dom.Artboard.fromNative(msartboard);
+
+            // Export artboard image -> traditional MSExportRequest for better naming control
+            var imageFormat = MSExportFormat.alloc().init();
+            imageFormat.setFileFormat('png');
+            imageFormat.setScale(this.pixelRatio); // @2x
+
+            var path = filemanager.getExportPath() + artboard.name + '.png';
+            var exportRequest = MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(msartboard, [imageFormat], true).firstObject();
             doc.saveArtboardOrSlice_toFile(exportRequest, path);
 
-            // var artboard = dom.Artboard.fromNative(msartboard);
-
-            resolve({
+            files.push({
                 name: artboard.name,
                 ext: 'png',
                 id_external: artboard.id_external,
                 id: artboard.id,
                 sha: artboard.sha,
                 path: path
-            })
+            });
+
+            // Export artboard structure -> via JS API as its not possible to export JSON with MSExportRequest
+            dom.export(jsartboard, {
+                formats: 'json',
+                output: filemanager.getExportPath(),
+                overwriting: true
+            });
+
+            files.push({
+                name: artboard.name,
+                ext: 'json',
+                id_external: artboard.id_external,
+                id: artboard.id,
+                path: filemanager.getExportPath() + artboard.name + '.json'
+            });
+
+            // Export formats -> traditional MSExportRequest for better naming control
+            function exportFormats(layer) {
+                layer.exportFormats.forEach(function(format) {
+
+                    var name = '';
+                    if(format.prefix && format.prefix !== 'null') {
+                        name += format.prefix;
+                    }
+
+                    name += layer.name;
+
+                    if(format.suffix && format.suffix !== 'null') {
+                        name += format.suffix;
+                    }
+
+                    var path = filemanager.getExportPath() + name + '.' + format.fileFormat;
+
+                    var layerFormat = MSExportFormat.alloc().init();
+                    layerFormat.setFileFormat(format.fileFormat);
+                    layerFormat.setScale(format.size);
+
+                    var exportRequest = MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(layer.sketchObject, [layerFormat], true).firstObject();
+                    doc.saveArtboardOrSlice_toFile(exportRequest, path);
+
+                    files.push({
+                        name: name,
+                        ext: format.fileFormat,
+                        id_external: layer.id,
+                        id: layer.id,
+                        path: path
+                    });
+                });
+
+                if (layer.layers) {
+                    layer.layers.forEach(exportFormats)
+                }
+            }
+
+            exportFormats(jsartboard);
+
+            resolve(files);
         }.bind(this));
     }
 
@@ -140,42 +199,35 @@ class Artboard {
             return artboards.reduce(function (sequence, artboard) {
                 return sequence.then(function () {
                     return this.exportArtboard(artboard);
-                }.bind(this)).then(function (result) {
-                    if (artboard.sha != shaFile(result.path)) {
+                }.bind(this)).then(function (files) {
+                    return files.reduces(function(file) {
                         return filemanager.uploadFile({
-                            path: result.path,
-                            name: result.name + '.' + result.ext,
-                            id: result.id,
-                            id_external: result.id_external,
+                            path: file.path,
+                            name: file.name + '.' + file.ext,
+                            id: file.id,
+                            id_external: file.id_external,
                             pixel_ratio: this.pixelRatio,
                             folder: target.set.path,
                             project: target.project.id,
                             type: 'artboard'
                         }).then(function (data) {
-                            filemanager.deleteFile(result.path);
+                            filemanager.deleteFile(file.path);
                             artboard.sha = data.sha;
                             artboard.id = data.id;
                             artboard.nochanges = false;
-                            // source file download
-                            if (isWebviewPresent('frontifymain')) {
-                                sendToWebview('frontifymain', 'artboardUploaded(' + JSON.stringify(artboard) + ')');
-                            }
-                            return true;
-                        }).catch(function (err) {
-                            if (isWebviewPresent('frontifymain')) {
-                                sendToWebview('frontifymain', 'artboardUploadFailed(' + JSON.stringify(artboard) + ')');
-                            }
-                            return true;
-                        });
-                    }
-                    else {
-                        filemanager.deleteFile(result.path);
-                        artboard.nochanges = true;
+                            return true
+                        })
+                    }.bind(this)).then(function() {
                         if (isWebviewPresent('frontifymain')) {
                             sendToWebview('frontifymain', 'artboardUploaded(' + JSON.stringify(artboard) + ')');
                         }
                         return true;
-                    }
+                    }).catch(function (err) {
+                        if (isWebviewPresent('frontifymain')) {
+                            sendToWebview('frontifymain', 'artboardUploadFailed(' + JSON.stringify(artboard) + ')');
+                        }
+                        return true;
+                    }.bind(this));
                 }.bind(this));
             }.bind(this), Promise.resolve());
         }.bind(this));
