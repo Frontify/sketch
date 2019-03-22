@@ -201,6 +201,10 @@
         // Change this to whatever you are testing
         document.writeln('<scr' + 'ipt src="./test/artboards.js"></scr' + 'ipt>');
     }
+
+    window.onerror = function(message, source, lineno, colno, error) {
+        console.log(message);
+    };
 </script>
 </body>
 </html>

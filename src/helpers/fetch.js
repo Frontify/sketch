@@ -157,12 +157,12 @@ export default function (uri, options) {
             }
 
             throw new TypeError("Invalid response");
-        }.bind(this)).catch(function (err) {
-            if (err.localizedDescription) {
-                console.error(err.localizedDescription);
+        }.bind(this)).catch(function (e) {
+            if (e.localizedDescription) {
+                console.error(e.localizedDescription);
             }
             else {
-                console.error(err);
+                console.error(e);
             }
 
             throw err;

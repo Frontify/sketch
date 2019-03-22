@@ -46,7 +46,7 @@ class Notification {
             }
 
             if(threadDictionary['frontifynotificationobservers']) {
-                threadDictionary['frontifynotificationobservers'].each(function(observer) {
+                threadDictionary['frontifynotificationobservers'].forEach(function(observer) {
                     NSNotificationCenter.defaultCenter().removeObserver(observer);
                 }.bind(this));
 

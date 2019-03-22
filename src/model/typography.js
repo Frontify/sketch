@@ -89,7 +89,7 @@ class Typography {
         // create a text style for each foreground color
         var colors = [];
         if (!(fontStyle.colors && fontStyle.colors.foreground)) {
-            colors.push({name: 'Default', r: 54, g: 61, b: 74, alpha: 255, css_value: 'rgba(54,61,74,1)'});
+            colors.push({ name: 'Default', r: 54, g: 61, b: 74, alpha: 255, css_value: 'rgba(54,61,74,1)'});
         }
         else {
             for (var id in fontStyle.colors.foreground) {
@@ -109,15 +109,15 @@ class Typography {
             var spacing = parseFloat(fontStyle.spacing);
             var lineHeight = parseFloat(fontStyle.line_height);
 
-            msstyle.textColor = color.convertColor(colorValue);
+            msstyle.textColor = color.convertColor(colorValue, 'MSColor');
 
             msstyle.name = (fontStyle.name || 'Untitled Style') + '/' + colorValue.name;
             msstyle.stringValue = fontStyle.example || 'Untitled Style';
             msstyle.fontSize = fontSize;
 
             // Get font name
-            var weightNumeric = !isNaN(parseInt(fontStyle.weight)) ? parseInt(fontStyle.weight) : 400;
-            if (fontStyle.weight && (fontStyle.weight == 'bold' || fontStyle.weight == 'bolder')) {
+            var weightNumeric = fontStyle.weight ? parseInt(fontStyle.weight) : 400;
+            if(!isNaN(weightNumeric) && (fontStyle.weight == 'bold' || fontStyle.weight == 'bolder')) {
                 weightNumeric = 700;
             }
 
