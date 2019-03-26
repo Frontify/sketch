@@ -80,7 +80,7 @@ class Artboard {
 
                     // compare with selected artboards
                     var selectedArtboards = [];
-                    var jsdoc = dom.getSelectedDocument();
+                    var jsdoc = dom.Document.fromNative(sketch.getDocument());
                     jsdoc.selectedLayers.forEach(function(layer) {
                         if(layer.type === 'Artboard') {
                             selectedArtboards.push(layer.id);
@@ -116,8 +116,6 @@ class Artboard {
             var msartboard = sketch.findFirstLayer(predicate, nil, MSArtboardGroup, doc);
             var exportRequest = MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(msartboard, [format], true).firstObject();
             doc.saveArtboardOrSlice_toFile(exportRequest, path);
-
-            // var artboard = dom.Artboard.fromNative(msartboard);
 
             resolve({
                 name: artboard.name,

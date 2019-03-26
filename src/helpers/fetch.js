@@ -165,7 +165,7 @@ export default function (uri, options) {
                 console.error(e);
             }
 
-            throw err;
+            throw e;
         }.bind(this));
     }
 }

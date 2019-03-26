@@ -2,6 +2,7 @@ import writeJSON from '../helpers/writeJSON'
 import readJSON from '../helpers/readJSON'
 import fetch from '../helpers/fetch'
 import notification from './notification';
+import target from "./target";
 
 var threadDictionary = NSThread.mainThread().threadDictionary();
 
@@ -45,6 +46,7 @@ class User {
 
     login(data) {
         writeJSON('token', data);
+        notification.listen();
     }
 }
 

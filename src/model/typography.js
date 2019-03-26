@@ -115,23 +115,52 @@ class Typography {
             msstyle.stringValue = fontStyle.example || 'Untitled Style';
             msstyle.fontSize = fontSize;
 
-            // Get font name
-            var weightNumeric = fontStyle.weight ? parseInt(fontStyle.weight) : 400;
-            if(!isNaN(weightNumeric) && (fontStyle.weight == 'bold' || fontStyle.weight == 'bolder')) {
-                weightNumeric = 700;
+            // Get font postscript name
+            var font = null;
+            try {
+                // Initialize the font
+                var font = NSFont.fontWithName_size(fontStyle.family, 75);
+
+                // Add weight
+                if(font) {
+                    if(font.familyName() == font.fontName()) {
+                        var weightNumeric = fontStyle.weight ? parseInt(fontStyle.weight) : 400;
+                        if(!isNaN(weightNumeric)) {
+                            // Normalize font weight (from 0 - 15) -> https://developer.apple.com/documentation/appkit/nsfontmanager/1462332-fontwithfamily?language=objc
+                            weightNumeric = weightNumeric / 1200 * 15; // so that 400 / 1200 * 15 = 5
+                        }
+                        else {
+                            if(fontStyle.weight == 'bold' || fontStyle.weight == 'bolder') {
+                                weightNumeric = 9;
+                            }
+                            else if(fontStyle.weight == 'light' || fontStyle.weight == 'lighter') {
+                                weightNumeric = 2;
+                            }
+                        }
+
+                        var sizedFont = fontManager.fontWithFamily_traits_weight_size(font.familyName(), null, weightNumeric, 75);
+                        if(sizedFont) {
+                            font = sizedFont;
+                        }
+                    }
+
+                    // apply italic trait
+                    if (fontStyle.style && (fontStyle.style == 'ITALIC' || fontStyle.style == 'OBLIQUE')) {
+                        font = fontManager.convertFont_toHaveTrait(font, NSItalicFontMask)
+                    }
+                }
+            }
+            catch(e) {
+                console.log(e);
             }
 
-            var traits = null;
-            if (fontStyle.style && (fontStyle.style == 'ITALIC' || fontStyle.style == 'OBLIQUE')) {
-                traits = NSItalicFontMask;
-            }
-
-            var font = fontManager.fontWithFamily_traits_weight_size(fontStyle.family, traits, weightNumeric, 75);
             if (!font) {
-                font = fontManager.fontWithFamily_traits_weight_size('Times', null, weightNumeric, 75);
+                // apply fallback font
+                font = fontManager.fontWithFamily_traits_weight_size('Times', null, 5, 75);
             }
 
             msstyle.fontPostscriptName = font.fontName();
+
 
             if (fontStyle.align) {
                 var possibleAligns = ['LEFT', 'RIGHT', 'CENTER', 'JUSTIFY'];
@@ -150,7 +179,7 @@ class Typography {
 
                 }
 
-                msstyle.characterSpacing = spacing;
+                msstyle.characterSpacing = spacing * 10;
             }
 
             if (lineHeight) {

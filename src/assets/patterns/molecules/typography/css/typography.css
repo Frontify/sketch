@@ -152,6 +152,7 @@
     right: 0;
     background: #fff;
     padding: 5px 8px;
+    z-index: 1;
 }
 
 .m-typography__style-desc {
