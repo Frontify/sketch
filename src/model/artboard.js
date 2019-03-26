@@ -11,6 +11,7 @@ class Artboard {
     constructor() {
         this.pixelRatio = 2;
         this.remoteAssets = null;
+        this.uploadInProgress = false;
     }
 
     getArtboards(skipRemote) {
@@ -79,7 +80,7 @@ class Artboard {
 
                     // compare with selected artboards
                     var selectedArtboards = [];
-                    var jsdoc = dom.getSelectedDocument();
+                    var jsdoc = dom.Document.fromNative(sketch.getDocument());
                     jsdoc.selectedLayers.forEach(function(layer) {
                         if(layer.type === 'Artboard') {
                             selectedArtboards.push(layer.id);
@@ -104,24 +105,17 @@ class Artboard {
         }.bind(this));
     }
 
-    exportArtboard(artboard) {
+    exportArtboard(artboard, doc) {
         return new Promise(function (resolve, reject) {
-            var doc = sketch.getDocument();
-            if (!doc) {
-                reject();
-            }
-
             var path = filemanager.getExportPath() + artboard.name + '.png';
             var format = MSExportFormat.alloc().init();
             format.setFileFormat('png');
             format.setScale(this.pixelRatio); // @2x
 
             var predicate = NSPredicate.predicateWithFormat('objectID == %@', artboard.id_external);
-            var msartboard = sketch.findFirstLayer(predicate, nil, MSArtboardGroup);
+            var msartboard = sketch.findFirstLayer(predicate, nil, MSArtboardGroup, doc);
             var exportRequest = MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(msartboard, [format], true).firstObject();
             doc.saveArtboardOrSlice_toFile(exportRequest, path);
-
-            // var artboard = dom.Artboard.fromNative(msartboard);
 
             resolve({
                 name: artboard.name,
@@ -136,57 +130,77 @@ class Artboard {
 
     uploadArtboards(artboards) {
         // sequence artboard export and upload
+        this.uploadInProgress = true;
+
         return target.getTarget().then(function(target) {
-            return artboards.reduce(function (sequence, artboard) {
-                return sequence.then(function () {
-                    return this.exportArtboard(artboard);
-                }.bind(this)).then(function (result) {
-                    if (artboard.sha != shaFile(result.path)) {
-                        return filemanager.uploadFile({
-                            path: result.path,
-                            name: result.name + '.' + result.ext,
-                            id: result.id,
-                            id_external: result.id_external,
-                            pixel_ratio: this.pixelRatio,
-                            folder: target.set.path,
-                            project: target.project.id,
-                            type: 'artboard'
-                        }).then(function (data) {
+            var doc = sketch.getDocument();
+            if (!doc) {
+                return Promise.reject('No document found');
+            }
+            else {
+                return artboards.reduce(function(sequence, artboard) {
+                    return sequence.then(function() {
+                        return this.exportArtboard(artboard, doc);
+                    }.bind(this)).then(function(result) {
+                        if (artboard.sha != shaFile(result.path)) {
+                            return filemanager.uploadFile({
+                                path: result.path,
+                                name: result.name + '.' + result.ext,
+                                id: result.id,
+                                id_external: result.id_external,
+                                pixel_ratio: this.pixelRatio,
+                                folder: target.set.path,
+                                project: target.project.id,
+                                type: 'artboard'
+                            }).then(function(data) {
+                                filemanager.deleteFile(result.path);
+                                artboard.sha = data.sha;
+                                artboard.id = data.id;
+                                artboard.nochanges = false;
+                                // source file download
+                                if (isWebviewPresent('frontifymain')) {
+                                    sendToWebview('frontifymain', 'artboardUploaded(' + JSON.stringify(artboard) + ')');
+                                }
+                                return true;
+                            }).catch(function(e) {
+                                if (isWebviewPresent('frontifymain')) {
+                                    sendToWebview('frontifymain', 'artboardUploadFailed(' + JSON.stringify(artboard) + ')');
+                                }
+                                return true;
+                            });
+                        }
+                        else {
                             filemanager.deleteFile(result.path);
-                            artboard.sha = data.sha;
-                            artboard.id = data.id;
-                            artboard.nochanges = false;
-                            // source file download
+                            artboard.nochanges = true;
                             if (isWebviewPresent('frontifymain')) {
                                 sendToWebview('frontifymain', 'artboardUploaded(' + JSON.stringify(artboard) + ')');
                             }
                             return true;
-                        }).catch(function (err) {
-                            if (isWebviewPresent('frontifymain')) {
-                                sendToWebview('frontifymain', 'artboardUploadFailed(' + JSON.stringify(artboard) + ')');
-                            }
-                            return true;
-                        });
-                    }
-                    else {
-                        filemanager.deleteFile(result.path);
-                        artboard.nochanges = true;
-                        if (isWebviewPresent('frontifymain')) {
-                            sendToWebview('frontifymain', 'artboardUploaded(' + JSON.stringify(artboard) + ')');
                         }
-                        return true;
-                    }
-                }.bind(this));
-            }.bind(this), Promise.resolve());
+                    }.bind(this));
+                }.bind(this), Promise.resolve());
+            }
+        }.bind(this)).then(function(data) {
+            this.uploadInProgress = false;
+        }.bind(this)).catch(function(e) {
+            this.uploadInProgress = false;
+            console.error(e);
         }.bind(this));
     }
 
     showArtboards(skipRemote) {
-        this.getArtboards(skipRemote).then(function (data) {
-            if (isWebviewPresent('frontifymain')) {
-                sendToWebview('frontifymain', 'showArtboards(' + JSON.stringify(data) + ')');
-            }
-        }.bind(this));
+        if(!this.uploadInProgress) {
+            this.getArtboards(skipRemote).then(function(data) {
+                if (isWebviewPresent('frontifymain')) {
+                    sendToWebview('frontifymain', 'showArtboards(' + JSON.stringify(data) + ')');
+                }
+            }.bind(this)).catch(function(e) {
+                console.error(e);
+            }.bind(this));
+        }
+        else {
+            console.log('upload in progress');
+        }
     }
 }
 

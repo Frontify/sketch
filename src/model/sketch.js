@@ -28,8 +28,8 @@ class Sketch {
     }
 
     // generic search functions (from https://medium.com/sketch-app-sources/sketch-plugin-snippets-for-plugin-developers-e9e1d2ab6827)
-    findLayers(predicate, container, layerType) {
-        var doc = this.getDocument();
+    findLayers(predicate, container, layerType, doc) {
+        doc = doc || this.getDocument();
         if(!doc) {
             return NSArray.array();
         }
@@ -77,8 +77,8 @@ class Sketch {
         return NSArray.array(); // Return an empty array if no matches were found
     }
 
-    findFirstLayer(predicate, container, layerType) {
-        var filteredArray = this.findLayers(predicate, container, layerType);
+    findFirstLayer(predicate, container, layerType, doc) {
+        var filteredArray = this.findLayers(predicate, container, layerType, doc);
         return filteredArray.firstObject();
     }
 

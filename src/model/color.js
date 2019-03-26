@@ -101,8 +101,15 @@ class Color {
         return mscolors;
     }
 
-    convertColor(color) {
-        return MSColorAsset.alloc().initWithAsset_name(MSColor.colorWithRed_green_blue_alpha(color.r / 255, color.g / 255, color.b / 255, (color.alpha || color.a) / 255), color.name);
+    convertColor(color, type) {
+        if(type === 'MSColor') {
+            // Color for e.g. typostyles
+            return MSColor.colorWithRed_green_blue_alpha(color.r / 255, color.g / 255, color.b / 255, (color.alpha || color.a) / 255);
+        }
+        else {
+            // Asset for document and global colors
+            return MSColorAsset.alloc().initWithAsset_name(MSColor.colorWithRed_green_blue_alpha(color.r / 255, color.g / 255, color.b / 255, (color.alpha || color.a) / 255), color.name);
+        }
     }
 
     applyColorToLayer(layer, color) {

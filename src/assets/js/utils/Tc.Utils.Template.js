@@ -7,9 +7,9 @@
         },
 
         truncate: function(str, suffixLength, maxLength, minLength) {
-            suffixLength = suffixLength || 8;
-            maxLength = maxLength || 40;
-            minLength = minLength || 0;
+            suffixLength = suffixLength !== undefined ? suffixLength : 8;
+            maxLength = maxLength !== undefined ? maxLength : 40;
+            minLength = minLength !== undefined ? minLength : 0;
 
             if (str && str.length > minLength && str.length > maxLength) {
                 var end = str.substring(str.length - suffixLength);

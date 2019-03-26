@@ -240,7 +240,7 @@ class Source {
 
                 return true;
             }.bind(this));
-        }.bind(this)).catch(function (err) {
+        }.bind(this)).catch(function (e) {
             if (isWebviewPresent('frontifymain')) {
                 sendToWebview('frontifymain', 'sourceUploadFailed(' + JSON.stringify(source) + ')');
             }
@@ -269,7 +269,7 @@ class Source {
                 // reload source file list
                 return this.showSources();
             }.bind(this));
-        }.bind(this)).catch(function (err) {
+        }.bind(this)).catch(function (e) {
             if (isWebviewPresent('frontifymain')) {
                 sendToWebview('frontifymain', 'sourceUploadFailed(' + JSON.stringify(source) + ')');
             }

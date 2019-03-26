@@ -177,7 +177,7 @@ export default function(context, view) {
         source.type = 'source';
         filemanager.downloadFile(source).then(function(path) {
             webview.executeJavaScript('sourceDownloaded(' + JSON.stringify(source) + ')');
-        }.bind(this)).catch(function(err) {
+        }.bind(this)).catch(function(e) {
             webview.executeJavaScript('sourceDownloadFailed(' + JSON.stringify(source) + ')');
         }.bind(this));
     });
@@ -194,7 +194,7 @@ export default function(context, view) {
                 NSDocumentController.sharedDocumentController().currentDocument().close();
                 filemanager.openFile(path);
             }
-        }.bind(this)).catch(function(err) {
+        }.bind(this)).catch(function(e) {
             webview.executeJavaScript('sourceDownloadFailed(' + JSON.stringify(source) + ')');
         }.bind(this));
     });
