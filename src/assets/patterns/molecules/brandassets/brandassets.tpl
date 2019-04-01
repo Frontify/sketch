@@ -9,4 +9,5 @@
            ]
        })
     }}
+    <div class="m-brandassets__blank-container js-m-brandassets__blank-container"></div>
 </div>

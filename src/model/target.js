@@ -158,6 +158,10 @@ class Target {
                         break;
                 }
 
+                if(sources.length == 0) {
+                    throw new Error('No asset sources found for type ' + type);
+                }
+
                 if(selection[type]) {
                     selected = sources.find(function(source) {
                         return source.id == selection[type].id;
@@ -173,6 +177,16 @@ class Target {
                     return { sources: sources, selected: selected, type: type };
                 }.bind(this));
             }.bind(this));
+        }.bind(this)).catch(function(e) {
+            if (isWebviewPresent('frontifymain')) {
+                this.getTarget().then(function(target) {
+                    var data = target;
+                    data.type = type;
+                    sendToWebview('frontifymain', 'showBlankSlate(' + JSON.stringify(data) + ')');
+                }.bind(this));
+            }
+
+            return null;
         }.bind(this));
     }
 
@@ -183,7 +197,7 @@ class Target {
                 return assetSources[type];
             }
 
-            throw new TypeError('No selected source for type ' + type + 'found');
+            throw new TypeError('No selected source for type ' + type + ' found');
         }.bind(this)).catch(function(e) {
             console.error(e);
         });

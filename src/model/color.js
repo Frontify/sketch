@@ -128,13 +128,15 @@ class Color {
 
     showColors() {
         target.getAssetSourcesForType('colors').then(function(assetSources) {
-            this.getColors(assetSources.selected.id).then(function (data) {
-                if (isWebviewPresent('frontifymain')) {
-                    data.project = assetSources.selected;
-                    sendToWebview('frontifymain', 'showAssetSources(' + JSON.stringify(assetSources) + ')');
-                    sendToWebview('frontifymain', 'showColors(' + JSON.stringify(data) + ')');
-                }
-            }.bind(this));
+            if(assetSources && assetSources.selected) {
+                this.getColors(assetSources.selected.id).then(function (data) {
+                    if (isWebviewPresent('frontifymain')) {
+                        data.project = assetSources.selected;
+                        sendToWebview('frontifymain', 'showAssetSources(' + JSON.stringify(assetSources) + ')');
+                        sendToWebview('frontifymain', 'showColors(' + JSON.stringify(data) + ')');
+                    }
+                }.bind(this));
+            }
         }.bind(this));
     }
 }

@@ -275,13 +275,15 @@ class Typography {
 
     showTypography() {
         target.getAssetSourcesForType('typography').then(function(assetSources) {
-            this.getFontStyles(assetSources.selected.id).then(function (data) {
-                if (isWebviewPresent('frontifymain')) {
-                    data.project = assetSources.selected;
-                    sendToWebview('frontifymain', 'showAssetSources(' + JSON.stringify(assetSources) + ')');
-                    sendToWebview('frontifymain', 'showTypography(' + JSON.stringify(data) + ')');
-                }
-            }.bind(this));
+            if(assetSources && assetSources.selected) {
+                this.getFontStyles(assetSources.selected.id).then(function (data) {
+                    if (isWebviewPresent('frontifymain')) {
+                        data.project = assetSources.selected;
+                        sendToWebview('frontifymain', 'showAssetSources(' + JSON.stringify(assetSources) + ')');
+                        sendToWebview('frontifymain', 'showTypography(' + JSON.stringify(data) + ')');
+                    }
+                }.bind(this));
+            }
         }.bind(this));
     }
 }

@@ -125,6 +125,7 @@
     box-sizing: border-box;
     flex: 1 0 25%;
     max-width: calc(25% - 10px);
+    max-height: 125px;
 }
 
 .m-mediachooser--logos .m-mediachooser__asset-item:hover {

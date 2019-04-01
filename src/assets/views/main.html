@@ -184,6 +184,11 @@
         chooser.showSearch();
     }
 
+    function showBlankSlate(data) {
+        var brandassets = application.sandbox.getModuleById($('.mod-brand-assets').data('terrificId'));
+        brandassets.showBlankSlate(data);
+    }
+
     // Folder Chooser
     function showFolderChooser(folders, current) {
         var folderChooser = application.sandbox.getModuleById($('.mod-folder-chooser').data('terrificId'));

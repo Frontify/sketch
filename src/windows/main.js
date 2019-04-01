@@ -118,13 +118,17 @@ export default function(context, view) {
 
     webview.on('switchAssetSourceForType', function(type, assetSourceId) {
         target.getAssetSourcesForType(type).then(function(data) {
-            var selected = data.sources.find(function(source) {
-                return source.id == assetSourceId
-            }.bind(this));
+            if (data && data.sources) {
+                var selected = data.sources.find(function(source) {
+                    return source.id == assetSourceId
+                }.bind(this));
 
-            target.switchAssetSourceForType(type, selected).then(function() {
-                webview.executeJavaScript('refresh()');
-            }.bind(this));
+                if (selected) {
+                    target.switchAssetSourceForType(type, selected).then(function() {
+                        webview.executeJavaScript('refresh()');
+                    }.bind(this));
+                }
+            }
         }.bind(this));
 
     });
@@ -282,10 +286,11 @@ export default function(context, view) {
     webview.on('showLibrary', function(type) {
         view = type;
         target.getAssetSourcesForType(type).then(function(assetSources) {
-            webview.executeJavaScript('showAssetSources(' + JSON.stringify(assetSources) + ')');
-            webview.executeJavaScript('showLibrarySearch("' + type + '")');
-
-            asset.search(type, [], '');
+            if(assetSources && assetSources.selected) {
+                webview.executeJavaScript('showAssetSources(' + JSON.stringify(assetSources) + ')');
+                webview.executeJavaScript('showLibrarySearch("' + type + '")');
+                asset.search(type, [], '');
+            }
         }.bind(this));
     });
 
