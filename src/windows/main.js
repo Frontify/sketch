@@ -7,6 +7,7 @@ import target from '../model/target';
 import sketch from '../model/sketch';
 import color from '../model/color';
 import typography from '../model/typography';
+import asset from '../model/asset';
 import user from '../model/user';
 import createFolder from '../helpers/createFolder'
 
@@ -113,6 +114,19 @@ export default function(context, view) {
         artboard.uploadArtboards(data).then(function() {
             webview.executeJavaScript('artboardsUploaded()');
         }.bind(this));
+    });
+
+    webview.on('switchAssetSourceForType', function(type, assetSourceId) {
+        target.getAssetSourcesForType(type).then(function(data) {
+            var selected = data.sources.find(function(source) {
+                return source.id == assetSourceId
+            }.bind(this));
+
+            target.switchAssetSourceForType(type, selected).then(function() {
+                webview.executeJavaScript('refresh()');
+            }.bind(this));
+        }.bind(this));
+
     });
 
     webview.on('openUrl', function(url, absolute) {
@@ -262,6 +276,25 @@ export default function(context, view) {
     webview.on('online', function() {
         target.showTarget();
         webview.executeJavaScript('switchTab("' + view + '")');
+    });
+
+    // Images, Logos and Icons
+    webview.on('showLibrary', function(type) {
+        view = type;
+        target.getAssetSourcesForType(type).then(function(assetSources) {
+            webview.executeJavaScript('showAssetSources(' + JSON.stringify(assetSources) + ')');
+            webview.executeJavaScript('showLibrarySearch("' + type + '")');
+
+            asset.search(type, [], '');
+        }.bind(this));
+    });
+
+    webview.on('searchLibraryAssets', function(type, filters, query) {
+        asset.search(type, filters, query);
+    });
+
+    webview.on('applyLibraryAsset', function(data) {
+        asset.applyImage(data);
     });
 
     // workarounds

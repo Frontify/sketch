@@ -122,6 +122,83 @@ class Target {
             }
         }.bind(this));
     }
+
+    getAssetSourcesForType(type) {
+        return this.getSimpleTarget().then(function(target) {
+            return fetch('/v1/brand/' + target.brand + '/projects').then(function (data) {
+                if (data.success == false) {
+                    return false;
+                }
+
+                var sources = [];
+                var selection = readJSON('assetsources-' + target.brand ) || {};
+                var selected = null;
+
+                switch(type) {
+                    case 'colors':
+                        sources = data.data.styleguides || [];
+                        break;
+                    case 'typography':
+                        sources = data.data.styleguides || [];
+                        break;
+                    case 'images':
+                        sources = data.data.libraries.filter(function(library) {
+                            return library.project_type == 'MEDIALIBRARY';
+                        }.bind(this));
+                        break;
+                    case 'logos':
+                        sources = data.data.libraries.filter(function(library) {
+                            return library.project_type == 'LOGOLIBRARY';
+                        }.bind(this));
+                        break;
+                    case 'icons':
+                        sources = data.data.libraries.filter(function(library) {
+                            return library.project_type == 'ICONLIBRARY';
+                        }.bind(this));
+                        break;
+                }
+
+                if(selection[type]) {
+                    selected = sources.find(function(source) {
+                        return source.id == selection[type].id;
+                    }.bind(this));
+                }
+
+                if(!selected) {
+                    selected = sources[0];
+                }
+
+                // set or refresh asset source
+                return this.switchAssetSourceForType(type, selected).then(function() {
+                    return { sources: sources, selected: selected, type: type };
+                }.bind(this));
+            }.bind(this));
+        }.bind(this));
+    }
+
+    getSelectedAssetSourceForType(type) {
+        return this.getSimpleTarget().then(function(target) {
+            var assetSources = readJSON('assetsources-' + target.brand ) || {};
+            if(assetSources[type]) {
+                return assetSources[type];
+            }
+
+            throw new TypeError('No selected source for type ' + type + 'found');
+        }.bind(this)).catch(function(e) {
+            console.error(e);
+        });
+    }
+
+    switchAssetSourceForType(type, assetSource) {
+        return this.getSimpleTarget().then(function(target) {
+            // write new source id to JSON
+            var assetSources = readJSON('assetsources-' + target.brand ) || {};
+            assetSources[type] = assetSource;
+            writeJSON('assetsources-' + target.brand, assetSources);
+
+            return true;
+        }.bind(this));
+    }
 }
 
 export default new Target();

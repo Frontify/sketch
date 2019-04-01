@@ -146,13 +146,17 @@ export default function (uri, options) {
         }.bind(this));
     }
     else {
-        return fetch(token.domain + uri, options).then(function (response) {
+        if(!options.cdn) {
+            uri = token.domain + uri;
+        }
+
+        return fetch(uri, options).then(function (response) {
             var contentType = response.headers.get("content-type");
             if (contentType && contentType.includes("application/json")) {
                 return response.json();
             }
 
-            if (contentType && contentType.includes("text/html")) {
+            if (contentType && (contentType.includes("text/html") || contentType.includes("image/svg+xml"))) {
                 return response.text();
             }
 

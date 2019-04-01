@@ -19,17 +19,6 @@ Tc.Module.Tabs = Tc.Module.extend({
            this.refresh();
         }.bind(this));
 
-        // open style guide
-        $ctx.on('click', '.js-m-tabs__styleguide', function (e) {
-            e.stopPropagation();
-            e.preventDefault();
-            var $this = $(e.currentTarget);
-            var url = $this.attr('href');
-            if(url) {
-                window.postMessage('openUrl', url);
-            }
-        }.bind(this));
-
         callback();
     },
 
@@ -61,17 +50,6 @@ Tc.Module.Tabs = Tc.Module.extend({
             if($tab.length > 0) {
                 this.showContent($tab);
             }
-        }
-    },
-
-    setTarget: function(target) {
-        var $ctx = this.$ctx;
-        var $styleguide = $ctx.find('.js-m-tabs__styleguide');
-        if(target.project && target.project.hub_id) {
-            $styleguide.attr('href', '/hub/' + target.project.hub_id).removeClass('state-hidden');
-        }
-        else {
-            $styleguide.addClass('state-hidden');
         }
     },
 

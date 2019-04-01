@@ -4,14 +4,9 @@ import sketch from './sketch';
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote'
 
 class Color {
-    getColors() {
-        return target.getTarget().then(function (target) {
-            // load remote assets status
-            return fetch('/v1/color/library/' + target.project.id).then(function (data) {
-                data.hub_id = target.project.hub_id;
-                return data;
-            }.bind(this));
-        }.bind(this));
+    getColors(project) {
+        // load remote assets status
+        return fetch('/v1/color/library/' + project);
     }
 
     applyColor(color) {
@@ -132,10 +127,14 @@ class Color {
     }
 
     showColors() {
-        this.getColors().then(function (data) {
-            if (isWebviewPresent('frontifymain')) {
-                sendToWebview('frontifymain', 'showColors(' + JSON.stringify(data) + ')');
-            }
+        target.getAssetSourcesForType('colors').then(function(assetSources) {
+            this.getColors(assetSources.selected.id).then(function (data) {
+                if (isWebviewPresent('frontifymain')) {
+                    data.project = assetSources.selected;
+                    sendToWebview('frontifymain', 'showAssetSources(' + JSON.stringify(assetSources) + ')');
+                    sendToWebview('frontifymain', 'showColors(' + JSON.stringify(data) + ')');
+                }
+            }.bind(this));
         }.bind(this));
     }
 }

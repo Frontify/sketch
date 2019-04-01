@@ -71,6 +71,6 @@
 }
 
 .a-dropdown ul li.selected {
-    background: #51BDCE;
+    background: rgba(73,80,92,1);
     color: #fff;
 }
