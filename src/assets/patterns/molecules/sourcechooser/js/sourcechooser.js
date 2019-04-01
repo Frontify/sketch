@@ -24,9 +24,5 @@ Tc.Module.SourceChooser = Tc.Module.extend({
         this.settings.getElem('source').changed = function(data) {
             window.postMessage('switchAssetSourceForType', this.type, data.source);
         }.bind(this);
-    },
-
-    onTabSwitched(data) {
-        this.$ctx.html('');
     }
 });

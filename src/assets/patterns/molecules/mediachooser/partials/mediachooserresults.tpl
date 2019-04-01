@@ -15,10 +15,12 @@
             </div>
         {{?}}
         <img data-src="{{= asset.image_url_thumbnail.replace('{width}', 400) }}" class="m-mediachooser__image lazyload" />
-        <div class="m-mediachooser__image-overlay">
-            <h4 class="m-mediachooser__image-title">{{! asset.title }}</h4>
-            <p class="m-mediachooser__image-desc">{{? asset.is_video }}{{= asset.video_width }} x {{= asset.video_height }}{{??}}{{= asset.width }} x {{= asset.height }}{{?}}</p>
-        </div>
+        {{? it.type !== 'icons' }}
+            <div class="m-mediachooser__image-overlay">
+                <h4 class="m-mediachooser__image-title">{{! asset.title }}</h4>
+                <p class="m-mediachooser__image-desc">{{? asset.is_video }}{{= asset.video_width }} x {{= asset.video_height }}{{??}}{{= asset.width }} x {{= asset.height }}{{?}}</p>
+            </div>
+        {{?}}
     </div>
     {{~}}
 {{??}}

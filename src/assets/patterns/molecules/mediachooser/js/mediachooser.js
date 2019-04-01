@@ -34,7 +34,9 @@ Tc.Module.MediaChooser = Tc.Module.extend({
     },
 
     applyFlexImages: function(maxHeight) {
-        this.$assets.flexImages({ container: '.js-m-mediachooser__asset-item', rowHeight: maxHeight, truncate: false });
+        if(this.type !== 'icons' && this.type !== 'logos') {
+            this.$assets.flexImages({ container: '.js-m-mediachooser__asset-item', rowHeight: maxHeight, truncate: false });
+        }
     },
 
     selectItem: function($item) {
@@ -69,11 +71,11 @@ Tc.Module.MediaChooser = Tc.Module.extend({
                 this.shuffle(assets);
             }
 
-            this.$assets.html(window.tpl.mediachooserresults({ items: assets }));
+            this.$assets.html(window.tpl.mediachooserresults({ items: assets, type: this.type }));
             this.applyFlexImages(this.rowHeight);
         }
         else {
-            this.$assets.html(window.tpl.mediachooserresults({ items: assets }));
+            this.$assets.html(window.tpl.mediachooserresults({ items: assets, type: this.type }));
         }
     },
 
