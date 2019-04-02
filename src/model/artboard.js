@@ -44,6 +44,7 @@ class Artboard {
                             id: null,
                             id_external: '' + msartboard.objectID(),
                             name: '' + msartboard.name(),
+                            ext: 'png',
                             sha: null,
                             state: 'new',
                             target: '',
@@ -68,6 +69,7 @@ class Artboard {
                                 if (path + asset.filename == artboard.name + '.' + asset.ext) {
                                     artboard.id = asset.id;
                                     artboard.sha = asset.sha;
+                                    artboard.ext = asset.ext;
                                     artboard.state = 'uploaded';
                                     artboard.count_annotation_open = asset.count_annotation_open;
                                     artboard.modified = asset.modified;
@@ -208,22 +210,30 @@ class Artboard {
                     }.bind(this)).then(function (files) {
                         return files.reduce(function(uploadsequence, file) {
                             return uploadsequence.then(function() {
-                                return filemanager.uploadFile({
-                                    path: file.path,
-                                    name: file.name + '.' + file.ext,
-                                    id: file.id,
-                                    id_external: file.id_external,
-                                    pixel_ratio: this.pixelRatio,
-                                    folder: target.set.path,
-                                    project: target.project.id,
-                                    type: 'artboard'
-                                }).then(function (data) {
+                                var status = this.getRemoteStatusForFile(artboard, file);
+                                if (status.sha != shaFile(file.path)) {
+                                    return filemanager.uploadFile({
+                                        path: file.path,
+                                        name: file.name + '.' + file.ext,
+                                        id: file.id,
+                                        id_external: file.id_external,
+                                        pixel_ratio: this.pixelRatio,
+                                        folder: target.set.path,
+                                        project: target.project.id,
+                                        type: 'artboard'
+                                    }).then(function(data) {
+                                        filemanager.deleteFile(file.path);
+                                        artboard.sha = data.sha;
+                                        artboard.id = data.id;
+                                        artboard.nochanges = false;
+                                        return true
+                                    }.bind(this));
+                                }
+                                else {
                                     filemanager.deleteFile(file.path);
-                                    artboard.sha = data.sha;
-                                    artboard.id = data.id;
-                                    artboard.nochanges = false;
-                                    return true
-                                })
+                                    artboard.nochanges = true;
+                                    return true;
+                                }
                             }.bind(this));
                         }.bind(this), Promise.resolve()).then(function() {
                             if (isWebviewPresent('frontifymain')) {
@@ -245,6 +255,27 @@ class Artboard {
             this.uploadInProgress = false;
             console.error(e);
         }.bind(this));
+    }
+
+    getRemoteStatusForFile(artboard, file) {
+        var status = null;
+
+        if (file.id_external == artboard.id_external && file.ext == artboard.ext) {
+            status = artboard;
+        }
+        else if(artboard.attachments && artboard.attachments.length > 0) {
+            artboard.attachments.forEach(function(attachment) {
+                if (file.id_external == attachment.id_external && file.name == artboard.name && file.ext == artboard.ext) {
+                    status = attachment
+                }
+            }.bind(this));
+        }
+
+        if(!status) {
+            status = artboard;
+        }
+
+        return status;
     }
 
     showArtboards(skipRemote) {
