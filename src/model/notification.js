@@ -1,4 +1,7 @@
 import fetch from '../helpers/fetch'
+import target from "./target";
+import source from "./source";
+import user from "./user";
 
 var MochaJSDelegate = require('mocha-js-delegate');
 var threadDictionary = NSThread.mainThread().threadDictionary();
@@ -18,6 +21,10 @@ class Notification {
     }
 
     connect() {
+        if (this.pusher) {
+            return Promise.resolve(this.pusher);
+        }
+
         return fetch('/v1/account/environment').then(function (data) {
             if (data['pusher']['enabled']) {
                 if (data['pusher']['region'] != 'us') {
@@ -35,7 +42,7 @@ class Notification {
                 return this.pusher;
             }
 
-            return null;
+            return Promise.reject('Pusher not enabled');
         }.bind(this));
     }
 
@@ -45,17 +52,10 @@ class Notification {
                 this.unsubscribe();
             }
 
-            if(threadDictionary['frontifynotificationobservers']) {
-                threadDictionary['frontifynotificationobservers'].each(function(observer) {
-                    NSNotificationCenter.defaultCenter().removeObserver(observer);
-                }.bind(this));
-
-                threadDictionary.removeObjectForKey('frontifynotificationobservers');
-            }
+            this.pusher.disconnect();
 
             threadDictionary.removeObjectForKey('frontifynotificationpusher');
             this.pusher = null;
-
         }
     }
 
@@ -82,7 +82,6 @@ class Notification {
                 this.channel.unsubscribe();
                 threadDictionary.removeObjectForKey('frontifynotificationchannel');
                 this.channel = null;
-
             }
         }
     }
@@ -96,20 +95,50 @@ class Notification {
                 }
             });
 
-            // Keep script around, otherwise everything will be dumped once its run
-            COScript.currentCOScript().setShouldKeepAround(true);
+            var fiber = require('sketch/async').createFiber();
 
             var delegateInstance = delegate.getClassInstance();
             var sel = NSSelectorFromString('didReceiveChannelEventNotification:');
 
-            if(!threadDictionary['frontifynotificationobservers']) {
-                threadDictionary['frontifynotificationobservers'] = [];
-            }
-
-            threadDictionary['frontifynotificationobservers'].push(NSNotificationCenter
+            NSNotificationCenter
                 .defaultCenter()
-                .addObserver_selector_name_object(delegateInstance, sel, 'PTPusherEventReceivedNotification', this.pusher));
+                .addObserver_selector_name_object(delegateInstance, sel, 'PTPusherEventReceivedNotification', this.pusher);
+
         }
+    }
+
+    listen() {
+        this.connect().then(function () {
+            // subscribe to current chosen project
+            target.getTarget().then(function (target) {
+                if (target.project) {
+                    this.subscribe(target.project.id);
+
+                    // bind events
+                    this.on('screen-activity', function (event) {
+                        var possibleActivities = ['OPEN', 'LOCAL_CHANGE', 'CLOSE'];
+                        var eventData = event.data();
+                        if (possibleActivities.indexOf('' + eventData.type) > -1) {
+                            source.getCurrentAsset().then(function (asset) {
+                                if (asset && '' + asset.id == '' + eventData.screen) {
+                                    user.getUser().then(function (userData) {
+                                        if ('' + eventData.actor.id != '' + userData.id) {
+                                            this.showNotification({
+                                                title: 'You are not alone',
+                                                image: eventData.actor.image,
+                                                description: eventData.actor.name + ' is currently working on ' + asset.filename + '. This might lead to conflicts.'
+                                            });
+                                        }
+                                    }.bind(this));
+                                }
+                            }.bind(this));
+                        }
+                    }.bind(this));
+                }
+            }.bind(this));
+        }.bind(this)).catch(function(e) {
+            console.error(e);
+        }.bind(this));
     }
 }
 

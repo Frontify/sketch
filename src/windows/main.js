@@ -7,6 +7,7 @@ import target from '../model/target';
 import sketch from '../model/sketch';
 import color from '../model/color';
 import typography from '../model/typography';
+import asset from '../model/asset';
 import user from '../model/user';
 import createFolder from '../helpers/createFolder'
 
@@ -115,6 +116,23 @@ export default function(context, view) {
         }.bind(this));
     });
 
+    webview.on('switchAssetSourceForType', function(type, assetSourceId) {
+        target.getAssetSourcesForType(type).then(function(data) {
+            if (data && data.sources) {
+                var selected = data.sources.find(function(source) {
+                    return source.id == assetSourceId
+                }.bind(this));
+
+                if (selected) {
+                    target.switchAssetSourceForType(type, selected).then(function() {
+                        webview.executeJavaScript('refresh()');
+                    }.bind(this));
+                }
+            }
+        }.bind(this));
+
+    });
+
     webview.on('openUrl', function(url, absolute) {
         if (absolute) {
             NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString(url));
@@ -177,7 +195,7 @@ export default function(context, view) {
         source.type = 'source';
         filemanager.downloadFile(source).then(function(path) {
             webview.executeJavaScript('sourceDownloaded(' + JSON.stringify(source) + ')');
-        }.bind(this)).catch(function(err) {
+        }.bind(this)).catch(function(e) {
             webview.executeJavaScript('sourceDownloadFailed(' + JSON.stringify(source) + ')');
         }.bind(this));
     });
@@ -194,7 +212,7 @@ export default function(context, view) {
                 NSDocumentController.sharedDocumentController().currentDocument().close();
                 filemanager.openFile(path);
             }
-        }.bind(this)).catch(function(err) {
+        }.bind(this)).catch(function(e) {
             webview.executeJavaScript('sourceDownloadFailed(' + JSON.stringify(source) + ')');
         }.bind(this));
     });
@@ -262,6 +280,26 @@ export default function(context, view) {
     webview.on('online', function() {
         target.showTarget();
         webview.executeJavaScript('switchTab("' + view + '")');
+    });
+
+    // Images, Logos and Icons
+    webview.on('showLibrary', function(type) {
+        view = type;
+        target.getAssetSourcesForType(type).then(function(assetSources) {
+            if(assetSources && assetSources.selected) {
+                webview.executeJavaScript('showAssetSources(' + JSON.stringify(assetSources) + ')');
+                webview.executeJavaScript('showLibrarySearch("' + type + '")');
+                asset.search(type, [], '');
+            }
+        }.bind(this));
+    });
+
+    webview.on('searchLibraryAssets', function(type, filters, query) {
+        asset.search(type, filters, query);
+    });
+
+    webview.on('applyLibraryAsset', function(data) {
+        asset.applyImage(data);
     });
 
     // workarounds

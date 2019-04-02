@@ -11,6 +11,7 @@ class Artboard {
     constructor() {
         this.pixelRatio = 2;
         this.remoteAssets = null;
+        this.uploadInProgress = false;
     }
 
     getArtboards(skipRemote) {
@@ -79,7 +80,7 @@ class Artboard {
 
                     // compare with selected artboards
                     var selectedArtboards = [];
-                    var jsdoc = dom.getSelectedDocument();
+                    var jsdoc = dom.Document.fromNative(sketch.getDocument());
                     jsdoc.selectedLayers.forEach(function(layer) {
                         if(layer.type === 'Artboard') {
                             selectedArtboards.push(layer.id);
@@ -104,13 +105,8 @@ class Artboard {
         }.bind(this));
     }
 
-    exportArtboard(artboard) {
+    exportArtboard(artboard, doc) {
         return new Promise(function (resolve, reject) {
-            var doc = sketch.getDocument();
-            if (!doc) {
-                reject();
-            }
-
             var files = [];
             var predicate = NSPredicate.predicateWithFormat('objectID == %@', artboard.id_external);
             var msartboard = sketch.findFirstLayer(predicate, nil, MSArtboardGroup);
@@ -122,7 +118,10 @@ class Artboard {
             imageFormat.setScale(this.pixelRatio); // @2x
 
             var path = filemanager.getExportPath() + artboard.name + '.png';
+
+
             var exportRequest = MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(msartboard, [imageFormat], true).firstObject();
+
             doc.saveArtboardOrSlice_toFile(exportRequest, path);
 
             files.push({
@@ -195,50 +194,72 @@ class Artboard {
 
     uploadArtboards(artboards) {
         // sequence artboard export and upload
+        this.uploadInProgress = true;
+
         return target.getTarget().then(function(target) {
-            return artboards.reduce(function (sequence, artboard) {
-                return sequence.then(function () {
-                    return this.exportArtboard(artboard);
-                }.bind(this)).then(function (files) {
-                    return files.reduces(function(file) {
-                        return filemanager.uploadFile({
-                            path: file.path,
-                            name: file.name + '.' + file.ext,
-                            id: file.id,
-                            id_external: file.id_external,
-                            pixel_ratio: this.pixelRatio,
-                            folder: target.set.path,
-                            project: target.project.id,
-                            type: 'artboard'
-                        }).then(function (data) {
-                            filemanager.deleteFile(file.path);
-                            artboard.sha = data.sha;
-                            artboard.id = data.id;
-                            artboard.nochanges = false;
-                            return true
-                        })
-                    }.bind(this)).then(function() {
-                        if (isWebviewPresent('frontifymain')) {
-                            sendToWebview('frontifymain', 'artboardUploaded(' + JSON.stringify(artboard) + ')');
-                        }
-                        return true;
-                    }).catch(function (err) {
-                        if (isWebviewPresent('frontifymain')) {
-                            sendToWebview('frontifymain', 'artboardUploadFailed(' + JSON.stringify(artboard) + ')');
-                        }
-                        return true;
+            var doc = sketch.getDocument();
+            if (!doc) {
+                return Promise.reject('No document found');
+            }
+            else {
+                return artboards.reduce(function (sequence, artboard) {
+                    return sequence.then(function () {
+                        return this.exportArtboard(artboard, doc);
+                    }.bind(this)).then(function (files) {
+                        return files.reduce(function(uploadsequence, file) {
+                            return uploadsequence.then(function() {
+                                return filemanager.uploadFile({
+                                    path: file.path,
+                                    name: file.name + '.' + file.ext,
+                                    id: file.id,
+                                    id_external: file.id_external,
+                                    pixel_ratio: this.pixelRatio,
+                                    folder: target.set.path,
+                                    project: target.project.id,
+                                    type: 'artboard'
+                                }).then(function (data) {
+                                    filemanager.deleteFile(file.path);
+                                    artboard.sha = data.sha;
+                                    artboard.id = data.id;
+                                    artboard.nochanges = false;
+                                    return true
+                                })
+                            }.bind(this));
+                        }.bind(this), Promise.resolve()).then(function() {
+                            if (isWebviewPresent('frontifymain')) {
+                                sendToWebview('frontifymain', 'artboardUploaded(' + JSON.stringify(artboard) + ')');
+                            }
+                            return true;
+                        }).catch(function (err) {
+                            if (isWebviewPresent('frontifymain')) {
+                                sendToWebview('frontifymain', 'artboardUploadFailed(' + JSON.stringify(artboard) + ')');
+                            }
+                            return true;
+                        }.bind(this));
                     }.bind(this));
-                }.bind(this));
-            }.bind(this), Promise.resolve());
+                }.bind(this), Promise.resolve());
+            }
+        }.bind(this)).then(function(data) {
+            this.uploadInProgress = false;
+        }.bind(this)).catch(function(e) {
+            this.uploadInProgress = false;
+            console.error(e);
         }.bind(this));
     }
 
     showArtboards(skipRemote) {
-        this.getArtboards(skipRemote).then(function (data) {
-            if (isWebviewPresent('frontifymain')) {
-                sendToWebview('frontifymain', 'showArtboards(' + JSON.stringify(data) + ')');
-            }
-        }.bind(this));
+        if(!this.uploadInProgress) {
+            this.getArtboards(skipRemote).then(function(data) {
+                if (isWebviewPresent('frontifymain')) {
+                    sendToWebview('frontifymain', 'showArtboards(' + JSON.stringify(data) + ')');
+                }
+            }.bind(this)).catch(function(e) {
+                console.error(e);
+            }.bind(this));
+        }
+        else {
+            console.log('upload in progress');
+        }
     }
 }
 

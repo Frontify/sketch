@@ -23,21 +23,18 @@ class Typography {
         }.bind(this));
     }
 
-    getFontStyles() {
-        return target.getTarget().then(function (target) {
-            // load typography styles
-            return fetch('/v1/typography/styles/' + target.project.hub_project_id).then(function (data) {
-                data.hub_id = target.project.hub_id;
-                this.colors = data.colors;
+    getFontStyles(project) {
+        // load typography styles
+        return fetch('/v1/typography/styles/' + project).then(function (data) {
+            this.colors = data.colors;
 
-                // only include installable fonts
-                data.fonts = data.fonts || [];
-                data.fonts = data.fonts.filter(function(font) {
-                    return !!font.install_name;
-                });
+            // only include installable fonts
+            data.fonts = data.fonts || [];
+            data.fonts = data.fonts.filter(function(font) {
+                return !!font.install_name;
+            });
 
-                return data;
-            }.bind(this));
+            return data;
         }.bind(this));
     }
 
@@ -89,7 +86,7 @@ class Typography {
         // create a text style for each foreground color
         var colors = [];
         if (!(fontStyle.colors && fontStyle.colors.foreground)) {
-            colors.push({name: 'Default', r: 54, g: 61, b: 74, alpha: 255, css_value: 'rgba(54,61,74,1)'});
+            colors.push({ name: 'Default', r: 54, g: 61, b: 74, alpha: 255, css_value: 'rgba(54,61,74,1)'});
         }
         else {
             for (var id in fontStyle.colors.foreground) {
@@ -109,29 +106,58 @@ class Typography {
             var spacing = parseFloat(fontStyle.spacing);
             var lineHeight = parseFloat(fontStyle.line_height);
 
-            msstyle.textColor = color.convertColor(colorValue);
+            msstyle.textColor = color.convertColor(colorValue, 'MSColor');
 
             msstyle.name = (fontStyle.name || 'Untitled Style') + '/' + colorValue.name;
             msstyle.stringValue = fontStyle.example || 'Untitled Style';
             msstyle.fontSize = fontSize;
 
-            // Get font name
-            var weightNumeric = !isNaN(parseInt(fontStyle.weight)) ? parseInt(fontStyle.weight) : 400;
-            if (fontStyle.weight && (fontStyle.weight == 'bold' || fontStyle.weight == 'bolder')) {
-                weightNumeric = 700;
+            // Get font postscript name
+            var font = null;
+            try {
+                // Initialize the font
+                var font = NSFont.fontWithName_size(fontStyle.family, 75);
+
+                // Add weight
+                if(font) {
+                    if(font.familyName() == font.fontName()) {
+                        var weightNumeric = fontStyle.weight ? parseInt(fontStyle.weight) : 400;
+                        if(!isNaN(weightNumeric)) {
+                            // Normalize font weight (from 0 - 15) -> https://developer.apple.com/documentation/appkit/nsfontmanager/1462332-fontwithfamily?language=objc
+                            weightNumeric = weightNumeric / 1200 * 15; // so that 400 / 1200 * 15 = 5
+                        }
+                        else {
+                            if(fontStyle.weight == 'bold' || fontStyle.weight == 'bolder') {
+                                weightNumeric = 9;
+                            }
+                            else if(fontStyle.weight == 'light' || fontStyle.weight == 'lighter') {
+                                weightNumeric = 2;
+                            }
+                        }
+
+                        var sizedFont = fontManager.fontWithFamily_traits_weight_size(font.familyName(), null, weightNumeric, 75);
+                        if(sizedFont) {
+                            font = sizedFont;
+                        }
+                    }
+
+                    // apply italic trait
+                    if (fontStyle.style && (fontStyle.style == 'ITALIC' || fontStyle.style == 'OBLIQUE')) {
+                        font = fontManager.convertFont_toHaveTrait(font, NSItalicFontMask)
+                    }
+                }
+            }
+            catch(e) {
+                console.log(e);
             }
 
-            var traits = null;
-            if (fontStyle.style && (fontStyle.style == 'ITALIC' || fontStyle.style == 'OBLIQUE')) {
-                traits = NSItalicFontMask;
-            }
-
-            var font = fontManager.fontWithFamily_traits_weight_size(fontStyle.family, traits, weightNumeric, 75);
             if (!font) {
-                font = fontManager.fontWithFamily_traits_weight_size('Times', null, weightNumeric, 75);
+                // apply fallback font
+                font = fontManager.fontWithFamily_traits_weight_size('Times', null, 5, 75);
             }
 
             msstyle.fontPostscriptName = font.fontName();
+
 
             if (fontStyle.align) {
                 var possibleAligns = ['LEFT', 'RIGHT', 'CENTER', 'JUSTIFY'];
@@ -150,7 +176,7 @@ class Typography {
 
                 }
 
-                msstyle.characterSpacing = spacing;
+                msstyle.characterSpacing = spacing * 10;
             }
 
             if (lineHeight) {
@@ -248,9 +274,15 @@ class Typography {
     }
 
     showTypography() {
-        this.getFontStyles().then(function (data) {
-            if (isWebviewPresent('frontifymain')) {
-                sendToWebview('frontifymain', 'showTypography(' + JSON.stringify(data) + ')');
+        target.getAssetSourcesForType('typography').then(function(assetSources) {
+            if(assetSources && assetSources.selected) {
+                this.getFontStyles(assetSources.selected.id).then(function (data) {
+                    if (isWebviewPresent('frontifymain')) {
+                        data.project = assetSources.selected;
+                        sendToWebview('frontifymain', 'showAssetSources(' + JSON.stringify(assetSources) + ')');
+                        sendToWebview('frontifymain', 'showTypography(' + JSON.stringify(data) + ')');
+                    }
+                }.bind(this));
             }
         }.bind(this));
     }

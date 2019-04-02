@@ -31,16 +31,10 @@
             </div>
         {{?}}
    {{~}}
-{{?? !it.hub_id }}
-    <div class="o-settings__blank">Your project is not linked to a Frontify Style Guide
-        <div class="m-btn-bar m-btn-bar--centered m-btn-bar--xs">
-           <button class="a-btn a-btn--link-primary js-m-color__learn" data-url="http://help.frontify.com/faq-workspace/how-to-create-a-project-and-link-it-to-your-style-guide">Learn more</button>
-        </div>
-    </div>
 {{??}}
     <div class="o-settings__blank">No color palettes found in your Frontify Style Guide
         <div class="m-btn-bar m-btn-bar--centered m-btn-bar--xs">
-           <button class="a-btn a-btn--link-primary js-m-color__styleguide" data-url="/hub/{{= it.hub_id }}">Add colors</button>
+           <button class="a-btn a-btn--link-primary js-m-color__styleguide" data-url="/hub/{{= it.project.hub_id }}">Add colors</button>
         </div>
     </div>
 {{?}}

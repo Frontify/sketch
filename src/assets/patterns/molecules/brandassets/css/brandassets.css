@@ -3,3 +3,38 @@
     flex-direction: column;
     height: calc(100vh - 90px);
 }
+
+.m-brandassets__blank-container {
+    display: none;
+    max-width: 323px;
+    margin: 40px auto 44px auto;
+    align-items: center;
+    flex: 1 0 auto;
+}
+
+.m-brandassets__blank-container.state-visible {
+    display: flex;
+}
+
+.m-brandassets__blank {
+    margin: auto;
+}
+
+.m-brandassets__blank-image-wrap {
+    position: relative;
+    width: 323px;
+    max-width: 100%;
+    padding-bottom: 84.2105%;
+}
+
+.m-brandassets__blank-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+}
+
+.m-brandassets_blank-cta {
+    margin-top: 20px !important;
+}

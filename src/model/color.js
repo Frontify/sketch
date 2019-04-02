@@ -4,14 +4,9 @@ import sketch from './sketch';
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote'
 
 class Color {
-    getColors() {
-        return target.getTarget().then(function (target) {
-            // load remote assets status
-            return fetch('/v1/color/library/' + target.project.id).then(function (data) {
-                data.hub_id = target.project.hub_id;
-                return data;
-            }.bind(this));
-        }.bind(this));
+    getColors(project) {
+        // load remote assets status
+        return fetch('/v1/color/library/' + project);
     }
 
     applyColor(color) {
@@ -101,8 +96,15 @@ class Color {
         return mscolors;
     }
 
-    convertColor(color) {
-        return MSColorAsset.alloc().initWithAsset_name(MSColor.colorWithRed_green_blue_alpha(color.r / 255, color.g / 255, color.b / 255, (color.alpha || color.a) / 255), color.name);
+    convertColor(color, type) {
+        if(type === 'MSColor') {
+            // Color for e.g. typostyles
+            return MSColor.colorWithRed_green_blue_alpha(color.r / 255, color.g / 255, color.b / 255, (color.alpha || color.a) / 255);
+        }
+        else {
+            // Asset for document and global colors
+            return MSColorAsset.alloc().initWithAsset_name(MSColor.colorWithRed_green_blue_alpha(color.r / 255, color.g / 255, color.b / 255, (color.alpha || color.a) / 255), color.name);
+        }
     }
 
     applyColorToLayer(layer, color) {
@@ -125,9 +127,15 @@ class Color {
     }
 
     showColors() {
-        this.getColors().then(function (data) {
-            if (isWebviewPresent('frontifymain')) {
-                sendToWebview('frontifymain', 'showColors(' + JSON.stringify(data) + ')');
+        target.getAssetSourcesForType('colors').then(function(assetSources) {
+            if(assetSources && assetSources.selected) {
+                this.getColors(assetSources.selected.id).then(function (data) {
+                    if (isWebviewPresent('frontifymain')) {
+                        data.project = assetSources.selected;
+                        sendToWebview('frontifymain', 'showAssetSources(' + JSON.stringify(assetSources) + ')');
+                        sendToWebview('frontifymain', 'showColors(' + JSON.stringify(data) + ')');
+                    }
+                }.bind(this));
             }
         }.bind(this));
     }

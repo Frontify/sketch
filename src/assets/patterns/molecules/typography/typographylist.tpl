@@ -2,21 +2,17 @@
 <div class="m-typography__fonts">
     <button type="button" class="a-btn a-btn--default m-typography__fonts-download js-m-typography__fonts-download"><i class="icon-download"></i> Download Fonts</button>
     <span class="m-typography__fonts-included">
+        {{ var includedFonts = ''; }}
         {{~ it.fonts :font:index }}
-            {{= font.install_name }}{{? index < it.fonts.length - 1 }}, {{?}}
+            {{ includedFonts += font.install_name; }}{{? index < it.fonts.length - 1 }}{{ includedFonts += ', '; }}{{?}}
         {{~}}
+        {{= window.utils.tpl.truncate(includedFonts, 0, 100, 0) }}
     </span>
 </div>
-{{?? !it.hub_id }}
-    <div class="o-settings__blank">Your project is not linked to a Frontify Style Guide
-        <div class="m-btn-bar m-btn-bar--centered m-btn-bar--xs">
-           <button class="a-btn a-btn--link-primary js-m-typography__learn" data-url="http://help.frontify.com/faq-workspace/how-to-create-a-project-and-link-it-to-your-style-guide">Learn more</button>
-        </div>
-    </div>
 {{??}}
     <div class="o-settings__blank">No fonts found in your Frontify Style Guide
        <div class="m-btn-bar m-btn-bar--centered m-btn-bar--xs">
-          <button class="a-btn a-btn--link-primary js-m-typography__styleguide" data-url="/hub/{{= it.hub_id }}">Add fonts</button>
+          <button class="a-btn a-btn--link-primary js-m-typography__styleguide" data-url="/hub/{{= it.project.hub_id }}">Add fonts</button>
        </div>
    </div>
 {{?}}
@@ -47,10 +43,10 @@
        {{?}}
    {{ } }}
     </div>
-{{?? it.hub_id }}
+{{??}}
     <div class="o-settings__blank">No typo styles found in your Frontify Style Guide
         <div class="m-btn-bar m-btn-bar--centered m-btn-bar--xs">
-           <button class="a-btn a-btn--link-primary js-m-typography__styleguide" data-url="/hub/{{= it.hub_id }}">Add typo styles</button>
+           <button class="a-btn a-btn--link-primary js-m-typography__styleguide" data-url="/hub/{{= it.project.hub_id }}">Add typo styles</button>
         </div>
     </div>
 {{?}}

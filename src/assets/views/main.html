@@ -21,7 +21,6 @@
     <title>Artboards</title>
 </head>
 <body>
-<div class="a-colorbar"></div>
 <div class="mod mod-target m-target"></div>
 <script>
     document.writeln(window.tpl.tabsmain({
@@ -60,10 +59,13 @@
     function showTarget(data) {
         var target = application.sandbox.getModuleById($('.mod-target').data('terrificId'));
         target.render(data);
-
-        var tabs = application.sandbox.getModuleById($('#tabs-brandassets').data('terrificId'));
-        tabs.setTarget(data);
     }
+
+    function showAssetSources(data) {
+        var sourceChooser = application.sandbox.getModuleById($('.mod-source-chooser[data-type=' + data.type + ']').data('terrificId'));
+        sourceChooser.render(data);
+    }
+
 
     function switchTab(id) {
         var tabsMain = application.sandbox.getModuleById($('#tabs-main').data('terrificId'));
@@ -167,8 +169,24 @@
 
     // Typography
     function showTypography(data) {
-        var colors = application.sandbox.getModuleById($('.mod-typography').data('terrificId'));
-        colors.render(data);
+        var typography = application.sandbox.getModuleById($('.mod-typography').data('terrificId'));
+        typography.render(data);
+    }
+
+    // Libraries
+    function showLibraryAssets(data) {
+        var chooser = application.sandbox.getModuleById($('.mod-media-chooser[data-type=' + data.type + ']').data('terrificId'));
+        chooser.render(data);
+    }
+
+    function showLibrarySearch(type) {
+        var chooser = application.sandbox.getModuleById($('.mod-media-chooser[data-type=' + type + ']').data('terrificId'));
+        chooser.showSearch();
+    }
+
+    function showBlankSlate(data) {
+        var brandassets = application.sandbox.getModuleById($('.mod-brand-assets').data('terrificId'));
+        brandassets.showBlankSlate(data);
     }
 
     // Folder Chooser
@@ -201,6 +219,10 @@
         // Change this to whatever you are testing
         document.writeln('<scr' + 'ipt src="./test/artboards.js"></scr' + 'ipt>');
     }
+
+    window.onerror = function(message, source, lineno, colno, error) {
+        console.log(message);
+    };
 </script>
 </body>
 </html>
