@@ -141,15 +141,18 @@ class Artboard {
             // Export artboard structure -> via JS API as its not possible to export JSON with MSExportRequest
             let jsartboard = DOM.Artboard.fromNative(msartboard);
 
-            // Create an own disconnected Artboard to include the symbols as well
+            // Create an own disconnected Artboard to preprocess and optimize data
             let detachedArtboard = jsartboard.duplicate();
             detachedArtboard.name = 'data';
 
-            let command = context.command;
+            // Save origin info
+            let jsdoc = DOM.Document.fromNative(doc);
+            Settings.setLayerSettingForKey(detachedArtboard, 'document', { id: jsdoc.id, page: { id: jsdoc.selectedPage.id, name: jsdoc.selectedPage.name }});
 
+            // Optimize layers
             detachedArtboard.layers.forEach(function(layer) {
                 if (layer.style && layer.style.fills) {
-                    // remove image fills
+                    // Remove image fills
                     let index = layer.style.fills.length;
                     while (--index >= 0) {
                         let fill = layer.style.fills[index];
@@ -165,12 +168,13 @@ class Artboard {
                         name: layer.master.name
                     };
 
-                    // save symbol properties to layer
+                    // Save symbol properties to layer
                     Settings.setLayerSettingForKey(layer, 'symbol', symbolProps);
 
                     layer.detach({recursively: true}); // inline symbols
                 }
                 else if (layer.type == 'Image') {
+                    // Remove image data
                     layer.image = null; // remove image data
                 }
             }.bind(this));
