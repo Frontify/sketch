@@ -1,6 +1,6 @@
 Tc.Setting.Toggle = Tc.Setting.Base.extend({
     elem: function() {
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
         this.readonly = $ctx.find('.js-m-setting-toggle').is('[readonly]');
 
         $ctx.on('click', function() {
@@ -11,7 +11,7 @@ Tc.Setting.Toggle = Tc.Setting.Base.extend({
     },
 
     setting: function () {
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
 
         this.readonly = $ctx.find('.js-m-setting-toggle').is('[readonly]');
 
@@ -34,7 +34,7 @@ Tc.Setting.Toggle = Tc.Setting.Base.extend({
     },
 
     enter: function() {
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
         this.mod.leave($ctx);
     },
 
@@ -43,14 +43,14 @@ Tc.Setting.Toggle = Tc.Setting.Base.extend({
     },
 
     serialize: function() {
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
 
-        var info = {};
+        let info = {};
 
-        var $toggle = $ctx.find('.js-m-setting-toggle');
-        var checked = $toggle.is(':checked');
-        var mapping_false = $ctx.data('mapping-false');
-        var mapping_true = $ctx.data('mapping-true');
+        let $toggle = $ctx.find('.js-m-setting-toggle');
+        let checked = $toggle.is(':checked');
+        let mapping_false = $ctx.data('mapping-false');
+        let mapping_true = $ctx.data('mapping-true');
         if (mapping_true !== undefined && mapping_false !== undefined) {
             checked = checked ? mapping_true : mapping_false;
         }
@@ -64,7 +64,7 @@ Tc.Setting.Toggle = Tc.Setting.Base.extend({
         // extend with data values
         info = $.extend(true, {}, info, $toggle.data());
 
-        var data = null;
+        let data = null;
 
         // group data, if configured
         if ($ctx.data('group')) {
@@ -79,8 +79,8 @@ Tc.Setting.Toggle = Tc.Setting.Base.extend({
     },
 
     setValue: function(checked) {
-        var $ctx = this.$ctx;
-        var $toggle = $ctx.find('.js-m-setting-toggle');
+        let $ctx = this.$ctx;
+        let $toggle = $ctx.find('.js-m-setting-toggle');
 
         if(checked) {
             $toggle.attr('checked', 'checked');

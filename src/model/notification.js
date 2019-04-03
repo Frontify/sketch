@@ -3,8 +3,8 @@ import target from "./target";
 import source from "./source";
 import user from "./user";
 
-var MochaJSDelegate = require('mocha-js-delegate');
-var threadDictionary = NSThread.mainThread().threadDictionary();
+let MochaJSDelegate = require('mocha-js-delegate');
+let threadDictionary = NSThread.mainThread().threadDictionary();
 
 class Notification {
     constructor() {
@@ -60,7 +60,7 @@ class Notification {
     }
 
     showNotification(data) {
-        var notification = NSUserNotification.alloc().init();
+        let notification = NSUserNotification.alloc().init();
         notification.title = data.title;
         notification.contentImage = NSImage.alloc().initByReferencingURL(NSURL.URLWithString(data.image));
         notification.informativeText = data.description;
@@ -88,17 +88,17 @@ class Notification {
 
     on(event, callback) {
         if (this.pusher) {
-            var delegate = new MochaJSDelegate({
+            let delegate = new MochaJSDelegate({
                 'didReceiveChannelEventNotification:': function (notification) {
-                    var event = notification.userInfo().objectForKey('PTPusherEventUserInfoKey');
+                    let event = notification.userInfo().objectForKey('PTPusherEventUserInfoKey');
                     callback(event);
                 }
             });
 
-            var fiber = require('sketch/async').createFiber();
+            let fiber = require('sketch/async').createFiber();
 
-            var delegateInstance = delegate.getClassInstance();
-            var sel = NSSelectorFromString('didReceiveChannelEventNotification:');
+            let delegateInstance = delegate.getClassInstance();
+            let sel = NSSelectorFromString('didReceiveChannelEventNotification:');
 
             NSNotificationCenter
                 .defaultCenter()
@@ -116,8 +116,8 @@ class Notification {
 
                     // bind events
                     this.on('screen-activity', function (event) {
-                        var possibleActivities = ['OPEN', 'LOCAL_CHANGE', 'CLOSE'];
-                        var eventData = event.data();
+                        let possibleActivities = ['OPEN', 'LOCAL_CHANGE', 'CLOSE'];
+                        let eventData = event.data();
                         if (possibleActivities.indexOf('' + eventData.type) > -1) {
                             source.getCurrentAsset().then(function (asset) {
                                 if (asset && '' + asset.id == '' + eventData.screen) {

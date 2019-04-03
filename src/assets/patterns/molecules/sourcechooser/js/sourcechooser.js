@@ -1,6 +1,6 @@
 Tc.Module.SourceChooser = Tc.Module.extend({
     on: function (callback) {
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
 
         this.sandbox.subscribe('events', this);
         this.sandbox.subscribe('tabs', this);
@@ -12,7 +12,7 @@ Tc.Module.SourceChooser = Tc.Module.extend({
     },
 
     render: function(data) {
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
         $ctx.html(window.tpl.sourcechooserlist(data));
 
         if(this.settings) {

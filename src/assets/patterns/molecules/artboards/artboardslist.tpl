@@ -16,7 +16,7 @@
         {{?}}
     </a>
 </div>
-{{ var hasSelected = false; }}
+{{ let hasSelected = false; }}
 {{? it.artboards.length > 0 }}
     {{= window.tpl.search({ label: 'Search artboards', classes: 'js-m-artboards__search'}) }}
     <ul class="m-artboards__list js-m-artboards__list">

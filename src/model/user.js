@@ -4,14 +4,14 @@ import fetch from '../helpers/fetch'
 import notification from './notification';
 import target from "./target";
 
-var threadDictionary = NSThread.mainThread().threadDictionary();
+let threadDictionary = NSThread.mainThread().threadDictionary();
 
 class User {
     constructor() {
     }
 
     isAuthenticated() {
-        var token = readJSON('token');
+        let token = readJSON('token');
 
         return token && token.access_token;
     }

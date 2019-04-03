@@ -1,4 +1,4 @@
-var fileManager = NSFileManager.defaultManager();
+let fileManager = NSFileManager.defaultManager();
 
 export default function (path) {
     if (!fileManager.fileExistsAtPath(path)) {

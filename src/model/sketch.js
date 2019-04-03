@@ -5,7 +5,7 @@ class Sketch {
     }
 
     getViewData() {
-        var data = {};
+        let data = {};
 
         if (user.isAuthenticated()) {
             data.url = require('../assets/views/main.html');
@@ -22,7 +22,7 @@ class Sketch {
     }
 
     resize(win) {
-        var viewData = this.getViewData();
+        let viewData = this.getViewData();
         win.setSize(viewData.width, viewData.height, true);
 
     }
@@ -34,7 +34,7 @@ class Sketch {
             return NSArray.array();
         }
 
-        var scope;
+        let scope;
         switch (layerType) {
             case MSPage :
                 scope = doc.pages();
@@ -49,8 +49,8 @@ class Sketch {
                     }
                 } else {
                     // search all pages
-                    var filteredArray = NSArray.array();
-                    var loopPages = doc.pages().objectEnumerator(), page;
+                    let filteredArray = NSArray.array();
+                    let loopPages = doc.pages().objectEnumerator(), page;
                     while (page = loopPages.nextObject()) {
                         scope = page.artboards();
                         filteredArray = filteredArray.arrayByAddingObjectsFromArray(scope.filteredArrayUsingPredicate(predicate));
@@ -65,8 +65,8 @@ class Sketch {
                     return scope.filteredArrayUsingPredicate(predicate);
                 } else {
                     // search all pages
-                    var filteredArray = NSArray.array();
-                    var loopPages = doc.pages().objectEnumerator(), page;
+                    let filteredArray = NSArray.array();
+                    let loopPages = doc.pages().objectEnumerator(), page;
                     while (page = loopPages.nextObject()) {
                         scope = page.children();
                         filteredArray = filteredArray.arrayByAddingObjectsFromArray(scope.filteredArrayUsingPredicate(predicate));
@@ -78,12 +78,12 @@ class Sketch {
     }
 
     findFirstLayer(predicate, container, layerType, doc) {
-        var filteredArray = this.findLayers(predicate, container, layerType, doc);
+        let filteredArray = this.findLayers(predicate, container, layerType, doc);
         return filteredArray.firstObject();
     }
 
     getSelection() {
-        var doc = this.getDocument();
+        let doc = this.getDocument();
         if(!doc) {
             return NSArray.array();
         }

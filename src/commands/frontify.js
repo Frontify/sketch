@@ -4,7 +4,7 @@ import source from '../model/source';
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote'
 
 export function runCommand(context) {
-    var threadDictionary = NSThread.mainThread().threadDictionary();
+    let threadDictionary = NSThread.mainThread().threadDictionary();
 
     executeSafely(context, function () {
         if(!threadDictionary['frontifywindow']) {
@@ -18,7 +18,7 @@ export function runCommand(context) {
 
 export function openCommand(context) {
     executeSafely(context, function () {
-        var interval = setInterval(function () {
+        let interval = setInterval(function () {
             if (context.actionContext.document.documentWindow()) {
                 clearInterval(interval);
                 source.opened().then(function () {

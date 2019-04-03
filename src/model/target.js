@@ -8,10 +8,10 @@ import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote'
 class Target {
     getTarget(view) {
         // load brand and project name
-        var target = readJSON('target') || {};
+        let target = readJSON('target') || {};
 
         if (target.project) {
-            var set = readJSON('set-' + target.project) || {};
+            let set = readJSON('set-' + target.project) || {};
             if (view == 'sources') {
                 target.set = set.set_sources || 0;
             }
@@ -36,14 +36,14 @@ class Target {
     }
 
     getSimpleTarget() {
-        var target = readJSON('target');
+        let target = readJSON('target');
 
         if (!target) {
             return Promise.resolve(false);
         }
 
         if (target.project) {
-            var set = readJSON('set-' + target.project) || {};
+            let set = readJSON('set-' + target.project) || {};
             target.set = set.set || 0;
             target.set_sources = set.set_sources || 0;
         }
@@ -52,7 +52,7 @@ class Target {
     }
 
     getDomain() {
-        var token = readJSON('token');
+        let token = readJSON('token');
 
         if (token && token.domain) {
             return Promise.resolve(token.domain);
@@ -63,7 +63,7 @@ class Target {
 
     updateTarget(data) {
         return Promise.resolve().then(function () {
-            var target = readJSON('target');
+            let target = readJSON('target');
 
             // handle pusher channel subscription if project changes
             if(target.project >= 0 && data.project >= 0 && target.project != data.project) {
@@ -80,7 +80,7 @@ class Target {
             }
 
             if (target.project) {
-                var set = readJSON('set-' + target.project) || {};
+                let set = readJSON('set-' + target.project) || {};
 
                 if (data.set >= 0) {
                     set.set = data.set;
@@ -111,7 +111,7 @@ class Target {
                 }
 
                 // write target to JSON
-                var target = readJSON('target') || {};
+                let target = readJSON('target') || {};
                 target.brand = data.brand.id;
                 target.project = data.project.id;
                 writeJSON('target', target);
@@ -130,9 +130,9 @@ class Target {
                     return false;
                 }
 
-                var sources = [];
-                var selection = readJSON('assetsources-' + target.brand ) || {};
-                var selected = null;
+                let sources = [];
+                let selection = readJSON('assetsources-' + target.brand ) || {};
+                let selected = null;
 
                 switch(type) {
                     case 'colors':
@@ -180,7 +180,7 @@ class Target {
         }.bind(this)).catch(function(e) {
             if (isWebviewPresent('frontifymain')) {
                 this.getTarget().then(function(target) {
-                    var data = target;
+                    let data = target;
                     data.type = type;
                     sendToWebview('frontifymain', 'showBlankSlate(' + JSON.stringify(data) + ')');
                 }.bind(this));
@@ -192,7 +192,7 @@ class Target {
 
     getSelectedAssetSourceForType(type) {
         return this.getSimpleTarget().then(function(target) {
-            var assetSources = readJSON('assetsources-' + target.brand ) || {};
+            let assetSources = readJSON('assetsources-' + target.brand ) || {};
             if(assetSources[type]) {
                 return assetSources[type];
             }
@@ -206,7 +206,7 @@ class Target {
     switchAssetSourceForType(type, assetSource) {
         return this.getSimpleTarget().then(function(target) {
             // write new source id to JSON
-            var assetSources = readJSON('assetsources-' + target.brand ) || {};
+            let assetSources = readJSON('assetsources-' + target.brand ) || {};
             assetSources[type] = assetSource;
             writeJSON('assetsources-' + target.brand, assetSources);
 

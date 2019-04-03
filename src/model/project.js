@@ -15,7 +15,7 @@ class Project {
     getFolders(folder) {
        return target.getSimpleTarget().then(function (target) {
            // browse project
-           var url = '/v1/project/browse/' + target.project;
+           let url = '/v1/project/browse/' + target.project;
            if (folder) {
                url += '/' + folder;
            }

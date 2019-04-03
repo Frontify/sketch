@@ -1,6 +1,6 @@
 Tc.Module.Status = Tc.Module.extend({
     on: function (callback) {
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
         this.setStatus(navigator.onLine);
 
         // Status events
@@ -17,7 +17,7 @@ Tc.Module.Status = Tc.Module.extend({
     },
 
     setStatus: function (status) {
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
 
         if (status) {
             $ctx.removeClass('state-offline');

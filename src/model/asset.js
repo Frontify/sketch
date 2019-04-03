@@ -3,8 +3,8 @@ import fetch from '../helpers/fetch';
 import sketch from './sketch';
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote'
 
-var api = require('sketch');
-var dom = require('sketch/dom');
+let API = require('sketch');
+let DOM = require('sketch/dom');
 
 class Asset {
     constructor() {
@@ -14,7 +14,7 @@ class Asset {
     searchAssets(type, filters, query) {
         return target.getSelectedAssetSourceForType(type).then(function(assetSource) {
             // search assets
-            var url = '/v1/assets/search/';
+            let url = '/v1/assets/search/';
             if(assetSource.connected_document_id) {
                 url += assetSource.connected_document_id + '?' + query;
             }
@@ -40,27 +40,27 @@ class Asset {
 
     applyImage(data) {
         if(data.url && data.ext) {
-            var url = data.url.replace('{width}', 2000);
-            var ext = data.ext;
+            let url = data.url.replace('{width}', 2000);
+            let ext = data.ext;
 
-            var jsdoc = dom.Document.fromNative(sketch.getDocument());
+            let jsdoc = DOM.Document.fromNative(sketch.getDocument());
 
             if(ext !== 'svg') {
-                var image = NSImage.alloc().initWithContentsOfURL(NSURL.URLWithString(url));
-                var imageLayer = new dom.Image({ image: image });
+                let image = NSImage.alloc().initWithContentsOfURL(NSURL.URLWithString(url));
+                let imageLayer = new DOM.Image({ image: image });
 
                 if(imageLayer && imageLayer.image) {
-                    var imageData = imageLayer.image;
-                    var app = NSApp.delegate();
+                    let imageData = imageLayer.image;
+                    let app = NSApp.delegate();
 
                     jsdoc.selectedLayers.forEach(function(layer) {
                         // check whether layer is a shape
                         if(layer.type != 'Artboard' && layer.style) {
                             layer.style.fills = [
                                 {
-                                    fill: api.Style.FillType.Pattern,
+                                    fill: API.Style.FillType.Pattern,
                                     pattern: {
-                                        patternType: api.Style.PatternFillType.Fill,
+                                        patternType: API.Style.PatternFillType.Fill,
                                         image: imageData
                                     }
                                 }
@@ -73,20 +73,20 @@ class Asset {
                 }
             } else {
                 fetch(url, { cdn : true }).then(function (blob) {
-                    var app = NSApp.delegate();
+                    let app = NSApp.delegate();
 
-                    var svg = NSString.stringWithString(blob);
-                    var svgData = svg.dataUsingEncoding(NSUTF8StringEncoding);
+                    let svg = NSString.stringWithString(blob);
+                    let svgData = svg.dataUsingEncoding(NSUTF8StringEncoding);
 
-                    var importer = MSSVGImporter.svgImporter();
+                    let importer = MSSVGImporter.svgImporter();
 
                     importer.prepareToImportFromData(svgData);
-                    var layer = importer.importAsLayer();
+                    let layer = importer.importAsLayer();
 
-                    var jsLayer = dom.Group.fromNative(layer).layers[0];
+                    let jsLayer = DOM.Group.fromNative(layer).layers[0];
                     jsLayer.name = data.title || 'SVG';
 
-                    var parent = null;
+                    let parent = null;
 
                     jsdoc.selectedLayers.forEach(function(selectedLayer) {
                         if(!parent && selectedLayer.type == 'Artboard') {

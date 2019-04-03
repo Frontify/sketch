@@ -9,7 +9,7 @@
                    {{? it.readonly}} readonly {{?}}
                    class="m-btn-toggle__input js-m-setting-toggle"
                    type="checkbox"
-                   {{ for(var key in it.data) { }}
+                   {{ for(let key in it.data) { }}
                         data-{{= key }}="{{= it.data[key] }}"
                    {{ } }}
             >

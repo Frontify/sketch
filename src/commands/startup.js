@@ -15,7 +15,7 @@ export default function (context) {
 
 function loadFramework(name, checkClassName, context) {
     if (NSClassFromString(checkClassName) == null) {
-        var mocha = Mocha.sharedRuntime();
+        let mocha = Mocha.sharedRuntime();
         return mocha.loadFrameworkWithName_inDirectory(name, context.scriptPath.stringByDeletingLastPathComponent() + '/frameworks');
     } else {
         return true;

@@ -12,8 +12,8 @@
             minLength = minLength !== undefined ? minLength : 0;
 
             if (str && str.length > minLength && str.length > maxLength) {
-                var end = str.substring(str.length - suffixLength);
-                var begin = str.substring(0, str.length - suffixLength);
+                let end = str.substring(str.length - suffixLength);
+                let begin = str.substring(0, str.length - suffixLength);
                 begin = begin.substring(0, maxLength);
 
                 return begin + '&hellip;' + end;

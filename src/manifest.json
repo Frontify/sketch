@@ -1,7 +1,7 @@
 {
   "name": "Frontify",
   "compatibleVersion": 3,
-  "identifier": "com.frontify.sketch-plugin",
+  "identifier": "com.frontify.sketch",
   "description": "Connecting your brand and design worlds",
   "bundleVersion": 2,
   "icon": "./images/drops.png",

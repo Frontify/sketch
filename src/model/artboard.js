@@ -3,9 +3,11 @@ import shaFile from '../helpers/shaFile'
 import sketch from './sketch'
 import target from './target';
 import filemanager from './filemanager';
-import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote'
+import {isWebviewPresent, sendToWebview} from 'sketch-module-web-view/remote'
 
-var dom = require('sketch/dom');
+let API = require('sketch');
+let DOM = require('sketch/dom');
+let Settings = require('sketch/settings');
 
 class Artboard {
     constructor() {
@@ -15,30 +17,30 @@ class Artboard {
     }
 
     getArtboards(skipRemote) {
-        return target.getTarget().then(function (target) {
-            var remoteStatus = null;
-            if(skipRemote && this.remoteAssets) {
-                remoteStatus = Promise.resolve({ assets: this.remoteAssets });
+        return target.getTarget().then(function(target) {
+            let remoteStatus = null;
+            if (skipRemote && this.remoteAssets) {
+                remoteStatus = Promise.resolve({assets: this.remoteAssets});
             }
             else {
                 // load remote assets status
-                remoteStatus = fetch('/v1/assets/status/' + target.project.id + '?include_count_annotation=true&path=' + encodeURIComponent(target.set.path));
+                remoteStatus = fetch('/v1/assets/status/' + target.project.id + '?include_count_annotation=true&include_attachments=true&path=' + encodeURIComponent(target.set.path));
             }
 
-            return remoteStatus.then(function (result) {
-                var assets = result.assets;
+            return remoteStatus.then(function(result) {
+                let assets = result.assets;
                 this.remoteAssets = result.assets;
 
                 // get artboards
-                var artboards = [];
-                var doc = sketch.getDocument();
+                let artboards = [];
+                let doc = sketch.getDocument();
 
                 if (doc) {
-                    var mspage = doc.currentPage();
-                    var msartboards = mspage.artboards();
+                    let mspage = doc.currentPage();
+                    let msartboards = mspage.artboards();
 
-                    for (var i = 0; i < msartboards.length; i++) {
-                        var msartboard = msartboards[i];
+                    for (let i = 0; i < msartboards.length; i++) {
+                        let msartboard = msartboards[i];
 
                         artboards.push({
                             id: null,
@@ -55,21 +57,22 @@ class Artboard {
                     }
 
                     // compare with remote status
-                    for (var i = 0; i < artboards.length; i++) {
-                        var artboard = artboards[i];
+                    for (let i = 0; i < artboards.length; i++) {
+                        let artboard = artboards[i];
 
-                        for (var id in assets) {
+                        for (let id in assets) {
                             if (assets.hasOwnProperty(id)) {
-                                var asset = assets[id];
-                                var path = asset.path;
-                                if(asset.path.indexOf(target.set.path) === 0) {
-                                    path =  asset.path.replace(target.set.path, '');
+                                let asset = assets[id];
+                                let path = asset.path;
+                                if (asset.path.indexOf(target.set.path) === 0) {
+                                    path = asset.path.replace(target.set.path, '');
                                 }
 
                                 if (path + asset.filename == artboard.name + '.' + asset.ext) {
                                     artboard.id = asset.id;
                                     artboard.sha = asset.sha;
                                     artboard.ext = asset.ext;
+                                    artboard.attachments = asset.attachments;
                                     artboard.state = 'uploaded';
                                     artboard.count_annotation_open = asset.count_annotation_open;
                                     artboard.modified = asset.modified;
@@ -81,23 +84,23 @@ class Artboard {
                     }
 
                     // compare with selected artboards
-                    var selectedArtboards = [];
-                    var jsdoc = dom.Document.fromNative(sketch.getDocument());
+                    let selectedArtboards = [];
+                    let jsdoc = DOM.Document.fromNative(sketch.getDocument());
                     jsdoc.selectedLayers.forEach(function(layer) {
-                        if(layer.type === 'Artboard') {
+                        if (layer.type === 'Artboard') {
                             selectedArtboards.push(layer.id);
                         }
                     }.bind(this));
 
-                    for (var i = 0; i < artboards.length; i++) {
-                        var artboard = artboards[i];
-                        if(selectedArtboards.indexOf(artboard.id_external) > -1) {
+                    for (let i = 0; i < artboards.length; i++) {
+                        let artboard = artboards[i];
+                        if (selectedArtboards.indexOf(artboard.id_external) > -1) {
                             artboard.selected = true;
                         }
                     }
                 }
 
-                var data = {
+                let data = {
                     artboards: artboards.reverse(),
                     target: target
                 };
@@ -108,21 +111,20 @@ class Artboard {
     }
 
     exportArtboard(artboard, doc) {
-        return new Promise(function (resolve, reject) {
-            var files = [];
-            var predicate = NSPredicate.predicateWithFormat('objectID == %@', artboard.id_external);
-            var msartboard = sketch.findFirstLayer(predicate, nil, MSArtboardGroup);
-            var jsartboard = dom.Artboard.fromNative(msartboard);
+        return new Promise(function(resolve, reject) {
+            let files = [];
+            let predicate = NSPredicate.predicateWithFormat('objectID == %@', artboard.id_external);
+            let msartboard = sketch.findFirstLayer(predicate, nil, MSArtboardGroup);
 
             // Export artboard image -> traditional MSExportRequest for better naming control
-            var imageFormat = MSExportFormat.alloc().init();
+            let imageFormat = MSExportFormat.alloc().init();
             imageFormat.setFileFormat('png');
             imageFormat.setScale(this.pixelRatio); // @2x
 
-            var path = filemanager.getExportPath() + artboard.name + '.png';
+            let path = filemanager.getExportPath() + artboard.name + '.png';
 
 
-            var exportRequest = MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(msartboard, [imageFormat], true).firstObject();
+            let exportRequest = MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(msartboard, [imageFormat], true).firstObject();
 
             doc.saveArtboardOrSlice_toFile(exportRequest, path);
 
@@ -132,46 +134,86 @@ class Artboard {
                 id_external: artboard.id_external,
                 id: artboard.id,
                 sha: artboard.sha,
-                path: path
+                path: path,
+                type: 'artboard'
             });
 
             // Export artboard structure -> via JS API as its not possible to export JSON with MSExportRequest
-            dom.export(jsartboard, {
+            let jsartboard = DOM.Artboard.fromNative(msartboard);
+
+            // Create an own disconnected Artboard to include the symbols as well
+            let detachedArtboard = jsartboard.duplicate();
+            detachedArtboard.name = 'data';
+
+            let command = context.command;
+
+            detachedArtboard.layers.forEach(function(layer) {
+                if (layer.style && layer.style.fills) {
+                    // remove image fills
+                    let index = layer.style.fills.length;
+                    while (--index >= 0) {
+                        let fill = layer.style.fills[index];
+                        if (fill.fill == API.Style.FillType.Pattern && fill.pattern.image) {
+                            layer.sketchObject.style().removeStyleFillAtIndex(index);
+                        }
+                    }
+                }
+
+                if (layer.type == 'SymbolInstance') {
+                    let symbolProps = {
+                        symbolId: layer.master.symbolId,
+                        name: layer.master.name
+                    };
+
+                    // save symbol properties to layer
+                    Settings.setLayerSettingForKey(layer, 'symbol', symbolProps);
+
+                    layer.detach({recursively: true}); // inline symbols
+                }
+                else if (layer.type == 'Image') {
+                    layer.image = null; // remove image data
+                }
+            }.bind(this));
+
+            detachedArtboard.parent = null;
+
+            DOM.export(detachedArtboard, {
                 formats: 'json',
                 output: filemanager.getExportPath(),
                 overwriting: true
             });
 
             files.push({
-                name: artboard.name,
+                name: detachedArtboard.name,
                 ext: 'json',
                 id_external: artboard.id_external,
                 id: artboard.id,
-                path: filemanager.getExportPath() + artboard.name + '.json'
+                path: filemanager.getExportPath() + detachedArtboard.name + '.json',
+                type: 'attachment'
             });
 
             // Export formats -> traditional MSExportRequest for better naming control
             function exportFormats(layer) {
                 layer.exportFormats.forEach(function(format) {
 
-                    var name = '';
-                    if(format.prefix && format.prefix !== 'null') {
+                    let name = '';
+                    if (format.prefix && format.prefix !== 'null') {
                         name += format.prefix;
                     }
 
                     name += layer.name;
 
-                    if(format.suffix && format.suffix !== 'null') {
+                    if (format.suffix && format.suffix !== 'null') {
                         name += format.suffix;
                     }
 
-                    var path = filemanager.getExportPath() + name + '.' + format.fileFormat;
+                    let path = filemanager.getExportPath() + name + '.' + format.fileFormat;
 
-                    var layerFormat = MSExportFormat.alloc().init();
+                    let layerFormat = MSExportFormat.alloc().init();
                     layerFormat.setFileFormat(format.fileFormat);
                     layerFormat.setScale(format.size);
 
-                    var exportRequest = MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(layer.sketchObject, [layerFormat], true).firstObject();
+                    let exportRequest = MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(layer.sketchObject, [layerFormat], true).firstObject();
                     doc.saveArtboardOrSlice_toFile(exportRequest, path);
 
                     files.push({
@@ -179,7 +221,8 @@ class Artboard {
                         ext: format.fileFormat,
                         id_external: layer.id,
                         id: layer.id,
-                        path: path
+                        path: path,
+                        type: 'attachment'
                     });
                 });
 
@@ -188,7 +231,7 @@ class Artboard {
                 }
             }
 
-            exportFormats(jsartboard);
+            exportFormats(detachedArtboard);
 
             resolve(files);
         }.bind(this));
@@ -199,40 +242,66 @@ class Artboard {
         this.uploadInProgress = true;
 
         return target.getTarget().then(function(target) {
-            var doc = sketch.getDocument();
+            let doc = sketch.getDocument();
             if (!doc) {
                 return Promise.reject('No document found');
             }
             else {
-                return artboards.reduce(function (sequence, artboard) {
-                    return sequence.then(function () {
+                let artboardChanged = true;
+
+                return artboards.reduce(function(sequence, artboard) {
+                    return sequence.then(function() {
                         return this.exportArtboard(artboard, doc);
-                    }.bind(this)).then(function (files) {
+                    }.bind(this)).then(function(files) {
                         return files.reduce(function(uploadsequence, file) {
-                            return uploadsequence.then(function() {
-                                var status = this.getRemoteStatusForFile(artboard, file);
-                                if (status.sha != shaFile(file.path)) {
-                                    return filemanager.uploadFile({
-                                        path: file.path,
-                                        name: file.name + '.' + file.ext,
-                                        id: file.id,
-                                        id_external: file.id_external,
-                                        pixel_ratio: this.pixelRatio,
-                                        folder: target.set.path,
-                                        project: target.project.id,
-                                        type: 'artboard'
-                                    }).then(function(data) {
+                            return uploadsequence.then(function(assetId) {
+                                if (file.type === 'artboard') {
+                                    if (artboard.sha != shaFile(file.path)) {
+                                        artboardChanged = true;
+                                        return filemanager.uploadFile({
+                                            path: file.path,
+                                            name: file.name + '.' + file.ext,
+                                            id: file.id,
+                                            id_external: file.id_external,
+                                            pixel_ratio: this.pixelRatio,
+                                            folder: target.set.path,
+                                            project: target.project.id,
+                                            type: file.type
+                                        }).then(function(data) {
+                                            filemanager.deleteFile(file.path);
+                                            artboard.sha = data.sha;
+                                            artboard.id = data.id;
+                                            artboard.nochanges = false;
+
+                                            return data.id;
+                                        }.bind(this));
+                                    }
+                                    else {
+                                        artboardChanged = false;
                                         filemanager.deleteFile(file.path);
-                                        artboard.sha = data.sha;
-                                        artboard.id = data.id;
-                                        artboard.nochanges = false;
-                                        return true
-                                    }.bind(this));
+                                        artboard.nochanges = true;
+                                        return artboard.id;
+                                    }
                                 }
-                                else {
-                                    filemanager.deleteFile(file.path);
-                                    artboard.nochanges = true;
-                                    return true;
+                                else if (file.type === 'attachment') {
+                                    let status = this.getRemoteStatusForAttachment(artboard, file);
+
+                                    if (artboardChanged || status.sha != shaFile(file.path)) {
+                                        return filemanager.uploadFile({
+                                            path: file.path,
+                                            name: file.name + '.' + file.ext,
+                                            type: file.type,
+                                            asset_id: assetId
+                                        }).then(function(data) {
+                                            filemanager.deleteFile(file.path);
+                                            status.sha = data.sha;
+                                            return assetId;
+                                        }.bind(this));
+                                    }
+                                    else {
+                                        filemanager.deleteFile(file.path);
+                                        return assetId;
+                                    }
                                 }
                             }.bind(this));
                         }.bind(this), Promise.resolve()).then(function() {
@@ -240,7 +309,7 @@ class Artboard {
                                 sendToWebview('frontifymain', 'artboardUploaded(' + JSON.stringify(artboard) + ')');
                             }
                             return true;
-                        }).catch(function (err) {
+                        }).catch(function(err) {
                             if (isWebviewPresent('frontifymain')) {
                                 sendToWebview('frontifymain', 'artboardUploadFailed(' + JSON.stringify(artboard) + ')');
                             }
@@ -257,29 +326,28 @@ class Artboard {
         }.bind(this));
     }
 
-    getRemoteStatusForFile(artboard, file) {
-        var status = null;
+    getRemoteStatusForAttachment(artboard, file) {
+        let status = null;
 
-        if (file.id_external == artboard.id_external && file.ext == artboard.ext) {
-            status = artboard;
-        }
-        else if(artboard.attachments && artboard.attachments.length > 0) {
+        if (artboard.attachments && artboard.attachments.length > 0) {
             artboard.attachments.forEach(function(attachment) {
-                if (file.id_external == attachment.id_external && file.name == artboard.name && file.ext == artboard.ext) {
+                if (file.name == attachment.name && file.ext == attachment.ext) {
                     status = attachment
                 }
             }.bind(this));
         }
 
-        if(!status) {
-            status = artboard;
+        if (!status) {
+            status = {
+                sha: null
+            };
         }
 
         return status;
     }
 
     showArtboards(skipRemote) {
-        if(!this.uploadInProgress) {
+        if (!this.uploadInProgress) {
             this.getArtboards(skipRemote).then(function(data) {
                 if (isWebviewPresent('frontifymain')) {
                     sendToWebview('frontifymain', 'showArtboards(' + JSON.stringify(data) + ')');

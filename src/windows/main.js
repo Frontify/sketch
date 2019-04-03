@@ -11,16 +11,16 @@ import asset from '../model/asset';
 import user from '../model/user';
 import createFolder from '../helpers/createFolder'
 
-var threadDictionary = NSThread.mainThread().threadDictionary();
+let threadDictionary = NSThread.mainThread().threadDictionary();
 
 export default function(context, view) {
-    var viewData = sketch.getViewData();
-    var mainURL = require('../assets/views/main.html');
-    var loginURL = require('../assets/views/login.html');
-    var domain = '';
+    let viewData = sketch.getViewData();
+    let mainURL = require('../assets/views/main.html');
+    let loginURL = require('../assets/views/login.html');
+    let domain = '';
 
     // create window and webview
-    var win = new BrowserWindow({
+    let win = new BrowserWindow({
         identifier: 'frontifymain',
         titleBarStyle: 'default',
         backgroundColor: '#FFFFFF',
@@ -35,7 +35,7 @@ export default function(context, view) {
         alwaysOnTop: true
     });
 
-    var webview = win.webContents;
+    let webview = win.webContents;
 
     // Load initial url
     win.loadURL(viewData.url);
@@ -59,9 +59,9 @@ export default function(context, view) {
 
     // Handle authentication redirect
     webview.on('did-get-redirect-request', function() {
-        var url = getURL();
+        let url = getURL();
         if (url.startsWith('https://frontify.com/sketchplugin')) {
-            var urlparts = url.split('?#access_token=');
+            let urlparts = url.split('?#access_token=');
 
             if(urlparts.length === 1) {
                 // no access token part included -> back to login URL
@@ -69,7 +69,7 @@ export default function(context, view) {
             }
             else {
                 // login with access token
-                var access_token = urlparts[1].split('&expires_in=31536000&token_type=bearer')[0];
+                let access_token = urlparts[1].split('&expires_in=31536000&token_type=bearer')[0];
                 user.login({
                     access_token: access_token,
                     domain: domain
@@ -119,7 +119,7 @@ export default function(context, view) {
     webview.on('switchAssetSourceForType', function(type, assetSourceId) {
         target.getAssetSourcesForType(type).then(function(data) {
             if (data && data.sources) {
-                var selected = data.sources.find(function(source) {
+                let selected = data.sources.find(function(source) {
                     return source.id == assetSourceId
                 }.bind(this));
 

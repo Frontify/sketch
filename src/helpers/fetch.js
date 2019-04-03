@@ -6,8 +6,8 @@ import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote'
 
 export default function (uri, options) {
     // get token
-    var token = readJSON('token');
-    var defaults = {
+    let token = readJSON('token');
+    let defaults = {
         method: 'GET',
         headers: {
             'Authorization': 'Bearer ' + token.access_token,
@@ -19,7 +19,7 @@ export default function (uri, options) {
     if (options.is_file_download) {
         // download file
         return new Promise(function (resolve, reject) {
-            var args = [];
+            let args = [];
 
             // http method
             args.push('-X');
@@ -27,9 +27,9 @@ export default function (uri, options) {
             args.push('-k');
 
             // http headers
-            for (var id in options.headers) {
+            for (let id in options.headers) {
                 if (options.headers.hasOwnProperty(id)) {
-                    var header = options.headers[id];
+                    let header = options.headers[id];
                     args.push('-H');
                     args.push('' + id + ': ' + header);
                 }
@@ -52,7 +52,7 @@ export default function (uri, options) {
             // uri
             args.push(token.domain + uri);
 
-            var spawn = childProcess.spawn('/usr/bin/curl', args);
+            let spawn = childProcess.spawn('/usr/bin/curl', args);
 
             spawn.on('close', function(status) {
                 if (status == 0) {
@@ -65,7 +65,7 @@ export default function (uri, options) {
 
             spawn.stderr.on('data', function(data) {
                 // get progress information
-                var progress = parseInt(data.replace(/#*/gi, '').trim());
+                let progress = parseInt(data.replace(/#*/gi, '').trim());
 
                 if(options.type === 'source') {
                     if (isWebviewPresent('frontifymain')) {
@@ -79,13 +79,13 @@ export default function (uri, options) {
         // upload file
         return new Promise(function (resolve, reject) {
 
-            var args = [];
+            let args = [];
             args.push('-k');
 
             // http headers
-            for (var id in options.headers) {
+            for (let id in options.headers) {
                 if (options.headers.hasOwnProperty(id)) {
-                    var header = options.headers[id];
+                    let header = options.headers[id];
                     args.push('-H');
                     args.push('' + id + ': ' + header);
                 }
@@ -98,9 +98,9 @@ export default function (uri, options) {
             }
 
             if (options.body) {
-                var params = JSON.parse(options.body);
+                let params = JSON.parse(options.body);
 
-                for(var key in params) {
+                for(let key in params) {
                     if(params.hasOwnProperty(key)) {
                         args.push('-F');
                         args.push(key + '=' + params[key]);
@@ -114,8 +114,8 @@ export default function (uri, options) {
             // uri
             args.push(token.domain + uri);
 
-            var spawn = childProcess.spawn('/usr/bin/curl', args);
-            var result = "";
+            let spawn = childProcess.spawn('/usr/bin/curl', args);
+            let result = "";
 
             spawn.on('close', function(status) {
                 if (status == 0) {
@@ -132,7 +132,7 @@ export default function (uri, options) {
 
             spawn.stderr.on('data', function(data) {
                 // get progress information
-                var progress = parseInt(data.replace(/#*/gi, '').trim());
+                let progress = parseInt(data.replace(/#*/gi, '').trim());
 
                 if (isWebviewPresent('frontifymain')) {
                     if(options.type === 'source') {
@@ -151,7 +151,7 @@ export default function (uri, options) {
         }
 
         return fetch(uri, options).then(function (response) {
-            var contentType = response.headers.get("content-type");
+            let contentType = response.headers.get("content-type");
             if (contentType && contentType.includes("application/json")) {
                 return response.json();
             }

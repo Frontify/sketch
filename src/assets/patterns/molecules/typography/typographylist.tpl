@@ -2,7 +2,7 @@
 <div class="m-typography__fonts">
     <button type="button" class="a-btn a-btn--default m-typography__fonts-download js-m-typography__fonts-download"><i class="icon-download"></i> Download Fonts</button>
     <span class="m-typography__fonts-included">
-        {{ var includedFonts = ''; }}
+        {{ let includedFonts = ''; }}
         {{~ it.fonts :font:index }}
             {{ includedFonts += font.install_name; }}{{? index < it.fonts.length - 1 }}{{ includedFonts += ', '; }}{{?}}
         {{~}}
@@ -18,9 +18,9 @@
 {{?}}
 {{? !$.isEmptyObject(it.groups) }}
     <div class="m-typography__list">
-   {{ for(var id in it.groups) { }}
+   {{ for(let id in it.groups) { }}
         {{? it.groups.hasOwnProperty(id) }}
-            {{ var group = it.groups[id]; }}
+            {{ let group = it.groups[id]; }}
             {{? group.styles.length > 0 }}
                 <div class="m-typography__group js-m-typography__group" data-id="{{= group.id }}">
                     <h3 class="m-typography__title">{{= group.title || 'Font Styles' }}</h3>
