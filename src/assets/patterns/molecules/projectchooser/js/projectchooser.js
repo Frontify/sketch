@@ -11,14 +11,15 @@ Tc.Module.ProjectChooser = Tc.Module.extend({
     render: function (brands, current) {
         let $ctx = this.$ctx;
         let projects = [];
+        let currentBrand = null;
 
         if (current.brand) {
-            let currentBrand = brands.find(function (brand) {
+            currentBrand = brands.find(function (brand) {
                 return current.brand.id == brand.id;
             }.bind(this));
         }
         else if(brands.length > 0) {
-            let currentBrand = brands[0];
+            currentBrand = brands[0];
         }
         else {
             currentBrand = { projects: [] }
