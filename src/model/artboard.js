@@ -147,7 +147,7 @@ class Artboard {
 
             // Save origin info
             let jsdoc = DOM.Document.fromNative(doc);
-            Settings.setLayerSettingForKey(detachedArtboard, 'document', { id: jsdoc.id, page: { id: jsdoc.selectedPage.id, name: jsdoc.selectedPage.name }, sketch: { version: API.version.sketch, api: API.version.api }});
+            Settings.setLayerSettingForKey(detachedArtboard, 'meta', { document: { id: jsdoc.id, path: jsdoc.path }, page: { id: jsdoc.selectedPage.id, name: jsdoc.selectedPage.name }, sketch: { version: API.version.sketch, api: API.version.api }});
 
             // Optimize layers
             detachedArtboard.layers.forEach(function(layer) {
