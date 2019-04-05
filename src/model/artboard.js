@@ -4,7 +4,6 @@ import sketch from './sketch'
 import target from './target';
 import filemanager from './filemanager';
 import {isWebviewPresent, sendToWebview} from 'sketch-module-web-view/remote'
-import asset from "./asset";
 
 let API = require('sketch');
 let DOM = require('sketch/dom');
@@ -15,6 +14,11 @@ class Artboard {
         this.pixelRatio = 2;
         this.remoteAssets = null;
         this.uploadInProgress = false;
+        this.emptyImage = new DOM.Image({
+            image: {
+                base64: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
+            }
+        });
     }
 
     getArtboards(skipRemote) {
@@ -173,8 +177,8 @@ class Artboard {
             });
 
             // Export formats -> traditional MSExportRequest for better naming control
-            files.concat(this.exportFormats(doc, jsartboard));
-
+            files = files.concat(this.exportFormats(doc, jsartboard));
+            
             resolve(files);
         }.bind(this));
     }
@@ -200,13 +204,17 @@ class Artboard {
             // Save symbol properties to layer
             Settings.setLayerSettingForKey(layer, 'symbol', symbolProps);
 
-            layer.detach({recursively: true}); // inline symbols
+            var group = layer.detach({recursively: true}); // inline symbols
+            if(group) {
+                group.layers.forEach(function(layer) {
+                    this.optimizeLayer(layer);
+                }.bind(this));
+            }
         }
         else if (layer.type == 'Image') {
-            // Remove image data
-            // layer.image = null; // remove image data
+            layer.image = this.emptyImage.image;
         }
-        else if(layer.type === 'Group') {
+        else if(layer.type == 'Group') {
             layer.layers.forEach(function(layer) {
                 this.optimizeLayer(layer);
             }.bind(this));
@@ -248,9 +256,33 @@ class Artboard {
             });
         });
 
+        // export image fills
+        /* if (layer.style && layer.style.fills) {
+            let index = layer.style.fills.length;
+            let imageId = 0;
+            while (--index >= 0) {
+                let fill = layer.style.fills[index];
+                if (fill.fill == API.Style.FillType.Pattern && fill.pattern.image && fill.enabled) {
+                    let name = layer.id + '_fill_' + imageId;
+                    let path = filemanager.getExportPath() + name + '.png';
+
+                    files.push({
+                        name: name,
+                        ext: 'png',
+                        id_external: layer.id,
+                        id: layer.id,
+                        path: path,
+                        type: 'attachment'
+                    });
+
+                    imageId++;
+                }
+            }
+        } */
+
         if (layer.layers) {
             layer.layers.forEach(function(layer) {
-                files.concat(this.exportFormats(doc, layer));
+                files = files.concat(this.exportFormats(doc, layer));
             }.bind(this));
         }
 
@@ -313,24 +345,21 @@ class Artboard {
                                             type: file.type,
                                             asset_id: assetId
                                         }).then(function(data) {
-                                            filemanager.deleteFile(file.path);
+                                            // filemanager.deleteFile(file.path);
                                             status.sha = data.sha;
                                             return assetId;
                                         }.bind(this));
                                     }
                                     else {
-                                        filemanager.deleteFile(file.path);
+                                        // filemanager.deleteFile(file.path);
                                         return assetId;
                                     }
                                 }
                             }.bind(this));
                         }.bind(this), Promise.resolve()).then(function(assetId) {
                             // start import of asset
-                            console.log('assetId = ' + assetId);
                             return fetch('/v1/inspect/import/' + assetId);
                         }.bind(this)).then(function(data) {
-                            console.log('done');
-                            console.log(data);
                             if (isWebviewPresent('frontifymain')) {
                                 sendToWebview('frontifymain', 'artboardUploaded(' + JSON.stringify(artboard) + ')');
                             }
