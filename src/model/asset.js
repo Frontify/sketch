@@ -38,6 +38,11 @@ class Asset {
         }.bind(this));
     }
 
+    import(assetId) {
+        const url = '/v1/inspect/import/' + assetId;
+        return fetch(url, { method: 'GET' });
+    }
+
     applyImage(data) {
         if(data.url && data.ext) {
             let url = data.url.replace('{width}', 2000);

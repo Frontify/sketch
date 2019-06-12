@@ -3,6 +3,7 @@ import shaFile from '../helpers/shaFile'
 import sketch from './sketch'
 import target from './target';
 import filemanager from './filemanager';
+import asset from './asset';
 import {isWebviewPresent, sendToWebview} from 'sketch-module-web-view/remote'
 
 let API = require('sketch');
@@ -346,6 +347,7 @@ class Artboard {
                                             asset_id: assetId
                                         }).then(function(data) {
                                             // filemanager.deleteFile(file.path);
+                                            asset.import(assetId); /* calls the import API */
                                             status.sha = data.sha;
                                             return assetId;
                                         }.bind(this));
