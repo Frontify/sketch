@@ -83,7 +83,8 @@ class FileManager {
         let data = {
             mimetype: 'image/png',
             filename: name,
-            origin: 'SKETCH'
+            origin: 'SKETCH',
+            id_external: info.id_external
         };
 
         if(info.pixel_ratio) {
@@ -98,7 +99,6 @@ class FileManager {
         else {
             let path = parts.join('/');
             data['id'] = info.id;
-            data['id_external'] = info.id_external;
             data['path'] = info.folder + path;
             data['project_id'] = info.project;
 

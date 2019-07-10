@@ -342,6 +342,7 @@ class Artboard {
                                         return filemanager.uploadFile({
                                             path: file.path,
                                             name: file.name + '.' + file.ext,
+                                            id_external: file.id_external,
                                             type: file.type,
                                             asset_id: assetId
                                         }).then(function(data) {
