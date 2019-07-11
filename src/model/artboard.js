@@ -151,6 +151,9 @@ class Artboard {
             let detachedArtboard = jsartboard.duplicate();
             detachedArtboard.name = 'data';
 
+            // Export formats -> traditional MSExportRequest for better naming control
+            files = files.concat(this.exportFormats(doc, detachedArtboard));
+
             // Save origin info
             let jsdoc = DOM.Document.fromNative(doc);
             Settings.setLayerSettingForKey(detachedArtboard, 'meta', { document: { id: jsdoc.id, path: jsdoc.path }, page: { id: jsdoc.selectedPage.id, name: jsdoc.selectedPage.name }, sketch: { version: API.version.sketch, api: API.version.api }});
@@ -177,9 +180,6 @@ class Artboard {
                 type: 'attachment'
             });
 
-            // Export formats -> traditional MSExportRequest for better naming control
-            files = files.concat(this.exportFormats(doc, jsartboard));
-            
             resolve(files);
         }.bind(this));
     }
