@@ -253,7 +253,8 @@ class Artboard {
                 id_external: layer.id,
                 id: layer.id,
                 path: path,
-                type: 'attachment'
+                type: 'attachment',
+                pixel_ratio: format.size
             });
         });
 
@@ -345,7 +346,8 @@ class Artboard {
                                             name: file.name + '.' + file.ext,
                                             id_external: file.id_external,
                                             type: file.type,
-                                            asset_id: assetId
+                                            asset_id: assetId,
+                                            pixel_ratio: file.pixel_ratio
                                         }).then(function(data) {
                                             // filemanager.deleteFile(file.path);
                                             asset.import(assetId); /* calls the import API */
