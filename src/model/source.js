@@ -222,6 +222,7 @@ class Source {
             // map source to file structure
             let file = {
                 path: target.path + source.filename,
+                filename: source.filename,
                 name: source.filename,
                 id: source.id,
                 id_external: source.id,
@@ -254,6 +255,7 @@ class Source {
             // map source to file structure
             let file = {
                 path: target.path + source.filename,
+                filename: source.filename,
                 name: source.filename,
                 id: null,
                 id_external: source.id,

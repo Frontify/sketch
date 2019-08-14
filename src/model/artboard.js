@@ -314,7 +314,8 @@ class Artboard {
                                         artboardChanged = true;
                                         return filemanager.uploadFile({
                                             path: file.path,
-                                            name: file.name + '.' + file.ext,
+                                            filename: file.name + '.' + file.ext,
+                                            name: file.name,
                                             id: file.id,
                                             id_external: file.id_external,
                                             pixel_ratio: this.pixelRatio,
@@ -341,9 +342,20 @@ class Artboard {
                                     let status = this.getRemoteStatusForAttachment(artboard, file);
 
                                     if (artboardChanged || status.sha != shaFile(file.path)) {
+                                        let filename;
+
+                                        if (file.ext === 'json') {
+                                            filename = file.name + '.' + file.ext;
+                                        }
+                                        else {
+                                            // Generate unique filenames for exportables. That prevents same named layers to overwrite each others exportables.
+                                            filename = file.id_external + '-' + file.pixel_ratio + '.' + file.ext;
+                                        }
+
                                         return filemanager.uploadFile({
                                             path: file.path,
-                                            name: file.name + '.' + file.ext,
+                                            filename: filename,
+                                            name: file.name,
                                             id_external: file.id_external,
                                             type: file.type,
                                             asset_id: assetId,

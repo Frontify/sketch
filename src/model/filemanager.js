@@ -77,12 +77,15 @@ class FileManager {
 
     uploadFile(info) {
         // remap slashes in filename to folders
-        let parts = info.name.split('/');
-        let name = parts.pop();
+        let filenameParts = info.filename.split('/');
+        let filename = filenameParts.pop();
+
+        let name = info.name.split('/').pop();
 
         let data = {
             mimetype: 'image/png',
-            filename: name,
+            name: name,
+            filename: filename,
             origin: 'SKETCH',
             id_external: info.id_external
         };
@@ -97,7 +100,7 @@ class FileManager {
             url += '/v1/attachment/create'
         }
         else {
-            let path = parts.join('/');
+            let path = filenameParts.join('/');
             data['id'] = info.id;
             data['path'] = info.folder + path;
             data['project_id'] = info.project;
@@ -108,7 +111,7 @@ class FileManager {
             }
         }
 
-        return fetch(url, {method: 'POST', filepath: info.path, is_file_upload: true, type: info.type, id: info.id, id_external: info.id_external, body: JSON.stringify(data)});
+        return fetch(url, {method: 'POST', filepath: info.path, is_file_upload: true, type: info.type, id: info.id, body: JSON.stringify(data)});
     }
 
     downloadFile(info) {
