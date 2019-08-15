@@ -10,6 +10,7 @@ import typography from '../model/typography';
 import asset from '../model/asset';
 import user from '../model/user';
 import createFolder from '../helpers/createFolder'
+import { runCommand } from '../commands/frontify'
 
 let threadDictionary = NSThread.mainThread().threadDictionary();
 
@@ -38,7 +39,7 @@ export default function(context, view) {
     let webview = win.webContents;
 
     // Load initial url
-    win.loadURL(viewData.url);
+    webview.loadURL(viewData.url);
 
     // Show window if ready
     win.once('ready-to-show', function() {
@@ -63,20 +64,18 @@ export default function(context, view) {
         if (url.startsWith('https://frontify.com/sketchplugin')) {
             let urlparts = url.split('?#access_token=');
 
-            if(urlparts.length === 1) {
-                // no access token part included -> back to login URL
-                win.loadURL(loginURL);
-            }
-            else {
+            if(urlparts.length !== 1) {
                 // login with access token
                 let access_token = urlparts[1].split('&expires_in=31536000&token_type=bearer')[0];
                 user.login({
                     access_token: access_token,
                     domain: domain
                 });
-
-                win.loadURL(mainURL);
             }
+
+            webview.stop();
+            win.close();
+            runCommand(context);
         }
     }.bind(this));
 
@@ -87,7 +86,9 @@ export default function(context, view) {
     // Handlers called from webview
     webview.on('logout', function() {
         user.logout().then(function() {
-            win.loadURL(loginURL);
+            webview.stop();
+            win.close();
+            runCommand(context);
         }.bind(this));
     });
 
