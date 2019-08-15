@@ -238,7 +238,8 @@ class Artboard {
                 name += format.suffix;
             }
 
-            let path = filemanager.getExportPath() + name + '.' + format.fileFormat;
+            let timeStamp = Date.now();
+            let path = filemanager.getExportPath() + timeStamp + '-' + name + '.' + format.fileFormat;
 
             let layerFormat = MSExportFormat.alloc().init();
             layerFormat.setFileFormat(format.fileFormat);
