@@ -363,7 +363,6 @@ class Artboard {
                                             pixel_ratio: file.pixel_ratio
                                         }).then(function(data) {
                                             // filemanager.deleteFile(file.path);
-                                            asset.import(assetId); /* calls the import API */
                                             status.sha = data.sha;
                                             return assetId;
                                         }.bind(this));
@@ -376,7 +375,7 @@ class Artboard {
                             }.bind(this));
                         }.bind(this), Promise.resolve()).then(function(assetId) {
                             // start import of asset
-                            return fetch('/v1/inspect/import/' + assetId);
+                            asset.import(assetId); /* calls the import API */
                         }.bind(this)).then(function(data) {
                             if (isWebviewPresent('frontifymain')) {
                                 sendToWebview('frontifymain', 'artboardUploaded(' + JSON.stringify(artboard) + ')');
