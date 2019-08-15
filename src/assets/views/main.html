@@ -71,15 +71,15 @@
         let tabsMain = application.sandbox.getModuleById($('#tabs-main').data('terrificId'));
         tabsMain.switchTab(id);
 
-        if (tabsMain.getCurrentTab() == 'brandassets') {
+        if (tabsMain.getCurrentTab() === 'brandassets') {
             let tabsBrandAssets = application.sandbox.getModuleById($('#tabs-brandassets').data('terrificId'));
             tabsBrandAssets.switchTab(id);
         }
     }
 
     function refresh() {
-        let tabs = application.sandbox.getModuleById($('.mod-tabs').data('terrificId'));
-        tabs.refresh();
+        let tabsMain = application.sandbox.getModuleById($('#tabs-main').data('terrificId'));
+        tabsMain.refresh();
     }
 
     function selectionChanged() {

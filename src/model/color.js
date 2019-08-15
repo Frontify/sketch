@@ -114,7 +114,7 @@ class Color {
         if (clazz == MSTextLayer) {
             layer.setTextColor(mscolor);
         }
-        else if(clazz == MSRectangleShape || clazz == MSOvalShape || clazz == MSTriangleShape || clazz == MSStarShape || clazz == MSPolygonShape || clazz == MSShapePathLayer) {
+        else if(clazz == MSRectangleShape || clazz == MSOvalShape || clazz == MSTriangleShape || clazz == MSStarShape || clazz == MSPolygonShape || clazz == MSShapeGroup) {
             let fills = layer.style().fills();
             if (fills.count() <= 0) {
                 fills.addNewStylePart();

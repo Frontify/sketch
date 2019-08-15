@@ -53,7 +53,6 @@ class Notification {
             }
 
             this.pusher.disconnect();
-
             threadDictionary.removeObjectForKey('frontifynotificationpusher');
             this.pusher = null;
         }

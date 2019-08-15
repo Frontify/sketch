@@ -22,12 +22,13 @@ Tc.Module.BrandAssets = Tc.Module.extend({
     },
 
     onTabSwitched(data) {
+        this.hideBlankSlate();
+
         if (data.id === 'brandassets') {
             let $ctx = this.$ctx;
             let $active = $ctx.find('.js-m-tabs__link.state-active');
             if ($active.length > 0) {
                 let tabs = this.sandbox.getModuleById($('#tabs-brandassets').data('terrificId'));
-                this.hideBlankSlate();
                 tabs.switchTab($active.attr('href').substring('5'));
             }
         }

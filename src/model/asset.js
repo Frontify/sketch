@@ -15,12 +15,14 @@ class Asset {
         return target.getSelectedAssetSourceForType(type).then(function(assetSource) {
             // search assets
             let url = '/v1/assets/search/';
-            if(assetSource.connected_document_id) {
+            if(assetSource.implicit_access) {
                 url += assetSource.connected_document_id + '?' + query;
             }
             else {
                 url += '?project_id=' + assetSource.id + '&' + query;
             }
+
+            url += '&limit=100';
 
             return fetch(url).then(function (data) {
                 return data;
@@ -53,14 +55,19 @@ class Asset {
             if(ext !== 'svg') {
                 let image = NSImage.alloc().initWithContentsOfURL(NSURL.URLWithString(url));
                 let imageLayer = new DOM.Image({ image: image });
+                let imageSize = image.size();
+                imageLayer.frame.width = imageSize.width;
+                imageLayer.frame.height = imageSize.height;
 
                 if(imageLayer && imageLayer.image) {
                     let imageData = imageLayer.image;
                     let app = NSApp.delegate();
+                    let applied = false;
 
                     jsdoc.selectedLayers.forEach(function(layer) {
                         // check whether layer is a shape
                         if(layer.type != 'Artboard' && layer.style) {
+                            applied = true;
                             layer.style.fills = [
                                 {
                                     fill: API.Style.FillType.Pattern,
@@ -71,8 +78,29 @@ class Asset {
                                 }
                             ];
                         }
-
                     }.bind(this));
+
+                    if(!applied) {
+                        // no appropriate layer has been selected -> add to document
+                        let parent = null;
+
+                        jsdoc.selectedLayers.forEach(function(layer) {
+                            if(layer.type == 'Artboard') {
+                                parent = layer;
+                            }
+                        }.bind(this));
+
+                        if(parent) {
+                            imageLayer.parent = parent;
+                        }
+                        else {
+                            imageLayer.parent = jsdoc.selectedPage;
+                        }
+
+                        imageLayer.selected = true;
+                        jsdoc.centerOnLayer(imageLayer);
+                        jsdoc.sketchObject.eventHandlerManager().currentHandler().zoomToSelection();
+                    }
 
                     app.refreshCurrentDocument();
                 }
@@ -104,6 +132,10 @@ class Asset {
                     }
 
                     jsLayer.parent = parent;
+
+                    jsLayer.selected = true;
+                    jsdoc.centerOnLayer(jsLayer);
+                    jsdoc.sketchObject.eventHandlerManager().currentHandler().zoomToSelection();
 
                     app.refreshCurrentDocument();
                 }.bind(this)).catch(function(e) {
