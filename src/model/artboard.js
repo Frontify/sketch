@@ -93,7 +93,7 @@ class Artboard {
                     let selectedArtboards = [];
                     let jsdoc = DOM.Document.fromNative(sketch.getDocument());
                     jsdoc.selectedLayers.forEach(function(layer) {
-                        if (layer.type === 'Artboard') {
+                        if (layer.type == 'Artboard' || layer.type == 'SymbolMaster') {
                             selectedArtboards.push(layer.id);
                         }
                     }.bind(this));
@@ -296,99 +296,105 @@ class Artboard {
         // sequence artboard export and upload
         this.uploadInProgress = true;
 
-        return target.getTarget().then(function(target) {
+        return this.getArtboards().then(function(data) {
+            let target = data.target;
+
+            // get the current state of the given artboards
+            artboards = artboards.map(function(artboard) {
+                return data.artboards.find(function(remoteArtboard) {
+                    return remoteArtboard.id_external == artboard.id_external;
+                }.bind(this));
+            }.bind(this));
+
             let doc = sketch.getDocument();
             if (!doc) {
                 return Promise.reject('No document found');
             }
             else {
-                let artboardChanged = true;
-
                 return artboards.reduce(function(sequence, artboard) {
-                    return sequence.then(function() {
-                        return this.exportArtboard(artboard, doc);
-                    }.bind(this)).then(function(files) {
-                        return files.reduce(function(uploadsequence, file) {
-                            return uploadsequence.then(function(assetId) {
-                                if (file.type === 'artboard') {
-                                    if (artboard.sha != shaFile(file.path)) {
-                                        artboardChanged = true;
-                                        return filemanager.uploadFile({
-                                            path: file.path,
-                                            filename: file.name + '.' + file.ext,
-                                            name: file.name,
-                                            id: file.id,
-                                            id_external: file.id_external,
-                                            pixel_ratio: this.pixelRatio,
-                                            folder: target.set.path,
-                                            project: target.project.id,
-                                            type: file.type
-                                        }).then(function(data) {
-                                            filemanager.deleteFile(file.path);
-                                            artboard.sha = data.sha;
-                                            artboard.id = data.id;
-                                            artboard.nochanges = false;
+                        return sequence.then(function() {
+                            return this.exportArtboard(artboard, doc);
+                        }.bind(this)).then(function(files) {
+                            console.log(files);
+                            return files.reduce(function(uploadsequence, file) {
+                                return uploadsequence.then(function(assetId) {
+                                    if (file.type === 'artboard') {
+                                        if (artboard.sha != shaFile(file.path)) {
+                                            return filemanager.uploadFile({
+                                                path: file.path,
+                                                filename: file.name + '.' + file.ext,
+                                                name: file.name,
+                                                id: file.id,
+                                                id_external: file.id_external,
+                                                pixel_ratio: this.pixelRatio,
+                                                folder: target.set.path,
+                                                project: target.project.id,
+                                                type: file.type
+                                            }).then(function(data) {
+                                                filemanager.deleteFile(file.path);
+                                                artboard.sha = data.sha;
+                                                artboard.id = data.id;
+                                                artboard.nochanges = false;
 
-                                            return data.id;
-                                        }.bind(this));
-                                    }
-                                    else {
-                                        artboardChanged = false;
-                                        filemanager.deleteFile(file.path);
-                                        artboard.nochanges = true;
-                                        return artboard.id;
-                                    }
-                                }
-                                else if (file.type === 'attachment') {
-                                    let status = this.getRemoteStatusForAttachment(artboard, file);
-
-                                    if (artboardChanged || status.sha != shaFile(file.path)) {
-                                        let filename;
-
-                                        if (file.ext === 'json') {
-                                            filename = file.name + '.' + file.ext;
+                                                return data.id;
+                                            }.bind(this));
                                         }
                                         else {
-                                            // Generate unique filenames for exportables. That prevents same named layers to overwrite each others exportables.
-                                            filename = file.id_external + '-' + file.pixel_ratio + '.' + file.ext;
+                                            filemanager.deleteFile(file.path);
+                                            artboard.nochanges = true;
+                                            return artboard.id;
                                         }
+                                    }
+                                    else if (file.type === 'attachment') {
+                                        let status = this.getRemoteStatusForAttachment(artboard, file);
 
-                                        return filemanager.uploadFile({
-                                            path: file.path,
-                                            filename: filename,
-                                            name: file.name,
-                                            id_external: file.id_external,
-                                            type: file.type,
-                                            asset_id: assetId,
-                                            pixel_ratio: file.pixel_ratio
-                                        }).then(function(data) {
+                                        if (status.sha != shaFile(file.path)) {
+                                            let filename;
+
+                                            if (file.ext === 'json') {
+                                                filename = file.name + '.' + file.ext;
+                                            }
+                                            else {
+                                                // Generate unique filenames for exportables. That prevents same named layers to overwrite each others exportables.
+                                                filename = file.id_external + '-' + file.pixel_ratio + '.' + file.ext;
+                                            }
+
+                                            return filemanager.uploadFile({
+                                                path: file.path,
+                                                filename: filename,
+                                                name: file.name,
+                                                id_external: file.id_external,
+                                                type: file.type,
+                                                asset_id: assetId,
+                                                pixel_ratio: file.pixel_ratio
+                                            }).then(function(data) {
+                                                // filemanager.deleteFile(file.path);
+                                                status.sha = data.sha;
+                                                return assetId;
+                                            }.bind(this));
+                                        }
+                                        else {
                                             // filemanager.deleteFile(file.path);
-                                            status.sha = data.sha;
                                             return assetId;
-                                        }.bind(this));
+                                        }
                                     }
-                                    else {
-                                        // filemanager.deleteFile(file.path);
-                                        return assetId;
-                                    }
+                                }.bind(this));
+                            }.bind(this), Promise.resolve()).then(function(assetId) {
+                                // start import of asset
+                                asset.import(assetId); /* calls the import API */
+                            }.bind(this)).then(function(data) {
+                                if (isWebviewPresent('frontifymain')) {
+                                    sendToWebview('frontifymain', 'artboardUploaded(' + JSON.stringify(artboard) + ')');
                                 }
+                                return true;
+                            }).catch(function(err) {
+                                if (isWebviewPresent('frontifymain')) {
+                                    sendToWebview('frontifymain', 'artboardUploadFailed(' + JSON.stringify(artboard) + ')');
+                                }
+                                return true;
                             }.bind(this));
-                        }.bind(this), Promise.resolve()).then(function(assetId) {
-                            // start import of asset
-                            asset.import(assetId); /* calls the import API */
-                        }.bind(this)).then(function(data) {
-                            if (isWebviewPresent('frontifymain')) {
-                                sendToWebview('frontifymain', 'artboardUploaded(' + JSON.stringify(artboard) + ')');
-                            }
-                            return true;
-                        }).catch(function(err) {
-                            if (isWebviewPresent('frontifymain')) {
-                                sendToWebview('frontifymain', 'artboardUploadFailed(' + JSON.stringify(artboard) + ')');
-                            }
-                            return true;
                         }.bind(this));
-                    }.bind(this));
-                }.bind(this), Promise.resolve());
+                    }.bind(this), Promise.resolve());
             }
         }.bind(this)).then(function(data) {
             this.uploadInProgress = false;
