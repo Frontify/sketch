@@ -58,12 +58,14 @@ export default function (uri, options) {
                 if (status == 0) {
                     resolve(options.filepath);
                 } else {
-                    console.log('File download exited with status ' + status);
+                    console.error('File download exited with status ' + status);
                     reject('File download failed');
                 }
             }.bind(this));
 
             spawn.stderr.on('data', function(data) {
+                data = data.toString();
+
                 // get progress information
                 let progress = parseInt(data.replace(/#*/gi, '').trim());
 
@@ -117,6 +119,10 @@ export default function (uri, options) {
             let spawn = childProcess.spawn('/usr/bin/curl', args);
             let result = "";
 
+            spawn.on('error', function(err) {
+                console.error(err);
+            }.bind(this));
+
             spawn.on('close', function(status) {
                 if (status == 0) {
                     resolve(JSON.parse(result));
@@ -131,6 +137,8 @@ export default function (uri, options) {
             }.bind(this));
 
             spawn.stderr.on('data', function(data) {
+                data = data.toString('utf8');
+
                 // get progress information
                 let progress = parseInt(data.replace(/#*/gi, '').trim());
 
