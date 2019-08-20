@@ -11,7 +11,7 @@ class Asset {
 
     }
 
-    searchAssets(type, filters, query) {
+    searchAssets(type, query) {
         return target.getSelectedAssetSourceForType(type).then(function(assetSource) {
             // search assets
             let url = '/v1/assets/search/';
@@ -22,7 +22,9 @@ class Asset {
                 url += '?project_id=' + assetSource.id + '&' + query;
             }
 
-            url += '&limit=100';
+            if(query === '') {
+                url += '&limit=100';
+            }
 
             return fetch(url).then(function (data) {
                 return data;
@@ -30,8 +32,8 @@ class Asset {
         }.bind(this));
     }
 
-    search(type, filters, query) {
-        this.searchAssets(type, filters, query).then(function (data) {
+    search(type, query) {
+        this.searchAssets(type, query).then(function (data) {
             if(data.success) {
                 if (isWebviewPresent('frontifymain')) {
                     sendToWebview('frontifymain', 'showLibraryAssets(' + JSON.stringify({ type: type, assets: data.data }) + ')');
