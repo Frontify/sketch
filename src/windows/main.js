@@ -10,7 +10,6 @@ import typography from '../model/typography';
 import asset from '../model/asset';
 import user from '../model/user';
 import createFolder from '../helpers/createFolder'
-import { runCommand } from '../commands/frontify'
 
 let threadDictionary = NSThread.mainThread().threadDictionary();
 
@@ -64,18 +63,20 @@ export default function(context, view) {
         if (url.startsWith('https://frontify.com/sketchplugin')) {
             let urlparts = url.split('?#access_token=');
 
-            if(urlparts.length !== 1) {
+            if(urlparts.length == 1) {
+                // no access token part included -> back to login URL
+                webview.loadURL(loginURL);
+            }
+            else {
                 // login with access token
                 let access_token = urlparts[1].split('&expires_in=31536000&token_type=bearer')[0];
                 user.login({
                     access_token: access_token,
                     domain: domain
                 });
-            }
 
-            webview.stop();
-            win.close();
-            runCommand(context);
+                webview.loadURL(mainURL);
+            }
         }
     }.bind(this));
 
@@ -86,9 +87,7 @@ export default function(context, view) {
     // Handlers called from webview
     webview.on('logout', function() {
         user.logout().then(function() {
-            webview.stop();
-            win.close();
-            runCommand(context);
+            webview.loadURL(loginURL);
         }.bind(this));
     });
 
@@ -290,13 +289,13 @@ export default function(context, view) {
             if(assetSources && assetSources.selected) {
                 webview.executeJavaScript('showAssetSources(' + JSON.stringify(assetSources) + ')');
                 webview.executeJavaScript('showLibrarySearch("' + type + '")');
-                asset.search(type, [], '');
+                asset.search(type, '');
             }
         }.bind(this));
     });
 
-    webview.on('searchLibraryAssets', function(type, filters, query) {
-        asset.search(type, filters, query);
+    webview.on('searchLibraryAssets', function(type, query) {
+        asset.search(type, query);
     });
 
     webview.on('applyLibraryAsset', function(data) {
