@@ -52,7 +52,6 @@ Tc.Module.MediaChooser = Tc.Module.extend({
         // add filters
         this.random = false;
         if (filters.q === '') {
-            filters.limit = 25;
             this.random = true;
         }
 
@@ -60,7 +59,7 @@ Tc.Module.MediaChooser = Tc.Module.extend({
 
         this.$assets.html(window.tpl.loaderspinner());
 
-        window.postMessage('searchLibraryAssets', this.type, filters, query);
+        window.postMessage('searchLibraryAssets', this.type, query);
     },
 
     render: function(data) {
