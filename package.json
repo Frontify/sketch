@@ -21,7 +21,6 @@
     "postinstall": "npm run build && skpm-link"
   },
   "devDependencies": {
-    "@skpm/builder": "^0.5.15",
     "@skpm/extract-loader": "^2.0.2",
     "copy-webpack-plugin": "^4.6.0",
     "css-loader": "^0.28.11",
@@ -36,8 +35,9 @@
     "src/assets/js/*.js"
   ],
   "dependencies": {
+    "@skpm/builder": "^0.5.15",
     "@skpm/child_process": "^0.4.1",
     "mocha-js-delegate": "^0.2.0",
-    "sketch-module-web-view": "^3.1.2"
+    "sketch-module-web-view": "^3.1.4"
   }
 }
