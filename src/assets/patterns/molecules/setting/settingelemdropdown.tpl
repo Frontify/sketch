@@ -5,7 +5,7 @@
             {{~ it.options :option:index}}
             <option {{? option.value == it.value}}selected {{?}} value="{{= option.value}}"
                 {{? option.data }}
-                    {{ for(var key in option.data) { }}
+                    {{ for(let key in option.data) { }}
                         data-{{= key }}="{{= option.data[key] }}"
                     {{ } }}
                 {{?}}>{{= option.name}}</option>

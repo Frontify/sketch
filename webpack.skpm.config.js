@@ -1,4 +1,3 @@
-var webpack = require("webpack");
 var ConcatPlugin = require('webpack-concat-plugin');
 var CopyPlugin = require('copy-webpack-plugin');
 

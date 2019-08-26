@@ -1,12 +1,12 @@
 Tc.Module.Target = Tc.Module.extend({
     on: function (callback) {
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
 
         this.sandbox.subscribe('events', this);
 
         $ctx.on('click', '.js-m-target__change-project', function(e) {
             e.preventDefault();
-            var $this = $(e.currentTarget);
+            let $this = $(e.currentTarget);
             this.fire('openModal', { modifier: 'default', closeable: false, $content: $(window.tpl.loaderspinner())}, ['events']);
             this.fire('closeDropdown', $this.closest('.js-m-btn-dropdown__menu'), ['events']);
             window.postMessage('changeProject');
@@ -14,7 +14,7 @@ Tc.Module.Target = Tc.Module.extend({
 
         $ctx.on('click', '.js-m-target__help', function(e) {
             e.preventDefault();
-            var $this = $(e.currentTarget);
+            let $this = $(e.currentTarget);
             this.fire('closeDropdown', $this.closest('.js-m-btn-dropdown__menu'), ['events']);
             window.postMessage('openUrl', $this.attr('href'), true);
         }.bind(this));
@@ -28,7 +28,7 @@ Tc.Module.Target = Tc.Module.extend({
     },
 
     render: function (data) {
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
 
         if(!data) {
             $ctx.html(window.tpl.targetblank(data));

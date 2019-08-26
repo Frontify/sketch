@@ -67,8 +67,8 @@ Tc.Setting = Tc.Setting || {};
         },
 
         save: function() {
-            var $ctx = this.$ctx;
-            var info = this.serialize();
+            let $ctx = this.$ctx;
+            let info = this.serialize();
 
             if(api) {
                 // return this.data[this.method](api, info);
@@ -81,12 +81,12 @@ Tc.Setting = Tc.Setting || {};
         showDetails: function() {
             return new Promise(function(resolve) {
                 if(this.$details && !this.$details.hasClass('state-open')) {
-                    var $ctx = this.$ctx;
-                    var $label = $ctx.find('.js-m-setting__label').clone().removeClass('state-hidden');
+                    let $ctx = this.$ctx;
+                    let $label = $ctx.find('.js-m-setting__label').clone().removeClass('state-hidden');
 
                     this.$details.prepend($label);
-                    var offset = this.$details.offset();
-                    var bottom = offset['top'] + parseInt(this.$details.outerHeight());
+                    let offset = this.$details.offset();
+                    let bottom = offset['top'] + parseInt(this.$details.outerHeight());
                     this.mod.resize(bottom);
 
                     this.$details.addClass('state-open');
@@ -107,7 +107,7 @@ Tc.Setting = Tc.Setting || {};
         hideDetails: function() {
             return new Promise(function(resolve) {
                 if (this.$details && this.$details.hasClass('state-open')) {
-                    var $ctx = this.$ctx;
+                    let $ctx = this.$ctx;
 
                     this.$details.velocity('fadeOut', {
                         duration: 1,
@@ -129,15 +129,15 @@ Tc.Setting = Tc.Setting || {};
 
         showActions: function($actions) {
             return new Promise(function(resolve) {
-                var $ctx = this.$ctx;
+                let $ctx = this.$ctx;
                 if(!$actions) {
 
                     $actions = $ctx.find('.js-m-setting__actions');
 
                     // exclude actions from nested elems and settings
                     $actions = $actions.filter(function(index, el) {
-                        var $el = $(el);
-                        var $parents = $el.parentsUntil($ctx, '.js-co-settings__elem, .js-co-settings__setting');
+                        let $el = $(el);
+                        let $parents = $el.parentsUntil($ctx, '.js-co-settings__elem, .js-co-settings__setting');
                         return $parents.length === 0;
                     }.bind(this));
 
@@ -175,7 +175,7 @@ Tc.Setting = Tc.Setting || {};
 
         hideActions: function($actions) {
             return new Promise(function(resolve) {
-                var $ctx = this.$ctx;
+                let $ctx = this.$ctx;
                 $actions = $actions || $ctx.find('.js-m-setting__actions');
                 $actions.velocity('stop');
 
@@ -208,10 +208,10 @@ Tc.Setting = Tc.Setting || {};
         },
 
         showSuccess: function($actions) {
-            var sequence = [];
+            let sequence = [];
 
             return new Promise(function(resolve) {
-                var $ctx = this.$ctx;
+                let $ctx = this.$ctx;
                 $actions = $actions || $ctx.find('.js-m-setting__actions');
 
                 if (this.$details && this.$details.length === 0) {
@@ -233,12 +233,12 @@ Tc.Setting = Tc.Setting || {};
                     $.Velocity.RunSequence(sequence);
                 }
                 else {
-                    var $reset = $actions.find('button[type="reset"]');
-                    var $submit = $actions.find('button[type="submit"]');
-                    var $submitLabel = $submit.find('.js-m-setting__btn-label');
-                    var $submitIcon = $submit.find('.js-m-setting__btn-icon--success');
-                    var $loaderIcon = $submit.find('.js-m-setting__btn-icon--loading');
-                    var width = $submit.data('width');
+                    let $reset = $actions.find('button[type="reset"]');
+                    let $submit = $actions.find('button[type="submit"]');
+                    let $submitLabel = $submit.find('.js-m-setting__btn-label');
+                    let $submitIcon = $submit.find('.js-m-setting__btn-icon--success');
+                    let $loaderIcon = $submit.find('.js-m-setting__btn-icon--loading');
+                    let width = $submit.data('width');
 
                     // stop velocity calls
                     $reset.velocity('stop');
@@ -248,7 +248,7 @@ Tc.Setting = Tc.Setting || {};
                     $loaderIcon.velocity('stop');
 
                     /* reverser sequence */
-                    var reverseSequence = [];
+                    let reverseSequence = [];
 
                     if($reset.length > 0) {
                         reverseSequence.push({e: $reset, p: 'transition.slideUpIn', o: {duration: 1, display: 'block'}});
@@ -286,7 +286,7 @@ Tc.Setting = Tc.Setting || {};
         },
 
         showError: function($actions) {
-            var $ctx = this.$ctx;
+            let $ctx = this.$ctx;
             $actions = $actions || $ctx.find('.js-m-setting__actions');
 
             if(!this.animating) {
@@ -301,7 +301,7 @@ Tc.Setting = Tc.Setting || {};
                     $ctx.append(this.$meta);
                     this.$meta.append(this.$message);
 
-                    var sequence = [
+                    let sequence = [
                         {e: this.$message, p: 'transition.slideRightIn', o: {duration: 100}},
                         {e: this.$message, p: 'reverse', o: {duration: 300, delay: 700}},
                         {e: $actions, p: 'reverse', o: { duration: 100, display: 'block', complete: function() {
@@ -312,11 +312,11 @@ Tc.Setting = Tc.Setting || {};
                     $.Velocity.RunSequence(sequence);
                 }
                 else {
-                    var $reset = $actions.find('button[type="reset"]');
-                    var $submit = $actions.find('button[type="submit"]');
-                    var $submitLabel = $submit.find('.js-m-setting__btn-label');
-                    var $submitIcon = $submit.find('.js-m-setting__btn-icon--error');
-                    var $loaderIcon = $submit.find('.js-m-setting__btn-icon--loading');
+                    let $reset = $actions.find('button[type="reset"]');
+                    let $submit = $actions.find('button[type="submit"]');
+                    let $submitLabel = $submit.find('.js-m-setting__btn-label');
+                    let $submitIcon = $submit.find('.js-m-setting__btn-icon--error');
+                    let $loaderIcon = $submit.find('.js-m-setting__btn-icon--loading');
                     $submit.css({ width: $submit.outerWidth()});
 
                     // stop velocity calls
@@ -326,7 +326,7 @@ Tc.Setting = Tc.Setting || {};
                     $submitIcon.velocity('stop');
                     $loaderIcon.velocity('stop');
 
-                    var reverseSequence = [
+                    let reverseSequence = [
                         {e: $submitIcon, p: 'reverse', o: {duration: 100, display:'none', complete: function() {
                             $submit.removeClass('m-btn--danger');
                         }.bind(this)}},
@@ -337,7 +337,7 @@ Tc.Setting = Tc.Setting || {};
                         }.bind(this)}}
                     ];
 
-                    var sequence = [
+                    let sequence = [
                         {e: $reset, p: 'transition.slideDownOut', o: {duration: 100}},
                         {e: $submitLabel, p: { opacity: 0 }, o: {duration: 100, visibility: 'hidden' }},
                         {e: $submit, p: { width: [47, $submit.outerWidth()] }, o: {duration: 150, sequenceQueue: false, complete: function() {
@@ -369,7 +369,7 @@ Tc.Setting = Tc.Setting || {};
 
         validation: function(submitHandler, resetHandler, $ctx) {
             $ctx = $ctx || this.$ctx;
-            var self = this;
+            let self = this;
 
             $ctx.on('reset', function(e) {
                 $ctx.validate().resetForm();
@@ -400,12 +400,12 @@ Tc.Setting = Tc.Setting || {};
         },
 
         showLoader: function($actions) {
-            var $ctx = this.$ctx;
+            let $ctx = this.$ctx;
             $actions = $actions || $ctx.find('.js-m-setting__actions');
-            var $reset = $actions.find('button[type="reset"]');
-            var $submit = $actions.find('button[type="submit"]');
-            var $submitLabel = $submit.find('.js-m-setting__btn-label');
-            var $loaderIcon = $submit.find('.js-m-setting__btn-icon--loading');
+            let $reset = $actions.find('button[type="reset"]');
+            let $submit = $actions.find('button[type="submit"]');
+            let $submitLabel = $submit.find('.js-m-setting__btn-label');
+            let $loaderIcon = $submit.find('.js-m-setting__btn-icon--loading');
 
             // stop velocity calls
             $reset.velocity('stop');
@@ -415,7 +415,7 @@ Tc.Setting = Tc.Setting || {};
 
             $submit.data('width', $submit.outerWidth());
 
-            var sequence = [];
+            let sequence = [];
 
             if($reset.length > 0) {
                 sequence.push({e: $reset, p: 'transition.slideDownOut', o: {duration: 100}});
@@ -432,23 +432,23 @@ Tc.Setting = Tc.Setting || {};
 
         hideLoader: function($actions) {
             return new Promise(function(resolve) {
-                var $ctx = this.$ctx;
+                let $ctx = this.$ctx;
 
                 if (this.$details && this.$details.length === 0) {
                     resolve(); // resolve immediately for settings without details
                 }
 
                 $actions = $actions || $ctx.find('.js-m-setting__actions');
-                var $reset = $actions.find('button[type="reset"]');
-                var $submit = $actions.find('button[type="submit"]');
-                var $submitLabel = $submit.find('.js-m-setting__btn-label');
-                var $loaderIcon = $submit.find('.js-m-setting__btn-icon--loading');
+                let $reset = $actions.find('button[type="reset"]');
+                let $submit = $actions.find('button[type="submit"]');
+                let $submitLabel = $submit.find('.js-m-setting__btn-label');
+                let $loaderIcon = $submit.find('.js-m-setting__btn-icon--loading');
                 // stop velocity calls
                 $reset.velocity('stop');
                 $submit.velocity('stop');
                 $submitLabel.velocity('stop');
                 $loaderIcon.velocity('stop');
-                var sequence = [
+                let sequence = [
                     {e: $loaderIcon, p: 'fadeOut', o: {duration: 100, display: 'none'}},
                     {e: $submit, p: 'reverse', o: {duration: 150 }},
                     {e: $submitLabel, p: {opacity: 1}, o: {duration: 150, visibility: 'visible', sequenceQueue: false }}
@@ -482,8 +482,8 @@ Tc.Setting = Tc.Setting || {};
         },
 
         createGroup: function(data, groups, info) {
-            var parts = groups.split('.');
-            var group = parts.shift();
+            let parts = groups.split('.');
+            let group = parts.shift();
             data[group] = {};
 
             if(parts.length > 0) {

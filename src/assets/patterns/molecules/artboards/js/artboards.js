@@ -1,6 +1,6 @@
 Tc.Module.Artboards = Tc.Module.extend({
     on: function(callback) {
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
 
         this.sandbox.subscribe('events', this);
         this.sandbox.subscribe('tabs', this);
@@ -24,11 +24,11 @@ Tc.Module.Artboards = Tc.Module.extend({
         $ctx.on('click', '.js-m-artboards__upload', function(e) {
             e.stopPropagation();
 
-            var $this = $(e.currentTarget);
-            var $item = $this.closest('.js-m-artboards__item');
+            let $this = $(e.currentTarget);
+            let $item = $this.closest('.js-m-artboards__item');
 
             // update item
-            var artboard = this.getArtboard($item.data('idExternal'));
+            let artboard = this.getArtboard($item.data('idExternal'));
             artboard.state = 'uploading';
             this.updateItem($item, artboard);
 
@@ -38,13 +38,13 @@ Tc.Module.Artboards = Tc.Module.extend({
         $ctx.on('click', '.js-m-artboards__upload-all', function(e) {
             e.stopPropagation();
 
-            var artboards = [];
+            let artboards = [];
 
             $ctx.find('.js-m-artboards__upload-all').attr('disabled', 'disabled');
 
             $.each($ctx.find('.js-m-artboards__item'), function(index, item) {
-                var $item = $(item);
-                var artboard = this.getArtboard($item.data('idExternal'));
+                let $item = $(item);
+                let artboard = this.getArtboard($item.data('idExternal'));
                 artboard.state = 'uploading';
                 artboards.push(artboard);
 
@@ -62,13 +62,13 @@ Tc.Module.Artboards = Tc.Module.extend({
         $ctx.on('click', '.js-m-artboards__upload-selected', function(e) {
             e.stopPropagation();
 
-            var artboards = [];
+            let artboards = [];
 
             $ctx.find('.js-m-artboards__upload-selected').attr('disabled', 'disabled');
 
             $.each($ctx.find('.js-m-artboards__item.state-selected'), function(index, item) {
-                var $item = $(item);
-                var artboard = this.getArtboard($item.data('idExternal'));
+                let $item = $(item);
+                let artboard = this.getArtboard($item.data('idExternal'));
                 artboard.state = 'uploading';
                 artboards.push(artboard);
 
@@ -85,8 +85,8 @@ Tc.Module.Artboards = Tc.Module.extend({
         $ctx.on('click', '.js-m-artboards__item', function(e) {
             e.stopPropagation();
 
-            var $this = $(e.currentTarget);
-            var url = $this.data('url');
+            let $this = $(e.currentTarget);
+            let url = $this.data('url');
 
             if (url) {
                 window.postMessage('openUrl', url);
@@ -97,8 +97,8 @@ Tc.Module.Artboards = Tc.Module.extend({
             e.stopPropagation();
             e.preventDefault();
 
-            var $this = $(e.currentTarget);
-            var url = $this.attr('href');
+            let $this = $(e.currentTarget);
+            let url = $this.attr('href');
 
             if (url) {
                 window.postMessage('openUrl', url);
@@ -109,12 +109,12 @@ Tc.Module.Artboards = Tc.Module.extend({
     },
 
     updateItem: function($item, artboard) {
-        var $replaceItem = $(window.tpl.artboardsitem(artboard));
+        let $replaceItem = $(window.tpl.artboardsitem(artboard));
         $item.replaceWith($replaceItem);
 
         if (artboard.state === 'success') {
             // flash icon green
-            var $badge = $replaceItem.find('.js-m-artboards__badge');
+            let $badge = $replaceItem.find('.js-m-artboards__badge');
             $badge.velocity({backgroundColor: '#A3CE62'}, {
                 duration: 200, complete: function() {
                     $badge.velocity('reverse', {
@@ -133,21 +133,21 @@ Tc.Module.Artboards = Tc.Module.extend({
 
 
     artboardUploadProgress: function(data) {
-        var $ctx = this.$ctx;
-        var $item = $ctx.find('.js-m-artboards__item[data-id-external="' + data.id_external + '"]');
+        let $ctx = this.$ctx;
+        let $item = $ctx.find('.js-m-artboards__item[data-id-external="' + data.id_external + '"]');
         $item.find('.js-a-progress__progress').css({'stroke-dasharray': data.progress + ' 100'});
     },
 
     artboardsUploaded: function() {
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
         $ctx.find('.js-m-artboards__upload-all').removeAttr('disabled');
     },
 
     artboardUploaded: function(data) {
-        var $ctx = this.$ctx;
-        var $item = $ctx.find('.js-m-artboards__item[data-id-external="' + data.id_external + '"]');
+        let $ctx = this.$ctx;
+        let $item = $ctx.find('.js-m-artboards__item[data-id-external="' + data.id_external + '"]');
 
-        var artboard = this.getArtboard(data.id_external);
+        let artboard = this.getArtboard(data.id_external);
 
         artboard.nochanges = data.nochanges;
 
@@ -164,10 +164,10 @@ Tc.Module.Artboards = Tc.Module.extend({
     },
 
     artboardUploadFailed: function(data) {
-        var $ctx = this.$ctx;
-        var $item = $ctx.find('.js-m-artboards__item[data-id-external="' + data.id_external + '"]');
+        let $ctx = this.$ctx;
+        let $item = $ctx.find('.js-m-artboards__item[data-id-external="' + data.id_external + '"]');
 
-        var artboard = this.getArtboard(data.id_external);
+        let artboard = this.getArtboard(data.id_external);
         artboard.modified_localized_ago = 'just now';
         artboard.state = 'failed';
 
@@ -175,7 +175,7 @@ Tc.Module.Artboards = Tc.Module.extend({
     },
 
     render: function(data) {
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
         this.artboards = data.artboards;
         $ctx.html(window.tpl.artboardslist(data));
 
@@ -189,8 +189,8 @@ Tc.Module.Artboards = Tc.Module.extend({
                 searchTag: '.js-m-artboards__search',
                 contentTag: '.js-m-artboards__list',
                 didSearch: function(search_phrase) {
-                    var $nr = this.$ctx.find('.js-m-artboards__no-results');
-                    var hasResults = this.$ctx.find('.js-m-artboards__item:visible').length;
+                    let $nr = this.$ctx.find('.js-m-artboards__no-results');
+                    let hasResults = this.$ctx.find('.js-m-artboards__item:visible').length;
                     if (!hasResults) {
                         $nr.addClass('state-visible');
                     }

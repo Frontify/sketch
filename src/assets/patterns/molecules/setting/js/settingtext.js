@@ -1,6 +1,6 @@
 Tc.Setting.Text = Tc.Setting.Base.extend({
     elem: function() {
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
 
         this.$text = $ctx.find('.js-m-setting__input');
         this.initialValue = this.$text.val();
@@ -48,7 +48,7 @@ Tc.Setting.Text = Tc.Setting.Base.extend({
     setting: function () {
         this.elem();
 
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
         this.hasChanged = false;
 
         this.$text.on('keyup change', function() {
@@ -154,7 +154,7 @@ Tc.Setting.Text = Tc.Setting.Base.extend({
         this._super();
 
         if(!this.readonly) {
-            var $ctx = this.$ctx;
+            let $ctx = this.$ctx;
 
             if (this.validator.form()) {
                 if (this.hasChanged) {
@@ -196,7 +196,7 @@ Tc.Setting.Text = Tc.Setting.Base.extend({
     },
 
     getValue: function() {
-        var value = this.$text.val();
+        let value = this.$text.val();
 
         if(this.$text.attr('type') === 'unit') {
             value =  this.tpl.unit(value, true);
@@ -221,13 +221,13 @@ Tc.Setting.Text = Tc.Setting.Base.extend({
     },
 
     serialize: function() {
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
 
-        var info = {};
+        let info = {};
         info[this.id] = this.getValue();
 
-        var data = null;
-        var group = $ctx.data('group');
+        let data = null;
+        let group = $ctx.data('group');
 
         if (group) {
             // allow for nested grouping

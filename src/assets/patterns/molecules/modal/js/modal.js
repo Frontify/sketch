@@ -1,7 +1,7 @@
 (function ($) {
     Tc.Module.Modal = Tc.Module.extend({
         on: function (callback) {
-            var $ctx = this.$ctx;
+            let $ctx = this.$ctx;
 
             this.$overlay = $('.js-m-modal__overlay');
             this.mId = $ctx.data('modal-id');
@@ -11,8 +11,8 @@
 
             // open modal
             $('body').on('click.m-modal', '.js-m-modal__open', function (e) {
-                var $target = $(e.currentTarget);
-                var modalId = $target.data('modal-id') || 'modal';
+                let $target = $(e.currentTarget);
+                let modalId = $target.data('modal-id') || 'modal';
                 if(this.mId === modalId) {
                     this.open({ modifier: $target.data('modal-modifier')});
                 }
@@ -39,7 +39,7 @@
             this.isOpen = false;
             Tc.Module.Modal.count--;
 
-            var $ctx = this.$ctx;
+            let $ctx = this.$ctx;
             $ctx.removeClass('state-visible');
 
             if(Tc.Module.Modal.count === 0) {
@@ -55,9 +55,9 @@
         },
 
         open: function (data) {
-            var $ctx = this.$ctx;
-            var modifier = data.modifier || null;
-            var $container = $ctx.find('.js-m-modal__content');
+            let $ctx = this.$ctx;
+            let modifier = data.modifier || null;
+            let $container = $ctx.find('.js-m-modal__content');
 
             // guard to prevent race conditions
             if (this.isOpen) {
@@ -66,7 +66,7 @@
             this.isOpen = true;
             Tc.Module.Modal.count++;
 
-            var $close = $ctx.find('> .js-m-modal__close');
+            let $close = $ctx.find('> .js-m-modal__close');
 
             if(!this.closeable) {
                 // hide close button
@@ -100,15 +100,15 @@
         },
 
         onOpenModal: function(data) {
-            var id = data.id || 'modal';
-            var $ctx = this.$ctx;
+            let id = data.id || 'modal';
+            let $ctx = this.$ctx;
             this.closeable = true;
 
             if(id === this.mId) {
                 this.closeable = data.closeable !== false;
 
                 if(data.$content) {
-                    var $container = $ctx.find('.js-m-modal__content');
+                    let $container = $ctx.find('.js-m-modal__content');
                     $container.html(data.$content);
                     if(data.terrific !== false) {
                         this.sandbox.addModules($container);
@@ -120,7 +120,7 @@
         },
 
         onCloseModal: function(data) {
-            var id = data.id || 'modal';
+            let id = data.id || 'modal';
 
             if(id === this.mId) {
                 this.close(true);

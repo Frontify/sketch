@@ -1,6 +1,6 @@
 Tc.Setting.Dropdown = Tc.Setting.Base.extend({
     elem: function (setting) {
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
 
         this.$select =  $ctx.find('select');
         this.readonly = this.$select.is('[readonly]');
@@ -24,9 +24,9 @@ Tc.Setting.Dropdown = Tc.Setting.Base.extend({
             open: function() {
                 if(this.expand) {
                     // calc
-                    var $list = $ctx.find('.js-ca-dropdown__list');
-                    var offset = $list.offset();
-                    var bottom = offset['top'] + parseInt($list.outerHeight()) + 30;
+                    let $list = $ctx.find('.js-ca-dropdown__list');
+                    let offset = $list.offset();
+                    let bottom = offset['top'] + parseInt($list.outerHeight()) + 30;
                     this.mod.resize(bottom);
                 }
             }.bind(this),
@@ -52,7 +52,7 @@ Tc.Setting.Dropdown = Tc.Setting.Base.extend({
     },
 
     setting: function() {
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
 
         this.elem(true);
 
@@ -99,7 +99,7 @@ Tc.Setting.Dropdown = Tc.Setting.Base.extend({
 
     enter: function() {
         this._super();
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
 
         this.current = this.$select.val();
 
@@ -115,14 +115,14 @@ Tc.Setting.Dropdown = Tc.Setting.Base.extend({
     leave: function() {
         this._super();
 
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
 
         this.hideActions();
         $ctx.find('.js-m-setting__bar').removeClass('state-active');
     },
 
     focus: function() {
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
 
         if(!this.readonly) {
             if (!this.isSetting) {
@@ -136,7 +136,7 @@ Tc.Setting.Dropdown = Tc.Setting.Base.extend({
 
     unfocus: function($setting) {
         this._super();
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
 
         if(!this.readonly) {
             this.mod.leave($ctx);
@@ -145,12 +145,12 @@ Tc.Setting.Dropdown = Tc.Setting.Base.extend({
     },
 
     serialize: function() {
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
 
-        var info = {};
+        let info = {};
         info[this.id] = $ctx.find('select').val();
 
-        var data = null;
+        let data = null;
 
         if ($ctx.data('group')) {
             data = {};

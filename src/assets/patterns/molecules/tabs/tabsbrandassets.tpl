@@ -3,7 +3,6 @@
         {{~ it.items :item }}
             <li role="presentation" class="m-tabs__item"><a href="#tab-{{= item.id }}" class="m-tabs__link js-m-tabs__link{{? item.active}} state-active{{?}}{{? item.classes}} {{= item.classes }}{{?}}" role="tab"">{{= item.title}}</a></li>
         {{~}}
-        <li class="m-tabs__item m-tabs__item--action"><a href="/hub/" class="m-tabs__action state-hidden js-m-tabs__styleguide">Open Style Guide</a></li>
     </ul>
 
     <div class="m-tabs__content clearfix js-m-tabs__content">

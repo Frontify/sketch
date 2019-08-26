@@ -4,24 +4,19 @@ import sketch from './sketch';
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote'
 
 class Color {
-    getColors() {
-        return target.getTarget().then(function (target) {
-            // load remote assets status
-            return fetch('/v1/color/library/' + target.project.id).then(function (data) {
-                data.hub_id = target.project.hub_id;
-                return data;
-            }.bind(this));
-        }.bind(this));
+    getColors(project) {
+        // load remote assets status
+        return fetch('/v1/color/library/' + project);
     }
 
     applyColor(color) {
-        var selection = sketch.getSelection();
-        var loop = selection.objectEnumerator();
-        var item = null;
+        let selection = sketch.getSelection();
+        let loop = selection.objectEnumerator();
+        let item = null;
 
         while (item = loop.nextObject()) {
             if (item.class() == MSLayerGroup) {
-                var layers = item.layers();
+                let layers = item.layers();
                 layers.forEach(function (layer) {
                     this.applyColorToLayer(layer, color);
                 }.bind(this));
@@ -31,19 +26,19 @@ class Color {
             }
         }
 
-        var doc = sketch.getDocument();
+        let doc = sketch.getDocument();
         if(doc) {
             doc.reloadInspector();
         }
     }
 
     addDocumentColors(colors) {
-        var app = NSApp.delegate();
-        var doc = sketch.getDocument();
+        let app = NSApp.delegate();
+        let doc = sketch.getDocument();
 
         if(doc) {
-            var assets = doc.documentData().assets();
-            var mscolors = this.convertColors(colors);
+            let assets = doc.documentData().assets();
+            let mscolors = this.convertColors(colors);
             assets.addColorAssets(mscolors);
 
             doc.inspectorController().closeAnyColorPopover();
@@ -52,12 +47,12 @@ class Color {
     }
 
     replaceDocumentColors(colors) {
-        var app = NSApp.delegate();
-        var doc = sketch.getDocument();
+        let app = NSApp.delegate();
+        let doc = sketch.getDocument();
 
         if(doc) {
-            var assets = doc.documentData().assets();
-            var mscolors = this.convertColors(colors);
+            let assets = doc.documentData().assets();
+            let mscolors = this.convertColors(colors);
             assets.setColorAssets([]);
             assets.addColorAssets(mscolors);
 
@@ -68,11 +63,11 @@ class Color {
     }
 
     addGlobalColors(colors) {
-        var app = NSApp.delegate();
-        var doc = sketch.getDocument();
+        let app = NSApp.delegate();
+        let doc = sketch.getDocument();
 
-        var assets = MSPersistentAssetCollection.sharedGlobalAssets();
-        var mscolors = this.convertColors(colors);
+        let assets = MSPersistentAssetCollection.sharedGlobalAssets();
+        let mscolors = this.convertColors(colors);
         assets.addColorAssets(mscolors);
 
         doc.inspectorController().closeAnyColorPopover();
@@ -80,11 +75,11 @@ class Color {
     }
 
     replaceGlobalColors(colors) {
-        var app = NSApp.delegate();
-        var doc = sketch.getDocument();
+        let app = NSApp.delegate();
+        let doc = sketch.getDocument();
 
-        var assets = app.globalAssets();
-        var mscolors = this.convertColors(colors);
+        let assets = app.globalAssets();
+        let mscolors = this.convertColors(colors);
         assets.setColorAssets([]);
         assets.addColorAssets(mscolors);
 
@@ -93,7 +88,7 @@ class Color {
     }
 
     convertColors(colors) {
-        var mscolors = [];
+        let mscolors = [];
         colors.forEach(function (color) {
             mscolors.push(this.convertColor(color));
         }.bind(this));
@@ -113,18 +108,18 @@ class Color {
     }
 
     applyColorToLayer(layer, color) {
-        var mscolor = MSColor.colorWithRed_green_blue_alpha(color.r / 255, color.g / 255, color.b / 255, color.a / 255);
-        var clazz = layer.class();
+        let mscolor = MSColor.colorWithRed_green_blue_alpha(color.r / 255, color.g / 255, color.b / 255, color.a / 255);
+        let clazz = layer.class();
 
         if (clazz == MSTextLayer) {
             layer.setTextColor(mscolor);
         }
-        else if(clazz == MSRectangleShape || clazz == MSOvalShape || clazz == MSTriangleShape || clazz == MSStarShape || clazz == MSPolygonShape || clazz == MSShapePathLayer) {
-            var fills = layer.style().fills();
+        else if(clazz == MSRectangleShape || clazz == MSOvalShape || clazz == MSTriangleShape || clazz == MSStarShape || clazz == MSPolygonShape || clazz == MSShapeGroup) {
+            let fills = layer.style().fills();
             if (fills.count() <= 0) {
                 fills.addNewStylePart();
             }
-            var fill = fills.firstObject();
+            let fill = fills.firstObject();
             fill.isEnabled = true;
             fill.setFillType(0);
             fill.setColor(mscolor);
@@ -132,9 +127,15 @@ class Color {
     }
 
     showColors() {
-        this.getColors().then(function (data) {
-            if (isWebviewPresent('frontifymain')) {
-                sendToWebview('frontifymain', 'showColors(' + JSON.stringify(data) + ')');
+        target.getAssetSourcesForType('colors').then(function(assetSources) {
+            if(assetSources && assetSources.selected) {
+                this.getColors(assetSources.selected.id).then(function (data) {
+                    if (isWebviewPresent('frontifymain')) {
+                        data.project = assetSources.selected;
+                        sendToWebview('frontifymain', 'showAssetSources(' + JSON.stringify(assetSources) + ')');
+                        sendToWebview('frontifymain', 'showColors(' + JSON.stringify(data) + ')');
+                    }
+                }.bind(this));
             }
         }.bind(this));
     }

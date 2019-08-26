@@ -1,5 +1,4 @@
 <div class="mod mod-howto m-howto">
-    <div class="a-colorbar"></div>
     <header class="m-howto__header">
            <h2 class="a-h2">How it works</h2>
     </header>

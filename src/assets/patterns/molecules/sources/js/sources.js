@@ -1,6 +1,6 @@
 Tc.Module.Sources = Tc.Module.extend({
     on: function(callback) {
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
 
         this.sandbox.subscribe('events', this);
         this.sandbox.subscribe('tabs', this);
@@ -25,11 +25,11 @@ Tc.Module.Sources = Tc.Module.extend({
         $ctx.on('click', '.js-m-sources__add', function(e) {
             e.stopPropagation();
 
-            var $this = $(e.currentTarget);
-            var $item = $this.closest('.js-m-sources__item');
+            let $this = $(e.currentTarget);
+            let $item = $this.closest('.js-m-sources__item');
 
             // update item
-            var source = this.getSource($item.data('id'));
+            let source = this.getSource($item.data('id'));
             source.state = 'uploading';
             this.updateItem($item, source);
 
@@ -39,11 +39,11 @@ Tc.Module.Sources = Tc.Module.extend({
         $ctx.on('click', '.js-m-sources__push', function(e) {
             e.stopPropagation();
 
-            var $this = $(e.currentTarget);
-            var $item = $this.closest('.js-m-sources__item');
+            let $this = $(e.currentTarget);
+            let $item = $this.closest('.js-m-sources__item');
 
             // update item
-            var source = this.getSource($item.data('id'));
+            let source = this.getSource($item.data('id'));
             source.state = 'pushing';
             this.updateItem($item, source);
 
@@ -53,11 +53,11 @@ Tc.Module.Sources = Tc.Module.extend({
         $ctx.on('click', '.js-m-sources__pull', function(e) {
             e.stopPropagation();
 
-            var $this = $(e.currentTarget);
-            var $item = $this.closest('.js-m-sources__item');
+            let $this = $(e.currentTarget);
+            let $item = $this.closest('.js-m-sources__item');
 
             // update item
-            var source = this.getSource($item.data('id'));
+            let source = this.getSource($item.data('id'));
             source.state = 'pulling';
             this.updateItem($item, source);
 
@@ -67,18 +67,18 @@ Tc.Module.Sources = Tc.Module.extend({
         $ctx.on('click', '.js-m-sources__conflict', function(e) {
             e.stopPropagation();
 
-            var $this = $(e.currentTarget);
-            var $item = $this.closest('.js-m-sources__item');
+            let $this = $(e.currentTarget);
+            let $item = $this.closest('.js-m-sources__item');
             window.postMessage('resolveConflict', $item.data('id'));
         }.bind(this));
 
         $ctx.on('click', '.js-m-sources__open', function(e) {
-            var $target = $(e.target);
+            let $target = $(e.target);
 
             // skip toggle
             if ($target.closest('.js-m-sources__toggle').length === 0) {
-                var $item = $(e.currentTarget);
-                var source = this.getSource($item.data('id'));
+                let $item = $(e.currentTarget);
+                let source = this.getSource($item.data('id'));
                 source.state = 'opening';
                 this.updateItem($item, source);
 
@@ -89,11 +89,11 @@ Tc.Module.Sources = Tc.Module.extend({
         $ctx.on('click', '.js-m-sources__download', function(e) {
             e.stopPropagation();
 
-            var $this = $(e.currentTarget);
-            var $item = $this.closest('.js-m-sources__item');
+            let $this = $(e.currentTarget);
+            let $item = $this.closest('.js-m-sources__item');
 
             // update item
-            var source = this.getSource($item.data('id'));
+            let source = this.getSource($item.data('id'));
             source.state = 'downloading';
             this.updateItem($item, source);
 
@@ -129,16 +129,16 @@ Tc.Module.Sources = Tc.Module.extend({
     },
 
     sourceUploadProgress: function(data) {
-        var $ctx = this.$ctx;
-        var $item = $ctx.find('.js-m-sources__item[data-id="' + data.id_external + '"]');
+        let $ctx = this.$ctx;
+        let $item = $ctx.find('.js-m-sources__item[data-id="' + data.id_external + '"]');
         $item.find('.js-a-progress__progress').css({'stroke-dasharray': data.progress + ' 100'});
     },
 
     sourceUploaded: function(data) {
-        var $ctx = this.$ctx;
-        var $item = $ctx.find('.js-m-sources__item[data-id="' + data.id + '"]');
+        let $ctx = this.$ctx;
+        let $item = $ctx.find('.js-m-sources__item[data-id="' + data.id + '"]');
 
-        var source = this.getSource(data.id);
+        let source = this.getSource(data.id);
         source.modified_localized_ago = 'just now';
         source.state = 'same';
         source.id = data.id;
@@ -147,13 +147,13 @@ Tc.Module.Sources = Tc.Module.extend({
     },
 
     sourceUploadFailed: function(data) {
-        var $ctx = this.$ctx;
-        var $item = $ctx.find('.js-m-sources__item[data-id="' + data.id + '"]');
+        let $ctx = this.$ctx;
+        let $item = $ctx.find('.js-m-sources__item[data-id="' + data.id + '"]');
 
-        var source = this.getSource(data.id);
+        let source = this.getSource(data.id);
         source.modified_localized_ago = 'just now';
 
-        var currentState = source.state;
+        let currentState = source.state;
 
         switch (currentState) {
             case 'pushing':
@@ -168,16 +168,16 @@ Tc.Module.Sources = Tc.Module.extend({
     },
 
     sourceDownloadProgress: function(data) {
-        var $ctx = this.$ctx;
-        var $item = $ctx.find('.js-m-sources__item[data-id="' + data.id + '"]');
+        let $ctx = this.$ctx;
+        let $item = $ctx.find('.js-m-sources__item[data-id="' + data.id + '"]');
         $item.find('.js-a-progress__progress').css({'stroke-dasharray': data.progress + ' 100'});
     },
 
     sourceDownloaded: function(data) {
-        var $ctx = this.$ctx;
-        var $item = $ctx.find('.js-m-sources__item[data-id="' + data.id + '"]');
+        let $ctx = this.$ctx;
+        let $item = $ctx.find('.js-m-sources__item[data-id="' + data.id + '"]');
 
-        var source = this.getSource(data.id);
+        let source = this.getSource(data.id);
         source.modified_localized_ago = 'just now';
         source.state = 'same';
         source.id = data.id;
@@ -186,13 +186,13 @@ Tc.Module.Sources = Tc.Module.extend({
     },
 
     sourceDownloadFailed: function(data) {
-        var $ctx = this.$ctx;
-        var $item = $ctx.find('.js-m-sources__item[data-id="' + data.id + '"]');
+        let $ctx = this.$ctx;
+        let $item = $ctx.find('.js-m-sources__item[data-id="' + data.id + '"]');
 
-        var source = this.getSource(data.id);
+        let source = this.getSource(data.id);
         source.modified_localized_ago = 'just now';
 
-        var currentState = source.state;
+        let currentState = source.state;
 
         switch (currentState) {
             case 'pulling':
@@ -207,7 +207,7 @@ Tc.Module.Sources = Tc.Module.extend({
     },
 
     render: function(data) {
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
         this.sources = data.sources;
         $ctx.html(window.tpl.sourceslist(data));
 
@@ -221,8 +221,8 @@ Tc.Module.Sources = Tc.Module.extend({
                 searchTag: '.js-m-sources__search',
                 contentTag: '.js-m-sources__list',
                 didSearch: function(search_phrase) {
-                    var $nr = this.$ctx.find('.js-m-sources__no-results');
-                    var hasResults = this.$ctx.find('.js-m-sources__item:visible').length;
+                    let $nr = this.$ctx.find('.js-m-sources__no-results');
+                    let hasResults = this.$ctx.find('.js-m-sources__item:visible').length;
                     if (!hasResults) {
                         $nr.addClass('state-visible');
                     }
@@ -242,7 +242,7 @@ Tc.Module.Sources = Tc.Module.extend({
     },
 
     showConflict: function(id) {
-        var source = this.getSource(id);
+        let source = this.getSource(id);
         this.fire('openModal', {
             modifier: 'default',
             closeable: false,
@@ -258,11 +258,11 @@ Tc.Module.Sources = Tc.Module.extend({
     },
 
     onPushChanges(data) {
-        var $ctx = this.$ctx;
-        var $item = $ctx.find('.js-m-sources__item[data-id=' + data.id + ']');
+        let $ctx = this.$ctx;
+        let $item = $ctx.find('.js-m-sources__item[data-id=' + data.id + ']');
 
         // update item
-        var source = this.getSource(data.id);
+        let source = this.getSource(data.id);
         source.state = 'pushing';
         this.updateItem($item, source);
 
@@ -270,11 +270,11 @@ Tc.Module.Sources = Tc.Module.extend({
     },
 
     onPullChanges(data) {
-        var $ctx = this.$ctx;
-        var $item = $ctx.find('.js-m-sources__item[data-id=' + data.id + ']');
+        let $ctx = this.$ctx;
+        let $item = $ctx.find('.js-m-sources__item[data-id=' + data.id + ']');
 
         // update item
-        var source = this.getSource(data.id);
+        let source = this.getSource(data.id);
         source.state = 'pulling';
         this.updateItem($item, source);
 

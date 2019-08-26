@@ -1,6 +1,6 @@
-{{ var color = null; }}
+{{ let color = null; }}
 {{? it.style.colors && !$.isEmptyObject(it.style.colors.foreground) }}
-  {{ for(var id in it.style.colors.foreground) { }}
+  {{ for(let id in it.style.colors.foreground) { }}
       {{? it.style.colors.foreground.hasOwnProperty(id) }}
           {{ color = it.colors[id]; }}
       {{?}}
@@ -11,9 +11,9 @@
     <div class="m-typography__example-wrap">
         {{? it.style.colors && !$.isEmptyObject(it.style.colors.foreground) }}
            <ul class="m-typography__colors">
-               {{ for(var id in it.style.colors.foreground) { }}
+               {{ for(let id in it.style.colors.foreground) { }}
                    {{? it.style.colors.foreground.hasOwnProperty(id) }}
-                       {{ var current = it.colors[id]; }}
+                       {{ let current = it.colors[id]; }}
                        <li class="m-typography__color js-m-typography__color {{? current.id == color.id }}state-active{{?}}" data-id="{{= id }}" style="background: {{= current.hex }}"></li>
                    {{?}}
                {{ } }}

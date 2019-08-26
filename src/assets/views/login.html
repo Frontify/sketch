@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <script>
-      var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+      let isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
 
       if(!isChrome) {
           document.writeln('<link rel="stylesheet" type="text/css" href="../css/statics.css">');
@@ -26,7 +26,7 @@
 <script>document.writeln(window.tpl.status());</script>
 <script>
     // Terrific Bootstrap
-    var $page = $('body');
+    let $page = $('body');
     application = new Tc.Application($page);
     application.registerModules();
     application.start();

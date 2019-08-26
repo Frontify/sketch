@@ -1,14 +1,14 @@
 Tc.Module.Login = Tc.Module.extend({
     on: function(callback) {
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
         this.settings = null;
 
         this.render();
 
         $ctx.on('click', '.js-o-login__link', function(e) {
             e.preventDefault();
-            var $this = $(e.currentTarget);
-            var url = $this.attr('href');
+            let $this = $(e.currentTarget);
+            let url = $this.attr('href');
 
             window.postMessage('openUrl', url, true);
         }.bind(this));
@@ -17,15 +17,15 @@ Tc.Module.Login = Tc.Module.extend({
     },
 
     render: function() {
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
         $ctx.html(window.tpl.login());
 
         this.settings = new Tc.Module.Settings($ctx.find('.js-o-login__form'), this.sandbox);
         this.settings.validation(function () {
-            var domain = this.sanitizeUrl(this.settings.serialize().domain);
-            var blacklist = ['https://app.frontify.com'];
+            let domain = this.sanitizeUrl(this.settings.serialize().domain);
+            let blacklist = ['https://app.frontify.com'];
 
-            var permitted = true;
+            let permitted = true;
             blacklist.forEach(function(item) {
                 if(item.startsWith(domain)) {
                     permitted = false;
@@ -44,20 +44,20 @@ Tc.Module.Login = Tc.Module.extend({
     },
 
     login: function(domain) {
-        var urlParams = '/api/oauth/authorize?response_type=token&client_id=sketch&redirect_uri=https://frontify.com/sketchplugin';
+        let urlParams = '/api/oauth/authorize?response_type=token&client_id=sketch&redirect_uri=https://frontify.com/sketchplugin';
         window.postMessage('memorizeDomain', domain);
         window.location.href = domain + urlParams;
     },
 
     sanitizeUrl: function(url) {
         // protocol
-        var pattern = /^(ht)tps?:\/\//i;
+        let pattern = /^(ht)tps?:\/\//i;
         if (!pattern.test(url)) {
             url = "https://" + url;
         }
 
         // strip path
-        var parts = url.split('/');
+        let parts = url.split('/');
         url = parts.slice(0, 3).join('/');
 
         return url;

@@ -1,6 +1,6 @@
 Tc.Module.ProjectChooser = Tc.Module.extend({
     on: function (callback) {
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
 
         this.sandbox.subscribe('events', this);
         this.settings = null;
@@ -9,16 +9,17 @@ Tc.Module.ProjectChooser = Tc.Module.extend({
     },
 
     render: function (brands, current) {
-        var $ctx = this.$ctx;
-        var projects = [];
+        let $ctx = this.$ctx;
+        let projects = [];
+        let currentBrand = null;
 
         if (current.brand) {
-            var currentBrand = brands.find(function (brand) {
+            currentBrand = brands.find(function (brand) {
                 return current.brand.id == brand.id;
             }.bind(this));
         }
         else if(brands.length > 0) {
-            var currentBrand = brands[0];
+            currentBrand = brands[0];
         }
         else {
             currentBrand = { projects: [] }
@@ -46,11 +47,11 @@ Tc.Module.ProjectChooser = Tc.Module.extend({
           }.bind(this));
         }
 
-        var $content = $(window.tpl.projectchooser({brands: brands, projects: projects, current: current }));
+        let $content = $(window.tpl.projectchooser({brands: brands, projects: projects, current: current }));
 
         $content.on('click', '.js-m-projectchooser__create', function(e) {
-            var $this = $(e.currentTarget);
-            var $refresh = $content.find('.js-m-projectchooser__refresh');
+            let $this = $(e.currentTarget);
+            let $refresh = $content.find('.js-m-projectchooser__refresh');
 
             $this.addClass('state-hidden');
             $refresh.removeClass('state-hidden');
@@ -76,14 +77,14 @@ Tc.Module.ProjectChooser = Tc.Module.extend({
             this.fire('closeModal', ['events']);
         }.bind(this));
 
-        var brand = this.settings.getElem('brand');
+        let brand = this.settings.getElem('brand');
         brand.changed = function (data) {
             current.brand = { id : data.brand };
             current.set = { id : 0, path: '/' };
             this.render(brands, current);
         }.bind(this);
 
-        var project = this.settings.getElem('project');
+        let project = this.settings.getElem('project');
         project.changed = function (data) {
             current.project = { id: data.project };
             current.set = { id : 0, path: '/' };
@@ -92,7 +93,7 @@ Tc.Module.ProjectChooser = Tc.Module.extend({
     },
 
     save: function () {
-        var data = this.settings.serialize();
+        let data = this.settings.serialize();
         this.fire('closeModal', ['events']);
         window.postMessage('projectSelected', data);
     }

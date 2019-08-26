@@ -1,9 +1,9 @@
 # Frontify for Sketch
 
-A [Sketch] plugin that provides integration with Frontify. Get it @ [frontify.com/sketch-download]
+A [Sketch] plugin that provides integration with Frontify. Get it @ [Frontify Sketch Plugin]
 
 This README.md is primarily for developers. The latest plugin version,
-documentation etc. are hosted at [frontify.com/sketch-download].
+documentation etc. are hosted at [https://frontify.com/integrations/sketch/].
 
 Contributions are welcome!
 
@@ -94,4 +94,4 @@ To make working on the Frontend independent from Sketch make the `sketch` folder
 The views are accessible by using: local-sketch.frontify.com/src/assets/views/…
 
 [Sketch]: https://sketchapp.com/
-[frontify.com/sketch-download]: https://frontify.com/sketch-download
+[Frontify Sketch Plugin]: https://frontify.com/integrations/sketch/
