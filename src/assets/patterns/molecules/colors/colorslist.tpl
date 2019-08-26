@@ -1,6 +1,8 @@
+{{ var hasColors = false; }}
 {{? it.palettes.length > 0 }}
    {{~ it.palettes :palette }}
         {{? palette.colors.length > 0 }}
+            {{ hasColors = true; }}
             <div class="m-colors__palette js-m-colors__palette" data-id="{{= palette.id }}">
                 <h3 class="m-colors__title">{{= palette.name || 'Untitled Palette'}}
                     <div class="m-btn-dropdown m-colors__dropdown">
@@ -31,7 +33,9 @@
             </div>
         {{?}}
    {{~}}
-{{??}}
+{{?}}
+
+{{? !hasColors }}
     <div class="o-settings__blank">No color palettes found in your Frontify Style Guide
         <div class="m-btn-bar m-btn-bar--centered m-btn-bar--xs">
            <button class="a-btn a-btn--link-primary js-m-color__styleguide" data-url="/hub/{{= it.project.hub_id }}">Add colors</button>

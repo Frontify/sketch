@@ -147,6 +147,7 @@ Tc.Module.Colors = Tc.Module.extend({
     },
 
     render: function (data) {
+        console.log('render', data);
         let $ctx = this.$ctx;
         this.palettes = data.palettes;
         $ctx.html(window.tpl.colorslist(data));
