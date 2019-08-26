@@ -58,10 +58,11 @@ class Asset {
                 let image = NSImage.alloc().initWithContentsOfURL(NSURL.URLWithString(url));
                 let imageLayer = new DOM.Image({ image: image });
                 let imageSize = image.size();
-                imageLayer.frame.width = imageSize.width;
-                imageLayer.frame.height = imageSize.height;
 
                 if(imageLayer && imageLayer.image) {
+                    imageLayer.frame.width = imageSize.width;
+                    imageLayer.frame.height = imageSize.height;
+
                     let imageData = imageLayer.image;
                     let app = NSApp.delegate();
                     let applied = false;
@@ -94,6 +95,11 @@ class Asset {
 
                         if(parent) {
                             imageLayer.parent = parent;
+
+                            let ratio = imageSize.height / imageSize.width;
+
+                            imageLayer.frame.width = parent.frame.width;
+                            imageLayer.frame.height = ratio * parent.frame.width;
                         }
                         else {
                             imageLayer.parent = jsdoc.selectedPage;
