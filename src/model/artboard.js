@@ -117,10 +117,10 @@ class Artboard {
     }
 
     exportArtboard(artboard, doc) {
-        return new Promise(function(resolve, reject) {
+        return new Promise(function(resolve) {
             let files = [];
             let predicate = NSPredicate.predicateWithFormat('objectID == %@', artboard.id_external);
-            let msartboard = sketch.findFirstLayer(predicate, nil, MSArtboardGroup);
+            let msartboard = sketch.findFirstLayer(predicate, nil, MSArtboardGroup, doc);
 
             // Export artboard image -> traditional MSExportRequest for better naming control
             let imageFormat = MSExportFormat.alloc().init();
@@ -128,8 +128,6 @@ class Artboard {
             imageFormat.setScale(this.pixelRatio); // @2x
 
             let path = filemanager.getExportPath() + artboard.name + '.png';
-
-
             let exportRequest = MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(msartboard, [imageFormat], true).firstObject();
 
             doc.saveArtboardOrSlice_toFile(exportRequest, path);
@@ -156,7 +154,11 @@ class Artboard {
 
             // Save origin info
             let jsdoc = DOM.Document.fromNative(doc);
-            Settings.setLayerSettingForKey(detachedArtboard, 'meta', { document: { id: jsdoc.id, path: jsdoc.path }, page: { id: jsdoc.selectedPage.id, name: jsdoc.selectedPage.name }, sketch: { version: API.version.sketch, api: API.version.api }});
+            Settings.setLayerSettingForKey(detachedArtboard, 'meta', {
+                document: {id: jsdoc.id, path: jsdoc.path},
+                page: {id: jsdoc.selectedPage.id, name: jsdoc.selectedPage.name},
+                sketch: {version: API.version.sketch, api: API.version.api}
+            });
 
             // Optimize layers
             detachedArtboard.layers.forEach(function(layer) {
@@ -308,99 +310,104 @@ class Artboard {
 
             let doc = sketch.getDocument();
             if (!doc) {
-                return Promise.reject('No document found');
+                throw new Error('No document found');
             }
             else {
                 return artboards.reduce(function(sequence, artboard) {
-                        return sequence.then(function() {
-                            return this.exportArtboard(artboard, doc);
-                        }.bind(this)).then(function(files) {
-                            console.log(files);
-                            return files.reduce(function(uploadsequence, file) {
-                                return uploadsequence.then(function(assetId) {
-                                    if (file.type === 'artboard') {
-                                        if (artboard.sha != shaFile(file.path)) {
-                                            return filemanager.uploadFile({
-                                                path: file.path,
-                                                filename: file.name + '.' + file.ext,
-                                                name: file.name,
-                                                id: file.id,
-                                                id_external: file.id_external,
-                                                pixel_ratio: this.pixelRatio,
-                                                folder: target.set.path,
-                                                project: target.project.id,
-                                                type: file.type
-                                            }).then(function(data) {
-                                                filemanager.deleteFile(file.path);
-                                                artboard.sha = data.sha;
-                                                artboard.id = data.id;
-                                                artboard.nochanges = false;
-
-                                                return data.id;
-                                            }.bind(this));
-                                        }
-                                        else {
+                    return sequence.then(function() {
+                        return this.exportArtboard(artboard, doc);
+                    }.bind(this)).then(function(files) {
+                        return files.reduce(function(uploadsequence, file) {
+                            return uploadsequence.then(function(assetId) {
+                                if (file.type === 'artboard') {
+                                    if (artboard.sha != shaFile(file.path)) {
+                                        return filemanager.uploadFile({
+                                            path: file.path,
+                                            filename: file.name + '.' + file.ext,
+                                            name: file.name,
+                                            id: file.id,
+                                            id_external: file.id_external,
+                                            pixel_ratio: this.pixelRatio,
+                                            folder: target.set.path,
+                                            project: target.project.id,
+                                            type: file.type
+                                        }).then(function(data) {
                                             filemanager.deleteFile(file.path);
-                                            artboard.nochanges = true;
-                                            return artboard.id;
-                                        }
+                                            artboard.sha = data.sha;
+                                            artboard.id = data.id;
+                                            artboard.nochanges = false;
+
+                                            return data.id;
+                                        }.bind(this));
                                     }
-                                    else if (file.type === 'attachment') {
-                                        let status = this.getRemoteStatusForAttachment(artboard, file);
+                                    else {
+                                        filemanager.deleteFile(file.path);
+                                        artboard.nochanges = true;
+                                        return artboard.id;
+                                    }
+                                }
+                                else if (file.type === 'attachment') {
+                                    let status = this.getRemoteStatusForAttachment(artboard, file);
 
-                                        if (status.sha != shaFile(file.path)) {
-                                            let filename;
+                                    if (status.sha != shaFile(file.path)) {
+                                        let filename;
 
-                                            if (file.ext === 'json') {
-                                                filename = file.name + '.' + file.ext;
-                                            }
-                                            else {
-                                                // Generate unique filenames for exportables. That prevents same named layers to overwrite each others exportables.
-                                                filename = file.id_external + '-' + file.pixel_ratio + '.' + file.ext;
-                                            }
-
-                                            return filemanager.uploadFile({
-                                                path: file.path,
-                                                filename: filename,
-                                                name: file.name,
-                                                id_external: file.id_external,
-                                                type: file.type,
-                                                asset_id: assetId,
-                                                pixel_ratio: file.pixel_ratio
-                                            }).then(function(data) {
-                                                // filemanager.deleteFile(file.path);
-                                                status.sha = data.sha;
-                                                return assetId;
-                                            }.bind(this));
+                                        if (file.ext === 'json') {
+                                            filename = file.name + '.' + file.ext;
                                         }
                                         else {
-                                            // filemanager.deleteFile(file.path);
-                                            return assetId;
+                                            // Generate unique filenames for exportables. That prevents same named layers to overwrite each others exportables.
+                                            filename = file.id_external + '-' + file.pixel_ratio + '.' + file.ext;
                                         }
+
+                                        return filemanager.uploadFile({
+                                            path: file.path,
+                                            filename: filename,
+                                            name: file.name,
+                                            id_external: file.id_external,
+                                            type: file.type,
+                                            asset_id: assetId,
+                                            pixel_ratio: file.pixel_ratio
+                                        }).then(function(data) {
+                                            // filemanager.deleteFile(file.path);
+                                            status.sha = data.sha;
+                                            return assetId;
+                                        }.bind(this));
                                     }
-                                }.bind(this));
-                            }.bind(this), Promise.resolve()).then(function(assetId) {
-                                // start import of asset
-                                asset.import(assetId); /* calls the import API */
-                            }.bind(this)).then(function(data) {
-                                if (isWebviewPresent('frontifymain')) {
-                                    sendToWebview('frontifymain', 'artboardUploaded(' + JSON.stringify(artboard) + ')');
+                                    else {
+                                        // filemanager.deleteFile(file.path);
+                                        return assetId;
+                                    }
                                 }
-                                return true;
-                            }).catch(function(err) {
-                                if (isWebviewPresent('frontifymain')) {
-                                    sendToWebview('frontifymain', 'artboardUploadFailed(' + JSON.stringify(artboard) + ')');
-                                }
-                                return true;
+                            }.bind(this)).catch(function(err) {
+                                console.error(err);
+                                throw err;
                             }.bind(this));
+                        }.bind(this), Promise.resolve()).then(function(assetId) {
+                            // start import of asset
+                            asset.import(assetId); /* calls the import API */
+                        }.bind(this)).then(function(data) {
+                            if (isWebviewPresent('frontifymain')) {
+                                sendToWebview('frontifymain', 'artboardUploaded(' + JSON.stringify(artboard) + ')');
+                            }
+                            return true;
+                        }.bind(this)).catch(function(err) {
+                            if (isWebviewPresent('frontifymain')) {
+                                sendToWebview('frontifymain', 'artboardUploadFailed(' + JSON.stringify(artboard) + ')');
+                            }
+                            throw err;
                         }.bind(this));
-                    }.bind(this), Promise.resolve());
+                    }.bind(this)).catch(function(err) {
+                        console.error(err);
+                        throw err;
+                    }.bind(this));
+                }.bind(this), Promise.resolve());
             }
         }.bind(this)).then(function(data) {
             this.uploadInProgress = false;
-        }.bind(this)).catch(function(e) {
+        }.bind(this)).catch(function(err) {
             this.uploadInProgress = false;
-            console.error(e);
+            console.error(err);
         }.bind(this));
     }
 

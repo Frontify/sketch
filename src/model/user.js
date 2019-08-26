@@ -34,6 +34,7 @@ class User {
             return fetch('/v1/user/logout/').then(function( ) {
                 writeJSON('token', {});
                 writeJSON('target', {});
+
                 threadDictionary.removeObjectForKey('frontifyuser');
 
                 // disconnect from pusher
@@ -45,8 +46,10 @@ class User {
     }
 
     login(data) {
-        writeJSON('token', data);
-        notification.listen();
+        return Promise.resolve().then(function() {
+            writeJSON('token', data);
+            return notification.listen();
+        }.bind(this));
     }
 }
 

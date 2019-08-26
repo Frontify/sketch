@@ -38,11 +38,10 @@ class Notification {
                 this.pusher.connect();
 
                 threadDictionary['frontifynotificationpusher'] = this.pusher;
-
                 return this.pusher;
             }
 
-            return Promise.reject('Pusher not enabled');
+            throw new Error('Pusher not enabled');
         }.bind(this));
     }
 
@@ -53,6 +52,7 @@ class Notification {
             }
 
             this.pusher.disconnect();
+
             threadDictionary.removeObjectForKey('frontifynotificationpusher');
             this.pusher = null;
         }
@@ -107,9 +107,9 @@ class Notification {
     }
 
     listen() {
-        this.connect().then(function () {
+        return this.connect().then(function () {
             // subscribe to current chosen project
-            target.getTarget().then(function (target) {
+            return target.getTarget().then(function (target) {
                 if (target.project) {
                     this.subscribe(target.project.id);
 
@@ -133,6 +133,8 @@ class Notification {
                             }.bind(this));
                         }
                     }.bind(this));
+
+                    return true;
                 }
             }.bind(this));
         }.bind(this)).catch(function(e) {

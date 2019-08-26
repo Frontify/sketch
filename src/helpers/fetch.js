@@ -170,6 +170,11 @@ export default function (uri, options) {
 
             throw new TypeError("Invalid response");
         }.bind(this)).catch(function (e) {
+            // whitelist uris
+            if (uri.indexOf('/v1/user/logout') > -1) {
+                return '';
+            }
+
             if (e.localizedDescription) {
                 console.error(e.localizedDescription);
             }

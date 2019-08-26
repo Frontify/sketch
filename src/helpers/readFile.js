@@ -12,5 +12,5 @@ export default function (path, encoding) {
         return data.base64EncodedStringWithOptions(NSDataBase64Encoding64CharacterLineLength);
     }
 
-    throw Error('Encoding ' + encoding + ' is currently not supported');
+    throw new Error('Encoding ' + encoding + ' is currently not supported');
 }
