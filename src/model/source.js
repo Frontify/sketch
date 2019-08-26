@@ -14,9 +14,9 @@ class Source {
         return target.getTarget('sources').then(function (target) {
             // load remote assets status
             return this.getAssets().then(function (assets) {
-                var sources = [];
-                var status = readJSON('sources-' + target.project.id) || {assets: {}};
-                var alreadyAdded = false;
+                let sources = [];
+                let status = readJSON('sources-' + target.project.id) || {assets: {}};
+                let alreadyAdded = false;
 
                 // compare with local status
                 return this.getFiles(target.path).then(function (files) {
@@ -72,10 +72,10 @@ class Source {
                     }.bind(this));
 
                     // sort (order: current, conflict, addable, new, sync, alphabetically
-                    var states = ['conflict', 'addable', 'new', 'push', 'pull', 'same'];
+                    let states = ['conflict', 'addable', 'new', 'push', 'pull', 'same'];
                     sources.sort(function (a, b) {
-                        var statea = states.indexOf(a.state);
-                        var stateb = states.indexOf(b.state);
+                        let statea = states.indexOf(a.state);
+                        let stateb = states.indexOf(b.state);
 
                         if (a.current) {
                             return -1;
@@ -95,7 +95,7 @@ class Source {
                     }.bind(this));
 
 
-                    var data = {
+                    let data = {
                         sources: sources,
                         target: target,
                         already_added: alreadyAdded,
@@ -111,10 +111,10 @@ class Source {
     getAssets() {
         return target.getTarget('sources').then(function (target) {
             return fetch('/v1/assets/status/' + target.project.id + '?include_screen_activity=true&depth=0&ext=sketch&path=' + encodeURIComponent(target.set.path)).then(function (result) {
-                var assets = [];
-                for (var id in result.assets) {
+                let assets = [];
+                for (let id in result.assets) {
                     if (result.assets.hasOwnProperty(id)) {
-                        var asset = result.assets[id];
+                        let asset = result.assets[id];
                         asset.localpath = target.path + '/' + asset.filename;
                         assets.push(asset);
                     }
@@ -128,16 +128,16 @@ class Source {
 
     getFiles(dir) {
         return Promise.resolve().then(function () {
-            var files = [];
-            var filenames = NSFileManager.defaultManager().contentsOfDirectoryAtPath_error(dir, null);
+            let files = [];
+            let filenames = NSFileManager.defaultManager().contentsOfDirectoryAtPath_error(dir, null);
 
-            var currentFilename = this.getCurrentFilename();
+            let currentFilename = this.getCurrentFilename();
 
             if (filenames) {
                 filenames.forEach(function (filename) {
                     filename = '' + filename;
                     if (filename.endsWith('.sketch')) {
-                        var file = {
+                        let file = {
                             ext: 'sketch',
                             filename: filename,
                             folder: dir,
@@ -161,7 +161,7 @@ class Source {
 
     openSource(source) {
         return target.getTarget('sources').then(function (target) {
-            var file = target.path + source.filename;
+            let file = target.path + source.filename;
             filemanager.openFile(file);
             return true;
         }.bind(this))
@@ -192,7 +192,7 @@ class Source {
     saved() {
         return this.getCurrentAsset().then(function (asset) {
             if (asset) {
-                var sha = shaFile(asset.localpath);
+                let sha = shaFile(asset.localpath);
                 if (sha != asset.sha) {
                     return fetch('/v1/screen/activity/' + asset.id, {
                         method: 'POST',
@@ -220,8 +220,9 @@ class Source {
     pushSource(source) {
         return target.getTarget('sources').then(function (target) {
             // map source to file structure
-            var file = {
+            let file = {
                 path: target.path + source.filename,
+                filename: source.filename,
                 name: source.filename,
                 id: source.id,
                 id_external: source.id,
@@ -252,8 +253,9 @@ class Source {
         return target.getTarget('sources').then(function (target) {
 
             // map source to file structure
-            var file = {
+            let file = {
                 path: target.path + source.filename,
+                filename: source.filename,
                 name: source.filename,
                 id: null,
                 id_external: source.id,
@@ -292,7 +294,7 @@ class Source {
     }
 
     getCurrentAsset() {
-        var currentFilename = this.getCurrentFilename();
+        let currentFilename = this.getCurrentFilename();
         return this.getAssets().then(function (assets) {
             return assets.find(function (asset) {
                 return asset.filename == currentFilename;
@@ -301,13 +303,13 @@ class Source {
     }
 
     getCurrentFilename() {
-        var doc = sketch.getDocument();
-        var currentFilename = '';
+        let doc = sketch.getDocument();
+        let currentFilename = '';
 
         if (doc && doc.fileURL()) {
-            var nsurl = doc.fileURL();
-            var path = '' + nsurl.path();
-            var parts = path.split('/');
+            let nsurl = doc.fileURL();
+            let path = '' + nsurl.path();
+            let parts = path.split('/');
             currentFilename = parts.pop();
         }
 

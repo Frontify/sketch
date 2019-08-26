@@ -1,6 +1,6 @@
 Tc.Module.MediaChooser = Tc.Module.extend({
     on: function(callback) {
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
         this.$form = $ctx.find('.js-m-mediachooser__form');
         this.$assets = $ctx.find('.js-m-mediachooser__asset-list');
         this.document = $ctx.data('document');
@@ -20,13 +20,13 @@ Tc.Module.MediaChooser = Tc.Module.extend({
             e.preventDefault();
         }.bind(this));
 
-        var query = this.settings.getElem('q');
+        let query = this.settings.getElem('q');
         query.changed = function() {
             this.search();
         }.bind(this);
 
         $ctx.on('click', '.js-m-mediachooser__asset-item', function(e) {
-            var $this = $(e.currentTarget);
+            let $this = $(e.currentTarget);
             this.selectItem($this);
         }.bind(this));
 
@@ -40,31 +40,30 @@ Tc.Module.MediaChooser = Tc.Module.extend({
     },
 
     selectItem: function($item) {
-        var url = $item.data('url');
-        var ext = $item.data('ext');
-        var title = $item.data('title');
+        let url = $item.data('url');
+        let ext = $item.data('ext');
+        let title = $item.data('title');
         window.postMessage('applyLibraryAsset', { url: url, ext: ext, title: title });
     },
 
     search: function() {
-        var filters = this.settings.serialize();
+        let filters = this.settings.serialize();
 
         // add filters
         this.random = false;
         if (filters.q === '') {
-            filters.limit = 25;
             this.random = true;
         }
 
-        var query = $.param(filters);
+        let query = $.param(filters);
 
         this.$assets.html(window.tpl.loaderspinner());
 
-        window.postMessage('searchLibraryAssets', this.type, filters, query);
+        window.postMessage('searchLibraryAssets', this.type, query);
     },
 
     render: function(data) {
-        var assets = data.assets;
+        let assets = data.assets;
 
         if (assets.length > 0) {
             if (this.random) {
@@ -82,7 +81,7 @@ Tc.Module.MediaChooser = Tc.Module.extend({
     showSearch: function() {
         this.$ctx.find('.js-m-mediachooser__form').removeClass('state-hidden');
 
-        var q =  this.settings.getElem('q');
+        let q =  this.settings.getElem('q');
         q.setValue('');
         q.focus();
     },
@@ -92,7 +91,7 @@ Tc.Module.MediaChooser = Tc.Module.extend({
      * @param {Array} a items The array containing the items.
      */
     shuffle: function(a) {
-        var j, x, i;
+        let j, x, i;
         for (i = a.length; i; i--) {
             j = Math.floor(Math.random() * i);
             x = a[i - 1];

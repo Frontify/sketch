@@ -2,7 +2,7 @@
 
     Tc.Module.BtnDropdown = Tc.Module.extend({
         on: function (callback) {
-            var $ctx = this.$ctx;
+            let $ctx = this.$ctx;
 
             this.sandbox.subscribe('events', this);
             this.observer = null;
@@ -10,37 +10,37 @@
             // events
             $('html').on('mousedown.btndropdown', function (e) {
                 // outside click ($ctx is <body>)
-                var $this = $(e.target);
-                var $menu = $this.closest('.js-m-btn-dropdown__menu');
-                var $toggle = $this.closest('.js-m-btn-dropdown__toggle');
-                var isModal = $('body').hasClass('state-m-modal-visible');
+                let $this = $(e.target);
+                let $menu = $this.closest('.js-m-btn-dropdown__menu');
+                let $toggle = $this.closest('.js-m-btn-dropdown__toggle');
+                let isModal = $('body').hasClass('state-m-modal-visible');
                 if ($menu.length === 0 && $toggle.length === 0 && !isModal) {
                     this.onCloseDropdown($ctx.find('.js-m-btn-dropdown__menu.state-open'));
                 }
             }.bind(this));
 
             $ctx.on('click.btndropdown', '.js-m-btn-dropdown__close', function (e) {
-                var $this = $(e.target);
-                var $menu = $this.closest('.js-m-btn-dropdown__menu');
+                let $this = $(e.target);
+                let $menu = $this.closest('.js-m-btn-dropdown__menu');
                 this.onCloseDropdown($menu);
             }.bind(this));
 
             $ctx.on('click.btndropdown', '.js-m-btn-dropdown__toggle', function (e) {
                 e.stopPropagation();
 
-                var $currentToggle = $(e.currentTarget);
+                let $currentToggle = $(e.currentTarget);
 
                 // close all open dropdown except current (and open parents for nested menus)
-                var $closeToggles = $ctx.find('.js-m-btn-dropdown__toggle.state-open').filter(function (index, toggle) {
-                    var $toggle = $(toggle);
+                let $closeToggles = $ctx.find('.js-m-btn-dropdown__toggle.state-open').filter(function (index, toggle) {
+                    let $toggle = $(toggle);
 
                     if ($toggle.is($currentToggle)) {
                         return false;
                     }
 
-                    var hasOpenParents = false;
+                    let hasOpenParents = false;
                     $currentToggle.closest('.m-btn-dropdown').parents('.m-btn-dropdown').each(function (index, el) {
-                        var $openToggles = $(el).find('.js-m-btn-dropdown__toggle.state-open');
+                        let $openToggles = $(el).find('.js-m-btn-dropdown__toggle.state-open');
                         if ($openToggles.length > 0) {
                             hasOpenParents = true;
                         }
@@ -54,13 +54,13 @@
                 }.bind(this));
 
                 $closeToggles.each(function (index, toggle) {
-                    var $toggle = $(toggle);
-                    var $menu = $toggle.next('.js-m-btn-dropdown__menu');
+                    let $toggle = $(toggle);
+                    let $menu = $toggle.next('.js-m-btn-dropdown__menu');
                     this.close($toggle, $menu);
                 }.bind(this));
 
                 // toggle current menu
-                var $currentMenu = $currentToggle.next('.js-m-btn-dropdown__menu');
+                let $currentMenu = $currentToggle.next('.js-m-btn-dropdown__menu');
                 this.toggle($currentToggle, $currentMenu);
             }.bind(this));
 
@@ -78,7 +78,7 @@
 
         open: function ($toggle, $menu) {
             $toggle.addClass('state-open');
-            var event = $toggle.data('event');
+            let event = $toggle.data('event');
             if (event) {
                 this.fire(event + 'Opened', {$toggle: $toggle, $menu: $menu}, ['events']);
             }
@@ -97,7 +97,7 @@
                 }.bind(this));
 
                 // configuration of the observer:
-                var config = {subtree: false, childList: true};
+                let config = {subtree: false, childList: true};
 
                 // pass in the target node, as well as the observer options
                 this.observer.observe($menu.get(0), config);
@@ -106,11 +106,11 @@
 
         position: function ($toggle, $menu) {
             // check horizontal dimension
-            var offset = $menu.offset();
+            let offset = $menu.offset();
 
-            var width = parseInt($menu.outerWidth());
-            var offsetLeft = offset.left;
-            var maxWidth = parseInt($(window).width());
+            let width = parseInt($menu.outerWidth());
+            let offsetLeft = offset.left;
+            let maxWidth = parseInt($(window).width());
 
             if ($menu.hasClass('m-btn-dropdown__menu--center')) {
                 $menu.css({left: (-width/2 + parseInt($toggle.outerWidth())/2 + ($menu.data('offset') || 0)) + 'px', right: 'auto'});
@@ -126,9 +126,9 @@
             }
 
             // check vertical dimension
-            var height = parseInt($menu.outerHeight());
-            var offsetTop = offset.top - parseInt($(window).scrollTop());
-            var maxHeight = parseInt($(window).height());
+            let height = parseInt($menu.outerHeight());
+            let offsetTop = offset.top - parseInt($(window).scrollTop());
+            let maxHeight = parseInt($(window).height());
 
             if (offsetTop + height > maxHeight && offsetTop - height > 60 && !$menu.hasClass('m-btn-dropdown__menu--below')) {
                 $menu.css({top: 'auto', bottom: '120%'});
@@ -148,7 +148,7 @@
                 this.observer = null;
             }
 
-            var event = $toggle.data('event');
+            let event = $toggle.data('event');
             if (event) {
                 this.fire(event + 'Closed', {$toggle: $toggle, $menu: $menu}, ['events']);
             }
@@ -159,7 +159,7 @@
 
         onCloseDropdown: function ($elem) {
             if ($elem && $elem.length > 0) {
-                var $toggle, $menu;
+                let $toggle, $menu;
                 if ($elem.hasClass('js-m-btn-dropdown__toggle')) {
                     $toggle = $elem;
                     $menu = $toggle.next('.js-m-btn-dropdown__menu');
@@ -175,7 +175,7 @@
 
         onOpenDropdown: function ($elem) {
             if ($elem && $elem.length > 0) {
-                var $toggle, $menu;
+                let $toggle, $menu;
                 if ($elem.hasClass('js-m-btn-dropdown__toggle')) {
                     $toggle = $elem;
                     $menu = $toggle.next('.js-m-btn-dropdown__menu');

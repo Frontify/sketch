@@ -1,5 +1,4 @@
 <div class="m-brandassets__blank">
-    {{ console.log(it); }}
     <div class="m-brandassets__blank-image-wrap">
         <img class="m-brandassets__blank-image lazyload" src="../images/blankslate_{{= it.type }}.png" />
     </div>

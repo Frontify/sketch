@@ -1,6 +1,6 @@
 Tc.Module.Colors = Tc.Module.extend({
     on: function (callback) {
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
 
         this.sandbox.subscribe('events', this);
         this.sandbox.subscribe('tabs', this);
@@ -10,9 +10,9 @@ Tc.Module.Colors = Tc.Module.extend({
         $ctx.on('click', '.js-m-colors__color', function (e) {
             e.stopPropagation();
 
-            var $this = $(e.currentTarget);
+            let $this = $(e.currentTarget);
 
-            var color = {
+            let color = {
                 r: $this.data('color-r'),
                 g: $this.data('color-g'),
                 b: $this.data('color-b'),
@@ -25,8 +25,8 @@ Tc.Module.Colors = Tc.Module.extend({
 
         $ctx.on('click', '.js-m-color__learn', function (e) {
             e.preventDefault();
-            var $this = $(e.currentTarget);
-            var url = $this.data('url');
+            let $this = $(e.currentTarget);
+            let url = $this.data('url');
             if (url) {
                 window.postMessage('openUrl', url, true);
             }
@@ -34,8 +34,8 @@ Tc.Module.Colors = Tc.Module.extend({
 
         $ctx.on('click', '.js-m-color__styleguide', function (e) {
             e.preventDefault();
-            var $this = $(e.currentTarget);
-            var url = $this.data('url');
+            let $this = $(e.currentTarget);
+            let url = $this.data('url');
             if (url) {
                 window.postMessage('openUrl', url);
             }
@@ -43,42 +43,42 @@ Tc.Module.Colors = Tc.Module.extend({
 
         // Add / replace colors
         $ctx.on('click', '.js-m-colors__document-add', function (e) {
-            var id = $(e.currentTarget).closest('.js-m-colors__palette').data('id');
-            var colors = this.getColors(id);
+            let id = $(e.currentTarget).closest('.js-m-colors__palette').data('id');
+            let colors = this.getColors(id);
             this.showSuccess(id);
             window.postMessage('addDocumentColors', colors);
         }.bind(this));
 
         $ctx.on('click', '.js-m-colors__document-replace', function (e) {
-            var id = $(e.currentTarget).closest('.js-m-colors__palette').data('id');
-            var colors = this.getColors(id);
+            let id = $(e.currentTarget).closest('.js-m-colors__palette').data('id');
+            let colors = this.getColors(id);
             this.showSuccess(id);
             window.postMessage('replaceDocumentColors', colors);
         }.bind(this));
 
         $ctx.on('click', '.js-m-colors__global-add', function (e) {
-            var id = $(e.currentTarget).closest('.js-m-colors__palette').data('id');
-            var colors = this.getColors(id);
+            let id = $(e.currentTarget).closest('.js-m-colors__palette').data('id');
+            let colors = this.getColors(id);
             this.showSuccess(id);
             window.postMessage('addGlobalColors', colors);
         }.bind(this));
 
         $ctx.on('click', '.js-m-colors__global-replace', function (e) {
-            var id = $(e.currentTarget).closest('.js-m-colors__palette').data('id');
-            var colors = this.getColors(id);
+            let id = $(e.currentTarget).closest('.js-m-colors__palette').data('id');
+            let colors = this.getColors(id);
             this.showSuccess(id);
             window.postMessage('replaceGlobalColors', colors);
         }.bind(this));
 
         // expand / collapse button visibility
         $ctx.on('mouseenter', '.js-m-colors__desc-wrap', function (e) {
-            var $this = $(e.currentTarget);
+            let $this = $(e.currentTarget);
 
             // hide all
             $ctx.find('.js-m-colors__expand, .js-m-colors__collapse').removeClass('state-visible');
 
-            var $expand = $this.find('.js-m-colors__expand');
-            var $collapse = $this.find('.js-m-colors__collapse');
+            let $expand = $this.find('.js-m-colors__expand');
+            let $collapse = $this.find('.js-m-colors__collapse');
 
             if ($this.hasClass('state-collapsed')) {
                 if (parseInt($this.height()) > 13) {
@@ -100,19 +100,19 @@ Tc.Module.Colors = Tc.Module.extend({
         }.bind(this));
 
         $ctx.on('mouseleave', '.js-m-colors__desc-wrap', function (e) {
-            var $this = $(e.currentTarget);
-            var $expand = $this.find('.js-m-colors__expand, .js-m-colors__collapse');
+            let $this = $(e.currentTarget);
+            let $expand = $this.find('.js-m-colors__expand, .js-m-colors__collapse');
             $expand.removeClass('state-visible');
         }.bind(this));
 
         $ctx.on('click', '.js-m-colors__expand', function (e) {
-            var $this = $(e.currentTarget);
+            let $this = $(e.currentTarget);
             $this.removeClass('state-visible');
             $this.closest('.js-m-colors__desc-wrap').removeClass('state-collapsed');
         }.bind(this));
 
         $ctx.on('click', '.js-m-colors__collapse', function (e) {
-            var $this = $(e.currentTarget);
+            let $this = $(e.currentTarget);
             $this.removeClass('state-visible');
             $this.closest('.js-m-colors__desc-wrap').addClass('state-collapsed');
         }.bind(this));
@@ -121,10 +121,10 @@ Tc.Module.Colors = Tc.Module.extend({
     },
 
     showSuccess: function (id) {
-        var $ctx = this.$ctx;
-        var $palette = $ctx.find('.js-m-colors__palette[data-id=' + id + ']');
-        var $btn = $palette.find('.js-m-colors__toggle');
-        var $icon = $btn.find('.js-m-colors__add');
+        let $ctx = this.$ctx;
+        let $palette = $ctx.find('.js-m-colors__palette[data-id=' + id + ']');
+        let $btn = $palette.find('.js-m-colors__toggle');
+        let $icon = $btn.find('.js-m-colors__add');
         this.fire('closeDropdown', $btn, ['events']);
         $btn.velocity({color: '#A3CE62'}, {
             duration: 200, complete: function () {
@@ -140,14 +140,14 @@ Tc.Module.Colors = Tc.Module.extend({
     },
 
     getColors: function (id) {
-        var palette = this.palettes.find(function(palette) {
+        let palette = this.palettes.find(function(palette) {
             return palette.id == id;
         });
         return palette.colors;
     },
 
     render: function (data) {
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
         this.palettes = data.palettes;
         $ctx.html(window.tpl.colorslist(data));
     },

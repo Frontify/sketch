@@ -5,7 +5,7 @@ Tc.Module.FolderChooser = Tc.Module.extend({
     },
 
     render: function (folders, current) {
-        var $content = $(window.tpl.folderchooser({
+        let $content = $(window.tpl.folderchooser({
             folders: folders.folders,
             folder: folders.folder,
             current: current
@@ -15,7 +15,7 @@ Tc.Module.FolderChooser = Tc.Module.extend({
 
         $content.on('submit', function (e) {
             e.preventDefault();
-            var id = $content.find('.js-m-folderchooser__target').data('id');
+            let id = $content.find('.js-m-folderchooser__target').data('id');
             this.fire('closeModal', ['events']);
             window.postMessage('folderSelected', id);
         }.bind(this));
@@ -26,23 +26,23 @@ Tc.Module.FolderChooser = Tc.Module.extend({
         }.bind(this));
 
         $content.on('click', '.js-m-folderchooser__back', function (e) {
-            var parent = $(e.currentTarget).data('parent');
+            let parent = $(e.currentTarget).data('parent');
             window.postMessage('changeFolder', parent);
         }.bind(this));
 
         $content.on('click', '.js-m-folderchooser__item', function (e) {
-            var id = $(e.currentTarget).data('id');
+            let id = $(e.currentTarget).data('id');
             window.postMessage('changeFolder', id);
         }.bind(this));
 
         // Add folders
         $content.on('blur', '.js-m-folderchooser__folder-create', function (e) {
-            var $this = $(e.currentTarget);
-            var folder = $.trim($this.val());
+            let $this = $(e.currentTarget);
+            let folder = $.trim($this.val());
 
             if (folder !== '') {
                 // add new folder
-                var set = $content.find('.js-m-folderchooser__target').data('id');
+                let set = $content.find('.js-m-folderchooser__target').data('id');
                 window.postMessage('addFolder', folder, set);
             }
             else {
@@ -51,7 +51,7 @@ Tc.Module.FolderChooser = Tc.Module.extend({
         }.bind(this));
 
         $content.on('keydown', '.js-m-folderchooser__folder-create', function (e) {
-            var $this = $(e.currentTarget);
+            let $this = $(e.currentTarget);
 
             if (e.which === 13 && !e.ctrlKey && !e.metaKey) {
                 $this.trigger('blur');

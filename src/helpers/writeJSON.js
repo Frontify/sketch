@@ -1,10 +1,10 @@
-var fileManager = NSFileManager.defaultManager();
+let fileManager = NSFileManager.defaultManager();
 
 export default function (key, data) {
-    var jsContent = JSON.stringify(data);
-    var jsContentNSSString = NSString.stringWithFormat("%@", jsContent);
-    var jsFolderPath =  '' + NSHomeDirectory() + '/Frontify/.config/';
-    var jsContentFilePath = jsFolderPath + key + '.json';
+    let jsContent = JSON.stringify(data);
+    let jsContentNSSString = NSString.stringWithFormat("%@", jsContent);
+    let jsFolderPath =  '' + NSHomeDirectory() + '/Frontify/.config/';
+    let jsContentFilePath = jsFolderPath + key + '.json';
 
     if(!fileManager.fileExistsAtPath(jsFolderPath)) {
         if(fileManager.createDirectoryAtPath_withIntermediateDirectories_attributes_error(jsFolderPath, true, null, null)) {

@@ -24,17 +24,17 @@ class FileManager {
         return target.getTarget('sources').then(function (data) {
             // create folder first
             if (createFolder(data.path)) {
-                var dialog = NSSavePanel.savePanel();
+                let dialog = NSSavePanel.savePanel();
                 dialog.canCreateDirectories = false;
                 dialog.directoryURL = NSURL.fileURLWithPath(data.path);
                 dialog.allowedFileTypes = ['sketch'];
                 dialog.message = 'Save your Sketch File in the Frontify sync folder';
 
-                var clicked = dialog.runModal();
+                let clicked = dialog.runModal();
 
                 if (clicked == NSOKButton) {
-                    var url = dialog.URL();
-                    var doc = sketch.getDocument();
+                    let url = dialog.URL();
+                    let doc = sketch.getDocument();
 
                     if(doc) {
                         doc.saveToURL_ofType_forSaveOperation_error_(url, "com.bohemiancoding.sketch.drawing", NSSaveOperation, null);
@@ -55,14 +55,14 @@ class FileManager {
     moveCurrent() {
         return target.getTarget('sources').then(function (data) {
             if (createFolder(data.path)) {
-                var doc = sketch.getDocument();
+                let doc = sketch.getDocument();
 
                 if(doc) {
-                    var nsurl = doc.fileURL();
-                    var path = nsurl.path();
-                    var parts = path.split('/');
-                    var currentFilename = parts.pop();
-                    var newNsurl =  NSURL.fileURLWithPath(data.path + currentFilename);
+                    let nsurl = doc.fileURL();
+                    let path = nsurl.path();
+                    let parts = path.split('/');
+                    let currentFilename = parts.pop();
+                    let newNsurl =  NSURL.fileURLWithPath(data.path + currentFilename);
 
                     // move to the target folder
                     doc.moveToURL_completionHandler_(newNsurl, null);
@@ -77,30 +77,41 @@ class FileManager {
 
     uploadFile(info) {
         // remap slashes in filename to folders
-        var parts = info.name.split('/');
-        var name = parts.pop();
-        var path = parts.join('/');
+        let filenameParts = info.filename.split('/');
+        let filename = filenameParts.pop();
 
-        var data = {
-            project_id: info.project,
+        let name = info.name.split('/').pop();
+
+        let data = {
             mimetype: 'image/png',
-            id: info.id,
-            id_external: info.id_external,
-            filename: name,
-            path: info.folder + path,
-            origin: 'SKETCH'
+            name: name,
+            filename: filename,
+            origin: 'SKETCH',
+            id_external: info.id_external
         };
 
         if(info.pixel_ratio) {
             data.pixel_ratio = info.pixel_ratio;
         }
 
-        var url = '/v1/assets/';
-        if (info.id) {
-            url += info.id;
+        let url = '';
+        if(info.type === 'attachment') {
+            data['asset_id'] = info.asset_id;
+            url += '/v1/attachment/create'
+        }
+        else {
+            let path = filenameParts.join('/');
+            data['id'] = info.id;
+            data['path'] = info.folder + path;
+            data['project_id'] = info.project;
+
+            url += '/v1/assets/';
+            if (info.id) {
+                url += info.id;
+            }
         }
 
-        return fetch(url, {method: 'POST', filepath: info.path, is_file_upload: true, type: info.type, id: info.id, id_external: info.id_external, body: JSON.stringify(data)});
+        return fetch(url, {method: 'POST', filepath: info.path, is_file_upload: true, type: info.type, id: info.id, body: JSON.stringify(data)});
     }
 
     downloadFile(info) {
@@ -108,7 +119,7 @@ class FileManager {
             this.updateAssetStatus(meta.screen.project, meta.screen);
 
             return target.getTarget('sources').then(function (target) {
-                var path = target.path + info.filename;
+                let path = target.path + info.filename;
                 if(createFolder(target.path)) {
                     return fetch('/v1/screen/download/' + info.id, { is_file_download: true, filepath: path, type: info.type, id: info.id });
                 }
@@ -117,7 +128,7 @@ class FileManager {
     }
 
     updateAssetStatus(project, asset) {
-        var status = readJSON('sources-' + project) || {};
+        let status = readJSON('sources-' + project) || {};
         status.assets = status.assets || {};
         status.assets[asset.id] = status[asset.id] || {};
         status.assets[asset.id].id = asset.id;
@@ -131,12 +142,12 @@ class FileManager {
     }
 
     deleteFile(path) {
-        var fileManager = NSFileManager.defaultManager();
+        let fileManager = NSFileManager.defaultManager();
         fileManager.removeItemAtPath_error(path, nil);
     }
 
     clearExportFolder() {
-        var fileManager = NSFileManager.defaultManager();
+        let fileManager = NSFileManager.defaultManager();
         fileManager.removeItemAtPath_error(this.exportPath, nil);
     }
 }

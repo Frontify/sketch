@@ -6,7 +6,7 @@
         },
 
         on: function () {
-            var $ctx = this.$ctx;
+            let $ctx = this.$ctx;
 
             this.settings = [];
             this.elems = [];
@@ -18,7 +18,7 @@
             this.sandbox.subscribe('tabs', this);
 
             // destroy old instance
-            var settings = $ctx.data('settings');
+            let settings = $ctx.data('settings');
             if (settings) {
                 settings.destroy();
             }
@@ -29,14 +29,14 @@
             // setting activation
             $ctx.off('.settings');
             $ctx.on('click.settings', '.js-o-settings__setting', function (e) {
-                var $item = $(e.currentTarget);
+                let $item = $(e.currentTarget);
                 this.enter($item);
             }.bind(this));
 
             // accordion
             $ctx.on('click.settings', '.js-o-settings__accordion-open', function (e) {
-                var $item = $(e.currentTarget);
-                var $container = $item.next('.js-o-settings__accordion-content');
+                let $item = $(e.currentTarget);
+                let $container = $item.next('.js-o-settings__accordion-content');
 
                 if ($container.hasClass('state-open')) {
                     $container.removeClass('state-open');
@@ -48,14 +48,14 @@
         },
 
         setup: function () {
-            var $ctx = this.$ctx;
-            var isSetting = false;
+            let $ctx = this.$ctx;
+            let isSetting = false;
 
-            var $settings = $ctx.find('.js-o-settings__setting');
+            let $settings = $ctx.find('.js-o-settings__setting');
             $settings.each(function (index, setting) {
                 isSetting = true;
-                var $setting = $(setting);
-                var id = $setting.data('id');
+                let $setting = $(setting);
+                let id = $setting.data('id');
 
                 if ($setting.data('setting')) {
                     this.settings.push({
@@ -66,8 +66,8 @@
                 }
 
                 // apply specific logic to the form elem
-                var type = Tc.Utils.String.capitalize(Tc.Utils.String.toCamel($setting.data('type')));
-                var item = new Tc.Setting[type](this, $setting, true);
+                let type = Tc.Utils.String.capitalize(Tc.Utils.String.toCamel($setting.data('type')));
+                let item = new Tc.Setting[type](this, $setting, true);
                 item.setting();
 
                 $setting.data('setting', item);
@@ -79,10 +79,10 @@
             }.bind(this));
 
             if(!isSetting) {
-                var $elems = $ctx.find('.js-o-settings__elem');
+                let $elems = $ctx.find('.js-o-settings__elem');
                 $elems.each(function (index, elem) {
-                    var $elem = $(elem);
-                    var id = $elem.data('id');
+                    let $elem = $(elem);
+                    let id = $elem.data('id');
 
                     if ($elem.data('elem')) {
                         this.elems.push({
@@ -93,8 +93,8 @@
                     }
 
                     // apply specific logic to the form elem
-                    var type = Tc.Utils.String.capitalize(Tc.Utils.String.toCamel($elem.data('type')));
-                    var item = new Tc.Setting[type](this, $elem, false);
+                    let type = Tc.Utils.String.capitalize(Tc.Utils.String.toCamel($elem.data('type')));
+                    let item = new Tc.Setting[type](this, $elem, false);
                     item.elem(false);
 
                     $elem.data('elem', item);
@@ -110,7 +110,7 @@
         },
 
         validation: function (submitHandler, resetHandler) {
-            var $ctx = this.$ctx;
+            let $ctx = this.$ctx;
             $ctx.on('reset', function () {
                 $ctx.validate().resetForm();
                 if ($.isFunction(resetHandler)) {
@@ -123,7 +123,7 @@
                 }
             }.bind(this));
 
-            var self = this;
+            let self = this;
             this.validator = $ctx.validate({
                 onfocusout: false,
                 submitHandler: function () {
@@ -180,8 +180,8 @@
         },
 
         next: function ($setting) {
-            var id = $setting.data('id');
-            var index = this.settings.findIndex(function (item) {
+            let id = $setting.data('id');
+            let index = this.settings.findIndex(function (item) {
                 return item.id === id;
             });
 
@@ -191,8 +191,8 @@
         },
 
         prev: function ($setting) {
-            var id = $setting.data('id');
-            var index = this.settings.findIndex(function (item) {
+            let id = $setting.data('id');
+            let index = this.settings.findIndex(function (item) {
                 return item.id === id;
             });
 
@@ -202,7 +202,7 @@
         },
 
         serialize: function () {
-            var data = {};
+            let data = {};
 
             this.elems.forEach(function (item) {
                 data = $.extend(true, {}, data, item.item.serialize());
@@ -230,11 +230,11 @@
         },
 
         resize: function (offsetBottom) {
-            var $ctx = this.$ctx;
+            let $ctx = this.$ctx;
 
             if (offsetBottom) {
-                var height = parseInt($ctx.height());
-                var offsetTop = $ctx.offset().top;
+                let height = parseInt($ctx.height());
+                let offsetTop = $ctx.offset().top;
 
                 if (height + offsetTop < offsetBottom) {
                     $ctx.height(offsetBottom - offsetTop);
@@ -246,7 +246,7 @@
         },
 
         get: function (id) {
-            var item = this.getSetting(id);
+            let item = this.getSetting(id);
             if ($.isEmptyObject(item)) {
                 item = this.getElem(id);
             }
@@ -262,8 +262,8 @@
 
         getActive: function () {
             if(this.$active) {
-                var id = this.$active.data('id');
-                var item = this.getSetting(id);
+                let id = this.$active.data('id');
+                let item = this.getSetting(id);
                 if ($.isEmptyObject(item)) {
                     item = this.getElem(id);
                 }
@@ -275,7 +275,7 @@
         },
 
         getSetting: function (id) {
-            var setting = this.settings.find(function (item) {
+            let setting = this.settings.find(function (item) {
                 return item.id === id;
             });
 
@@ -287,7 +287,7 @@
         },
 
         getElem: function (id) {
-            var elem = this.elems.find(function (item) {
+            let elem = this.elems.find(function (item) {
                 return item.id === id;
             });
 
@@ -307,7 +307,7 @@
         },
 
         onTabSwitched: function(data){
-            var active = this.getActive();
+            let active = this.getActive();
             if(active) {
                 if($.isFunction(active.onTabSwitched)) {
                     active.onTabSwitched(data);

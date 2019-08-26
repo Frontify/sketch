@@ -1,6 +1,6 @@
 Tc.Module.Toolbar = Tc.Module.extend({
     on: function(callback) {
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
 
         $ctx.on('click', '.js-m-toolbar__login', function() {
             window.postMessage('showLogin')
@@ -22,9 +22,9 @@ Tc.Module.Toolbar = Tc.Module.extend({
     },
 
     renderUser: function(user) {
-        var $ctx = this.$ctx;
+        let $ctx = this.$ctx;
 
-        var $user = $ctx.find('.js-m-toolbar__user');
+        let $user = $ctx.find('.js-m-toolbar__user');
         $user.html(window.tpl.toolbaruser(user));
     }
 });

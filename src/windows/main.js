@@ -10,17 +10,18 @@ import typography from '../model/typography';
 import asset from '../model/asset';
 import user from '../model/user';
 import createFolder from '../helpers/createFolder'
+import { runCommand } from '../commands/frontify'
 
-var threadDictionary = NSThread.mainThread().threadDictionary();
+let threadDictionary = NSThread.mainThread().threadDictionary();
 
 export default function(context, view) {
-    var viewData = sketch.getViewData();
-    var mainURL = require('../assets/views/main.html');
-    var loginURL = require('../assets/views/login.html');
-    var domain = '';
+    let viewData = sketch.getViewData();
+    let mainURL = require('../assets/views/main.html');
+    let loginURL = require('../assets/views/login.html');
+    let domain = '';
 
     // create window and webview
-    var win = new BrowserWindow({
+    let win = new BrowserWindow({
         identifier: 'frontifymain',
         titleBarStyle: 'default',
         backgroundColor: '#FFFFFF',
@@ -35,10 +36,10 @@ export default function(context, view) {
         alwaysOnTop: true
     });
 
-    var webview = win.webContents;
+    let webview = win.webContents;
 
     // Load initial url
-    win.loadURL(viewData.url);
+    webview.loadURL(viewData.url);
 
     // Show window if ready
     win.once('ready-to-show', function() {
@@ -57,25 +58,27 @@ export default function(context, view) {
         }
     }.bind(this));
 
+    webview.on('did-fail-load', function(err) {
+        console.log('did-fail-load', err);
+    }.bind(this));
+
     // Handle authentication redirect
     webview.on('did-get-redirect-request', function() {
-        var url = getURL();
+        let url = getURL();
         if (url.startsWith('https://frontify.com/sketchplugin')) {
-            var urlparts = url.split('?#access_token=');
+            let urlparts = url.split('?#access_token=');
 
-            if(urlparts.length === 1) {
-                // no access token part included -> back to login URL
-                win.loadURL(loginURL);
-            }
-            else {
+            if(urlparts.length !== 1) {
                 // login with access token
-                var access_token = urlparts[1].split('&expires_in=31536000&token_type=bearer')[0];
+                let access_token = urlparts[1].split('&expires_in=31536000&token_type=bearer')[0];
+
                 user.login({
                     access_token: access_token,
                     domain: domain
-                });
-
-                win.loadURL(mainURL);
+                }).then(function() {
+                    win.close();
+                    runCommand(context);
+                }.bind(this));
             }
         }
     }.bind(this));
@@ -87,7 +90,8 @@ export default function(context, view) {
     // Handlers called from webview
     webview.on('logout', function() {
         user.logout().then(function() {
-            win.loadURL(loginURL);
+            win.close();
+            runCommand(context);
         }.bind(this));
     });
 
@@ -119,7 +123,7 @@ export default function(context, view) {
     webview.on('switchAssetSourceForType', function(type, assetSourceId) {
         target.getAssetSourcesForType(type).then(function(data) {
             if (data && data.sources) {
-                var selected = data.sources.find(function(source) {
+                let selected = data.sources.find(function(source) {
                     return source.id == assetSourceId
                 }.bind(this));
 
@@ -289,13 +293,13 @@ export default function(context, view) {
             if(assetSources && assetSources.selected) {
                 webview.executeJavaScript('showAssetSources(' + JSON.stringify(assetSources) + ')');
                 webview.executeJavaScript('showLibrarySearch("' + type + '")');
-                asset.search(type, [], '');
+                asset.search(type, '');
             }
         }.bind(this));
     });
 
-    webview.on('searchLibraryAssets', function(type, filters, query) {
-        asset.search(type, filters, query);
+    webview.on('searchLibraryAssets', function(type, query) {
+        asset.search(type, query);
     });
 
     webview.on('applyLibraryAsset', function(data) {
