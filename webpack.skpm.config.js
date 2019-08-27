@@ -35,7 +35,13 @@ module.exports = function (config) {
             outputPath: '../Resources/',
             injectType: 'none',
             fileName: '[name].js',
-            filesToConcat: ['jquery', './src/assets/js/libs/**', './src/assets/js/plugins/**', './src/assets/js/utils/**']
+            filesToConcat: ['jquery',
+                './src/assets/js/libs/terrific-2.1.0.min.js',
+                './src/assets/js/libs/velocity.min.js',
+                './src/assets/js/libs/velocity.ui.min.js',
+                './src/assets/js/libs/**',
+                './src/assets/js/plugins/**',
+                './src/assets/js/utils/**']
         }),
         new ConcatPlugin({
             uglify: false,
