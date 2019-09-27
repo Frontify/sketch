@@ -317,10 +317,12 @@ class Artboard {
                     return sequence.then(function() {
                         return this.exportArtboard(artboard, doc);
                     }.bind(this)).then(function(files) {
+                        let artboardChanged = false;
                         return files.reduce(function(uploadsequence, file) {
                             return uploadsequence.then(function(assetId) {
                                 if (file.type === 'artboard') {
                                     if (artboard.sha != shaFile(file.path)) {
+                                        artboardChanged = true;
                                         return filemanager.uploadFile({
                                             path: file.path,
                                             filename: file.name + '.' + file.ext,
@@ -341,6 +343,7 @@ class Artboard {
                                         }.bind(this));
                                     }
                                     else {
+                                        artboardChanged = false;
                                         filemanager.deleteFile(file.path);
                                         artboard.nochanges = true;
                                         return artboard.id;
@@ -349,7 +352,7 @@ class Artboard {
                                 else if (file.type === 'attachment') {
                                     let status = this.getRemoteStatusForAttachment(artboard, file);
 
-                                    if (status.sha != shaFile(file.path)) {
+                                    if (artboardChanged || status.sha != shaFile(file.path)) {
                                         let filename;
 
                                         if (file.ext === 'json') {
