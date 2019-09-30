@@ -204,10 +204,11 @@ class Artboard {
                 name: layer.master.name
             };
 
-            // Save symbol properties to layer
-            Settings.setLayerSettingForKey(layer, 'symbol', symbolProps);
-
             var group = layer.detach({recursively: true}); // inline symbols
+
+            // Save symbol properties to layer
+            Settings.setLayerSettingForKey(group, 'symbol', symbolProps);
+
             if(group) {
                 group.layers.forEach(function(layer) {
                     this.optimizeLayer(layer);
