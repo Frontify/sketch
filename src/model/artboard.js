@@ -1,5 +1,6 @@
-import fetch from '../helpers/fetch'
-import shaFile from '../helpers/shaFile'
+import fetch from '../helpers/fetch';
+import shaFile from '../helpers/shaFile';
+import writeJSON from '../helpers/writeJSON';
 import sketch from './sketch'
 import target from './target';
 import filemanager from './filemanager';
@@ -8,7 +9,6 @@ import {isWebviewPresent, sendToWebview} from 'sketch-module-web-view/remote'
 
 let API = require('sketch');
 let DOM = require('sketch/dom');
-let Settings = require('sketch/settings');
 
 class Artboard {
     constructor() {
@@ -145,40 +145,39 @@ class Artboard {
             // Export artboard structure -> via JS API as its not possible to export JSON with MSExportRequest
             let jsartboard = DOM.Artboard.fromNative(msartboard);
 
-            // Create an own disconnected Artboard to preprocess and optimize data
-            let detachedArtboard = jsartboard.duplicate();
-            detachedArtboard.name = 'data';
+            // Export the artboard's data first to preprocess and optimize data
+            let artboardExport = DOM.export(jsartboard, {
+                formats: 'json',
+                output: false
+            });
 
             // Export formats -> traditional MSExportRequest for better naming control
-            files = files.concat(this.exportFormats(doc, detachedArtboard));
-
+            files = files.concat(this.exportFormats(doc, jsartboard));
             // Save origin info
             let jsdoc = DOM.Document.fromNative(doc);
-            Settings.setLayerSettingForKey(detachedArtboard, 'meta', {
+
+            this.setLayerSettingForKey(artboardExport, 'meta', {
                 document: {id: jsdoc.id, path: jsdoc.path},
                 page: {id: jsdoc.selectedPage.id, name: jsdoc.selectedPage.name},
-                sketch: {version: API.version.sketch, api: API.version.api}
+                sketch: {version: '' + API.version.sketch, api: API.version.api }
+                // converting 'sketch.version' to string is needed to not lose it at JSON.stringify
             });
 
             // Optimize layers
-            detachedArtboard.layers.forEach(function(layer) {
+            artboardExport.layers.forEach(function(layer) {
                 this.optimizeLayer(layer);
             }.bind(this));
 
-            detachedArtboard.parent = null;
-
-            DOM.export(detachedArtboard, {
-                formats: 'json',
-                output: filemanager.getExportPath(),
-                overwriting: true
-            });
+            const exportName = 'data';
+            const exportPath = filemanager.getExportPath();
+            writeJSON(exportName, artboardExport, exportPath);
 
             files.push({
-                name: detachedArtboard.name,
+                name: exportName,
                 ext: 'json',
                 id_external: artboard.id_external,
                 id: artboard.id,
-                path: filemanager.getExportPath() + detachedArtboard.name + '.json',
+                path: exportPath + exportName + '.json',
                 type: 'attachment'
             });
 
@@ -186,19 +185,36 @@ class Artboard {
         }.bind(this));
     }
 
+    setLayerSettingForKey(layer, key, value) {
+        let settings;
+        const data = JSON.stringify(value);
+
+        if (!layer.hasOwnProperty('userInfo')) {
+            layer['userInfo'] = {}
+        }
+
+        if (!layer['userInfo'].hasOwnProperty('com.frontify.sketch')) {
+            settings = layer['userInfo']['com.frontify.sketch'] = {}
+        }
+
+        settings[key] = data;
+    }
+
     optimizeLayer(layer) {
+        // REMOVE IMAGE FILLS TO REDUCE THE JSON WEIGHT
         if (layer.style && layer.style.fills) {
             // Remove image fills
             let index = layer.style.fills.length;
             while (--index >= 0) {
                 let fill = layer.style.fills[index];
-                if (fill.fill == API.Style.FillType.Pattern && fill.pattern.image) {
-                    layer.sketchObject.style().removeStyleFillAtIndex(index);
+
+                if (fill.fillType === 4 && fill.image) {
+                    layer.style.fills.splice(index,1);
                 }
             }
         }
 
-        if (layer.type == 'SymbolInstance') {
+        /*if (layer.type == 'SymbolInstance') {
             let symbolProps = {
                 symbolId: layer.master.symbolId,
                 name: layer.master.name
@@ -207,7 +223,7 @@ class Artboard {
             var group = layer.detach({recursively: true}); // inline symbols
 
             // Save symbol properties to layer
-            Settings.setLayerSettingForKey(group, 'symbol', symbolProps);
+            this.setLayerSettingForKey(group, 'symbol', symbolProps);
 
             if(group) {
                 group.layers.forEach(function(layer) {
@@ -222,7 +238,7 @@ class Artboard {
             layer.layers.forEach(function(layer) {
                 this.optimizeLayer(layer);
             }.bind(this));
-        }
+        }*/
     }
 
     exportFormats(doc, layer) {
