@@ -15,11 +15,6 @@ class Artboard {
         this.pixelRatio = 2;
         this.remoteAssets = null;
         this.uploadInProgress = false;
-        this.emptyImage = new DOM.Image({
-            image: {
-                base64: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
-            }
-        });
     }
 
     getArtboards(skipRemote) {
@@ -201,6 +196,24 @@ class Artboard {
     }
 
     optimizeLayer(layer) {
+        this.layerRemoveImageFills(layer);
+
+        switch (layer._class) {
+            case 'bitmap':
+                this.layerBitmapOptimize(layer);
+                break;
+            case '% SYMBOL %':
+                this.layerSymbolOptimize(layer);
+                break;
+            case 'group':
+                this.layerGroupOptimize(layer);
+                break;
+            default:
+                break;
+        }
+    }
+
+    layerRemoveImageFills(layer) {
         // REMOVE IMAGE FILLS TO REDUCE THE JSON WEIGHT
         if (layer.style && layer.style.fills) {
             // Remove image fills
@@ -213,9 +226,17 @@ class Artboard {
                 }
             }
         }
+    }
 
-        /*if (layer.type == 'SymbolInstance') {
-            let symbolProps = {
+    layerBitmapOptimize(layer) {
+        // Replace base64 with a lightweigt 1x1 px placeholder, because we don't need that extra asset
+        if (layer.image && layer.image.data && layer.image.data._data) {
+            layer.image.data._data = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+        }
+    }
+
+    layerSymbolOptimize(layer) {
+        /*let symbolProps = {
                 symbolId: layer.master.symbolId,
                 name: layer.master.name
             };
@@ -225,20 +246,13 @@ class Artboard {
             // Save symbol properties to layer
             this.setLayerSettingForKey(group, 'symbol', symbolProps);
 
-            if(group) {
-                group.layers.forEach(function(layer) {
-                    this.optimizeLayer(layer);
-                }.bind(this));
-            }
-        }
-        else if (layer.type == 'Image') {
-            layer.image = this.emptyImage.image;
-        }
-        else if(layer.type == 'Group') {
-            layer.layers.forEach(function(layer) {
-                this.optimizeLayer(layer);
-            }.bind(this));
-        }*/
+            */
+    }
+
+    layerGroupOptimize(layer) {
+        layer.layers.forEach(function(layer) {
+            this.optimizeLayer(layer);
+        }.bind(this));
     }
 
     exportFormats(doc, layer) {
