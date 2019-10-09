@@ -196,13 +196,15 @@ class Artboard {
     }
 
     optimizeLayer(layer) {
+        // TODO: maybe first detach symbols and then optimize them?
+
         this.layerRemoveImageFills(layer);
 
         switch (layer._class) {
             case 'bitmap':
                 this.layerBitmapOptimize(layer);
                 break;
-            case '% SYMBOL %':
+            case 'symbolInstance':
                 this.layerSymbolOptimize(layer);
                 break;
             case 'group':
@@ -235,18 +237,52 @@ class Artboard {
         }
     }
 
-    layerSymbolOptimize(layer) {
-        /*let symbolProps = {
-                symbolId: layer.master.symbolId,
-                name: layer.master.name
-            };
+    layerSymbolOptimize(exportedLayer) {
+        const document = DOM.getSelectedDocument();
+        const layerId = exportedLayer.do_objectID;
+        const symbolId = exportedLayer.symbolID;
+        const originalSymbolMaster = document.getSymbolMasterWithID(symbolId);
+        const originalSymbolInstance = document.getLayerWithID(layerId);
+        const duplicatedSymbolInstance = originalSymbolInstance.duplicate();
 
-            var group = layer.detach({recursively: true}); // inline symbols
+        // Create a duplicate of the symbolInstance
+        const detachedGroup = duplicatedSymbolInstance.detach({
+            recursively: true,
+        });
 
-            // Save symbol properties to layer
-            this.setLayerSettingForKey(group, 'symbol', symbolProps);
+        // Get data of the symbolInstance duplicate
+        const detachedGroupExport = DOM.export(detachedGroup, {
+            formats: 'json',
+            output: false
+        });
 
-            */
+        // Remove the duplicate of the symbolInstance
+        detachedGroup.remove();
+
+        const groupMeta = {
+            isDetachedSymbolGroup: true,
+            symbolMaster: {
+                id: originalSymbolMaster.id,
+                symbolId: originalSymbolMaster.symbolId,
+                library: originalSymbolMaster.getLibrary()
+            }
+        };
+
+        this.setLayerSettingForKey(detachedGroupExport, 'meta', groupMeta);
+
+        // TODO: find a cleaner way to replace the object (map external)
+        // Set new layer value
+        for (const prop of Object.keys(exportedLayer)) {
+            delete exportedLayer[prop];
+        }
+
+        for (const prop of Object.keys(detachedGroupExport)) {
+             exportedLayer[prop] = detachedGroupExport[prop];
+        }
+
+        // Set layerId of the old symbol instance to the exported group,
+        // because we want to keep that id to match exporables (attachments)
+        exportedLayer.do_objectID = layerId;
     }
 
     layerGroupOptimize(layer) {
