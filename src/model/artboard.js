@@ -9,6 +9,7 @@ import {isWebviewPresent, sendToWebview} from 'sketch-module-web-view/remote'
 
 let API = require('sketch');
 let DOM = require('sketch/dom');
+let _ = require('lodash');
 
 class Artboard {
     constructor() {
@@ -139,6 +140,12 @@ class Artboard {
 
             // Export artboard structure -> via JS API as its not possible to export JSON with MSExportRequest
             let jsartboard = DOM.Artboard.fromNative(msartboard);
+            const jsArtboardDuplicate = jsartboard.duplicate();
+
+            this.layerIdMap = this.getIdMap(jsartboard, jsArtboardDuplicate);
+
+            console.log(this.layerIdMap);
+
 
             // Export the artboard's data first to preprocess and optimize data
             let artboardExport = DOM.export(jsartboard, {
@@ -178,6 +185,48 @@ class Artboard {
 
             resolve(files);
         }.bind(this));
+    }
+
+    /***
+     * RETURNS AN IDMAP WITH KEY FROM ARTBOARDDUPLICATE AND VALUE FROM ORIGINAL ARTBOARD
+     * @param artboard
+     * @param artboardDuplicate
+     * @returns {Map<duplicateArtboardLayerId, originalArtboardLayerId>}
+     */
+
+    getIdMap(artboardOriginal, artboardDuplicate) {
+        let id_property = '';
+        let idMap = {};
+
+        /* Returns a simple tree with ids and its layers */
+        let getIdTree = function(entry){
+            let reducedEntry =  {};
+            reducedEntry[id_property] = entry.id;
+
+            if(entry.layers) {
+                reducedEntry.layers = entry.layers.map(getIdTree);
+            }
+            return reducedEntry;
+        };
+
+        /* Returns tree as a flat structure */
+        var flattenTree = function(entry){
+            if (entry.layers) {
+                entry.layers.map(flattenTree);
+            }
+
+            idMap[entry.id] = entry.id_original;
+        };
+
+        id_property = 'id_original';
+        let originalIdTree = [artboardOriginal].map(getIdTree)[0];
+        id_property = 'id';
+        let duplicateIdTree = [artboardDuplicate].map(getIdTree)[0];
+        let mergedIdTree = _.merge(originalIdTree,duplicateIdTree);
+
+        [mergedIdTree].map(flattenTree);
+
+        return idMap;
     }
 
     setLayerSettingForKey(layer, key, value) {
@@ -258,6 +307,8 @@ class Artboard {
 
         // Remove the duplicate of the symbolInstance
         detachedGroup.remove();
+        // TODO: maybe do an artboard copy and get data from there?
+        // TODO: would be easier to delete afterwards and if something goes wrong...
 
         const groupMeta = {
             isDetachedSymbolGroup: true,
