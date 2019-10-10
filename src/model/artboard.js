@@ -243,9 +243,11 @@ class Artboard {
         const symbolId = exportedLayer.symbolID;
         const originalSymbolMaster = document.getSymbolMasterWithID(symbolId);
         const originalSymbolInstance = document.getLayerWithID(layerId);
-        const duplicatedSymbolInstance = originalSymbolInstance.duplicate();
 
-        // TODO: rename layer, keep name
+        // Keep name and rename duplicate to recognize it if something is broken during export
+        const layerName = originalSymbolInstance.name;
+        const duplicatedSymbolInstance = originalSymbolInstance.duplicate();
+        duplicatedSymbolInstance.name = '[export copy] ' + layerName;
 
         // Create a duplicate of the symbolInstance
         const detachedGroup = duplicatedSymbolInstance.detach({
@@ -258,10 +260,11 @@ class Artboard {
             output: false
         });
 
+        // Reset original name
+        detachedGroupExport.name = layerName;
+
         // Remove the duplicate of the symbolInstance
         detachedGroup.remove();
-        // TODO: maybe do an artboard copy and get data from there?
-        // TODO: would be easier to delete afterwards and if something goes wrong...
 
         const groupMeta = {
             isDetachedSymbolGroup: true,
