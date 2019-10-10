@@ -158,10 +158,11 @@ class Artboard {
                 // converting 'sketch.version' to string is needed to not lose it at JSON.stringify
             });
 
+            // Resolve Symbols
+            artboardExport.layers = this.resolveSymbolLayers(artboardExport.layers);
+
             // Optimize layers
-            artboardExport.layers.forEach(function(layer) {
-                this.optimizeLayer(layer);
-            }.bind(this));
+            artboardExport.layers = this.optimizeLayers(artboardExport.layers);
 
             const exportName = 'data';
             const exportPath = filemanager.getExportPath();
@@ -195,25 +196,28 @@ class Artboard {
         settings[key] = data;
     }
 
-    optimizeLayer(layer) {
-        // TODO: maybe first detach symbols and then optimize them?
+    optimizeLayers(layers) {
+        const optimize = (layer) => {
+            layer = this.layerRemoveImageFills(layer);
 
-        this.layerRemoveImageFills(layer);
+            if (layer._class === 'group') {
+                layer.layers = layer.layers.map(optimize);
+            }
+            else if (layer._class === 'bitmap') {
+                layer = this.layerReplaceImageData(layer);
+            }
 
-        switch (layer._class) {
-            case 'bitmap':
-                this.layerBitmapOptimize(layer);
-                break;
-            case 'symbolInstance':
-                this.layerSymbolOptimize(layer);
-                break;
-            case 'group':
-                this.layerGroupOptimize(layer);
-                break;
-            default:
-                break;
-        }
+            return layer;
+        };
+
+        return layers.map(optimize);
     }
+
+    /**
+     * Removes base64 image fills, because we don't need that extra data
+     * @param layer
+     * @returns {{style}|*}
+     */
 
     layerRemoveImageFills(layer) {
         // REMOVE IMAGE FILLS TO REDUCE THE JSON WEIGHT
@@ -228,16 +232,48 @@ class Artboard {
                 }
             }
         }
+
+        return layer;
     }
 
-    layerBitmapOptimize(layer) {
-        // Replace base64 with a lightweigt 1x1 px placeholder, because we don't need that extra asset
+    /**
+     *  Replaces base64 image with a lightweigt 1x1 px placeholder, because we don't need that extra asset
+     * @param layer
+     * @returns {{image}|*}
+     */
+    layerReplaceImageData(layer) {
+
         if (layer.image && layer.image.data && layer.image.data._data) {
             layer.image.data._data = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
         }
+
+        return layer;
     }
 
-    layerSymbolOptimize(exportedLayer) {
+    resolveSymbolLayers(layers) {
+        const resolve = (layer) => {
+
+            if (layer._class === 'symbolInstance') {
+                return this.getDetachedGroupByExportedSymbolLayer(layer);
+            }
+
+            if (layer._class === 'group') {
+                layer.layers = layer.layers.map(resolve);
+            }
+
+            return layer;
+        };
+
+        return layers.map(resolve);
+    }
+
+    /**
+     * Accepts an exported symbold layer and returns a detached version in export json format
+     * Nested symbols are detachted deeply
+     * @param exportedLayer (a layer after export to json format)
+     */
+
+    getDetachedGroupByExportedSymbolLayer(exportedLayer) {
         const document = DOM.getSelectedDocument();
         const layerId = exportedLayer.do_objectID;
         const symbolId = exportedLayer.symbolID;
@@ -277,25 +313,11 @@ class Artboard {
 
         this.setLayerSettingForKey(detachedGroupExport, 'meta', groupMeta);
 
-        // TODO: find a cleaner way to replace the object (map external)
-        // Set new layer value
-        for (const prop of Object.keys(exportedLayer)) {
-            delete exportedLayer[prop];
-        }
-
-        for (const prop of Object.keys(detachedGroupExport)) {
-             exportedLayer[prop] = detachedGroupExport[prop];
-        }
-
         // Set layerId of the old symbol instance to the exported group,
         // because we want to keep that id to match exporables (attachments)
-        exportedLayer.do_objectID = layerId;
-    }
+        detachedGroupExport.do_objectID = layerId;
 
-    layerGroupOptimize(layer) {
-        layer.layers.forEach(function(layer) {
-            this.optimizeLayer(layer);
-        }.bind(this));
+        return detachedGroupExport;
     }
 
     exportFormats(doc, layer) {
