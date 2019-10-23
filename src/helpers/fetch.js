@@ -104,6 +104,10 @@ export default function (uri, options) {
 
                 for(let key in params) {
                     if(params.hasOwnProperty(key)) {
+                        if (key === 'name') {
+                            params[key] = encodeURIComponent(params[key]);
+                        }
+
                         args.push('-F');
                         args.push(key + '=' + params[key]);
                     }
