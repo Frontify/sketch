@@ -9,6 +9,7 @@ import {isWebviewPresent, sendToWebview} from 'sketch-module-web-view/remote'
 
 let API = require('sketch');
 let DOM = require('sketch/dom');
+let Settings = require('sketch/settings');
 
 class Artboard {
     constructor() {
@@ -181,6 +182,9 @@ class Artboard {
         }.bind(this));
     }
 
+    /***
+     * Local counterpart to Settings.setLayerSettingsForKey for already exported structures
+     * */
     setLayerSettingForKey(layer, key, value) {
         let settings;
         const data = JSON.stringify(value);
@@ -276,8 +280,6 @@ class Artboard {
     getDetachedGroupByExportedSymbolLayer(exportedLayer) {
         const document = DOM.getSelectedDocument();
         const layerId = exportedLayer.do_objectID;
-        const symbolId = exportedLayer.symbolID;
-        const originalSymbolMaster = document.getSymbolMasterWithID(symbolId);
         const originalSymbolInstance = document.getLayerWithID(layerId);
 
         // Keep name and rename duplicate to recognize it if something is broken during export
@@ -285,10 +287,7 @@ class Artboard {
         const duplicatedSymbolInstance = originalSymbolInstance.duplicate();
         duplicatedSymbolInstance.name = '[export copy] ' + layerName;
 
-        // Create a duplicate of the symbolInstance
-        const detachedGroup = duplicatedSymbolInstance.detach({
-            recursively: true,
-        });
+        const detachedGroup = this.recursivelyDetachSymbols(duplicatedSymbolInstance);
 
         // Get data of the symbolInstance duplicate
         const detachedGroupExport = DOM.export(detachedGroup, {
@@ -302,7 +301,41 @@ class Artboard {
         // Remove the duplicate of the symbolInstance
         detachedGroup.remove();
 
-        const groupMeta = {
+        // Set layerId of the old symbol instance to the exported group,
+        // because we want to keep that id to match exporables (attachments)
+        detachedGroupExport.do_objectID = layerId;
+
+        return detachedGroupExport;
+    }
+
+    /**
+     * The recursion is done manually, so we can add meta to separated symbols before we detach them.
+     * In this way, we can later determine that it was a symbol.
+     * @param layer
+     * @returns {void | *}
+     */
+
+    recursivelyDetachSymbols (layer) {
+        if (layer.type === 'Group') {
+            layer.layers.forEach((layer) => {
+                this.recursivelyDetachSymbols(layer);
+            });
+
+            return;
+        }
+        else if(layer.type !== 'SymbolInstance') {
+            /* if it's not a symbol, there's nothing to do */
+            return;
+        }
+
+        const document = DOM.getSelectedDocument();
+        const originalSymbolMaster = document.getSymbolMasterWithID(layer.symbolId);
+
+        if (!originalSymbolMaster) {
+            console.error('symbol Master with ID ' + layer.symbolId + 'not found');
+        }
+
+        const meta = {
             isDetachedSymbolGroup: true,
             symbolMaster: {
                 id: originalSymbolMaster.id,
@@ -311,13 +344,15 @@ class Artboard {
             }
         };
 
-        this.setLayerSettingForKey(detachedGroupExport, 'meta', groupMeta);
+        /* add meta info to symbolInstance before detaching it */
+        Settings.setLayerSettingForKey(layer, 'meta', meta);
 
-        // Set layerId of the old symbol instance to the exported group,
-        // because we want to keep that id to match exporables (attachments)
-        detachedGroupExport.do_objectID = layerId;
+        let detachedlayer = layer.detach({recursively: false});
 
-        return detachedGroupExport;
+        /* detached layer is a now a group, so do detaching for its layers again */
+        this.recursivelyDetachSymbols(detachedlayer);
+
+        return detachedlayer;
     }
 
     exportFormats(doc, layer) {
@@ -356,30 +391,6 @@ class Artboard {
                 pixel_ratio: format.size
             });
         });
-
-        // export image fills
-        /* if (layer.style && layer.style.fills) {
-            let index = layer.style.fills.length;
-            let imageId = 0;
-            while (--index >= 0) {
-                let fill = layer.style.fills[index];
-                if (fill.fill == API.Style.FillType.Pattern && fill.pattern.image && fill.enabled) {
-                    let name = layer.id + '_fill_' + imageId;
-                    let path = filemanager.getExportPath() + name + '.png';
-
-                    files.push({
-                        name: name,
-                        ext: 'png',
-                        id_external: layer.id,
-                        id: layer.id,
-                        path: path,
-                        type: 'attachment'
-                    });
-
-                    imageId++;
-                }
-            }
-        } */
 
         if (layer.layers) {
             layer.layers.forEach(function(layer) {
