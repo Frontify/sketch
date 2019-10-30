@@ -3,6 +3,7 @@ import extend from '../helpers/extend'
 import fetch from 'sketch-polyfill-fetch'
 import childProcess from '@skpm/child_process';
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote'
+import shaFile from "./shaFile";
 
 export default function (uri, options) {
     // get token
@@ -78,84 +79,121 @@ export default function (uri, options) {
         }.bind(this));
     }
     else if (options.is_file_upload) {
+        let file = NSData.alloc().initWithContentsOfFile(options.filepath);
+        let filesize = file.length();
+
+        let fileInitOptions = {};
+
+        console.log(options);
+
         // upload file
-        return new Promise(function (resolve, reject) {
-
-            let args = [];
-            args.push('-k');
-
-            // http headers
-            for (let id in options.headers) {
-                if (options.headers.hasOwnProperty(id)) {
-                    let header = options.headers[id];
-                    args.push('-H');
-                    args.push('' + id + ': ' + header);
+        if(options.type === 'artboard') {
+            fileInitOptions = {
+                method: 'POST',
+                headers: options.headers,
+                body: {
+                    object_type: 'ASSET',
+                    files: [{
+                        name: options.body.filename,
+                        type: options.body.mimetype,
+                        size: filesize,
+                        project_id: options.body.project_id
+                    }]
                 }
-            }
-
-            // Form encoded params
-            if (options.filepath) {
-                args.push('-F');
-                args.push('file=@\"' + options.filepath + '\"');
-            }
-
-            if (options.body) {
-                let params = JSON.parse(options.body);
-
-                for(let key in params) {
-                    if(params.hasOwnProperty(key)) {
-                        if (key === 'name') {
-                            params[key] = encodeURIComponent(params[key]);
-                        }
-
-                        args.push('-F');
-                        args.push(key + '=' + params[key]);
-                    }
+            };
+        }
+        else {
+            fileInitOptions = {
+                method: 'POST',
+                headers: options.headers,
+                body: {
+                    object_type: 'ATTACHMENT',
+                    files: [{
+                        name: options.body.filename,
+                        type: options.body.mimetype,
+                        size: filesize,
+                        project_id: options.body.project_id,
+                        asset_id: options.body.asset_id
+                    }]
                 }
-            }
+            };
+        }
 
-            // display progress
-            args.push('-#');
+        return fetch(token.domain + '/v1/file/init', fileInitOptions).then(function(response) {
+            return response.json();
+        }.bind(this)).then(function(responseInit) {
+            console.log('inited');
 
-            // uri
-            args.push(token.domain + uri);
+            let fileUploadOptions = {
+                method: 'PUT',
+                headers: options.headers,
+                body: file
+            };
 
-            let spawn = childProcess.spawn('/usr/bin/curl', args);
-            let result = "";
+            let chunkOriginalUrl = responseInit.files[0].upload.urls['1'];
+            let chunkUri = chunkOriginalUrl.replace('/api/', '/v1/');
 
-            spawn.on('error', function(err) {
-                console.error(err);
-            }.bind(this));
+            return fetch(chunkUri, fileUploadOptions).then(function(response) {
+                return response.json();
+            }.bind(this)).then(function(response) {
+                console.log('uploaded');
 
-            spawn.on('close', function(status) {
-                if (status == 0) {
-                    resolve(JSON.parse(result));
-                } else {
-                    console.log('File upload exited with status ' + status);
-                    reject('File Upload failed');
-                }
-            }.bind(this));
+                console.log(responseInit);
 
-            spawn.stdout.on('data', function(data) {
-                result += data.toString();
-            }.bind(this));
+                let fileProgressOptions = {
+                    method: 'POST',
+                    headers: options.headers,
+                    body: JSON.stringify({
+                        index: 0,
+                        chunk: 1,
+                        start: 0,
+                        end: filesize,
+                        total: filesize,
+                        more: false,
+                        object: responseInit.files[0].object,
+                        upload: responseInit.files[0].upload,
+                        url: chunkOriginalUrl
+                    })
+                };
 
-            spawn.stderr.on('data', function(data) {
-                data = data.toString('utf8');
+                console.log(fileProgressOptions);
 
-                // get progress information
-                let progress = parseInt(data.replace(/#*/gi, '').trim());
+                return fetch(token.domain + '/v1/file/progress', fileProgressOptions).then(function(response) {
+                    return response.json();
+                }.bind(this)).then(function(response) {
+                    console.log('progressed');
+                    response.sha = '1234';
 
-                if (isWebviewPresent('frontifymain')) {
-                    if(options.type === 'source') {
-                        sendToWebview('frontifymain', 'sourceUploadProgress(' + JSON.stringify({ id: options.id, id_external: options.id_external, progress: progress }) + ')');
-                    }
-                    else if(options.type === 'artboard') {
-                        sendToWebview('frontifymain', 'artboardUploadProgress(' + JSON.stringify({ id: options.id,  id_external: options.id_external, progress: progress }) + ')');
-                    }
-                }
-            }.bind(this));
+                    console.log(response);
+                    return response;
+                }.bind(this));
+            });
         }.bind(this));
+
+
+        /* options.method = 'POST';
+        options.content = NSData.alloc().initWithContentsOfFile(options.filepath);
+
+        console.log(options);
+        console.log(uri);
+
+        return fetch(uri, options).then(function(response) {
+            return response.json();
+        }.bind(this)).catch(function (e) {
+            // whitelist uris
+            if (uri.indexOf('/v1/user/logout') > -1) {
+                return '';
+            }
+
+            if (e.localizedDescription) {
+                console.error(e.localizedDescription);
+            }
+            else {
+                console.error(e);
+            }
+
+            throw e;
+        }.bind(this)); */
     }
     else {
         if(!options.cdn) {

@@ -111,7 +111,7 @@ class FileManager {
             }
         }
 
-        return fetch(url, {method: 'POST', filepath: info.path, is_file_upload: true, type: info.type, id: info.id, body: JSON.stringify(data)});
+        return fetch(url, {method: 'POST', filepath: info.path, is_file_upload: true, type: info.type, id: info.id, body: data});
     }
 
     downloadFile(info) {
