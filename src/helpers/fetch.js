@@ -3,7 +3,7 @@ import extend from '../helpers/extend'
 import fetch from 'sketch-polyfill-fetch'
 import childProcess from '@skpm/child_process';
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote'
-import shaFile from "./shaFile";
+import FormData from 'sketch-polyfill-fetch/lib/form-data'
 
 export default function (uri, options) {
     // get token
@@ -79,112 +79,37 @@ export default function (uri, options) {
         }.bind(this));
     }
     else if (options.is_file_upload) {
-        let file = NSData.alloc().initWithContentsOfFile(options.filepath);
-        let filesize = file.length();
+        let formData = new FormData();
 
-        let fileInitOptions = {};
+        let fileUploadOptions = {
+            method: 'POST',
+            headers: options.headers
+        };
 
-        console.log(options);
-
-        // upload file
-        if(options.type === 'artboard') {
-            fileInitOptions = {
-                method: 'POST',
-                headers: options.headers,
-                body: {
-                    object_type: 'ASSET',
-                    files: [{
-                        name: options.body.filename,
-                        type: options.body.mimetype,
-                        size: filesize,
-                        project_id: options.body.project_id
-                    }]
-                }
-            };
-        }
-        else {
-            fileInitOptions = {
-                method: 'POST',
-                headers: options.headers,
-                body: {
-                    object_type: 'ATTACHMENT',
-                    files: [{
-                        name: options.body.filename,
-                        type: options.body.mimetype,
-                        size: filesize,
-                        project_id: options.body.project_id,
-                        asset_id: options.body.asset_id
-                    }]
-                }
-            };
-        }
-
-        return fetch(token.domain + '/v1/file/init', fileInitOptions).then(function(response) {
-            return response.json();
-        }.bind(this)).then(function(responseInit) {
-            console.log('inited');
-
-            let fileUploadOptions = {
-                method: 'PUT',
-                headers: options.headers,
-                body: file
-            };
-
-            let chunkOriginalUrl = responseInit.files[0].upload.urls['1'];
-            let chunkUri = chunkOriginalUrl.replace('/api/', '/v1/');
-
-            return fetch(chunkUri, fileUploadOptions).then(function(response) {
-                return response.json();
-            }.bind(this)).then(function(response) {
-                console.log('uploaded');
-
-                console.log(responseInit);
-
-                let fileProgressOptions = {
-                    method: 'POST',
-                    headers: options.headers,
-                    body: JSON.stringify({
-                        index: 0,
-                        chunk: 1,
-                        start: 0,
-                        end: filesize,
-                        total: filesize,
-                        more: false,
-                        object: responseInit.files[0].object,
-                        upload: responseInit.files[0].upload,
-                        url: chunkOriginalUrl
-                    })
-                };
-
-                console.log(fileProgressOptions);
-
-                return fetch(token.domain + '/v1/file/progress', fileProgressOptions).then(function(response) {
-                    return response.json();
-                }.bind(this)).then(function(response) {
-                    console.log('progressed');
-                    response.sha = '1234';
-
-                    console.log(response);
-                    return response;
-                }.bind(this));
+        // Form encoded params
+        if (options.filepath) {
+            formData.append('file', {
+                fileName: options.body.filename,
+                mimeType: options.body.mimetype,
+                data: NSData.alloc().initWithContentsOfFile(options.filepath)
             });
-        }.bind(this));
+        }
 
+        if (options.body) {
+            let params = options.body;
 
-        /* options.method = 'POST';
-        options.content = NSData.alloc().initWithContentsOfFile(options.filepath);
+            for(let key in params) {
+                if(params.hasOwnProperty(key)) {
+                    formData.append(key, '' + params[key]);
+                }
+            }
+        }
 
-        console.log(options);
-        console.log(uri);
+        fileUploadOptions.body  = formData;
 
-        return fetch(uri, options).then(function(response) {
+        return fetch(token.domain + uri, fileUploadOptions).then(function(response) {
             return response.json();
         }.bind(this)).catch(function (e) {
-            // whitelist uris
-            if (uri.indexOf('/v1/user/logout') > -1) {
-                return '';
-            }
-
             if (e.localizedDescription) {
                 console.error(e.localizedDescription);
             }
@@ -193,7 +118,7 @@ export default function (uri, options) {
             }
 
             throw e;
-        }.bind(this)); */
+        }.bind(this));
     }
     else {
         if(!options.cdn) {
