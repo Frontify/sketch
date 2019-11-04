@@ -16,7 +16,7 @@ i, em { font-style: italic; font-weight: inherit; }
 
 html {
   box-sizing: border-box;
-  background: transparent;
+  background: #FFFFFF;
   /* Prevent the page to be scrollable */
   overflow: hidden;
 
