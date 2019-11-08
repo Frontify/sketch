@@ -1,9 +1,9 @@
 import readJSON from './readJSON'
 import extend from '../helpers/extend'
 import fetch from 'sketch-polyfill-fetch'
-import childProcess from '@skpm/child_process';
+import childProcess from '@skpm/child_process'
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote'
-import FormData from 'sketch-polyfill-fetch/lib/form-data'
+import uploadFile from '../helpers/uploadFile'
 
 export default function (uri, options) {
     // get token
@@ -79,36 +79,9 @@ export default function (uri, options) {
         }.bind(this));
     }
     else if (options.is_file_upload) {
-        let formData = new FormData();
-
-        let fileUploadOptions = {
-            method: 'POST',
-            headers: options.headers
-        };
-
-        // Form encoded params
-        if (options.filepath) {
-            formData.append('file', {
-                fileName: options.body.filename,
-                mimeType: options.body.mimetype,
-                data: NSData.alloc().initWithContentsOfFile(options.filepath)
-            });
-        }
-
-        if (options.body) {
-            let params = options.body;
-
-            for(let key in params) {
-                if(params.hasOwnProperty(key)) {
-                    formData.append(key, '' + params[key]);
-                }
-            }
-        }
-
-        fileUploadOptions.body  = formData;
-
-        return fetch(token.domain + uri, fileUploadOptions).then(function(response) {
-            return response.json();
+        return uploadFile(token.domain + uri, options).then(function(response) {
+            var json = response.json();
+            return json;
         }.bind(this)).catch(function (e) {
             if (e.localizedDescription) {
                 console.error(e.localizedDescription);
