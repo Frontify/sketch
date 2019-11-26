@@ -7,6 +7,7 @@
   "icon": "./images/drops.png",
   "authorEmail": "hello@frontify.com",
   "author": "Frontify AG",
+  "homepage": "https://www.frontify.com/en/integrations/sketch/",
   "commands": [
     {
       "name": "Frontify",
