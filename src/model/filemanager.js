@@ -1,10 +1,13 @@
 import readJSON from '../helpers/readJSON'
-import readFile from '../helpers/readFile'
 import writeJSON from '../helpers/writeJSON'
 import fetch from '../helpers/fetch'
 import createFolder from '../helpers/createFolder'
 import target from './target'
 import sketch from './sketch'
+import FormData from 'sketch-polyfill-fetch/lib/form-data';
+import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote'
+import extend from "../helpers/extend";
+import response from  "../helpers/response";
 
 class FileManager {
     constructor() {
@@ -21,7 +24,7 @@ class FileManager {
     }
 
     saveCurrent() {
-        return target.getTarget('sources').then(function (data) {
+        return target.getTarget('sources').then(function(data) {
             // create folder first
             if (createFolder(data.path)) {
                 let dialog = NSSavePanel.savePanel();
@@ -36,7 +39,7 @@ class FileManager {
                     let url = dialog.URL();
                     let doc = sketch.getDocument();
 
-                    if(doc) {
+                    if (doc) {
                         doc.saveToURL_ofType_forSaveOperation_error_(url, "com.bohemiancoding.sketch.drawing", NSSaveOperation, null);
                     }
 
@@ -53,16 +56,16 @@ class FileManager {
     }
 
     moveCurrent() {
-        return target.getTarget('sources').then(function (data) {
+        return target.getTarget('sources').then(function(data) {
             if (createFolder(data.path)) {
                 let doc = sketch.getDocument();
 
-                if(doc) {
+                if (doc) {
                     let nsurl = doc.fileURL();
                     let path = nsurl.path();
                     let parts = path.split('/');
                     let currentFilename = parts.pop();
-                    let newNsurl =  NSURL.fileURLWithPath(data.path + currentFilename);
+                    let newNsurl = NSURL.fileURLWithPath(data.path + currentFilename);
 
                     // move to the target folder
                     doc.moveToURL_completionHandler_(newNsurl, null);
@@ -72,58 +75,6 @@ class FileManager {
             }
 
             return false;
-        }.bind(this));
-    }
-
-    uploadFile(info) {
-        // remap slashes in filename to folders
-        let filenameParts = info.filename.split('/');
-        let filename = filenameParts.pop();
-
-        let name = info.name.split('/').pop();
-
-        let data = {
-            mimetype: 'image/png',
-            name: name,
-            filename: filename,
-            origin: 'SKETCH',
-            id_external: info.id_external
-        };
-
-        if(info.pixel_ratio) {
-            data.pixel_ratio = info.pixel_ratio;
-        }
-
-        let url = '';
-        if(info.type === 'attachment') {
-            data['asset_id'] = info.asset_id;
-            url += '/v1/attachment/create'
-        }
-        else {
-            let path = filenameParts.join('/');
-            data['id'] = info.id;
-            data['path'] = info.folder + path;
-            data['project_id'] = info.project;
-
-            url += '/v1/assets/';
-            if (info.id) {
-                url += info.id;
-            }
-        }
-
-        return fetch(url, {method: 'POST', filepath: info.path, is_file_upload: true, type: info.type, id: info.id, body: data});
-    }
-
-    downloadFile(info) {
-        return fetch('/v1/screen/modified/' + info.id).then(function (meta) {
-            this.updateAssetStatus(meta.screen.project, meta.screen);
-
-            return target.getTarget('sources').then(function (target) {
-                let path = target.path + info.filename;
-                if(createFolder(target.path)) {
-                    return fetch('/v1/screen/download/' + info.id, { is_file_download: true, filepath: path, type: info.type, id: info.id });
-                }
-            }.bind(this));
         }.bind(this));
     }
 
@@ -149,6 +100,292 @@ class FileManager {
     clearExportFolder() {
         let fileManager = NSFileManager.defaultManager();
         fileManager.removeItemAtPath_error(this.exportPath, nil);
+    }
+
+    uploadFile(info, overallProgress) {
+        // remap slashes in filename to folders
+        let filenameParts = info.filename.split('/');
+        let filename = filenameParts.pop();
+
+        let name = info.name.split('/').pop();
+
+        let data = {
+            mimetype: 'image/png',
+            name: name,
+            filename: filename,
+            origin: 'SKETCH',
+            id_external: info.id_external
+        };
+
+        if (info.pixel_ratio) {
+            data.pixel_ratio = info.pixel_ratio;
+        }
+
+        let uri = '';
+        if (info.type === 'attachment') {
+            data['asset_id'] = info.asset_id;
+            uri += '/v1/attachment/create'
+        }
+        else {
+            let path = filenameParts.join('/');
+            data['id'] = info.id;
+            data['path'] = info.folder + path;
+            data['project_id'] = info.project;
+
+            uri += '/v1/assets/';
+            if (info.id) {
+                uri += info.id;
+            }
+        }
+
+        var options = {
+            method: 'POST',
+            filepath: info.path,
+            is_file_upload: true,
+            type: info.type,
+            id: info.id,
+            body: data
+        };
+
+        // get token
+        let token = readJSON('token');
+        let defaults = {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + token.access_token,
+            }
+        };
+
+        options = extend({}, defaults, options);
+
+        if (!uri) {
+            return Promise.reject("Missing URL");
+        }
+
+        uri = token.domain + uri;
+
+        var fiber;
+        try {
+            fiber = coscript.createFiber();
+        } catch (err) {
+            coscript.shouldKeepAround = true;
+        }
+
+        return new Promise(function(resolve, reject) {
+            var url = NSURL.alloc().initWithString(uri);
+            var request = NSMutableURLRequest.requestWithURL(url);
+            request.setHTTPMethod("POST");
+
+            Object.keys(options.headers || {}).forEach(function(i) {
+                request.setValue_forHTTPHeaderField(options.headers[i], i);
+            });
+
+            let formData = new FormData();
+
+            // Form encoded params
+            if (options.filepath) {
+                formData.append('file', {
+                    fileName: options.body.filename,
+                    mimeType: options.body.mimetype,
+                    data: NSData.alloc().initWithContentsOfFile(options.filepath)
+                });
+            }
+
+            if (options.body) {
+                let params = options.body;
+
+                for (let key in params) {
+                    if (params.hasOwnProperty(key)) {
+                        formData.append(key, '' + params[key]);
+                    }
+                }
+            }
+
+            var data = formData._data;
+            var boundary = formData._boundary;
+
+            request.setValue_forHTTPHeaderField(
+                "multipart/form-data; boundary=" + boundary,
+                "Content-Type"
+            );
+
+            data.appendData(
+                NSString.alloc()
+                    .initWithString("--" + boundary + "--\r\n")
+                    .dataUsingEncoding(NSUTF8StringEncoding)
+            );
+
+            var finished = false;
+
+            var task = NSURLSession.sharedSession().uploadTaskWithRequest_fromData_completionHandler(
+                request,
+                data,
+                __mocha__.createBlock_function(
+                    'v32@?0@"NSData"8@"NSURLResponse"16@"NSError"24',
+                    function(data, res, error) {
+                        task.progress().setCompletedUnitCount(100);
+
+                        if (fiber) {
+                            fiber.cleanup();
+                        }
+                        else {
+                            coscript.shouldKeepAround = false;
+                        }
+
+                        if (error) {
+                            finished = true;
+                            return reject(error);
+                        }
+
+                        return resolve(response(res, data));
+                    }
+                )
+            );
+
+            task.resume();
+
+            if(overallProgress && task) {
+                overallProgress.addChild_withPendingUnitCount(task.progress(), 10);
+            }
+
+            if (fiber) {
+                fiber.onCleanup(function() {
+                    if (!finished) {
+                        task.cancel();
+                    }
+                });
+            }
+        }).then(function(response) {
+            return response.json();
+        }.bind(this)).catch(function(e) {
+            if (e.localizedDescription) {
+                console.error(e.localizedDescription);
+            }
+            else {
+                console.error(e);
+            }
+
+            throw e;
+        }.bind(this));
+    }
+
+    downloadFile(info) {
+        return fetch('/v1/screen/modified/' + info.id).then(function(meta) {
+            this.updateAssetStatus(meta.screen.project, meta.screen);
+
+            return target.getTarget('sources').then(function(target) {
+                let path = target.path + info.filename;
+                if (createFolder(target.path)) {
+                    var options = {
+                        is_file_download: true,
+                        filepath: path,
+                        type: info.type,
+                        id: info.id
+                    };
+
+                    var uri = '/v1/screen/download/' + info.id;
+
+                    // get token
+                    let token = readJSON('token');
+                    let defaults = {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': 'Bearer ' + token.access_token,
+                        }
+                    };
+
+                    options = extend({}, defaults, options);
+
+                    if (!uri) {
+                        return Promise.reject("Missing URL");
+                    }
+
+                    var fiber;
+                    try {
+                        fiber = coscript.createFiber();
+                    } catch (err) {
+                        coscript.shouldKeepAround = true;
+                    }
+
+                    return new Promise(function(resolve, reject) {
+                        var url = NSURL.alloc().initWithString(uri);
+                        var request = NSMutableURLRequest.requestWithURL(url);
+                        request.setHTTPMethod("GET");
+
+                        Object.keys(options.headers || {}).forEach(function(i) {
+                            request.setValue_forHTTPHeaderField(options.headers[i], i);
+                        });
+
+                        var finished = false;
+
+                        var updateProgress = function() {
+                            console.log('progress = ' + progress);
+                            if (isWebviewPresent('frontifymain')) {
+                                if (options.type === 'source') {
+                                    sendToWebview('frontifymain', 'sourceDownloadProgress(' + JSON.stringify({
+                                        id: options.id,
+                                        id_external: options.id_external,
+                                        progress: progress
+                                    }) + ')');
+                                }
+                            }
+                        };
+
+                        var task = NSURLSession.sharedSession().downloadTaskWithRequest_completionHandler(
+                            request,
+                            __mocha__.createBlock_function(
+                                'v32@?0@"NSData"8@"NSURLResponse"16@"NSError"24',
+                                function(data, res, error) {
+                                    updateProgress();
+
+                                    clearInterval(polling);
+
+                                    if (fiber) {
+                                        fiber.cleanup();
+                                    }
+                                    else {
+                                        coscript.shouldKeepAround = false;
+                                    }
+
+                                    if (error) {
+                                        finished = true;
+                                        return reject(error);
+                                    }
+                                    return resolve(response(res, data));
+                                }
+                            )
+                        );
+
+                        task.resume();
+
+                        var polling = setInterval(function() {
+                            if (task) {
+                                updateProgress();
+                            }
+                        }, 200);
+
+                        if (fiber) {
+                            fiber.onCleanup(function() {
+                                if (!finished) {
+                                    task.cancel();
+                                }
+                            });
+                        }
+                    }).then(function(response) {
+                        return response.json();
+                    }.bind(this)).catch(function(e) {
+                        if (e.localizedDescription) {
+                            console.error(e.localizedDescription);
+                        }
+                        else {
+                            console.error(e);
+                        }
+
+                        throw e;
+                    }.bind(this));
+                }
+            }.bind(this));
+        }.bind(this));
     }
 }
 

@@ -18,6 +18,16 @@ class Artboard {
         this.uploadInProgress = false;
     }
 
+    updateProgress(options, progress) {
+        if (isWebviewPresent('frontifymain')) {
+            sendToWebview('frontifymain', 'artboardUploadProgress(' + JSON.stringify({
+                id: options.id,
+                id_external: options.id_external,
+                progress: progress.fractionCompleted() * 100
+            }) + ')');
+        }
+    };
+
     getArtboards(skipRemote) {
         return target.getTarget().then(function(target) {
             let remoteStatus = null;
@@ -424,6 +434,12 @@ class Artboard {
                     return sequence.then(function() {
                         return this.exportArtboard(artboard, doc);
                     }.bind(this)).then(function(files) {
+                        var artboardProgress = NSProgress.progressWithTotalUnitCount(10 * files.length + 20);
+
+                        var polling = setInterval(function() {
+                            this.updateProgress(artboard, artboardProgress);
+                        }.bind(this), 100);
+
                         let artboardChanged = false;
                         return files.reduce(function(uploadsequence, file) {
                             return uploadsequence.then(function(assetId) {
@@ -440,8 +456,9 @@ class Artboard {
                                             folder: target.set.path,
                                             project: target.project.id,
                                             type: file.type
-                                        }).then(function(data) {
+                                        }, artboardProgress).then(function(data) {
                                             filemanager.deleteFile(file.path);
+                                            this.updateProgress(artboard, artboardProgress);
                                             artboard.sha = data.sha;
                                             artboard.id = data.id;
                                             artboard.nochanges = false;
@@ -451,6 +468,8 @@ class Artboard {
                                     }
                                     else {
                                         artboardChanged = false;
+                                        artboardProgress.setCompletedUnitCount(artboardProgress.completedUnitCount() + 10);
+                                        this.updateProgress(artboard, artboardProgress);
                                         filemanager.deleteFile(file.path);
                                         artboard.nochanges = true;
                                         return artboard.id;
@@ -478,14 +497,17 @@ class Artboard {
                                             type: file.type,
                                             asset_id: assetId,
                                             pixel_ratio: file.pixel_ratio
-                                        }).then(function(data) {
+                                        }, artboardProgress).then(function(data) {
                                             // filemanager.deleteFile(file.path);
+                                            this.updateProgress(artboard, artboardProgress);
                                             status.sha = data.sha;
                                             return assetId;
                                         }.bind(this));
                                     }
                                     else {
                                         // filemanager.deleteFile(file.path);
+                                        artboardProgress.setCompletedUnitCount(artboardProgress.completedUnitCount() + 10);
+                                        this.updateProgress(artboard, artboardProgress);
                                         return assetId;
                                     }
                                 }
@@ -496,12 +518,16 @@ class Artboard {
                         }.bind(this), Promise.resolve()).then(function(assetId) {
                             // start import of asset
                             asset.import(assetId); /* calls the import API */
+                            artboardProgress.setCompletedUnitCount(artboardProgress.completedUnitCount() + 20);
+                            this.updateProgress(artboard, artboardProgress);
                         }.bind(this)).then(function(data) {
+                            clearInterval(polling);
                             if (isWebviewPresent('frontifymain')) {
                                 sendToWebview('frontifymain', 'artboardUploaded(' + JSON.stringify(artboard) + ')');
                             }
                             return true;
                         }.bind(this)).catch(function(err) {
+                            clearInterval(polling);
                             if (isWebviewPresent('frontifymain')) {
                                 sendToWebview('frontifymain', 'artboardUploadFailed(' + JSON.stringify(artboard) + ')');
                             }

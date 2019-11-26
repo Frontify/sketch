@@ -4,7 +4,7 @@ import sketch from './sketch';
 import filemanager from './filemanager';
 import fetch from '../helpers/fetch';
 import createFolder from '../helpers/createFolder'
-import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote'
+import {isWebviewPresent, sendToWebview} from 'sketch-module-web-view/remote'
 
 class Typography {
     constructor() {
@@ -12,20 +12,23 @@ class Typography {
     }
 
     downloadFonts() {
-        target.getTarget().then(function (target) {
+        target.getTarget().then(function(target) {
             let folder = '' + NSHomeDirectory() + '/Frontify/' + target.brand.name + '/Fonts';
-            if(createFolder(folder)) {
+            if (createFolder(folder)) {
                 let path = folder + '/' + target.project.name + '.zip';
-               return fetch('/v1/font/download/' + target.project.hub_project_id, { is_file_download: true, filepath: path }).then(function() {
+                return fetch('/v1/font/download/' + target.project.hub_project_id, {
+                    is_file_download: true,
+                    filepath: path
+                }).then(function() {
                     filemanager.openFile(path); // open and extract
-               }.bind(this));
+                }.bind(this));
             }
         }.bind(this));
     }
 
     getFontStyles(project) {
         // load typography styles
-        return fetch('/v1/typography/styles/' + project).then(function (data) {
+        return fetch('/v1/typography/styles/' + project).then(function(data) {
             this.colors = data.colors;
 
             // only include installable fonts
@@ -46,7 +49,7 @@ class Typography {
         while (item = loop.nextObject()) {
             if (item.class() == MSLayerGroup) {
                 let layers = item.layers();
-                layers.forEach(function (layer) {
+                layers.forEach(function(layer) {
                     this.applyFontStyleToLayer(layer, fontStyle);
                 }.bind(this));
             }
@@ -56,7 +59,7 @@ class Typography {
         }
 
         let doc = sketch.getDocument();
-        if(doc) {
+        if (doc) {
             doc.reloadInspector();
         }
     }
@@ -72,7 +75,7 @@ class Typography {
     convertFontStyles(fontStyles) {
         let msstyles = [];
 
-        fontStyles.forEach(function (fontStyle) {
+        fontStyles.forEach(function(fontStyle) {
             msstyles = msstyles.concat(this.convertFontStyle(fontStyle));
         }.bind(this));
 
@@ -86,7 +89,7 @@ class Typography {
         // create a text style for each foreground color
         let colors = [];
         if (!(fontStyle.colors && fontStyle.colors.foreground)) {
-            colors.push({ name: 'Default', r: 54, g: 61, b: 74, alpha: 255, css_value: 'rgba(54,61,74,1)'});
+            colors.push({name: 'Default', r: 54, g: 61, b: 74, alpha: 255, css_value: 'rgba(54,61,74,1)'});
         }
         else {
             for (let id in fontStyle.colors.foreground) {
@@ -98,7 +101,7 @@ class Typography {
             }
         }
 
-        colors.forEach(function (colorValue) {
+        colors.forEach(function(colorValue) {
             let rectTextFrame = NSMakeRect(0, 0, 250, 50);
             let msstyle = MSTextLayer.alloc().initWithFrame(rectTextFrame);
 
@@ -119,24 +122,24 @@ class Typography {
                 let font = NSFont.fontWithName_size(fontStyle.family, 75);
 
                 // Add weight
-                if(font) {
-                    if(font.familyName() == font.fontName()) {
+                if (font) {
+                    if (font.familyName() == font.fontName()) {
                         let weightNumeric = fontStyle.weight ? parseInt(fontStyle.weight) : 400;
-                        if(!isNaN(weightNumeric)) {
+                        if (!isNaN(weightNumeric)) {
                             // Normalize font weight (from 0 - 15) -> https://developer.apple.com/documentation/appkit/nsfontmanager/1462332-fontwithfamily?language=objc
                             weightNumeric = weightNumeric / 1200 * 15; // so that 400 / 1200 * 15 = 5
                         }
                         else {
-                            if(fontStyle.weight == 'bold' || fontStyle.weight == 'bolder') {
+                            if (fontStyle.weight == 'bold' || fontStyle.weight == 'bolder') {
                                 weightNumeric = 9;
                             }
-                            else if(fontStyle.weight == 'light' || fontStyle.weight == 'lighter') {
+                            else if (fontStyle.weight == 'light' || fontStyle.weight == 'lighter') {
                                 weightNumeric = 2;
                             }
                         }
 
                         let sizedFont = fontManager.fontWithFamily_traits_weight_size(font.familyName(), null, weightNumeric, 75);
-                        if(sizedFont) {
+                        if (sizedFont) {
                             font = sizedFont;
                         }
                     }
@@ -146,8 +149,7 @@ class Typography {
                         font = fontManager.convertFont_toHaveTrait(font, NSItalicFontMask)
                     }
                 }
-            }
-            catch(e) {
+            } catch (e) {
                 console.log(e);
             }
 
@@ -224,11 +226,11 @@ class Typography {
     addFontStyles(fontStyles) {
         let app = NSApp.delegate();
         let doc = sketch.getDocument();
-        if(doc) {
+        if (doc) {
             let msstyles = this.convertFontStyles(fontStyles);
             let sharedStyles = doc.documentData().layerTextStyles();
 
-            msstyles.forEach(function (msstyle) {
+            msstyles.forEach(function(msstyle) {
                 this.updateMatchingSharedStyles(sharedStyles, sharedStyles.objects(), msstyle.name(), msstyle.style());
                 this.updateLayersWithStyle(sharedStyles.objects(), msstyle.name(), msstyle.style())
             }.bind(this));
@@ -249,7 +251,8 @@ class Typography {
             }
 
             sharedStyles.addSharedStyleWithName_firstInstance(styleName, style);
-        } else {
+        }
+        else {
             sharedStyles.addSharedStyleWithName_firstInstance(styleName, style);
         }
     }
@@ -275,8 +278,8 @@ class Typography {
 
     showTypography() {
         target.getAssetSourcesForType('typography').then(function(assetSources) {
-            if(assetSources && assetSources.selected) {
-                this.getFontStyles(assetSources.selected.id).then(function (data) {
+            if (assetSources && assetSources.selected) {
+                this.getFontStyles(assetSources.selected.id).then(function(data) {
                     if (isWebviewPresent('frontifymain')) {
                         data.project = assetSources.selected;
                         sendToWebview('frontifymain', 'showAssetSources(' + JSON.stringify(assetSources) + ')');
