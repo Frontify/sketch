@@ -217,6 +217,16 @@ class Source {
         });
     }
 
+    updateProgress(options, progress) {
+        if (isWebviewPresent('frontifymain')) {
+            sendToWebview('frontifymain', 'sourceUploadProgress(' + JSON.stringify({
+                id: options.id,
+                id_external: options.id_external,
+                progress: progress.fractionCompleted() * 100
+            }) + ')');
+        }
+    };
+
     pushSource(source) {
         return target.getTarget('sources').then(function (target) {
             // map source to file structure
@@ -231,7 +241,15 @@ class Source {
                 type: 'source'
             };
 
-            return filemanager.uploadFile(file).then(function (data) {
+            var sourceProgress = NSProgress.progressWithTotalUnitCount(100);
+            sourceProgress.setCompletedUnitCount(1);
+
+            var polling = setInterval(function() {
+                this.updateProgress(file, sourceProgress);
+            }.bind(this), 100);
+
+            return filemanager.uploadFile(file, sourceProgress).then(function (data) {
+                clearInterval(polling);
                 file.id = data.id;
                 if (isWebviewPresent('frontifymain')) {
                     sendToWebview('frontifymain', 'sourceUploaded(' + JSON.stringify(file) + ')');
@@ -240,12 +258,13 @@ class Source {
                 filemanager.updateAssetStatus(target.project.id, data);
 
                 return true;
+            }.bind(this)).catch(function (e) {
+                clearInterval(polling);
+                if (isWebviewPresent('frontifymain')) {
+                    sendToWebview('frontifymain', 'sourceUploadFailed(' + JSON.stringify(source) + ')');
+                }
+                return true;
             }.bind(this));
-        }.bind(this)).catch(function (e) {
-            if (isWebviewPresent('frontifymain')) {
-                sendToWebview('frontifymain', 'sourceUploadFailed(' + JSON.stringify(source) + ')');
-            }
-            return true;
         }.bind(this));
     }
 
@@ -264,18 +283,27 @@ class Source {
                 type: 'source'
             };
 
-            return filemanager.uploadFile(file).then(function (data) {
+            var sourceProgress = NSProgress.progressWithTotalUnitCount(100);
+
+            var polling = setInterval(function() {
+                this.updateProgress(file, sourceProgress);
+            }.bind(this), 100);
+
+
+            return filemanager.uploadFile(file, sourceProgress).then(function (data) {
+                clearInterval(polling);
                 data.modified = data.created;
                 filemanager.updateAssetStatus(target.project.id, data);
 
                 // reload source file list
                 return this.showSources();
+            }.bind(this)).catch(function (e) {
+                clearInterval(polling);
+                if (isWebviewPresent('frontifymain')) {
+                    sendToWebview('frontifymain', 'sourceUploadFailed(' + JSON.stringify(source) + ')');
+                }
+                return true;
             }.bind(this));
-        }.bind(this)).catch(function (e) {
-            if (isWebviewPresent('frontifymain')) {
-                sendToWebview('frontifymain', 'sourceUploadFailed(' + JSON.stringify(source) + ')');
-            }
-            return true;
         }.bind(this));
     }
 

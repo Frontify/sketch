@@ -110,7 +110,6 @@ class FileManager {
         let name = info.name.split('/').pop();
 
         let data = {
-            mimetype: 'image/png',
             name: name,
             filename: filename,
             origin: 'SKETCH',
@@ -122,12 +121,27 @@ class FileManager {
         }
 
         let uri = '';
+
         if (info.type === 'attachment') {
+            data['mimetype'] = 'image/png';
             data['asset_id'] = info.asset_id;
             uri += '/v1/attachment/create'
         }
+        else if(info.type === 'source') {
+            let path = filenameParts.join('/');
+            data['mimetype'] = 'application/octet-stream';
+            data['id'] = info.id;
+            data['path'] = info.folder + path;
+            data['project_id'] = info.project;
+
+            uri += '/v1/assets/';
+            if (info.id) {
+                uri += info.id;
+            }
+        }
         else {
             let path = filenameParts.join('/');
+            data['mimetype'] = 'image/png';
             data['id'] = info.id;
             data['path'] = info.folder + path;
             data['project_id'] = info.project;
@@ -319,7 +333,6 @@ class FileManager {
                         var finished = false;
 
                         var updateProgress = function() {
-                            console.log('progress = ' + progress);
                             if (isWebviewPresent('frontifymain')) {
                                 if (options.type === 'source') {
                                     sendToWebview('frontifymain', 'sourceDownloadProgress(' + JSON.stringify({

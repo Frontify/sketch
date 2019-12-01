@@ -57,7 +57,7 @@ class Artboard {
                         artboards.push({
                             id: null,
                             id_external: '' + msartboard.objectID(),
-                            name: '' + msartboard.name(),
+                            name: '' + msartboard.name().replace(/\s*\/\s*/g, '/'),
                             ext: 'png',
                             sha: null,
                             state: 'new',
@@ -435,6 +435,7 @@ class Artboard {
                         return this.exportArtboard(artboard, doc);
                     }.bind(this)).then(function(files) {
                         var artboardProgress = NSProgress.progressWithTotalUnitCount(10 * files.length + 20);
+                        artboardProgress.setCompletedUnitCount(1);
 
                         var polling = setInterval(function() {
                             this.updateProgress(artboard, artboardProgress);
