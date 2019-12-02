@@ -16,10 +16,15 @@ class Typography {
             let folder = '' + NSHomeDirectory() + '/Frontify/' + target.brand.name + '/Fonts';
             if (createFolder(folder)) {
                 let path = folder + '/' + target.project.name + '.zip';
-                return fetch('/v1/font/download/' + target.project.hub_project_id, {
-                    is_file_download: true,
-                    filepath: path
-                }).then(function() {
+                var downloadProgress = NSProgress.progressWithTotalUnitCount(10);
+                downloadProgress.setCompletedUnitCount(0);
+
+                return filemanager.downloadFile(
+                    {
+                        uri: '/v1/font/download/' + target.project.hub_project_id,
+                        path: path
+                    }, downloadProgress
+                ).then(function() {
                     filemanager.openFile(path); // open and extract
                 }.bind(this));
             }

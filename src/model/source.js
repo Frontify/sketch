@@ -245,7 +245,7 @@ class Source {
             this.updateDownloadProgress(source, sourceProgress);
         }.bind(this), 100);
 
-        return filemanager.downloadFile({ id: source.id, filename: source.filename }, sourceProgress).then(function(path) {
+        return filemanager.downloadScreen({ id: source.id, filename: source.filename }, sourceProgress).then(function(path) {
             clearInterval(polling);
 
             if (isWebviewPresent('frontifymain')) {

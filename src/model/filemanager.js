@@ -282,98 +282,101 @@ class FileManager {
         }.bind(this));
     }
 
-    downloadFile(info, overallProgress) {
+    downloadScreen(info, overallProgress) {
         return fetch('/v1/screen/modified/' + info.id).then(function(meta) {
             this.updateAssetStatus(meta.screen.project, meta.screen);
 
             return target.getTarget('sources').then(function(target) {
                 if (createFolder(target.path)) {
-
-                    // get token
-                    let token = readJSON('token');
-                    let options = {
-                        method: 'GET',
-                        headers: {
-                            'Authorization': 'Bearer ' + token.access_token,
-                        }
-                    };
-
-                    var uri = token.domain + '/v1/screen/download/' + info.id;
-
-                    if (!uri) {
-                        return Promise.reject("Missing URL");
-                    }
-
-                    var fiber;
-                    try {
-                        fiber = coscript.createFiber();
-                    } catch (err) {
-                        coscript.shouldKeepAround = true;
-                    }
-
-                    return new Promise(function(resolve, reject) {
-                        var url = NSURL.alloc().initWithString(uri);
-                        var request = NSMutableURLRequest.requestWithURL(url);
-                        request.setHTTPMethod("GET");
-
-                        Object.keys(options.headers || {}).forEach(function(i) {
-                            request.setValue_forHTTPHeaderField(options.headers[i], i);
-                        });
-
-                        var finished = false;
-
-                        var task = NSURLSession.sharedSession().downloadTaskWithRequest_completionHandler(
-                            request,
-                            __mocha__.createBlock_function(
-                                'v32@?0@"NSURL"8@"NSURLResponse"16@"NSError"24',
-                                function(location, res, error) {
-                                    let fileManager = NSFileManager.defaultManager();
-                                    let targetUrl = NSURL.fileURLWithPath(target.path + info.filename);
-
-                                    fileManager.replaceItemAtURL_withItemAtURL_backupItemName_options_resultingItemURL_error(targetUrl, location, nil, NSFileManagerItemReplacementUsingNewMetadataOnly, nil, nil);
-                                    task.progress().setCompletedUnitCount(100);
-
-                                    if (fiber) {
-                                        fiber.cleanup();
-                                    }
-                                    else {
-                                        coscript.shouldKeepAround = false;
-                                    }
-
-                                    if (error) {
-                                        finished = true;
-                                        return reject(error);
-                                    }
-                                    return resolve(targetUrl.path());
-                                }
-                            )
-                        );
-
-                        task.resume();
-
-                        if(overallProgress && task) {
-                            overallProgress.addChild_withPendingUnitCount(task.progress(), 10);
-                        }
-
-                        if (fiber) {
-                            fiber.onCleanup(function() {
-                                if (!finished) {
-                                    task.cancel();
-                                }
-                            });
-                        }
-                    }.bind(this)).catch(function(e) {
-                        if (e.localizedDescription) {
-                            console.error(e.localizedDescription);
-                        }
-                        else {
-                            console.error(e);
-                        }
-
-                        throw e;
-                    }.bind(this));
+                    return this.downloadFile({ uri: '/v1/screen/download/' + info.id, path: target.path + info.filename }, overallProgress);
                 }
             }.bind(this));
+        }.bind(this));
+    }
+
+    downloadFile(info, overallProgress) {
+        // get token
+        let token = readJSON('token');
+        var uri = token.domain + info.uri;
+
+        let options = {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + token.access_token,
+            }
+        };
+
+        if (!uri) {
+            return Promise.reject("Missing URL");
+        }
+
+        var fiber;
+        try {
+            fiber = coscript.createFiber();
+        } catch (err) {
+            coscript.shouldKeepAround = true;
+        }
+
+        return new Promise(function(resolve, reject) {
+            var url = NSURL.alloc().initWithString(uri);
+            var request = NSMutableURLRequest.requestWithURL(url);
+            request.setHTTPMethod("GET");
+
+            Object.keys(options.headers || {}).forEach(function(i) {
+                request.setValue_forHTTPHeaderField(options.headers[i], i);
+            });
+
+            var finished = false;
+
+            var task = NSURLSession.sharedSession().downloadTaskWithRequest_completionHandler(
+                request,
+                __mocha__.createBlock_function(
+                    'v32@?0@"NSURL"8@"NSURLResponse"16@"NSError"24',
+                    function(location, res, error) {
+                        let fileManager = NSFileManager.defaultManager();
+                        let targetUrl = NSURL.fileURLWithPath(info.path);
+
+                        fileManager.replaceItemAtURL_withItemAtURL_backupItemName_options_resultingItemURL_error(targetUrl, location, nil, NSFileManagerItemReplacementUsingNewMetadataOnly, nil, nil);
+                        task.progress().setCompletedUnitCount(100);
+
+                        if (fiber) {
+                            fiber.cleanup();
+                        }
+                        else {
+                            coscript.shouldKeepAround = false;
+                        }
+
+                        if (error) {
+                            finished = true;
+                            return reject(error);
+                        }
+                        return resolve(targetUrl.path());
+                    }
+                )
+            );
+
+            task.resume();
+
+            if(overallProgress && task) {
+                overallProgress.addChild_withPendingUnitCount(task.progress(), 10);
+            }
+
+            if (fiber) {
+                fiber.onCleanup(function() {
+                    if (!finished) {
+                        task.cancel();
+                    }
+                });
+            }
+        }.bind(this)).catch(function(e) {
+            if (e.localizedDescription) {
+                console.error(e.localizedDescription);
+            }
+            else {
+                console.error(e);
+            }
+
+            throw e;
         }.bind(this));
     }
 }
