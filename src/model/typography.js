@@ -119,7 +119,7 @@ class Typography {
             let font = null;
             try {
                 // Initialize the font
-                let font = NSFont.fontWithName_size(fontStyle.family, 75);
+                font = NSFont.fontWithName_size(fontStyle.family, 75);
 
                 // Add weight
                 if (font) {
