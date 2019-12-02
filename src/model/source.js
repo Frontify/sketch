@@ -217,7 +217,7 @@ class Source {
         });
     }
 
-    updateProgress(options, progress) {
+    updateUploadProgress(options, progress) {
         if (isWebviewPresent('frontifymain')) {
             sendToWebview('frontifymain', 'sourceUploadProgress(' + JSON.stringify({
                 id: options.id,
@@ -225,7 +225,53 @@ class Source {
                 progress: progress.fractionCompleted() * 100
             }) + ')');
         }
-    };
+    }
+
+    updateDownloadProgress(options, progress) {
+        if (isWebviewPresent('frontifymain')) {
+            sendToWebview('frontifymain', 'sourceDownloadProgress(' + JSON.stringify({
+                id: options.id,
+                id_external: options.id_external,
+                progress: progress.fractionCompleted() * 100
+            }) + ')');
+        }
+    }
+
+    downloadSource(source) {
+        var sourceProgress = NSProgress.progressWithTotalUnitCount(10);
+        sourceProgress.setCompletedUnitCount(0);
+
+        var polling = setInterval(function() {
+            this.updateDownloadProgress(source, sourceProgress);
+        }.bind(this), 100);
+
+        return filemanager.downloadFile({ id: source.id, filename: source.filename }, sourceProgress).then(function(path) {
+            clearInterval(polling);
+
+            if (isWebviewPresent('frontifymain')) {
+                sendToWebview('frontifymain', 'sourceDownloaded(' + JSON.stringify(source) + ')');
+            }
+
+            return path;
+        }.bind(this)).catch(function(e) {
+            clearInterval(polling);
+
+            if (isWebviewPresent('frontifymain')) {
+                sendToWebview('frontifymain', 'sourceDownloadFailed(' + JSON.stringify(source) + ')');
+            }
+
+            return null;
+        }.bind(this));
+    }
+
+    pullSource(source) {
+        return this.downloadSource(source).then(function(path) {
+            if(path && source.current == true && NSDocumentController.sharedDocumentController().currentDocument()) {
+                NSDocumentController.sharedDocumentController().currentDocument().close();
+                filemanager.openFile(path);
+            }
+        }.bind(this));
+    }
 
     pushSource(source) {
         return target.getTarget('sources').then(function (target) {
@@ -241,11 +287,11 @@ class Source {
                 type: 'source'
             };
 
-            var sourceProgress = NSProgress.progressWithTotalUnitCount(100);
-            sourceProgress.setCompletedUnitCount(1);
+            var sourceProgress = NSProgress.progressWithTotalUnitCount(10);
+            sourceProgress.setCompletedUnitCount(0);
 
             var polling = setInterval(function() {
-                this.updateProgress(file, sourceProgress);
+                this.updateUploadProgress(file, sourceProgress);
             }.bind(this), 100);
 
             return filemanager.uploadFile(file, sourceProgress).then(function (data) {
@@ -286,7 +332,7 @@ class Source {
             var sourceProgress = NSProgress.progressWithTotalUnitCount(100);
 
             var polling = setInterval(function() {
-                this.updateProgress(file, sourceProgress);
+                this.updateUploadProgress(file, sourceProgress);
             }.bind(this), 100);
 
 

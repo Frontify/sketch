@@ -195,30 +195,16 @@ export default function(context, view) {
         source.openSource(data);
     });
 
-    webview.on('downloadSource', function(source) {
-        source.type = 'source';
-        filemanager.downloadFile(source).then(function(path) {
-            webview.executeJavaScript('sourceDownloaded(' + JSON.stringify(source) + ')');
-        }.bind(this)).catch(function(e) {
-            webview.executeJavaScript('sourceDownloadFailed(' + JSON.stringify(source) + ')');
-        }.bind(this));
+    webview.on('downloadSource', function(data) {
+        source.downloadSource(data);
     });
 
     webview.on('pushSource', function(data) {
         source.pushSource(data);
     });
 
-    webview.on('pullSource', function(source) {
-        source.type = 'source';
-        filemanager.downloadFile(source).then(function(path) {
-            webview.executeJavaScript('sourceDownloaded(' + JSON.stringify(source) + ')');
-            if (source.current == true && NSDocumentController.sharedDocumentController().currentDocument()) {
-                NSDocumentController.sharedDocumentController().currentDocument().close();
-                filemanager.openFile(path);
-            }
-        }.bind(this)).catch(function(e) {
-            webview.executeJavaScript('sourceDownloadFailed(' + JSON.stringify(source) + ')');
-        }.bind(this));
+    webview.on('pullSource', function(data) {
+        source.pullSource(data);
     });
 
     webview.on('addSource', function(data) {

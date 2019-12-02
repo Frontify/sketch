@@ -155,7 +155,6 @@ class FileManager {
         var options = {
             method: 'POST',
             filepath: info.path,
-            is_file_upload: true,
             type: info.type,
             id: info.id,
             body: data
@@ -283,32 +282,23 @@ class FileManager {
         }.bind(this));
     }
 
-    downloadFile(info) {
+    downloadFile(info, overallProgress) {
         return fetch('/v1/screen/modified/' + info.id).then(function(meta) {
             this.updateAssetStatus(meta.screen.project, meta.screen);
 
             return target.getTarget('sources').then(function(target) {
-                let path = target.path + info.filename;
                 if (createFolder(target.path)) {
-                    var options = {
-                        is_file_download: true,
-                        filepath: path,
-                        type: info.type,
-                        id: info.id
-                    };
-
-                    var uri = '/v1/screen/download/' + info.id;
 
                     // get token
                     let token = readJSON('token');
-                    let defaults = {
+                    let options = {
                         method: 'GET',
                         headers: {
                             'Authorization': 'Bearer ' + token.access_token,
                         }
                     };
 
-                    options = extend({}, defaults, options);
+                    var uri = token.domain + '/v1/screen/download/' + info.id;
 
                     if (!uri) {
                         return Promise.reject("Missing URL");
@@ -332,26 +322,16 @@ class FileManager {
 
                         var finished = false;
 
-                        var updateProgress = function() {
-                            if (isWebviewPresent('frontifymain')) {
-                                if (options.type === 'source') {
-                                    sendToWebview('frontifymain', 'sourceDownloadProgress(' + JSON.stringify({
-                                        id: options.id,
-                                        id_external: options.id_external,
-                                        progress: progress
-                                    }) + ')');
-                                }
-                            }
-                        };
-
                         var task = NSURLSession.sharedSession().downloadTaskWithRequest_completionHandler(
                             request,
                             __mocha__.createBlock_function(
-                                'v32@?0@"NSData"8@"NSURLResponse"16@"NSError"24',
-                                function(data, res, error) {
-                                    updateProgress();
+                                'v32@?0@"NSURL"8@"NSURLResponse"16@"NSError"24',
+                                function(location, res, error) {
+                                    let fileManager = NSFileManager.defaultManager();
+                                    let targetUrl = NSURL.fileURLWithPath(target.path + info.filename);
 
-                                    clearInterval(polling);
+                                    fileManager.replaceItemAtURL_withItemAtURL_backupItemName_options_resultingItemURL_error(targetUrl, location, nil, NSFileManagerItemReplacementUsingNewMetadataOnly, nil, nil);
+                                    task.progress().setCompletedUnitCount(100);
 
                                     if (fiber) {
                                         fiber.cleanup();
@@ -364,18 +344,16 @@ class FileManager {
                                         finished = true;
                                         return reject(error);
                                     }
-                                    return resolve(response(res, data));
+                                    return resolve(targetUrl.path());
                                 }
                             )
                         );
 
                         task.resume();
 
-                        var polling = setInterval(function() {
-                            if (task) {
-                                updateProgress();
-                            }
-                        }, 200);
+                        if(overallProgress && task) {
+                            overallProgress.addChild_withPendingUnitCount(task.progress(), 10);
+                        }
 
                         if (fiber) {
                             fiber.onCleanup(function() {
@@ -384,8 +362,6 @@ class FileManager {
                                 }
                             });
                         }
-                    }).then(function(response) {
-                        return response.json();
                     }.bind(this)).catch(function(e) {
                         if (e.localizedDescription) {
                             console.error(e.localizedDescription);

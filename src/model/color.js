@@ -3,6 +3,8 @@ import fetch from '../helpers/fetch'
 import sketch from './sketch';
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote'
 
+let API = require('sketch');
+
 class Color {
     getColors(project) {
         // load remote assets status
@@ -41,7 +43,6 @@ class Color {
             let mscolors = this.convertColors(colors);
             assets.addColorAssets(mscolors);
 
-            doc.inspectorController().closeAnyColorPopover();
             app.refreshCurrentDocument();
         }
     }
@@ -56,7 +57,6 @@ class Color {
             assets.setColorAssets([]);
             assets.addColorAssets(mscolors);
 
-            doc.inspectorController().closeAnyColorPopover();
             app.refreshCurrentDocument();
         }
 
@@ -64,26 +64,22 @@ class Color {
 
     addGlobalColors(colors) {
         let app = NSApp.delegate();
-        let doc = sketch.getDocument();
 
         let assets = MSPersistentAssetCollection.sharedGlobalAssets();
         let mscolors = this.convertColors(colors);
         assets.addColorAssets(mscolors);
 
-        doc.inspectorController().closeAnyColorPopover();
         app.refreshCurrentDocument();
     }
 
     replaceGlobalColors(colors) {
         let app = NSApp.delegate();
-        let doc = sketch.getDocument();
 
         let assets = app.globalAssets();
         let mscolors = this.convertColors(colors);
         assets.setColorAssets([]);
         assets.addColorAssets(mscolors);
 
-        doc.inspectorController().closeAnyColorPopover();
         app.refreshCurrentDocument();
     }
 
