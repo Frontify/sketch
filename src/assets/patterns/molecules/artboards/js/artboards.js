@@ -21,7 +21,7 @@ Tc.Module.Artboards = Tc.Module.extend({
             window.postMessage('changeFolder');
         }.bind(this));
 
-        $ctx.on('click', '.js-m-artboards__upload', function(e) {
+        $ctx.on('click', '.js-m-artboards__upload-button', function(e) {
             let $this = $(e.currentTarget);
             let $item = $this.closest('.js-m-artboards__item');
             let artboard = this.getArtboard($item.data('idExternal'));
@@ -42,12 +42,12 @@ Tc.Module.Artboards = Tc.Module.extend({
                 let $item = $(item);
                 let artboard = this.getArtboard($item.data('idExternal'))
                 artboards.push(artboard);
+                this.updateItemState($item, 'uploading');
             }.bind(this));
 
             // give button time to gray out
             setTimeout(function() {
                 window.postMessage('uploadArtboards', artboards);
-                this.updateItemState($item, 'uploading');
             }, 20);
         }.bind(this));
 
@@ -62,12 +62,12 @@ Tc.Module.Artboards = Tc.Module.extend({
                 let $item = $(item);
                 let artboard = this.getArtboard($item.data('idExternal'));
                 artboards.push(artboard);
+                this.updateItemState($item, 'uploading');
             }.bind(this));
 
             // give button time to gray out
             setTimeout(function() {
                 window.postMessage('uploadArtboards', artboards);
-                this.updateItemState($item, 'uploading');
             }, 20);
         }.bind(this));
 
@@ -99,22 +99,38 @@ Tc.Module.Artboards = Tc.Module.extend({
 
     updateItemState: function ($item, state) {
         var $allStates = $item.find('.js-m-artboards__upload-state');
+        var $upload = $item.find('.js-m-artboards__upload');
         var $matchingState = null;
+
+        $upload
+            .removeClass('state-inactive')
+            .removeClass('state-uploading')
+            .removeClass('state-success')
+            .removeClass('state-failed')
+            .removeClass('state-no-changes');
 
         if (state === 'uploading') {
             $matchingState = $item.find('.js-m-artboards__upload-state--uploading');
+            $upload.addClass('state-uploading');
         }
 
-        if (state === 'failed') {
+        else if (state === 'failed') {
             $matchingState = $item.find('.js-m-artboards__upload-state--failed');
+            $upload.addClass('state-failed');
         }
 
-        if (state === 'success') {
+        else if (state === 'success') {
             $matchingState = $item.find('.js-m-artboards__upload-state--success');
+            $upload.addClass('state-success');
         }
 
-        if (state === 'no-changes') {
+        else if (state === 'no-changes') {
             $matchingState = $item.find('.js-m-artboards__upload-state--no-changes');
+            $upload.addClass('state-no-changes');
+        }
+
+        else {
+            $upload.addClass('state-inactive');
         }
 
         $allStates.removeClass('state-visible');

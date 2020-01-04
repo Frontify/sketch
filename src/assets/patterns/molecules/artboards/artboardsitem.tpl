@@ -8,7 +8,7 @@
     <div class="m-artboards__preview">
         <img
             class="m-artboards__preview-image js-m-artboards__preview-image"
-            src="https://duckduckgo.com/assets/logo_header.v108.svg"/>
+            src="../images/image.svg"/>
     </div>
 
     <!-- DETAILS - the main artboard details -->
@@ -50,23 +50,28 @@
                 js-m-artboards__upload-state
                 js-m-artboards__upload-state--no-changes
                 state-hidden">
-                Nothing changed
+                {{? it.modified_localized_ago }}
+                    {{= it.modified_localized_ago }}
+                    {{? it.modifier_name }} by {{= it.modifier_name }}{{?}}
+                {{?}}
             </span>
 
             <span class="
                 m-artboards__upload-state
+                m-artboards__upload-state--success
                 js-m-artboards__upload-state
                 js-m-artboards__upload-state--success
                 state-hidden">
-                Success!
+                Upload successful!
             </span>
 
             <span class="
                 m-artboards__upload-state
+                m-artboards__upload-state--failed
                 js-m-artboards__upload-state
                 js-m-artboards__upload-state--failed
                 state-hidden">
-                FAIL!
+                Upload failed!
             </span>
 
             <span class="m-artboards__feedback-state">
@@ -86,7 +91,25 @@
 
     <!-- ACTIONS - doing stuff to the artboard -->
     <div class="m-artboards__actions">
-        <button {{? it.state == 'uploading' }}disabled{{?}} class="a-btn a-btn--xs a-btn--default js-m-artboards__upload">Upload</button>
-    </div>
+        <!-- Upload -->
+        <div class="m-artboards__upload js-m-artboards__upload state-inactive">
+            <!-- Button - If upload is available -->
+            <button class="m-artboards__upload-button js-m-artboards__upload-button">
+                <span class="m-artboards__upload-button-text m-artboards__upload-button-text--standard">Upload</span>
+                <!-- If the upload has failed then the button text changes -->
+                <span class="m-artboards__upload-button-text m-artboards__upload-button-text--retry">Retry upload</span>
+            </button>
 
+            <!-- Feedback - If upload is not available -->
+            <span class="m-artboards__upload-feedback m-artboards__upload-feedback--uploading">
+                {{= window.tpl.progress() }}
+            </span>
+            <span class="m-artboards__upload-feedback m-artboards__upload-feedback--success">
+                <span class="m-artboards__icon fi-checkmark"></span>
+            </span>
+            <span class="m-artboards__upload-feedback m-artboards__upload-feedback--no-changes">
+                No changes to upload
+            </span>
+        </div>
+    </div>
 </li>

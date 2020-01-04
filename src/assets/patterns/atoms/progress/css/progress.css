@@ -3,14 +3,14 @@
     height: 24px;
     display: block;
     transform: rotate(-90deg);
-    background: #D7D8DB;
+    background: #B1B4BD;
     border-radius: 50%;
     overflow: hidden;
     position: relative;
 }
 
 .a-progress__progress {
-    fill: #f8f8f8;
+    fill: #B1B4BD;
     stroke: #5FC8D7;
     stroke-width: 32;
     stroke-dasharray: 0 100; /* for 0% */

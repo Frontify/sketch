@@ -242,6 +242,10 @@
     white-space: nowrap;
 }
 
+.m-artboards__upload-state--failed {
+    color: #EF6756;
+}
+
 .m-artboards__upload-state.state-hidden {
     display: none;
 }
@@ -299,6 +303,100 @@
     flex-shrink: 1;
     text-overflow: ellipsis;
     overflow: hidden;
+}
+
+.m-artboards__upload-trigger-text.state-visible {
+    display: inline;
+}
+
+.m-artboards__upload-trigger-text.state-hidden {
+    display: none;
+}
+
+
+.m-artboards__upload-trigger-progresas.state-visible {
+    display: inline;
+}
+
+.m-artboards__upload-trigger-progress.state-hidden {
+    display: none;
+}
+
+
+.m-artboards__upload.state-failed .m-artboards__upload-button-text--standard {
+    display: none;
+}
+
+.m-artboards__upload.state-failed .m-artboards__upload-button-text--retry {
+    display: block;
+}
+
+.m-artboards__upload-button {
+    padding: 6px 12px;
+    background-color: #EAEBEE;
+    font-size: 13px;
+    line-height: 1;
+    appearance: none;
+    box-shadow: none;
+    outline: none;
+    border: none;
+    height: 24px;
+    border-radius: 12px;
+    transition: all .2s ease;
+    display: none;
+}
+
+.m-artboards__upload.state-inactive .m-artboards__upload-button {
+    display: inline-block;
+}
+
+.m-artboards__upload-button-text {
+    display: none;
+}
+
+.m-artboards__upload.state-inactive .m-artboards__upload-button-text--standard {
+    display: inline-block;
+}
+
+.m-artboards__upload-feedback {
+    display: none;
+    padding: 0 12px;
+    font-size: 11px;
+    line-height: 13px;
+    text-align: right;
+    color: #8C909A;
+}
+
+.m-artboards__upload-feedback--success .m-artboards__icon {
+    color: #83B438;
+}
+
+.m-artboards__upload-feedback--no-changes .m-artboards__icon {
+    color: #83B438;
+}
+
+.m-artboards__upload-feedback--failed .m-artboards__icon {
+    color: #F16651;
+}
+
+.m-artboards__upload.state-uploading .m-artboards__upload-feedback--uploading {
+    display: inline-block;
+}
+
+.m-artboards__upload.state-failed .m-artboards__upload-button {
+    display: inline-block;
+}
+
+.m-artboards__upload.state-failed .m-artboards__upload-button-text--retry {
+    display: inline-block;
+}
+
+.m-artboards__upload.state-success .m-artboards__upload-feedback--success {
+    display: inline-block;
+}
+
+.m-artboards__upload.state-no-changes .m-artboards__upload-feedback--no-changes {
+    display: inline-block;
 }
 
 
