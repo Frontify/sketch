@@ -22,63 +22,52 @@ Tc.Module.Artboards = Tc.Module.extend({
         }.bind(this));
 
         $ctx.on('click', '.js-m-artboards__upload', function(e) {
-            e.stopPropagation();
-
             let $this = $(e.currentTarget);
             let $item = $this.closest('.js-m-artboards__item');
-
-            // update item
             let artboard = this.getArtboard($item.data('idExternal'));
-            artboard.state = 'uploading';
-            this.updateItem($item, artboard);
 
+            e.stopPropagation();
             window.postMessage('uploadArtboard', artboard);
+            this.updateItemState($item, 'uploading');
         }.bind(this));
 
         $ctx.on('click', '.js-m-artboards__upload-all', function(e) {
-            e.stopPropagation();
-
             let artboards = [];
+            let $uploadAllTrigger = $ctx.find('.js-m-artboards__upload-all');
 
-            $ctx.find('.js-m-artboards__upload-all').attr('disabled', 'disabled');
+            e.stopPropagation();
+            $uploadAllTrigger.attr('disabled', 'disabled');
 
             $.each($ctx.find('.js-m-artboards__item'), function(index, item) {
                 let $item = $(item);
-                let artboard = this.getArtboard($item.data('idExternal'));
-                artboard.state = 'uploading';
+                let artboard = this.getArtboard($item.data('idExternal'))
                 artboards.push(artboard);
-
-                // update item
-                this.updateItem($item, artboard);
-
             }.bind(this));
 
             // give button time to gray out
             setTimeout(function() {
                 window.postMessage('uploadArtboards', artboards);
+                this.updateItemState($item, 'uploading');
             }, 20);
         }.bind(this));
 
         $ctx.on('click', '.js-m-artboards__upload-selected', function(e) {
-            e.stopPropagation();
-
             let artboards = [];
+            let $uploadSelectedTrigger = $ctx.find('.js-m-artboards__upload-selected');
 
-            $ctx.find('.js-m-artboards__upload-selected').attr('disabled', 'disabled');
+            e.stopPropagation();
+            $uploadSelectedTrigger.attr('disabled', 'disabled');
 
             $.each($ctx.find('.js-m-artboards__item.state-selected'), function(index, item) {
                 let $item = $(item);
                 let artboard = this.getArtboard($item.data('idExternal'));
-                artboard.state = 'uploading';
                 artboards.push(artboard);
-
-                // update item
-                this.updateItem($item, artboard);
             }.bind(this));
 
             // give button time to gray out
             setTimeout(function() {
                 window.postMessage('uploadArtboards', artboards);
+                this.updateItemState($item, 'uploading');
             }, 20);
         }.bind(this));
 
@@ -108,21 +97,29 @@ Tc.Module.Artboards = Tc.Module.extend({
         callback();
     },
 
-    updateItem: function($item, artboard) {
-        let $replaceItem = $(window.tpl.artboardsitem(artboard));
-        $item.replaceWith($replaceItem);
+    updateItemState: function ($item, state) {
+        var $allStates = $item.find('.js-m-artboards__upload-state');
+        var $matchingState = null;
 
-        if (artboard.state === 'success') {
-            // flash icon green
-            let $badge = $replaceItem.find('.js-m-artboards__badge');
-            $badge.velocity({backgroundColor: '#A3CE62'}, {
-                duration: 200, complete: function() {
-                    $badge.velocity('reverse', {
-                        duration: 200, delay: 1000
-                    });
-                }
-            });
+        if (state === 'uploading') {
+            $matchingState = $item.find('.js-m-artboards__upload-state--uploading');
         }
+
+        if (state === 'failed') {
+            $matchingState = $item.find('.js-m-artboards__upload-state--failed');
+        }
+
+        if (state === 'success') {
+            $matchingState = $item.find('.js-m-artboards__upload-state--success');
+        }
+
+        if (state === 'no-changes') {
+            $matchingState = $item.find('.js-m-artboards__upload-state--no-changes');
+        }
+
+        $allStates.removeClass('state-visible');
+        $allStates.addClass('state-hidden');
+        $matchingState.addClass('state-visible');
     },
 
     getArtboard: function(id_external) {
@@ -147,31 +144,20 @@ Tc.Module.Artboards = Tc.Module.extend({
         let $ctx = this.$ctx;
         let $item = $ctx.find('.js-m-artboards__item[data-id-external="' + data.id_external + '"]');
 
-        let artboard = this.getArtboard(data.id_external);
-
-        artboard.nochanges = data.nochanges;
-
-        if (!data.nochanges) {
-            artboard.modified_localized_ago = 'just now';
-            artboard.modifier_name = 'you'
+        if (data.nochanges) {
+            this.updateItemState($item, 'no-changes');
         }
-        artboard.state = 'success';
-        artboard.id = data.id;
-        artboard.sha = data.sha;
-
-        this.updateItem($item, artboard);
-
+        else {
+            this.updateItemState($item, 'success');
+        }
     },
 
     artboardUploadFailed: function(data) {
         let $ctx = this.$ctx;
         let $item = $ctx.find('.js-m-artboards__item[data-id-external="' + data.id_external + '"]');
 
-        let artboard = this.getArtboard(data.id_external);
-        artboard.modified_localized_ago = 'just now';
-        artboard.state = 'failed';
 
-        this.updateItem($item, artboard);
+        this.updateItemState($item, 'failed');
     },
 
     onPreviewReady: function (layerId) {

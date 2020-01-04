@@ -235,14 +235,22 @@
 }
 
 
-.m-artboards__upload-status {
+.m-artboards__upload-state {
     font-size: 11px;
     line-height: 20px;
     color: #686D76;
     white-space: nowrap;
 }
 
-.m-artboards__feedback-status {
+.m-artboards__upload-state.state-hidden {
+    display: none;
+}
+
+.m-artboards__upload-state.state-visible {
+    display: inline-block;
+}
+
+.m-artboards__feedback-state {
     line-height: 20px;
 }
 
@@ -283,11 +291,11 @@
     object-fit: scale-down;
 }
 
-.m-artboards__statuses {
+.m-artboards__states {
     display: flex;
 }
 
-.m-artboards__upload-status {
+.m-artboards__upload-state {
     flex-shrink: 1;
     text-overflow: ellipsis;
     overflow: hidden;

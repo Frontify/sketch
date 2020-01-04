@@ -14,26 +14,62 @@
     <!-- DETAILS - the main artboard details -->
     <div class="m-artboards__details">
         <h3 class="m-artboards__title js-m-artboards__title" title="{{! it.name }}">{{! it.name }}</h3>
-        <div class="m-artboards__statuses">
-            <span class="m-artboards__upload-status">
-                {{? it.state === 'uploading'}}
-                    Uploading…
-                {{?? it.nochanges}}
-                    Nothing changed
-                {{?? it.state === 'new'}}
-                    Not yet uploaded
-                {{?? it.state === 'success'}}
-                    Success!
-                {{?? it.state === 'failed'}}
-                    FAIL!
-                {{??}}
-                    {{? it.modified_localized_ago }}
-                        {{= it.modified_localized_ago }}
-                        {{? it.modifier_name }} by {{= it.modifier_name }}{{?}}
-                    {{?}}
+        <div class="m-artboards__states">
+
+            <!-- Initial upload state -->
+            <span class="
+                m-artboards__upload-state
+                js-m-artboards__upload-state
+                js-m-artboards__upload-state--uploaded
+                state-{{? it.state !== 'new' }}visible{{??}}hidden{{?}}">
+                {{? it.modified_localized_ago }}
+                    {{= it.modified_localized_ago }}
+                    {{? it.modifier_name }} by {{= it.modifier_name }}{{?}}
                 {{?}}
             </span>
-            <span class="m-artboards__feedback-status">
+
+            <span class="
+                m-artboards__upload-state
+                js-m-artboards__upload-state
+                js-m-artboards__upload-state--new
+                state-{{? it.state === 'new' }}visible{{??}}hidden{{?}}">
+                Not yet uploaded
+            </span>
+
+            <!-- Upload state feedback -->
+            <span class="
+                m-artboards__upload-state
+                js-m-artboards__upload-state
+                js-m-artboards__upload-state--uploading
+                state-hidden">
+                Uploading…
+            </span>
+
+            <span class="
+                m-artboards__upload-state
+                js-m-artboards__upload-state
+                js-m-artboards__upload-state--no-changes
+                state-hidden">
+                Nothing changed
+            </span>
+
+            <span class="
+                m-artboards__upload-state
+                js-m-artboards__upload-state
+                js-m-artboards__upload-state--success
+                state-hidden">
+                Success!
+            </span>
+
+            <span class="
+                m-artboards__upload-state
+                js-m-artboards__upload-state
+                js-m-artboards__upload-state--failed
+                state-hidden">
+                FAIL!
+            </span>
+
+            <span class="m-artboards__feedback-state">
                 {{? it.id }}
                 <a class="m-artboards__annotation js-m-artboards__annotation" href="/screens/{{= it.id }}/annotation" >
                     <i class="m-artboards__meta-icon fi-annotations"></i>
