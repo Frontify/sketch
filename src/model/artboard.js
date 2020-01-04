@@ -53,7 +53,6 @@ class Artboard {
 
                     for (let i = 0; i < msartboards.length; i++) {
                         let msartboard = msartboards[i];
-
                         artboards.push({
                             id: null,
                             id_external: '' + msartboard.objectID(),
@@ -409,6 +408,24 @@ class Artboard {
         }
 
         return files;
+    }
+
+    generatePreview(layerId) {
+        const document = DOM.getSelectedDocument();
+        const layer = document.getLayerWithID(layerId);
+
+        let outputDirectory = filemanager.getExportPath();
+        let options = {
+            formats: 'png',
+            overwriting: true,
+            output: outputDirectory
+        };
+        options['use-id-for-name'] = true;
+
+        DOM.export(layer, options)
+        if (isWebviewPresent('frontifymain')) {
+            sendToWebview('frontifymain', 'previewReady(' + JSON.stringify(layerId) + ')');
+        }
     }
 
     uploadArtboards(artboards) {

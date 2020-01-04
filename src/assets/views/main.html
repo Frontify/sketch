@@ -115,6 +115,11 @@
         artboards.artboardsUploaded();
     }
 
+    function previewReady(layerId) {
+        let artboards = application.sandbox.getModuleById($('.mod-artboards').data('terrificId'));
+        artboards.onPreviewReady(layerId);
+    }
+
     // Sources
     function showSources(data) {
         let sources = application.sandbox.getModuleById($('.mod-sources').data('terrificId'));

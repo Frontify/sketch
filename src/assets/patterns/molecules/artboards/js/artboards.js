@@ -174,11 +174,23 @@ Tc.Module.Artboards = Tc.Module.extend({
         this.updateItem($item, artboard);
     },
 
+    onPreviewReady: function (layerId) {
+        this.updatePreviewImage(layerId);
+    },
+
+    updatePreviewImage: function (layerId) {
+        var $image = this.$ctx.find('.js-m-artboards__item[data-id-external="' + layerId + '"] .js-m-artboards__preview-image');
+        $image.attr('src', 'file:///var/folders/rk/xkvpp6b10pq1yvpc11wgjfnr0000gn/T/sketch-frontify/' + layerId + '.png');
+    },
+
     render: function(data) {
         let $ctx = this.$ctx;
         this.artboards = data.artboards;
         $ctx.html(window.tpl.artboardslist(data));
-
+        $ctx.on('lazyloaded', function (e) {
+            var layerId = e.target.getAttribute('data-id-external');
+            window.postMessage('generatePreview', layerId);
+        }.bind(this))
         // initialize search
         try {
             if(this.jets) {
@@ -196,7 +208,6 @@ Tc.Module.Artboards = Tc.Module.extend({
                     }
                     else {
                         $nr.removeClass('state-visible');
-
                     }
                 }.bind(this)
             });

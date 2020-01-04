@@ -120,6 +120,10 @@ export default function(context, view) {
         }.bind(this));
     });
 
+    webview.on('generatePreview', function(data) {
+        artboard.generatePreview(data);
+    });
+
     webview.on('switchAssetSourceForType', function(type, assetSourceId) {
         target.getAssetSourcesForType(type).then(function(data) {
             if (data && data.sources) {

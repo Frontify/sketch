@@ -28,12 +28,18 @@
     margin-bottom: 2px;
     color: #48505D;
     font-weight: bold;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 .m-target__project {
     font-size: 14px;
     line-height: 16px;
     color: #49505C;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 .m-target__action {

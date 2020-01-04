@@ -5,9 +5,13 @@
 }
 
 .m-tabs__list {
+    width: 100%;
     overflow: hidden;
-    padding: 0 18px;
+    padding-left: 18px;
     background: rgba(216,216,216,.2);
+    display: flex;
+    justify-items: flex-end;
+    box-sizing: border-box;
 }
 
 .m-tabs--light .m-tabs__list {
@@ -17,9 +21,9 @@
 
 .m-tabs__item {
     display: block;
-    float: left;
     margin: 0 10px;
     font-weight: 500;
+    overflow: hidden;
 }
 
 .m-tabs__item .a-badge {
@@ -39,7 +43,9 @@
 }
 
 .m-tabs__item--action {
-    float: right;
+    margin-left: auto;
+    display: inline-block;
+    flex-shrink: 0;
 }
 
 .m-tabs__action {
@@ -48,7 +54,7 @@
     visibility: visible;
     font-size: 11px;
     line-height: 13px;
-    padding: 10px 0 9px 0;
+    padding: 10px 18px 9px;
     text-decoration: none;
     color: rgba(0,0,0,0.5);
     transition: all .2s ease-in;
@@ -77,6 +83,9 @@
     color: rgba(0,0,0,0.5);
     transition: border .2s ease-in;
     border-bottom: 2px solid transparent;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 .m-tabs__link:hover {
