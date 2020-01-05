@@ -28,6 +28,18 @@ class Artboard {
         }
     }
 
+    getSelectedArtboards() {
+        let selectedArtboards = [];
+        let jsdoc = DOM.Document.fromNative(sketch.getDocument());
+        jsdoc.selectedLayers.forEach(function(layer) {
+            if (layer.type == 'Artboard' || layer.type == 'SymbolMaster') {
+                selectedArtboards.push(layer.id);
+            }
+        }.bind(this));
+
+        return selectedArtboards;
+    }
+
     getArtboards(skipRemote) {
         return target.getTarget().then(function(target) {
             let remoteStatus = null;
@@ -94,14 +106,7 @@ class Artboard {
                         }
                     }
 
-                    // compare with selected artboards
-                    let selectedArtboards = [];
-                    let jsdoc = DOM.Document.fromNative(sketch.getDocument());
-                    jsdoc.selectedLayers.forEach(function(layer) {
-                        if (layer.type == 'Artboard' || layer.type == 'SymbolMaster') {
-                            selectedArtboards.push(layer.id);
-                        }
-                    }.bind(this));
+                    let selectedArtboards = this.getSelectedArtboards();
 
                     for (let i = 0; i < artboards.length; i++) {
                         let artboard = artboards[i];
@@ -425,6 +430,16 @@ class Artboard {
         DOM.export(layer, options)
         if (isWebviewPresent('frontifymain')) {
             sendToWebview('frontifymain', 'previewReady(' + JSON.stringify(layerId) + ')');
+        }
+    }
+
+    updateArtboardSelection() {
+        if (!this.uploadInProgress) {
+            let selectedArtboards = this.getSelectedArtboards();
+            sendToWebview('frontifymain', 'updateArtboardSelection(' + JSON.stringify(selectedArtboards) + ')');
+        }
+        else {
+            console.log('upload in progress');
         }
     }
 

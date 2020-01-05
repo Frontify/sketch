@@ -138,6 +138,26 @@ Tc.Module.Artboards = Tc.Module.extend({
         $matchingState.addClass('state-visible');
     },
 
+    updateArtboardSelection: function (selectedArtboards) {
+        let $ctx = this.$ctx;
+        let $allArtboardItems = $ctx.find('.js-m-artboards__item');
+        let $uploadSelectedTrigger = $ctx.find('.js-m-artboards__upload-selected');
+
+        $allArtboardItems.removeClass('state-selected');
+
+        selectedArtboards.forEach(function(layerId) {
+            let $matchingArtboard = $selectedArtboardItems = $ctx.find('.js-m-artboards__item[data-id-external="' + layerId + '"]');
+            $matchingArtboard.addClass('state-selected');
+        }.bind(this));
+
+        if (selectedArtboards.length > 0) {
+            $uploadSelectedTrigger.removeAttr('disabled');
+        }
+        else {
+            $uploadSelectedTrigger.prop('disabled', true);
+        }
+    },
+
     getArtboard: function(id_external) {
         return this.artboards.find(function(artboard) {
             return artboard.id_external == id_external;

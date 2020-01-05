@@ -84,8 +84,8 @@
 
     function selectionChanged() {
         let tabs = application.sandbox.getModuleById($('.mod-tabs').data('terrificId'));
-        if(tabs.getCurrentTab() === 'artboards') {
-            window.postMessage('showArtboards', true);
+        if (tabs.getCurrentTab() === 'artboards') {
+            window.postMessage('updateArtboardSelection');
         }
     }
 
@@ -93,6 +93,11 @@
     function showArtboards(data) {
         let artboards = application.sandbox.getModuleById($('.mod-artboards').data('terrificId'));
         artboards.render(data);
+    }
+
+    function updateArtboardSelection(data) {
+        let artboards = application.sandbox.getModuleById($('.mod-artboards').data('terrificId'));
+        artboards.updateArtboardSelection(data);
     }
 
     function artboardUploadProgress(artboard) {
