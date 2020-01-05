@@ -21,6 +21,7 @@
                 m-artboards__upload-state
                 js-m-artboards__upload-state
                 js-m-artboards__upload-state--uploaded
+                js-m-artboards__upload-state--no-changes
                 state-{{? it.state !== 'new' }}visible{{??}}hidden{{?}}">
                 {{? it.modified_localized_ago }}
                     {{= it.modified_localized_ago }}
@@ -45,16 +46,6 @@
                 Uploading…
             </span>
 
-            <span class="
-                m-artboards__upload-state
-                js-m-artboards__upload-state
-                js-m-artboards__upload-state--no-changes
-                state-hidden">
-                {{? it.modified_localized_ago }}
-                    {{= it.modified_localized_ago }}
-                    {{? it.modifier_name }} by {{= it.modifier_name }}{{?}}
-                {{?}}
-            </span>
 
             <span class="
                 m-artboards__upload-state
@@ -74,18 +65,13 @@
                 Upload failed!
             </span>
 
-            <span class="m-artboards__feedback-state">
-                {{? it.id }}
-                <a class="m-artboards__annotation js-m-artboards__annotation" href="/screens/{{= it.id }}/annotation" >
-                    <i class="m-artboards__meta-icon fi-annotations"></i>
-                        {{? it.count_annotation_open }}
-                            <span class="a-badge a-badge--xs a-badge--default m-artboards__annotation-badge">
-                                {{= it.count_annotation_open }}
-                            </span>
-                        {{?}}
-                    </a>
-                {{?}}
-            </span>
+            {{? it.count_annotation_open }}
+            <a class="m-artboards__annotation-count js-m-artboards__annotation a-btn a-btn--xs a-btn--default" href="/screens/{{= it.id }}/annotation" >
+                <i class="m-artboards__annotation-count-icon fi-annotations"></i>
+                <span class="m-artboards__annotation-count-text">{{= it.count_annotation_open }}</span>
+            </a>
+            {{?}}
+
         </div>
     </div>
 
@@ -94,7 +80,7 @@
         <!-- Upload -->
         <div class="m-artboards__upload js-m-artboards__upload state-inactive">
             <!-- Button - If upload is available -->
-            <button class="m-artboards__upload-button js-m-artboards__upload-button">
+            <button class="m-artboards__upload-button a-btn a-btn--sm a-btn--default js-m-artboards__upload-button">
                 <span class="m-artboards__upload-button-text m-artboards__upload-button-text--standard">Upload</span>
                 <!-- If the upload has failed then the button text changes -->
                 <span class="m-artboards__upload-button-text m-artboards__upload-button-text--retry">Retry upload</span>

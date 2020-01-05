@@ -138,6 +138,7 @@
 .m-artboards__actions {
     padding-left: 8px;
     float: right;
+    display: flex;
 }
 
 .m-artboards__type {
@@ -252,10 +253,6 @@
 
 .m-artboards__upload-state.state-visible {
     display: inline-block;
-}
-
-.m-artboards__feedback-state {
-    line-height: 20px;
 }
 
 .m-artboards__meta-icon {
@@ -399,6 +396,15 @@
     display: inline-block;
 }
 
+.m-artboards__annotation-count  {
+    margin-top: -2px;
+    margin-left: 4px;
+}
+
+.m-artboards__annotation-count-icon,
+.m-artboards__annotation-count-text {
+    vertical-align: middle;
+}
 
 @media (min-width: 320px) {
     .m-artboards__preview {
