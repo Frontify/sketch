@@ -7,14 +7,14 @@
         data-ext="{{= asset.ext }}"
         data-title="{{= asset.title }}"
         data-id="{{= asset.id }}"
-        data-url="{{= asset.image_url_thumbnail }}"
+        data-url="{{= asset.generic_url }}"
     >
         {{? asset.is_video }}
             <div class="m-mediachooser__video-icon-wrap">
                 <i class="icon-play"></i>
             </div>
         {{?}}
-        <img data-src="{{= asset.image_url_thumbnail.replace('{width}', 400) }}" class="m-mediachooser__image lazyload" />
+        <img data-src="{{= asset.generic_url.replace('{width}', 400) }}" class="m-mediachooser__image lazyload" />
         {{? it.type !== 'icons' }}
             <div class="m-mediachooser__image-overlay">
                 <h4 class="m-mediachooser__image-title">{{! asset.title }}</h4>
