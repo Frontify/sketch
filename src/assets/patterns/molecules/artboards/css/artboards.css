@@ -88,10 +88,6 @@
     display: flex;
 }
 
-.m-artboards__item.state-selected .m-artboards__preview {
-    box-shadow: 0 0 0 3px white, 0 0 0 4px #363D4A;
-}
-
 .m-artboards__item.state-selected .m-artboards__title {
     font-weight: bold;
 }
@@ -414,6 +410,10 @@
     .m-artboards__preview {
         margin-right: 16px;
         padding: 4px;
+    }
+
+    .m-artboards__item.state-selected .m-artboards__preview {
+        box-shadow: 0 0 0 3px white, 0 0 0 4px #363D4A;
     }
 
     .m-artboards__preview-image {

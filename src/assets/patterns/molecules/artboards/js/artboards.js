@@ -196,13 +196,13 @@ Tc.Module.Artboards = Tc.Module.extend({
         this.updateItemState($item, 'failed');
     },
 
-    onPreviewReady: function (layerId) {
-        this.updatePreviewImage(layerId);
+    onPreviewReady: function (layerId, path) {
+        this.updatePreviewImage(layerId, path);
     },
 
-    updatePreviewImage: function (layerId) {
+    updatePreviewImage: function (layerId,  path) {
         var $image = this.$ctx.find('.js-m-artboards__item[data-id-external="' + layerId + '"] .js-m-artboards__preview-image');
-        $image.attr('src', 'file:///var/folders/rk/xkvpp6b10pq1yvpc11wgjfnr0000gn/T/sketch-frontify/' + layerId + '.png');
+        $image.attr('src', 'file://' + path + layerId + '.png');
     },
 
     render: function(data) {

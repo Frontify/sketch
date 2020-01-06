@@ -426,10 +426,10 @@ class Artboard {
             output: outputDirectory
         };
         options['use-id-for-name'] = true;
-
         DOM.export(layer, options)
         if (isWebviewPresent('frontifymain')) {
-            sendToWebview('frontifymain', 'previewReady(' + JSON.stringify(layerId) + ')');
+            let argument = 'previewReady(' + JSON.stringify(layerId) + ', ' + JSON.stringify(outputDirectory) + ')';
+            sendToWebview('frontifymain', argument);
         }
     }
 

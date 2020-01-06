@@ -120,9 +120,9 @@
         artboards.artboardsUploaded();
     }
 
-    function previewReady(layerId) {
+    function previewReady(layerId, path) {
         let artboards = application.sandbox.getModuleById($('.mod-artboards').data('terrificId'));
-        artboards.onPreviewReady(layerId);
+        artboards.onPreviewReady(layerId, path);
     }
 
     // Sources
