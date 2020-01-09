@@ -48,7 +48,8 @@ export function closeCommand(context) {
 export function selectionChangedCommand(context) {
     executeSafely(context, function() {
         if (isWebviewPresent('frontifymain')) {
-            sendToWebview('frontifymain', 'selectionChanged()');
+            let documentHash = context.actionContext.document.hash();
+            sendToWebview('frontifymain', 'selectionChanged(' + documentHash + ')');
         }
     });
 }

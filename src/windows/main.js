@@ -105,10 +105,13 @@ export default function(context, view) {
         artboard.showArtboards(skipRemote);
     });
 
-    webview.on('updateArtboardSelection', function() {
+    webview.on('selectionChanged', function(selectedDocumentChanged) {
         view = 'artboards';
+        if (selectedDocumentChanged) {
+            artboard.showArtboards(true);
+        }
         artboard.updateArtboardSelection();
-    });
+    }.bind(this));
 
     webview.on('showSources', function() {
         view = 'sources';

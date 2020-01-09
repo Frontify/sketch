@@ -413,7 +413,7 @@
     }
 
     .m-artboards__item.state-selected .m-artboards__preview {
-        box-shadow: 0 0 0 3px white, 0 0 0 4px #363D4A;
+        box-shadow: 0 0 0 3px white, 0 0 0 4px #5FC8D7;
     }
 
     .m-artboards__preview-image {

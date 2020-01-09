@@ -20,7 +20,7 @@
     </script>
     <title>Artboards</title>
 </head>
-<body>
+<body data-document-hash="">
 <div class="mod mod-target m-target"></div>
 <script>
     document.writeln(window.tpl.tabsmain({
@@ -82,10 +82,18 @@
         tabsMain.refresh();
     }
 
-    function selectionChanged() {
+    function selectionChanged(selectedDocumentHash) {
         let tabs = application.sandbox.getModuleById($('.mod-tabs').data('terrificId'));
         if (tabs.getCurrentTab() === 'artboards') {
-            window.postMessage('updateArtboardSelection');
+            var selectedDocumentChanged = false;
+            var lastSelectedDocumentHash = localStorage.getItem('lastSelectedDocumentHash');
+
+            if (lastSelectedDocumentHash && lastSelectedDocumentHash !== selectedDocumentHash) {
+                selectedDocumentChanged = true;
+                localStorage.setItem('lastSelectedDocumentHash', selectedDocumentHash);
+            }
+
+            window.postMessage('selectionChanged', selectedDocumentChanged);
         }
     }
 
