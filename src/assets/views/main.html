@@ -84,14 +84,12 @@
 
     function selectionChanged(selectedDocumentHash) {
         let tabs = application.sandbox.getModuleById($('.mod-tabs').data('terrificId'));
-        if (tabs.getCurrentTab() === 'artboards') {
-            var selectedDocumentChanged = false;
-            var lastSelectedDocumentHash = Number(sessionStorage.getItem('lastSelectedDocumentHash'));
 
-            if (lastSelectedDocumentHash && lastSelectedDocumentHash !== selectedDocumentHash) {
-                selectedDocumentChanged = true;
-            }
-            if (!lastSelectedDocumentHash || (lastSelectedDocumentHash && lastSelectedDocumentHash !== selectedDocumentHash) ) {
+        if (tabs.getCurrentTab() === 'artboards') {
+            var lastSelectedDocumentHash = Number(sessionStorage.getItem('lastSelectedDocumentHash'));
+            var selectedDocumentChanged = lastSelectedDocumentHash && lastSelectedDocumentHash !== selectedDocumentHash;
+
+            if (!lastSelectedDocumentHash || selectedDocumentChanged) {
                 sessionStorage.setItem('lastSelectedDocumentHash', selectedDocumentHash);
             }
 
