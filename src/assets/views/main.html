@@ -86,11 +86,13 @@
         let tabs = application.sandbox.getModuleById($('.mod-tabs').data('terrificId'));
         if (tabs.getCurrentTab() === 'artboards') {
             var selectedDocumentChanged = false;
-            var lastSelectedDocumentHash = localStorage.getItem('lastSelectedDocumentHash');
+            var lastSelectedDocumentHash = Number(sessionStorage.getItem('lastSelectedDocumentHash'));
 
             if (lastSelectedDocumentHash && lastSelectedDocumentHash !== selectedDocumentHash) {
                 selectedDocumentChanged = true;
-                localStorage.setItem('lastSelectedDocumentHash', selectedDocumentHash);
+            }
+            if (!lastSelectedDocumentHash || (lastSelectedDocumentHash && lastSelectedDocumentHash !== selectedDocumentHash) ) {
+                sessionStorage.setItem('lastSelectedDocumentHash', selectedDocumentHash);
             }
 
             window.postMessage('selectionChanged', selectedDocumentChanged);
