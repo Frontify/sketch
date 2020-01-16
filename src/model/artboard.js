@@ -5,7 +5,10 @@ import sketch from './sketch'
 import target from './target';
 import filemanager from './filemanager';
 import asset from './asset';
-import {isWebviewPresent, sendToWebview} from 'sketch-module-web-view/remote'
+import {
+    isWebviewPresent,
+    sendToWebview
+} from 'sketch-module-web-view/remote'
 
 let API = require('sketch');
 let DOM = require('sketch/dom');
@@ -31,7 +34,7 @@ class Artboard {
     getSelectedArtboards() {
         let selectedArtboards = [];
         let jsdoc = DOM.Document.fromNative(sketch.getDocument());
-        jsdoc.selectedLayers.forEach(function(layer) {
+        jsdoc.selectedLayers.forEach(function (layer) {
             if (layer.type == 'Artboard' || layer.type == 'SymbolMaster') {
                 selectedArtboards.push(layer.id);
             }
@@ -41,17 +44,18 @@ class Artboard {
     }
 
     getArtboards(skipRemote) {
-        return target.getTarget().then(function(target) {
+        return target.getTarget().then(function (target) {
             let remoteStatus = null;
             if (skipRemote && this.remoteAssets) {
-                remoteStatus = Promise.resolve({assets: this.remoteAssets});
-            }
-            else {
+                remoteStatus = Promise.resolve({
+                    assets: this.remoteAssets
+                });
+            } else {
                 // load remote assets status
                 remoteStatus = fetch('/v1/assets/status/' + target.project.id + '?include_count_annotation=true&include_attachments=true&path=' + encodeURIComponent(target.set.path));
             }
 
-            return remoteStatus.then(function(result) {
+            return remoteStatus.then(function (result) {
                 let assets = result.assets;
                 this.remoteAssets = result.assets;
 
@@ -127,7 +131,7 @@ class Artboard {
     }
 
     exportArtboard(artboard, doc) {
-        return new Promise(function(resolve) {
+        return new Promise(function (resolve) {
             let files = [];
             let predicate = NSPredicate.predicateWithFormat('objectID == %@', artboard.id_external);
             let msartboard = sketch.findFirstLayer(predicate, nil, MSArtboardGroup, doc);
@@ -167,9 +171,18 @@ class Artboard {
             let jsdoc = DOM.Document.fromNative(doc);
 
             this.setLayerSettingForKey(artboardExport, 'meta', {
-                document: {id: jsdoc.id, path: jsdoc.path},
-                page: {id: jsdoc.selectedPage.id, name: jsdoc.selectedPage.name},
-                sketch: {version: '' + API.version.sketch, api: API.version.api }
+                document: {
+                    id: jsdoc.id,
+                    path: jsdoc.path
+                },
+                page: {
+                    id: jsdoc.selectedPage.id,
+                    name: jsdoc.selectedPage.name
+                },
+                sketch: {
+                    version: '' + API.version.sketch,
+                    api: API.version.api
+                }
                 // converting 'sketch.version' to string is needed to not lose it at JSON.stringify
             });
 
@@ -220,8 +233,7 @@ class Artboard {
 
             if (layer._class === 'group') {
                 layer.layers = layer.layers.map(optimize);
-            }
-            else if (layer._class === 'bitmap') {
+            } else if (layer._class === 'bitmap') {
                 layer = this.layerReplaceImageData(layer);
             }
 
@@ -246,7 +258,7 @@ class Artboard {
                 let fill = layer.style.fills[index];
 
                 if (fill.fillType === 4 && fill.image) {
-                    layer.style.fills.splice(index,1);
+                    layer.style.fills.splice(index, 1);
                 }
             }
         }
@@ -329,15 +341,14 @@ class Artboard {
      * @returns {void | *}
      */
 
-    recursivelyDetachSymbols (layer) {
+    recursivelyDetachSymbols(layer) {
         if (layer.type === 'Group') {
             layer.layers.forEach((layer) => {
                 this.recursivelyDetachSymbols(layer);
             });
 
             return;
-        }
-        else if(layer.type !== 'SymbolInstance') {
+        } else if (layer.type !== 'SymbolInstance') {
             /* if it's not a symbol, there's nothing to do */
             return;
         }
@@ -361,7 +372,9 @@ class Artboard {
         /* add meta info to symbolInstance before detaching it */
         Settings.setLayerSettingForKey(layer, 'meta', meta);
 
-        let detachedlayer = layer.detach({recursively: false});
+        let detachedlayer = layer.detach({
+            recursively: false
+        });
 
         /* detached layer is a now a group, so do detaching for its layers again */
         this.recursivelyDetachSymbols(detachedlayer);
@@ -372,7 +385,7 @@ class Artboard {
     exportFormats(doc, layer) {
         let files = [];
 
-        layer.exportFormats.forEach(function(format) {
+        layer.exportFormats.forEach(function (format) {
 
             let name = '';
             if (format.prefix && format.prefix !== 'null') {
@@ -407,7 +420,7 @@ class Artboard {
         });
 
         if (layer.layers) {
-            layer.layers.forEach(function(layer) {
+            layer.layers.forEach(function (layer) {
                 files = files.concat(this.exportFormats(doc, layer));
             }.bind(this));
         }
@@ -437,8 +450,7 @@ class Artboard {
         if (!this.uploadInProgress) {
             let selectedArtboards = this.getSelectedArtboards();
             sendToWebview('frontifymain', 'updateArtboardSelection(' + JSON.stringify(selectedArtboards) + ')');
-        }
-        else {
+        } else {
             console.log('upload in progress');
         }
     }
@@ -447,12 +459,12 @@ class Artboard {
         // sequence artboard export and upload
         this.uploadInProgress = true;
 
-        return this.getArtboards().then(function(data) {
+        return this.getArtboards().then(function (data) {
             let target = data.target;
 
             // get the current state of the given artboards
-            artboards = artboards.map(function(artboard) {
-                return data.artboards.find(function(remoteArtboard) {
+            artboards = artboards.map(function (artboard) {
+                return data.artboards.find(function (remoteArtboard) {
                     return remoteArtboard.id_external == artboard.id_external;
                 }.bind(this));
             }.bind(this));
@@ -460,22 +472,21 @@ class Artboard {
             let doc = sketch.getDocument();
             if (!doc) {
                 throw new Error('No document found');
-            }
-            else {
-                return artboards.reduce(function(sequence, artboard) {
-                    return sequence.then(function() {
+            } else {
+                return artboards.reduce(function (sequence, artboard) {
+                    return sequence.then(function () {
                         return this.exportArtboard(artboard, doc);
-                    }.bind(this)).then(function(files) {
+                    }.bind(this)).then(function (files) {
                         var artboardProgress = NSProgress.progressWithTotalUnitCount(10 * files.length + 20);
                         artboardProgress.setCompletedUnitCount(0);
 
-                        var polling = setInterval(function() {
+                        var polling = setInterval(function () {
                             this.updateProgress(artboard, artboardProgress);
                         }.bind(this), 100);
 
                         let artboardChanged = false;
-                        return files.reduce(function(uploadsequence, file) {
-                            return uploadsequence.then(function(assetId) {
+                        return files.reduce(function (uploadsequence, file) {
+                            return uploadsequence.then(function (assetId) {
                                 if (file.type === 'artboard') {
                                     if (artboard.sha != shaFile(file.path)) {
                                         artboardChanged = true;
@@ -489,7 +500,7 @@ class Artboard {
                                             folder: target.set.path,
                                             project: target.project.id,
                                             type: file.type
-                                        }, artboardProgress).then(function(data) {
+                                        }, artboardProgress).then(function (data) {
                                             filemanager.deleteFile(file.path);
                                             this.updateProgress(artboard, artboardProgress);
                                             artboard.sha = data.sha;
@@ -498,8 +509,7 @@ class Artboard {
 
                                             return data.id;
                                         }.bind(this));
-                                    }
-                                    else {
+                                    } else {
                                         artboardChanged = false;
                                         artboardProgress.setCompletedUnitCount(artboardProgress.completedUnitCount() + 10);
                                         this.updateProgress(artboard, artboardProgress);
@@ -507,8 +517,7 @@ class Artboard {
                                         artboard.nochanges = true;
                                         return artboard.id;
                                     }
-                                }
-                                else if (file.type === 'attachment') {
+                                } else if (file.type === 'attachment') {
                                     let status = this.getRemoteStatusForAttachment(artboard, file);
 
                                     if (artboardChanged || status.sha != shaFile(file.path)) {
@@ -516,8 +525,7 @@ class Artboard {
 
                                         if (file.ext === 'json') {
                                             filename = file.name + '.' + file.ext;
-                                        }
-                                        else {
+                                        } else {
                                             // Generate unique filenames for exportables. That prevents same named layers to overwrite each others exportables.
                                             filename = file.id_external + '-' + file.pixel_ratio + '.' + file.ext;
                                         }
@@ -530,51 +538,50 @@ class Artboard {
                                             type: file.type,
                                             asset_id: assetId,
                                             pixel_ratio: file.pixel_ratio
-                                        }, artboardProgress).then(function(data) {
+                                        }, artboardProgress).then(function (data) {
                                             // filemanager.deleteFile(file.path);
                                             this.updateProgress(artboard, artboardProgress);
                                             status.sha = data.sha;
                                             return assetId;
                                         }.bind(this));
-                                    }
-                                    else {
+                                    } else {
                                         // filemanager.deleteFile(file.path);
                                         artboardProgress.setCompletedUnitCount(artboardProgress.completedUnitCount() + 10);
                                         this.updateProgress(artboard, artboardProgress);
                                         return assetId;
                                     }
                                 }
-                            }.bind(this)).catch(function(err) {
+                            }.bind(this)).catch(function (err) {
                                 console.error(err);
                                 throw err;
                             }.bind(this));
-                        }.bind(this), Promise.resolve()).then(function(assetId) {
+                        }.bind(this), Promise.resolve()).then(function (assetId) {
                             // start import of asset
                             asset.import(assetId); /* calls the import API */
                             artboardProgress.setCompletedUnitCount(artboardProgress.completedUnitCount() + 20);
                             this.updateProgress(artboard, artboardProgress);
-                        }.bind(this)).then(function(data) {
+                        }.bind(this)).then(function (data) {
                             clearInterval(polling);
                             if (isWebviewPresent('frontifymain')) {
                                 sendToWebview('frontifymain', 'artboardUploaded(' + JSON.stringify(artboard) + ')');
                             }
                             return true;
-                        }.bind(this)).catch(function(err) {
+                        }.bind(this)).catch(function (err) {
                             clearInterval(polling);
                             if (isWebviewPresent('frontifymain')) {
                                 sendToWebview('frontifymain', 'artboardUploadFailed(' + JSON.stringify(artboard) + ')');
                             }
                             throw err;
                         }.bind(this));
-                    }.bind(this)).catch(function(err) {
+                    }.bind(this)).catch(function (err) {
                         console.error(err);
                         throw err;
                     }.bind(this));
                 }.bind(this), Promise.resolve());
             }
-        }.bind(this)).then(function(data) {
+        }.bind(this)).then(function (data) {
             this.uploadInProgress = false;
-        }.bind(this)).catch(function(err) {
+        }.bind(this)).catch(function (err) {
             this.uploadInProgress = false;
             console.error(err);
         }.bind(this));
@@ -584,7 +591,7 @@ class Artboard {
         let status = null;
 
         if (artboard.attachments && artboard.attachments.length > 0) {
-            artboard.attachments.forEach(function(attachment) {
+            artboard.attachments.forEach(function (attachment) {
                 if (file.name == attachment.name && file.ext == attachment.ext) {
                     status = attachment
                 }
@@ -602,19 +609,17 @@ class Artboard {
 
     showArtboards(skipRemote) {
         if (!this.uploadInProgress) {
-            this.getArtboards(skipRemote).then(function(data) {
+            this.getArtboards(skipRemote).then(function (data) {
                 if (isWebviewPresent('frontifymain')) {
                     sendToWebview('frontifymain', 'showArtboards(' + JSON.stringify(data) + ')');
                 }
-            }.bind(this)).catch(function(e) {
+            }.bind(this)).catch(function (e) {
                 console.error(e);
             }.bind(this));
-        }
-        else {
+        } else {
             console.log('upload in progress');
         }
     }
 }
 
 export default new Artboard();
-
