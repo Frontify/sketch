@@ -1,5 +1,5 @@
 Tc.Module.Artboards = Tc.Module.extend({
-    on: function(callback) {
+    on: function (callback) {
         let $ctx = this.$ctx;
 
         this.sandbox.subscribe('events', this);
@@ -9,7 +9,7 @@ Tc.Module.Artboards = Tc.Module.extend({
 
         $ctx.html(window.tpl.loaderspinner());
 
-        $ctx.on('click', '.js-m-artboards__change-target', function(e) {
+        $ctx.on('click', '.js-m-artboards__change-target', function (e) {
             e.stopPropagation();
 
             // open modal with loader
@@ -21,7 +21,7 @@ Tc.Module.Artboards = Tc.Module.extend({
             window.postMessage('changeFolder');
         }.bind(this));
 
-        $ctx.on('click', '.js-m-artboards__upload-button', function(e) {
+        $ctx.on('click', '.js-m-artboards__upload-button', function (e) {
             let $this = $(e.currentTarget);
             let $item = $this.closest('.js-m-artboards__item');
             let artboard = this.getArtboard($item.data('idExternal'));
@@ -31,14 +31,14 @@ Tc.Module.Artboards = Tc.Module.extend({
             this.updateItemState($item, 'uploading');
         }.bind(this));
 
-        $ctx.on('click', '.js-m-artboards__upload-all', function(e) {
+        $ctx.on('click', '.js-m-artboards__upload-all', function (e) {
             let artboards = [];
             let $uploadAllTrigger = $ctx.find('.js-m-artboards__upload-all');
 
             e.stopPropagation();
             $uploadAllTrigger.attr('disabled', 'disabled');
 
-            $.each($ctx.find('.js-m-artboards__item'), function(index, item) {
+            $.each($ctx.find('.js-m-artboards__item'), function (index, item) {
                 let $item = $(item);
                 let artboard = this.getArtboard($item.data('idExternal'))
                 artboards.push(artboard);
@@ -46,19 +46,19 @@ Tc.Module.Artboards = Tc.Module.extend({
             }.bind(this));
 
             // give button time to gray out
-            setTimeout(function() {
+            setTimeout(function () {
                 window.postMessage('uploadArtboards', artboards);
             }, 20);
         }.bind(this));
 
-        $ctx.on('click', '.js-m-artboards__upload-selected', function(e) {
+        $ctx.on('click', '.js-m-artboards__upload-selected', function (e) {
             let artboards = [];
             let $uploadSelectedTrigger = $ctx.find('.js-m-artboards__upload-selected');
 
             e.stopPropagation();
             $uploadSelectedTrigger.attr('disabled', 'disabled');
 
-            $.each($ctx.find('.js-m-artboards__item.state-selected'), function(index, item) {
+            $.each($ctx.find('.js-m-artboards__item.state-selected'), function (index, item) {
                 let $item = $(item);
                 let artboard = this.getArtboard($item.data('idExternal'));
                 artboards.push(artboard);
@@ -66,12 +66,12 @@ Tc.Module.Artboards = Tc.Module.extend({
             }.bind(this));
 
             // give button time to gray out
-            setTimeout(function() {
+            setTimeout(function () {
                 window.postMessage('uploadArtboards', artboards);
             }, 20);
         }.bind(this));
 
-        $ctx.on('click', '.js-m-artboards__item', function(e) {
+        $ctx.on('click', '.js-m-artboards__item', function (e) {
             e.stopPropagation();
 
             let $this = $(e.currentTarget);
@@ -82,7 +82,7 @@ Tc.Module.Artboards = Tc.Module.extend({
             }
         }.bind(this));
 
-        $ctx.on('click', '.js-m-artboards__annotation', function(e) {
+        $ctx.on('click', '.js-m-artboards__annotation', function (e) {
             e.stopPropagation();
             e.preventDefault();
 
@@ -112,24 +112,16 @@ Tc.Module.Artboards = Tc.Module.extend({
         if (state === 'uploading') {
             $matchingState = $item.find('.js-m-artboards__upload-state--uploading');
             $upload.addClass('state-uploading');
-        }
-
-        else if (state === 'failed') {
+        } else if (state === 'failed') {
             $matchingState = $item.find('.js-m-artboards__upload-state--failed');
             $upload.addClass('state-failed');
-        }
-
-        else if (state === 'success') {
+        } else if (state === 'success') {
             $matchingState = $item.find('.js-m-artboards__upload-state--success');
             $upload.addClass('state-success');
-        }
-
-        else if (state === 'no-changes') {
+        } else if (state === 'no-changes') {
             $matchingState = $item.find('.js-m-artboards__upload-state--no-changes');
             $upload.addClass('state-no-changes');
-        }
-
-        else {
+        } else {
             $upload.addClass('state-inactive');
         }
 
@@ -145,50 +137,50 @@ Tc.Module.Artboards = Tc.Module.extend({
 
         $allArtboardItems.removeClass('state-selected');
 
-        selectedArtboards.forEach(function(layerId) {
+        selectedArtboards.forEach(function (layerId) {
             let $matchingArtboard = $selectedArtboardItems = $ctx.find('.js-m-artboards__item[data-id-external="' + layerId + '"]');
             $matchingArtboard.addClass('state-selected');
         }.bind(this));
 
         if (selectedArtboards.length > 0) {
             $uploadSelectedTrigger.removeAttr('disabled');
-        }
-        else {
+        } else {
             $uploadSelectedTrigger.prop('disabled', true);
         }
     },
 
-    getArtboard: function(id_external) {
-        return this.artboards.find(function(artboard) {
+    getArtboard: function (id_external) {
+        return this.artboards.find(function (artboard) {
             return artboard.id_external == id_external;
         }.bind(this));
     },
 
 
-    artboardUploadProgress: function(data) {
+    artboardUploadProgress: function (data) {
         let $ctx = this.$ctx;
         let $item = $ctx.find('.js-m-artboards__item[data-id-external="' + data.id_external + '"]');
-        $item.find('.js-a-progress__progress').css({'stroke-dasharray': data.progress + ' 100'});
+        $item.find('.js-a-progress__progress').css({
+            'stroke-dasharray': data.progress + ' 100'
+        });
     },
 
-    artboardsUploaded: function() {
+    artboardsUploaded: function () {
         let $ctx = this.$ctx;
         $ctx.find('.js-m-artboards__upload-all').removeAttr('disabled');
     },
 
-    artboardUploaded: function(data) {
+    artboardUploaded: function (data) {
         let $ctx = this.$ctx;
         let $item = $ctx.find('.js-m-artboards__item[data-id-external="' + data.id_external + '"]');
 
         if (data.nochanges) {
             this.updateItemState($item, 'no-changes');
-        }
-        else {
+        } else {
             this.updateItemState($item, 'success');
         }
     },
 
-    artboardUploadFailed: function(data) {
+    artboardUploadFailed: function (data) {
         let $ctx = this.$ctx;
         let $item = $ctx.find('.js-m-artboards__item[data-id-external="' + data.id_external + '"]');
 
@@ -200,12 +192,12 @@ Tc.Module.Artboards = Tc.Module.extend({
         this.updatePreviewImage(layerId, path);
     },
 
-    updatePreviewImage: function (layerId,  path) {
+    updatePreviewImage: function (layerId, path) {
         var $image = this.$ctx.find('.js-m-artboards__item[data-id-external="' + layerId + '"] .js-m-artboards__preview-image');
         $image.attr('src', 'file://' + path + layerId + '.png');
     },
 
-    render: function(data) {
+    render: function (data) {
         let $ctx = this.$ctx;
         this.artboards = data.artboards;
         $ctx.html(window.tpl.artboardslist(data));
@@ -215,20 +207,19 @@ Tc.Module.Artboards = Tc.Module.extend({
         }.bind(this))
         // initialize search
         try {
-            if(this.jets) {
+            if (this.jets) {
                 this.jets.destroy();
             }
 
             this.jets = new Jets({
                 searchTag: '.js-m-artboards__search',
                 contentTag: '.js-m-artboards__list',
-                didSearch: function(search_phrase) {
+                didSearch: function (search_phrase) {
                     let $nr = this.$ctx.find('.js-m-artboards__no-results');
                     let hasResults = this.$ctx.find('.js-m-artboards__item:visible').length;
                     if (!hasResults) {
                         $nr.addClass('state-visible');
-                    }
-                    else {
+                    } else {
                         $nr.removeClass('state-visible');
                     }
                 }.bind(this)
