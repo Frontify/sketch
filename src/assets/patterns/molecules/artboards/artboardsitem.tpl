@@ -5,7 +5,7 @@
     data-jets="{{! it.name.toLowerCase() }}">
 
     <!-- PREVIEW - image src will be replaced with correct preview once available -->
-    <div class="m-artboards__preview">
+    <div class="m-artboards__preview-image-wrapper">
         <img
             class="m-artboards__preview-image js-m-artboards__preview-image"
             src="../images/image.svg"/>
@@ -14,7 +14,7 @@
     <!-- DETAILS - the main artboard details -->
     <div class="m-artboards__details">
         <h3 class="m-artboards__title js-m-artboards__title" title="{{! it.name }}">{{! it.name }}</h3>
-        <div class="m-artboards__states">
+        <div class="m-artboards__state-wrapper">
 
             <!-- Initial upload state -->
             <span class="
@@ -75,10 +75,9 @@
         </div>
     </div>
 
-    <!-- ACTIONS - doing stuff to the artboard -->
-    <div class="m-artboards__actions">
-        <!-- Upload -->
-        <div class="m-artboards__upload js-m-artboards__upload state-inactive">
+    <!-- UPLOAD -->
+    <div class="m-artboards__upload js-m-artboards__upload state-inactive">
+
             <!-- Button - If upload is available -->
             <button class="m-artboards__upload-button a-btn a-btn--sm a-btn--default js-m-artboards__upload-button">
                 <span class="m-artboards__upload-button-text m-artboards__upload-button-text--standard">Upload</span>
@@ -91,11 +90,11 @@
                 {{= window.tpl.progress() }}
             </span>
             <span class="m-artboards__upload-feedback m-artboards__upload-feedback--success">
-                <span class="m-artboards__icon fi-checkmark"></span>
+                <span class="m-artboards__upload-success-icon fi-checkmark"></span>
             </span>
             <span class="m-artboards__upload-feedback m-artboards__upload-feedback--no-changes">
                 No changes to upload
             </span>
-        </div>
+        <!-- </div> -->
     </div>
 </li>
