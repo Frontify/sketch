@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,236 +12,263 @@
             document.writeln('<link rel="stylesheet" type="text/css" href="../css/statics.css">');
             document.writeln('<scr' + 'ipt src="../statics.js"></scr' + 'ipt>');
             document.writeln('<scr' + 'ipt src="../app.js"></scr' + 'ipt>');
-        }
-        else {
-            document.writeln('<link rel="stylesheet" type="text/css" href="/frontify.sketchplugin/Contents/Resources/css/statics.css">');
+        } else {
+            document.writeln(
+                '<link rel="stylesheet" type="text/css" href="/frontify.sketchplugin/Contents/Resources/css/statics.css">'
+                );
             document.writeln('<scr' + 'ipt src="/frontify.sketchplugin/Contents/Resources/statics.js"></scr' + 'ipt>');
             document.writeln('<scr' + 'ipt src="/frontify.sketchplugin/Contents/Resources/app.js"></scr' + 'ipt>');
         }
+
     </script>
     <title>Artboards</title>
 </head>
+
 <body data-document-hash="">
-<div class="mod mod-target m-target"></div>
-<script>
-    document.writeln(window.tpl.tabsmain({
-        items: [
-            {id: 'artboards', active: false, title: 'Artboards', content: window.tpl.artboards()},
-            {id: 'sources', active: false, title: 'Sources', content: window.tpl.sources()},
-            {id: 'brandassets', active: false, title: 'Brand Assets', content: window.tpl.brandassets()}
-        ]
-    }));
-</script>
+    <div class="mod mod-target m-target"></div>
+    <script>
+        document.writeln(window.tpl.tabsmain({
+            items: [{
+                    id: 'artboards',
+                    active: false,
+                    title: 'Artboards',
+                    content: window.tpl.artboards()
+                },
+                {
+                    id: 'sources',
+                    active: false,
+                    title: 'Sources',
+                    content: window.tpl.sources()
+                },
+                {
+                    id: 'brandassets',
+                    active: false,
+                    title: 'Brand Assets',
+                    content: window.tpl.brandassets()
+                }
+            ]
+        }));
 
-<div class="m-modal__overlay js-m-modal__overlay"></div>
-<script>
-    document.writeln(window.tpl.modal({id: 'modal'}));
-    document.writeln(window.tpl.status());
-</script>
+    </script>
 
-<div class="mod mod-folder-chooser m-folder-chooser"></div>
-<div class="mod mod-project-chooser m-project-chooser"></div>
-<div class="mod mod-error m-error"></div>
+    <div class="m-modal__overlay js-m-modal__overlay"></div>
+    <script>
+        document.writeln(window.tpl.modal({
+            id: 'modal'
+        }));
+        document.writeln(window.tpl.status());
 
-<script>
-    // Terrific Bootstrap
-    let $page = $('body');
-    let application = new Tc.Application($page);
+    </script>
 
-    application.registerModules();
-    application.registerModule($('body'), 'BtnDropdown');
-    application.start();
+    <div class="mod mod-folder-chooser m-folder-chooser"></div>
+    <div class="mod mod-project-chooser m-project-chooser"></div>
+    <div class="mod mod-error m-error"></div>
 
-    window.utils = {
-        tpl: new Tc.Utils.Template(),
-    };
+    <script>
+        // Terrific Bootstrap
+        let $page = $('body');
+        let application = new Tc.Application($page);
 
-    // Callbacks from Sketch Plugin
-    function showTarget(data) {
-        let target = application.sandbox.getModuleById($('.mod-target').data('terrificId'));
-        target.render(data);
-    }
+        application.registerModules();
+        application.registerModule($('body'), 'BtnDropdown');
+        application.start();
 
-    function showAssetSources(data) {
-        let sourceChooser = application.sandbox.getModuleById($('.mod-source-chooser[data-type=' + data.type + ']').data('terrificId'));
-        sourceChooser.render(data);
-    }
+        window.utils = {
+            tpl: new Tc.Utils.Template(),
+        };
 
-
-    function switchTab(id) {
-        let tabsMain = application.sandbox.getModuleById($('#tabs-main').data('terrificId'));
-        tabsMain.switchTab(id);
-
-        if (tabsMain.getCurrentTab() === 'brandassets') {
-            let tabsBrandAssets = application.sandbox.getModuleById($('#tabs-brandassets').data('terrificId'));
-            tabsBrandAssets.switchTab(id);
+        // Callbacks from Sketch Plugin
+        function showTarget(data) {
+            let target = application.sandbox.getModuleById($('.mod-target').data('terrificId'));
+            target.render(data);
         }
-    }
 
-    function refresh() {
-        let tabsMain = application.sandbox.getModuleById($('#tabs-main').data('terrificId'));
-        tabsMain.refresh();
-    }
+        function showAssetSources(data) {
+            let sourceChooser = application.sandbox.getModuleById($('.mod-source-chooser[data-type=' + data.type + ']')
+                .data('terrificId'));
+            sourceChooser.render(data);
+        }
 
-    function selectionChanged(selectedDocumentHash) {
-        let tabs = application.sandbox.getModuleById($('.mod-tabs').data('terrificId'));
 
-        if (tabs.getCurrentTab() === 'artboards') {
-            var lastSelectedDocumentHash = Number(sessionStorage.getItem('lastSelectedDocumentHash'));
-            var selectedDocumentChanged = lastSelectedDocumentHash && lastSelectedDocumentHash !== selectedDocumentHash;
+        function switchTab(id) {
+            let tabsMain = application.sandbox.getModuleById($('#tabs-main').data('terrificId'));
+            tabsMain.switchTab(id);
 
-            if (!lastSelectedDocumentHash || selectedDocumentChanged) {
-                sessionStorage.setItem('lastSelectedDocumentHash', selectedDocumentHash);
+            if (tabsMain.getCurrentTab() === 'brandassets') {
+                let tabsBrandAssets = application.sandbox.getModuleById($('#tabs-brandassets').data('terrificId'));
+                tabsBrandAssets.switchTab(id);
             }
-
-            window.postMessage('selectionChanged', selectedDocumentChanged);
         }
-    }
 
-    // Artboards
-    function showArtboards(data) {
-        let artboards = application.sandbox.getModuleById($('.mod-artboards').data('terrificId'));
-        artboards.render(data);
-    }
+        function refresh() {
+            let tabsMain = application.sandbox.getModuleById($('#tabs-main').data('terrificId'));
+            tabsMain.refresh();
+        }
 
-    function updateArtboardSelection(data) {
-        let artboards = application.sandbox.getModuleById($('.mod-artboards').data('terrificId'));
-        artboards.updateArtboardSelection(data);
-    }
+        function selectionChanged(selectedDocumentHash) {
+            let tabs = application.sandbox.getModuleById($('.mod-tabs').data('terrificId'));
 
-    function artboardUploadProgress(artboard) {
-        let artboards = application.sandbox.getModuleById($('.mod-artboards').data('terrificId'));
-        artboards.artboardUploadProgress(artboard);
-    }
+            if (tabs.getCurrentTab() === 'artboards') {
+                var lastSelectedDocumentHash = Number(sessionStorage.getItem('lastSelectedDocumentHash'));
+                var selectedDocumentChanged = lastSelectedDocumentHash && lastSelectedDocumentHash !==
+                    selectedDocumentHash;
 
-    function artboardUploaded(artboard) {
-        let artboards = application.sandbox.getModuleById($('.mod-artboards').data('terrificId'));
-        artboards.artboardUploaded(artboard);
-    }
+                if (!lastSelectedDocumentHash || selectedDocumentChanged) {
+                    sessionStorage.setItem('lastSelectedDocumentHash', selectedDocumentHash);
+                }
 
-    function artboardUploadFailed(artboard) {
-        let artboards = application.sandbox.getModuleById($('.mod-artboards').data('terrificId'));
-        artboards.artboardUploadFailed(artboard);
-    }
+                window.postMessage('selectionChanged', selectedDocumentChanged);
+            }
+        }
 
-    function artboardsUploaded() {
-        let artboards = application.sandbox.getModuleById($('.mod-artboards').data('terrificId'));
-        artboards.artboardsUploaded();
-    }
+        // Artboards
+        function showArtboards(data) {
+            let artboards = application.sandbox.getModuleById($('.mod-artboards').data('terrificId'));
+            artboards.render(data);
+        }
 
-    function previewReady(layerId, path) {
-        let artboards = application.sandbox.getModuleById($('.mod-artboards').data('terrificId'));
-        artboards.onPreviewReady(layerId, path);
-    }
+        function updateArtboardSelection(data) {
+            let artboards = application.sandbox.getModuleById($('.mod-artboards').data('terrificId'));
+            artboards.updateArtboardSelection(data);
+        }
 
-    // Sources
-    function showSources(data) {
-        let sources = application.sandbox.getModuleById($('.mod-sources').data('terrificId'));
-        sources.render(data);
-    }
+        function artboardUploadProgress(artboard) {
+            let artboards = application.sandbox.getModuleById($('.mod-artboards').data('terrificId'));
+            artboards.artboardUploadProgress(artboard);
+        }
 
-    function showSourcesHowTo(data) {
-        let sources = application.sandbox.getModuleById($('.mod-sources').data('terrificId'));
-        sources.showHowTo();
-    }
+        function artboardUploaded(artboard) {
+            let artboards = application.sandbox.getModuleById($('.mod-artboards').data('terrificId'));
+            artboards.artboardUploaded(artboard);
+        }
 
-    function showSourcesConflict(source) {
-        let sources = application.sandbox.getModuleById($('.mod-sources').data('terrificId'));
-        sources.showConflict(source);
-    }
+        function artboardUploadFailed(artboard) {
+            let artboards = application.sandbox.getModuleById($('.mod-artboards').data('terrificId'));
+            artboards.artboardUploadFailed(artboard);
+        }
 
-    function sourceUploadProgress(source) {
-        let sources = application.sandbox.getModuleById($('.mod-sources').data('terrificId'));
-        sources.sourceUploadProgress(source);
-    }
+        function artboardsUploaded() {
+            let artboards = application.sandbox.getModuleById($('.mod-artboards').data('terrificId'));
+            artboards.artboardsUploaded();
+        }
 
-    function sourceUploaded(source) {
-        let sources = application.sandbox.getModuleById($('.mod-sources').data('terrificId'));
-        sources.sourceUploaded(source);
-    }
+        function previewReady(layerId, path) {
+            let artboards = application.sandbox.getModuleById($('.mod-artboards').data('terrificId'));
+            artboards.onPreviewReady(layerId, path);
+        }
 
-    function sourceUploadFailed(source) {
-        let sources = application.sandbox.getModuleById($('.mod-sources').data('terrificId'));
-        sources.sourceUploadFailed(source);
-    }
+        // Sources
+        function showSources(data) {
+            let sources = application.sandbox.getModuleById($('.mod-sources').data('terrificId'));
+            sources.render(data);
+        }
 
-    function sourceDownloadProgress(source) {
-        let sources = application.sandbox.getModuleById($('.mod-sources').data('terrificId'));
-        sources.sourceDownloadProgress(source);
-    }
+        function showSourcesHowTo(data) {
+            let sources = application.sandbox.getModuleById($('.mod-sources').data('terrificId'));
+            sources.showHowTo();
+        }
 
-    function sourceDownloaded(source) {
-        let sources = application.sandbox.getModuleById($('.mod-sources').data('terrificId'));
-        sources.sourceDownloaded(source);
-    }
+        function showSourcesConflict(source) {
+            let sources = application.sandbox.getModuleById($('.mod-sources').data('terrificId'));
+            sources.showConflict(source);
+        }
 
-    function sourceDownloadFailed(source) {
-        let sources = application.sandbox.getModuleById($('.mod-sources').data('terrificId'));
-        sources.sourceDownloadFailed(source);
-    }
+        function sourceUploadProgress(source) {
+            let sources = application.sandbox.getModuleById($('.mod-sources').data('terrificId'));
+            sources.sourceUploadProgress(source);
+        }
 
-    // Colors
-    function showColors(data) {
-        let colors = application.sandbox.getModuleById($('.mod-colors').data('terrificId'));
-        colors.render(data);
-    }
+        function sourceUploaded(source) {
+            let sources = application.sandbox.getModuleById($('.mod-sources').data('terrificId'));
+            sources.sourceUploaded(source);
+        }
 
-    // Typography
-    function showTypography(data) {
-        let typography = application.sandbox.getModuleById($('.mod-typography').data('terrificId'));
-        typography.render(data);
-    }
+        function sourceUploadFailed(source) {
+            let sources = application.sandbox.getModuleById($('.mod-sources').data('terrificId'));
+            sources.sourceUploadFailed(source);
+        }
 
-    // Libraries
-    function showLibraryAssets(data) {
-        let chooser = application.sandbox.getModuleById($('.mod-media-chooser[data-type=' + data.type + ']').data('terrificId'));
-        chooser.render(data);
-    }
+        function sourceDownloadProgress(source) {
+            let sources = application.sandbox.getModuleById($('.mod-sources').data('terrificId'));
+            sources.sourceDownloadProgress(source);
+        }
 
-    function showLibrarySearch(type) {
-        let chooser = application.sandbox.getModuleById($('.mod-media-chooser[data-type=' + type + ']').data('terrificId'));
-        chooser.showSearch();
-    }
+        function sourceDownloaded(source) {
+            let sources = application.sandbox.getModuleById($('.mod-sources').data('terrificId'));
+            sources.sourceDownloaded(source);
+        }
 
-    function showBlankSlate(data) {
-        let brandassets = application.sandbox.getModuleById($('.mod-brand-assets').data('terrificId'));
-        brandassets.showBlankSlate(data);
-    }
+        function sourceDownloadFailed(source) {
+            let sources = application.sandbox.getModuleById($('.mod-sources').data('terrificId'));
+            sources.sourceDownloadFailed(source);
+        }
 
-    // Folder Chooser
-    function showFolderChooser(folders, current) {
-        let folderChooser = application.sandbox.getModuleById($('.mod-folder-chooser').data('terrificId'));
+        // Colors
+        function showColors(data) {
+            let colors = application.sandbox.getModuleById($('.mod-colors').data('terrificId'));
+            colors.render(data);
+        }
 
-        // render chooser
-        folderChooser.render(folders, current);
-    }
+        // Typography
+        function showTypography(data) {
+            let typography = application.sandbox.getModuleById($('.mod-typography').data('terrificId'));
+            typography.render(data);
+        }
 
-    // No Projects
-    function showNoProjects() {
-        let error = application.sandbox.getModuleById($('.mod-error').data('terrificId'));
+        // Libraries
+        function showLibraryAssets(data) {
+            let chooser = application.sandbox.getModuleById($('.mod-media-chooser[data-type=' + data.type + ']').data(
+                'terrificId'));
+            chooser.render(data);
+        }
 
-        // render error
-        error.render('noprojects');
-    }
+        function showLibrarySearch(type) {
+            let chooser = application.sandbox.getModuleById($('.mod-media-chooser[data-type=' + type + ']').data(
+                'terrificId'));
+            chooser.showSearch();
+        }
 
-    // Project Chooser
-    function showProjectChooser(brands, current) {
-        let projectChooser = application.sandbox.getModuleById($('.mod-project-chooser').data('terrificId'));
+        function showBlankSlate(data) {
+            let brandassets = application.sandbox.getModuleById($('.mod-brand-assets').data('terrificId'));
+            brandassets.showBlankSlate(data);
+        }
 
-        // render chooser
-        projectChooser.render(brands, current);
-    }
+        // Folder Chooser
+        function showFolderChooser(folders, current) {
+            let folderChooser = application.sandbox.getModuleById($('.mod-folder-chooser').data('terrificId'));
 
-    if (isChrome) {
-        document.writeln('<scr' + 'ipt src="./test/target.js"></scr' + 'ipt>');
+            // render chooser
+            folderChooser.render(folders, current);
+        }
 
-        // Change this to whatever you are testing
-        document.writeln('<scr' + 'ipt src="./test/artboards.js"></scr' + 'ipt>');
-    }
+        // No Projects
+        function showNoProjects() {
+            let error = application.sandbox.getModuleById($('.mod-error').data('terrificId'));
 
-    window.onerror = function(message, source, lineno, colno, error) {
-        console.log(message);
-    };
-</script>
+            // render error
+            error.render('noprojects');
+        }
+
+        // Project Chooser
+        function showProjectChooser(brands, current) {
+            let projectChooser = application.sandbox.getModuleById($('.mod-project-chooser').data('terrificId'));
+
+            // render chooser
+            projectChooser.render(brands, current);
+        }
+
+        if (isChrome) {
+            document.writeln('<scr' + 'ipt src="./test/target.js"></scr' + 'ipt>');
+
+            // Change this to whatever you are testing
+            document.writeln('<scr' + 'ipt src="./test/artboards.js"></scr' + 'ipt>');
+        }
+
+        window.onerror = function (message, source, lineno, colno, error) {
+            console.log(message);
+        };
+
+    </script>
 </body>
+
 </html>
