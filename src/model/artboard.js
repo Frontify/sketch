@@ -31,6 +31,12 @@ class Artboard {
         }
     }
 
+    updateUrl(artboard) {
+        if (isWebviewPresent('frontifymain')) {
+            sendToWebview('frontifymain', 'updateArtboardUrl(' + JSON.stringify(artboard) + ')');
+        }
+    }
+
     getSelectedArtboards() {
         let selectedArtboards = [];
         let jsdoc = DOM.Document.fromNative(sketch.getDocument());
@@ -565,6 +571,7 @@ class Artboard {
                             if (isWebviewPresent('frontifymain')) {
                                 sendToWebview('frontifymain', 'artboardUploaded(' + JSON.stringify(artboard) + ')');
                             }
+                            this.updateUrl(artboard);
                             return true;
                         }.bind(this)).catch(function (err) {
                             clearInterval(polling);

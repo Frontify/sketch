@@ -15,7 +15,7 @@
         } else {
             document.writeln(
                 '<link rel="stylesheet" type="text/css" href="/frontify.sketchplugin/Contents/Resources/css/statics.css">'
-                );
+            );
             document.writeln('<scr' + 'ipt src="/frontify.sketchplugin/Contents/Resources/statics.js"></scr' + 'ipt>');
             document.writeln('<scr' + 'ipt src="/frontify.sketchplugin/Contents/Resources/app.js"></scr' + 'ipt>');
         }
@@ -135,6 +135,11 @@
         function artboardUploadProgress(artboard) {
             let artboards = application.sandbox.getModuleById($('.mod-artboards').data('terrificId'));
             artboards.artboardUploadProgress(artboard);
+        }
+
+        function updateArtboardUrl(artboard) {
+            let artboards = application.sandbox.getModuleById($('.mod-artboards').data('terrificId'));
+            artboards.updateUrl(artboard);
         }
 
         function artboardUploaded(artboard) {

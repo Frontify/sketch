@@ -97,6 +97,14 @@ Tc.Module.Artboards = Tc.Module.extend({
         callback();
     },
 
+    updateUrl: function (artboard) {
+        const idSketch = artboard.id_external;
+        const idFrontify = artboard.id;
+        const $artboardItem = this.$ctx.find('.js-m-artboards__item[data-id-external="' + idSketch + '"]');
+
+        $artboardItem.data('url', '/screens/' + idFrontify);
+    },
+
     updateItemState: function ($item, state) {
         var $allStates = $item.find('.js-m-artboards__upload-state');
         var $upload = $item.find('.js-m-artboards__upload');
