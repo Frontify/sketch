@@ -45,6 +45,9 @@ Tc.Module.Login = Tc.Module.extend({
     },
 
     login: function(domain) {
+        var array = new Uint32Array(10);
+        console.log(window.crypto.getRandomValues(array));
+
         window.postMessage('memorizeDomain', domain);
         window.postMessage('beginLoginFlow', domain);
     },
