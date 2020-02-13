@@ -104,12 +104,6 @@ export default function(context, view) {
         fetchSessionId(domain)
             .then(sessionId => {
                 console.log('Generated session id: ', sessionId)
-
-                // Try to open the legacy url in a new browser window
-                const legacyUrl = domain + '/api/oauth/authorize?response_type=token&client_id=sketch&redirect_uri=https://frontify.com/sketchplugin'
-                NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString(legacyUrl))
-
-
                 const verifier = generateVerifier()
                 const challengeCode = generateChallengeCodeFromVerifier(verifier)
 
@@ -126,7 +120,7 @@ export default function(context, view) {
 
                 console.log('URL', url);
                 console.log('Domain', domain);
-
+                NSWorkspace.sharedWorkspace().openURL(domain + url);
             });
     });
 

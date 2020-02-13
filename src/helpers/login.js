@@ -11,8 +11,7 @@ function fetchSessionId(domain) {
         })
             .then(response => {
                 const json = response.json();
-                console.log(response);
-                resolve(json)
+                resolve(json.session_id)
             })
             .catch(error => {
                 reject(error)
