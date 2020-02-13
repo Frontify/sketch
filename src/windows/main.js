@@ -100,7 +100,8 @@ export default function(context, view) {
         domain = url;
     });
 
-    webview.on('beginLoginFlow', () => {
+    webview.on('beginLoginFlow', function({domain, verifier, challenge}) {
+        console.log(domain, verifier, challenge);
         fetchSessionId(domain)
             .then(sessionId => {
                 console.log('Generated session id: ', sessionId)

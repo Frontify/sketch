@@ -44,12 +44,27 @@ Tc.Module.Login = Tc.Module.extend({
         }.bind(this));
     },
 
-    login: function(domain) {
-        var array = new Uint32Array(10);
-        console.log(window.crypto.getRandomValues(array));
+    base64URLEncode: function (str) {
+        return str.toString('base64')
+            .replace(/\+/g, '-')
+            .replace(/\//g, '_')
+            .replace(/=/g, '');
+    },
 
+    sha256: function (buffer) {
+        return window.createHash('sha256').update(buffer).digest();
+    },
+
+    login: function(domain) {
+        var verifier = this.base64URLEncode(window.randomBytes(32));
+        var challenge = this.base64URLEncode(this.sha256(verifier));
+
+        window.postMessage('beginLoginFlow', {
+            domain: domain,
+            verifier: verifier,
+            challenge: challenge,
+        });
         window.postMessage('memorizeDomain', domain);
-        window.postMessage('beginLoginFlow', domain);
     },
 
     sanitizeUrl: function(url) {

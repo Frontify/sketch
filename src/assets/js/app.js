@@ -8,3 +8,6 @@ templates.keys().forEach(function(template) {
     let name = template.split('/').pop().split('.')[0];
     window.tpl[name] = templates(template);
 });
+
+window.randomBytes = require('randombytes');
+window.createHash = require('create-hash');
