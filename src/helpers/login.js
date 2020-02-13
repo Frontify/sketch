@@ -42,8 +42,9 @@ function sha256(buffer) {
 }
 
 function generateVerifier() {
-    child_process.exec('openssl rand -base64 32', (error, stdout, stderr) =>  {
-        console.log(stdout);
+    child_process.exec('openssl rand -base64 32', function (error, stdout, stderr) {
+        console.log(`stdout: ${stdout}`);
+        console.error(`stderr: ${stderr}`);
     });
 }
 
