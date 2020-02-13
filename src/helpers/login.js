@@ -10,10 +10,11 @@ function fetchSessionId(domain) {
             method: 'GET',
         })
             .then(response => {
-                const json = response.json();
-                console.log(json);
-                console.log('session: ' + json.session_id)
-                resolve(json.session_id)
+                response
+                    .json()
+                    .then(json => {
+                        resolve(json.session_id)
+                    });
             })
             .catch(error => {
                 reject(error)
