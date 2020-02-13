@@ -104,16 +104,16 @@ export default function(context, view) {
         fetchSessionId(domain)
             .then(sessionId => {
                 console.log('Generated session id: ', sessionId)
-                const verifier = generateVerifier()
-                const challengeCode = generateChallengeCodeFromVerifier(verifier)
+                // const verifier = generateVerifier()
+                // const challengeCode = generateChallengeCodeFromVerifier(verifier)
 
                 console.log('Verifier: ', verifier)
                 const url = generateUrl('/api/oauth/authorize', {
                     response_type : 'code',
                     client_id: 'sketch',
                     scope: 'api:v1',
-                    code_challenge_method: 'S256',
-                    code_challenge: challengeCode,
+                    // code_challenge_method: 'S256',
+                    // code_challenge: challengeCode,
                     redirect_uri: 'https://frontify.com/sketchplugin',
                     session_id: sessionId
                 });
