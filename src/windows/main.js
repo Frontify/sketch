@@ -107,7 +107,6 @@ export default function(context, view) {
                 // const verifier = generateVerifier()
                 // const challengeCode = generateChallengeCodeFromVerifier(verifier)
 
-                console.log('Verifier: ', verifier)
                 const url = generateUrl('/api/oauth/authorize', {
                     response_type : 'code',
                     client_id: 'sketch',

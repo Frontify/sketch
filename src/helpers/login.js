@@ -1,5 +1,5 @@
 import fetch from 'sketch-polyfill-fetch'
-import randomBytes from 'randombytes'
+
 import createHash from 'create-hash'
 
 function fetchSessionId(domain) {
@@ -27,7 +27,7 @@ function generateUrl(url, queryParams) {
         return [key, queryParams[key]].map(encodeURIComponent).join("=");
     }).join("&");
 
-    return url + queryParams;
+    return url + '?' + queryParamsString;
 }
 
 function base64URLEncode(str) {
