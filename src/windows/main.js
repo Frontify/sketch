@@ -104,7 +104,7 @@ export default function(context, view) {
         fetchSessionId(domain)
             .then(sessionId => {
                 console.log('Generated session id: ', sessionId)
-                // const verifier = generateVerifier()
+                const verifier = generateVerifier()
                 // const challengeCode = generateChallengeCodeFromVerifier(verifier)
 
                 const url = generateUrl('/api/oauth/authorize', {

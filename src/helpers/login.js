@@ -1,5 +1,5 @@
 import fetch from 'sketch-polyfill-fetch'
-
+import child_process from '@skpm/child_process'
 import createHash from 'create-hash'
 
 function fetchSessionId(domain) {
@@ -42,7 +42,9 @@ function sha256(buffer) {
 }
 
 function generateVerifier() {
-    return base64URLEncode(randomBytes(32))
+    child_process.exec('openssl rand -base64 32', (error, stdout, stderr) =>  {
+        console.log(stdout);
+    });
 }
 
 function generateChallengeCodeFromVerifier(verifier) {
