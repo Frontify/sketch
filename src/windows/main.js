@@ -11,6 +11,7 @@ import asset from '../model/asset';
 import user from '../model/user';
 import createFolder from '../helpers/createFolder'
 import { runCommand } from '../commands/frontify'
+import {generateChallengeCodeFromVerifier, generateUrl, generateVerifier, getSessionId} from "../helpers/login";
 
 let threadDictionary = NSThread.mainThread().threadDictionary();
 
@@ -97,6 +98,32 @@ export default function(context, view) {
 
     webview.on('memorizeDomain', function(url) {
         domain = url;
+    });
+
+    webview.on('beginLoginFlow', () => {
+        getSessionId(domain)
+            .then(sessionId => {
+
+                console.log('Generated session id: ', sessionId)
+                const verifier = generateVerifier()
+                const challengeCode = generateChallengeCodeFromVerifier(verifier)
+
+                console.log('Verifier: ', verifier)
+                const url = generateUrl('/api/oauth/authorize', {
+                    response_type : 'code',
+                    client_id: 'sketch',
+                    scope: 'api:v1',
+                    code_challenge_method: 'S256',
+                    code_challenge: challengeCode,
+                    redirect_uri: 'https://frontify.com/sketchplugin',
+                    session_id: sessionId
+                });
+
+                console.log('URL', url);
+                console.log('Domain', domain);
+                //const urlParams = '/api/oauth/authorize?response_type=token&client_id=sketch&redirect_uri=https://frontify.com/sketchplugin'
+                //window.location.href = domain + urlParams
+            });
     });
 
     webview.on('showArtboards', function(skipRemote) {

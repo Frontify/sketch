@@ -1,4 +1,3 @@
-import {getSessionId, generateVerifier, generateChallengeCodeFromVerifier, generateUrl} from "../../../../../helpers/login";
 
 Tc.Module.Login = Tc.Module.extend({
     on: function(callback) {
@@ -47,29 +46,7 @@ Tc.Module.Login = Tc.Module.extend({
 
     login: function(domain) {
         window.postMessage('memorizeDomain', domain);
-        getSessionId(domain)
-            .then(sessionId => {
-
-                console.log('Generated session id: ', sessionId)
-                const verifier = generateVerifier()
-                const challengeCode = generateChallengeCodeFromVerifier(verifier)
-
-                console.log('Verifier: ', verifier)
-                const url = generateUrl('/api/oauth/authorize', {
-                    response_type : 'code',
-                    client_id: 'sketch',
-                    scope: 'api:v1',
-                    code_challenge_method: 'S256',
-                    code_challenge: challengeCode,
-                    redirect_uri: 'https://frontify.com/sketchplugin',
-                    session_id: sessionId
-                });
-
-                console.log('URL', url);
-                console.log('Domain', domain);
-                //const urlParams = '/api/oauth/authorize?response_type=token&client_id=sketch&redirect_uri=https://frontify.com/sketchplugin'
-                //window.location.href = domain + urlParams
-            });
+        window.postMessage('beginLoginFlow', domain);
     },
 
     sanitizeUrl: function(url) {
