@@ -2,12 +2,17 @@ import fetch from 'sketch-polyfill-fetch'
 import randomBytes from 'randombytes'
 import createHash from 'create-hash'
 
-function getSessionId(domain) {
+function fetchSessionId(domain) {
+    console.log(domain + '/api/oauth/generate/sessionid');
+
     return new Promise((resolve, reject) => {
-        fetch(domain + '/api/oauth/generate/sessionid')
+        fetch(domain + '/api/oauth/generate/sessionid', {
+            method: 'GET',
+        })
             .then(response => {
                 const json = response.json();
-                response(json.session_id)
+                console.log(response);
+                resolve(json)
             })
             .catch(error => {
                 reject(error)
@@ -44,7 +49,7 @@ function generateChallengeCodeFromVerifier(verifier) {
 
 export {
     generateUrl,
-    getSessionId,
+    fetchSessionId,
     generateChallengeCodeFromVerifier,
     generateVerifier
 }

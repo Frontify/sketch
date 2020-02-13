@@ -11,7 +11,7 @@ import asset from '../model/asset';
 import user from '../model/user';
 import createFolder from '../helpers/createFolder'
 import { runCommand } from '../commands/frontify'
-import {generateChallengeCodeFromVerifier, generateUrl, generateVerifier, getSessionId} from "../helpers/login";
+import {generateChallengeCodeFromVerifier, generateUrl, generateVerifier, fetchSessionId} from "../helpers/login";
 
 let threadDictionary = NSThread.mainThread().threadDictionary();
 
@@ -101,7 +101,7 @@ export default function(context, view) {
     });
 
     webview.on('beginLoginFlow', () => {
-        getSessionId(domain)
+        fetchSessionId(domain)
             .then(sessionId => {
 
                 console.log('Generated session id: ', sessionId)
