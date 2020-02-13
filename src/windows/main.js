@@ -100,20 +100,18 @@ export default function(context, view) {
         domain = url;
     });
 
-    webview.on('beginLoginFlow', function({domain, verifier, challenge}) {
-        console.log(domain, verifier, challenge);
+    webview.on('beginLoginFlow', (challenge) => {
+        console.log(challenge);
         fetchSessionId(domain)
             .then(sessionId => {
                 console.log('Generated session id: ', sessionId)
-                const verifier = generateVerifier()
-                // const challengeCode = generateChallengeCodeFromVerifier(verifier)
 
                 const url = generateUrl('/api/oauth/authorize', {
                     response_type : 'code',
                     client_id: 'sketch',
                     scope: 'api:v1',
-                    // code_challenge_method: 'S256',
-                    // code_challenge: challengeCode,
+                    code_challenge_method: 'S256',
+                    code_challenge: challenge,
                     redirect_uri: 'https://frontify.com/sketchplugin',
                     session_id: sessionId
                 });

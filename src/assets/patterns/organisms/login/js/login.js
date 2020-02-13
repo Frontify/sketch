@@ -59,12 +59,10 @@ Tc.Module.Login = Tc.Module.extend({
         var verifier = this.base64URLEncode(window.randomBytes(32));
         var challenge = this.base64URLEncode(this.sha256(verifier));
 
-        window.postMessage('beginLoginFlow', {
-            domain: domain,
-            verifier: verifier,
-            challenge: challenge,
-        });
+        console.log(verifier, challenge);
+
         window.postMessage('memorizeDomain', domain);
+        window.postMessage('beginLoginFlow', challenge);
     },
 
     sanitizeUrl: function(url) {
