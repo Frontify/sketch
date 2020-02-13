@@ -37,7 +37,9 @@
   "dependencies": {
     "@skpm/builder": "^0.5.15",
     "@skpm/child_process": "^0.4.1",
+    "create-hash": "^1.2.0",
     "mocha-js-delegate": "^0.2.0",
+    "randombytes": "^2.1.0",
     "sketch-module-web-view": "^3.1.4"
   }
 }
