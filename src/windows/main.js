@@ -119,7 +119,9 @@ export default function(context, view) {
 
                 console.log('URL', url);
                 console.log('Domain', domain);
-                NSWorkspace.sharedWorkspace().openURL(domain + url);
+
+                // Open the URL in the browser
+                NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString(domain + url))
             });
     });
 
