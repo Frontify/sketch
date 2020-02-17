@@ -271,7 +271,7 @@ class Artboard {
                 return this.getDetachedGroupByExportedSymbolLayer(layer);
             }
 
-            if (layer._class === 'group') {
+            if (layer._class === 'group' || layer._class === 'shapeGroup') {
                 layer.layers = layer.layers.map(resolve);
             }
 
