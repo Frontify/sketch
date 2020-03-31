@@ -368,7 +368,7 @@ class Artboard {
     exportFormats(doc, layer) {
         let files = [];
 
-        layer.exportFormats.forEach(function(format) {
+        layer.exportFormats.forEach((format) => {
 
             let name = '';
             if (format.prefix && format.prefix !== 'null') {
@@ -381,14 +381,15 @@ class Artboard {
                 name += format.suffix;
             }
 
-            let timeStamp = Date.now();
-            let path = filemanager.getExportPath() + timeStamp + '-' + name + '.' + format.fileFormat;
+            const timeStamp = Date.now();
+            const path = filemanager.getExportPath() + timeStamp + '-' + name + '.' + format.fileFormat;
+            const layerSizeAsScaleNumber = this.getLayerScaleNumberFromSizeString(format.size, layer.frame);
+            const layerFormat = MSExportFormat.alloc().init();
 
-            let layerFormat = MSExportFormat.alloc().init();
             layerFormat.setFileFormat(format.fileFormat);
-            layerFormat.setScale(format.size);
+            layerFormat.setScale(layerSizeAsScaleNumber);
 
-            let exportRequest = MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(layer.sketchObject, [layerFormat], true).firstObject();
+            const exportRequest = MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(layer.sketchObject, [layerFormat], true).firstObject();
             doc.saveArtboardOrSlice_toFile(exportRequest, path);
 
             files.push({
@@ -403,9 +404,9 @@ class Artboard {
         });
 
         if (layer.layers) {
-            layer.layers.forEach(function(layer) {
+            layer.layers.forEach((layer) => {
                 files = files.concat(this.exportFormats(doc, layer));
-            }.bind(this));
+            });
         }
 
         return files;
@@ -581,6 +582,30 @@ class Artboard {
         else {
             console.log('upload in progress');
         }
+    }
+
+    /**
+     *
+     * @param sizeString: e.g. "2x, 100w, 300h"
+     * @param layerFrame
+     */
+    getLayerScaleNumberFromSizeString(sizeString, layerFrame) {
+        let scale = 1;
+
+        if (sizeString.indexOf('x') !== -1) {
+            scale = parseFloat(sizeString);
+        }
+        else if (sizeString.indexOf('w') !== -1) {
+            const widthInPx = parseInt(sizeString);
+            scale = 1 / layerFrame.width * widthInPx;
+        }
+        else if (sizeString.indexOf('h') !== -1) {
+            // there is a given height
+            const heightInPx = parseInt(sizeString);
+            scale = 1 / layerFrame.height * heightInPx;
+        }
+
+        return scale;
     }
 }
 
