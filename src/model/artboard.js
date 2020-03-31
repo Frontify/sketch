@@ -381,18 +381,15 @@ class Artboard {
                 name += format.suffix;
             }
 
-            let timeStamp = Date.now();
-            let path = filemanager.getExportPath() + timeStamp + '-' + name + '.' + format.fileFormat;
+            const timeStamp = Date.now();
+            const path = filemanager.getExportPath() + timeStamp + '-' + name + '.' + format.fileFormat;
             const layerSizeAsScaleNumber = this.getLayerScaleNumberFromSizeString(format.size, layer.frame);
-            let layerFormat = MSExportFormat.alloc().init();
-            layerFormat.setFileFormat(format.fileFormat);
+            const layerFormat = MSExportFormat.alloc().init();
 
-            // according the documentation of the JS API it should be able to pass strings like "2x, 100w, 100width, 100px, 300h, 300height"
-            // but it doesn't work. After testing it seems it only supports integers for scaling.
-            // this.getLayerScaleIntFromSizeString does the transformation.
+            layerFormat.setFileFormat(format.fileFormat);
             layerFormat.setScale(layerSizeAsScaleNumber);
 
-            let exportRequest = MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(layer.sketchObject, [layerFormat], true).firstObject();
+            const exportRequest = MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(layer.sketchObject, [layerFormat], true).firstObject();
             doc.saveArtboardOrSlice_toFile(exportRequest, path);
 
             files.push({
@@ -589,30 +586,20 @@ class Artboard {
 
     /**
      *
-     * @param sizeString: e.g. "2x, 100w, 100width, 100px, 300h, 300height"
+     * @param sizeString: e.g. "2x, 100w, 300h"
      * @param layerFrame
      */
     getLayerScaleNumberFromSizeString(sizeString, layerFrame) {
         let scale = 1;
 
         if (sizeString.indexOf('x') !== -1) {
-            // there is a given float or integer scale string
-            scale = parseFloat(sizeString); //Float to support strings like '1.5x'
+            scale = parseFloat(sizeString);
         }
-        else if (
-            sizeString.indexOf('w') !== -1 ||
-            sizeString.indexOf('width') !== -1 ||
-            sizeString.indexOf('px') !== -1
-        ) {
-            // there is a given width in px
+        else if (sizeString.indexOf('w') !== -1) {
             const widthInPx = parseInt(sizeString);
             scale = 1 / layerFrame.width * widthInPx;
         }
-        else if (
-            // there is a given height in px
-            sizeString.indexOf('h') !== -1 ||
-            sizeString.indexOf('height') !== -1
-        ) {
+        else if (sizeString.indexOf('h') !== -1) {
             // there is a given height
             const heightInPx = parseInt(sizeString);
             scale = 1 / layerFrame.height * heightInPx;
