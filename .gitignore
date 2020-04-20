@@ -12,6 +12,3 @@ npm-debug.log
 
 # WebStorm
 .idea
-
-# notarization
-.skpmrc

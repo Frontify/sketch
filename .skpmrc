@@ -1,0 +1,3 @@
+notarization:
+    authority: 'Developer ID Application: Frontify AG'
+    command: './notarize.sh' 
