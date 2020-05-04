@@ -574,7 +574,9 @@ class Artboard {
                                                                                 )
                                                                                 .then(
                                                                                     function (data) {
-                                                                                        // filemanager.deleteFile(file.path);
+                                                                                        filemanager.deleteFile(
+                                                                                            file.path
+                                                                                        );
                                                                                         this.updateProgress(
                                                                                             artboard,
                                                                                             artboardProgress
@@ -584,7 +586,7 @@ class Artboard {
                                                                                     }.bind(this)
                                                                                 );
                                                                         } else {
-                                                                            // filemanager.deleteFile(file.path);
+                                                                            filemanager.deleteFile(file.path);
                                                                             artboardProgress.setCompletedUnitCount(
                                                                                 artboardProgress.completedUnitCount() +
                                                                                     10

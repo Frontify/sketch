@@ -12,7 +12,6 @@ import response from '../helpers/response';
 class FileManager {
     constructor() {
         this.exportPath = NSTemporaryDirectory() + 'sketch-frontify/';
-        this.clearExportFolder();
     }
 
     getExportPath() {
