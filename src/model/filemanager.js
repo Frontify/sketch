@@ -1,18 +1,17 @@
-import readJSON from '../helpers/readJSON'
-import writeJSON from '../helpers/writeJSON'
-import fetch from '../helpers/fetch'
-import createFolder from '../helpers/createFolder'
-import target from './target'
-import sketch from './sketch'
+import readJSON from '../helpers/readJSON';
+import writeJSON from '../helpers/writeJSON';
+import fetch from '../helpers/fetch';
+import createFolder from '../helpers/createFolder';
+import target from './target';
+import sketch from './sketch';
 import FormData from 'sketch-polyfill-fetch/lib/form-data';
-import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote'
-import extend from "../helpers/extend";
-import response from  "../helpers/response";
+import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
+import extend from '../helpers/extend';
+import response from '../helpers/response';
 
 class FileManager {
     constructor() {
         this.exportPath = NSTemporaryDirectory() + 'sketch-frontify/';
-        this.clearExportFolder();
     }
 
     getExportPath() {
@@ -24,58 +23,65 @@ class FileManager {
     }
 
     saveCurrent() {
-        return target.getTarget('sources').then(function(data) {
-            // create folder first
-            if (createFolder(data.path)) {
-                let dialog = NSSavePanel.savePanel();
-                dialog.canCreateDirectories = false;
-                dialog.directoryURL = NSURL.fileURLWithPath(data.path);
-                dialog.allowedFileTypes = ['sketch'];
-                dialog.message = 'Save your Sketch File in the Frontify sync folder';
+        return target.getTarget('sources').then(
+            function (data) {
+                // create folder first
+                if (createFolder(data.path)) {
+                    let dialog = NSSavePanel.savePanel();
+                    dialog.canCreateDirectories = false;
+                    dialog.directoryURL = NSURL.fileURLWithPath(data.path);
+                    dialog.allowedFileTypes = ['sketch'];
+                    dialog.message = 'Save your Sketch File in the Frontify sync folder';
 
-                let clicked = dialog.runModal();
+                    let clicked = dialog.runModal();
 
-                if (clicked == NSOKButton) {
-                    let url = dialog.URL();
+                    if (clicked == NSOKButton) {
+                        let url = dialog.URL();
+                        let doc = sketch.getDocument();
+
+                        if (doc) {
+                            doc.saveToURL_ofType_forSaveOperation_error_(
+                                url,
+                                'com.bohemiancoding.sketch.drawing',
+                                NSSaveOperation,
+                                null
+                            );
+                        }
+
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+
+                return false;
+            }.bind(this)
+        );
+    }
+
+    moveCurrent() {
+        return target.getTarget('sources').then(
+            function (data) {
+                if (createFolder(data.path)) {
                     let doc = sketch.getDocument();
 
                     if (doc) {
-                        doc.saveToURL_ofType_forSaveOperation_error_(url, "com.bohemiancoding.sketch.drawing", NSSaveOperation, null);
+                        let nsurl = doc.fileURL();
+                        let path = nsurl.path();
+                        let parts = path.split('/');
+                        let currentFilename = parts.pop();
+                        let newNsurl = NSURL.fileURLWithPath(data.path + currentFilename);
+
+                        // move to the target folder
+                        doc.moveToURL_completionHandler_(newNsurl, null);
                     }
 
                     return true;
                 }
-                else {
-                    return false;
-                }
-            }
 
-            return false;
-        }.bind(this));
-
-    }
-
-    moveCurrent() {
-        return target.getTarget('sources').then(function(data) {
-            if (createFolder(data.path)) {
-                let doc = sketch.getDocument();
-
-                if (doc) {
-                    let nsurl = doc.fileURL();
-                    let path = nsurl.path();
-                    let parts = path.split('/');
-                    let currentFilename = parts.pop();
-                    let newNsurl = NSURL.fileURLWithPath(data.path + currentFilename);
-
-                    // move to the target folder
-                    doc.moveToURL_completionHandler_(newNsurl, null);
-                }
-
-                return true;
-            }
-
-            return false;
-        }.bind(this));
+                return false;
+            }.bind(this)
+        );
     }
 
     updateAssetStatus(project, asset) {
@@ -113,7 +119,7 @@ class FileManager {
             name: name,
             filename: filename,
             origin: 'SKETCH',
-            id_external: info.id_external
+            id_external: info.id_external,
         };
 
         if (info.pixel_ratio) {
@@ -125,9 +131,8 @@ class FileManager {
         if (info.type === 'attachment') {
             data['mimetype'] = 'image/png';
             data['asset_id'] = info.asset_id;
-            uri += '/v1/attachment/create'
-        }
-        else if(info.type === 'source') {
+            uri += '/v1/attachment/create';
+        } else if (info.type === 'source') {
             let path = filenameParts.join('/');
             data['mimetype'] = 'application/octet-stream';
             data['id'] = info.id;
@@ -138,8 +143,7 @@ class FileManager {
             if (info.id) {
                 uri += info.id;
             }
-        }
-        else {
+        } else {
             let path = filenameParts.join('/');
             data['mimetype'] = 'image/png';
             data['id'] = info.id;
@@ -157,7 +161,7 @@ class FileManager {
             filepath: info.path,
             type: info.type,
             id: info.id,
-            body: data
+            body: data,
         };
 
         // get token
@@ -165,14 +169,14 @@ class FileManager {
         let defaults = {
             method: 'GET',
             headers: {
-                'Authorization': 'Bearer ' + token.access_token,
-            }
+                Authorization: 'Bearer ' + token.access_token,
+            },
         };
 
         options = extend({}, defaults, options);
 
         if (!uri) {
-            return Promise.reject("Missing URL");
+            return Promise.reject('Missing URL');
         }
 
         uri = token.domain + uri;
@@ -184,12 +188,12 @@ class FileManager {
             coscript.shouldKeepAround = true;
         }
 
-        return new Promise(function(resolve, reject) {
+        return new Promise(function (resolve, reject) {
             var url = NSURL.alloc().initWithString(uri);
             var request = NSMutableURLRequest.requestWithURL(url);
-            request.setHTTPMethod("POST");
+            request.setHTTPMethod('POST');
 
-            Object.keys(options.headers || {}).forEach(function(i) {
+            Object.keys(options.headers || {}).forEach(function (i) {
                 request.setValue_forHTTPHeaderField(options.headers[i], i);
             });
 
@@ -200,7 +204,7 @@ class FileManager {
                 formData.append('file', {
                     fileName: options.body.filename,
                     mimeType: options.body.mimetype,
-                    data: NSData.alloc().initWithContentsOfFile(options.filepath)
+                    data: NSData.alloc().initWithContentsOfFile(options.filepath),
                 });
             }
 
@@ -217,14 +221,11 @@ class FileManager {
             var data = formData._data;
             var boundary = formData._boundary;
 
-            request.setValue_forHTTPHeaderField(
-                "multipart/form-data; boundary=" + boundary,
-                "Content-Type"
-            );
+            request.setValue_forHTTPHeaderField('multipart/form-data; boundary=' + boundary, 'Content-Type');
 
             data.appendData(
                 NSString.alloc()
-                    .initWithString("--" + boundary + "--\r\n")
+                    .initWithString('--' + boundary + '--\r\n')
                     .dataUsingEncoding(NSUTF8StringEncoding)
             );
 
@@ -233,65 +234,77 @@ class FileManager {
             var task = NSURLSession.sharedSession().uploadTaskWithRequest_fromData_completionHandler(
                 request,
                 data,
-                __mocha__.createBlock_function(
-                    'v32@?0@"NSData"8@"NSURLResponse"16@"NSError"24',
-                    function(data, res, error) {
-                        task.progress().setCompletedUnitCount(100);
+                __mocha__.createBlock_function('v32@?0@"NSData"8@"NSURLResponse"16@"NSError"24', function (
+                    data,
+                    res,
+                    error
+                ) {
+                    task.progress().setCompletedUnitCount(100);
 
-                        if (fiber) {
-                            fiber.cleanup();
-                        }
-                        else {
-                            coscript.shouldKeepAround = false;
-                        }
-
-                        if (error) {
-                            finished = true;
-                            return reject(error);
-                        }
-
-                        return resolve(response(res, data));
+                    if (fiber) {
+                        fiber.cleanup();
+                    } else {
+                        coscript.shouldKeepAround = false;
                     }
-                )
+
+                    if (error) {
+                        finished = true;
+                        return reject(error);
+                    }
+
+                    return resolve(response(res, data));
+                })
             );
 
             task.resume();
 
-            if(overallProgress && task) {
+            if (overallProgress && task) {
                 overallProgress.addChild_withPendingUnitCount(task.progress(), 10);
             }
 
             if (fiber) {
-                fiber.onCleanup(function() {
+                fiber.onCleanup(function () {
                     if (!finished) {
                         task.cancel();
                     }
                 });
             }
-        }).then(function(response) {
-            return response.json();
-        }.bind(this)).catch(function(e) {
-            if (e.localizedDescription) {
-                console.error(e.localizedDescription);
-            }
-            else {
-                console.error(e);
-            }
+        })
+            .then(
+                function (response) {
+                    return response.json();
+                }.bind(this)
+            )
+            .catch(
+                function (e) {
+                    if (e.localizedDescription) {
+                        console.error(e.localizedDescription);
+                    } else {
+                        console.error(e);
+                    }
 
-            throw e;
-        }.bind(this));
+                    throw e;
+                }.bind(this)
+            );
     }
 
     downloadScreen(info, overallProgress) {
-        return fetch('/v1/screen/modified/' + info.id).then(function(meta) {
-            this.updateAssetStatus(meta.screen.project, meta.screen);
+        return fetch('/v1/screen/modified/' + info.id).then(
+            function (meta) {
+                this.updateAssetStatus(meta.screen.project, meta.screen);
 
-            return target.getTarget('sources').then(function(target) {
-                if (createFolder(target.path)) {
-                    return this.downloadFile({ uri: '/v1/screen/download/' + info.id, path: target.path + info.filename }, overallProgress);
-                }
-            }.bind(this));
-        }.bind(this));
+                return target.getTarget('sources').then(
+                    function (target) {
+                        if (createFolder(target.path)) {
+                            return this.downloadFile(
+                                { uri: '/v1/screen/download/' + info.id, path: target.path + info.filename },
+                                overallProgress
+                            );
+                        }
+                    }.bind(this)
+                );
+            }.bind(this)
+        );
     }
 
     downloadFile(info, overallProgress) {
@@ -302,12 +315,12 @@ class FileManager {
         let options = {
             method: 'GET',
             headers: {
-                'Authorization': 'Bearer ' + token.access_token,
-            }
+                Authorization: 'Bearer ' + token.access_token,
+            },
         };
 
         if (!uri) {
-            return Promise.reject("Missing URL");
+            return Promise.reject('Missing URL');
         }
 
         var fiber;
@@ -317,32 +330,41 @@ class FileManager {
             coscript.shouldKeepAround = true;
         }
 
-        return new Promise(function(resolve, reject) {
-            var url = NSURL.alloc().initWithString(uri);
-            var request = NSMutableURLRequest.requestWithURL(url);
-            request.setHTTPMethod("GET");
+        return new Promise(
+            function (resolve, reject) {
+                var url = NSURL.alloc().initWithString(uri);
+                var request = NSMutableURLRequest.requestWithURL(url);
+                request.setHTTPMethod('GET');
 
-            Object.keys(options.headers || {}).forEach(function(i) {
-                request.setValue_forHTTPHeaderField(options.headers[i], i);
-            });
+                Object.keys(options.headers || {}).forEach(function (i) {
+                    request.setValue_forHTTPHeaderField(options.headers[i], i);
+                });
 
-            var finished = false;
+                var finished = false;
 
-            var task = NSURLSession.sharedSession().downloadTaskWithRequest_completionHandler(
-                request,
-                __mocha__.createBlock_function(
-                    'v32@?0@"NSURL"8@"NSURLResponse"16@"NSError"24',
-                    function(location, res, error) {
+                var task = NSURLSession.sharedSession().downloadTaskWithRequest_completionHandler(
+                    request,
+                    __mocha__.createBlock_function('v32@?0@"NSURL"8@"NSURLResponse"16@"NSError"24', function (
+                        location,
+                        res,
+                        error
+                    ) {
                         let fileManager = NSFileManager.defaultManager();
                         let targetUrl = NSURL.fileURLWithPath(info.path);
 
-                        fileManager.replaceItemAtURL_withItemAtURL_backupItemName_options_resultingItemURL_error(targetUrl, location, nil, NSFileManagerItemReplacementUsingNewMetadataOnly, nil, nil);
+                        fileManager.replaceItemAtURL_withItemAtURL_backupItemName_options_resultingItemURL_error(
+                            targetUrl,
+                            location,
+                            nil,
+                            NSFileManagerItemReplacementUsingNewMetadataOnly,
+                            nil,
+                            nil
+                        );
                         task.progress().setCompletedUnitCount(100);
 
                         if (fiber) {
                             fiber.cleanup();
-                        }
-                        else {
+                        } else {
                             coscript.shouldKeepAround = false;
                         }
 
@@ -351,35 +373,35 @@ class FileManager {
                             return reject(error);
                         }
                         return resolve(targetUrl.path());
-                    }
-                )
-            );
+                    })
+                );
 
-            task.resume();
+                task.resume();
 
-            if(overallProgress && task) {
-                overallProgress.addChild_withPendingUnitCount(task.progress(), 10);
-            }
+                if (overallProgress && task) {
+                    overallProgress.addChild_withPendingUnitCount(task.progress(), 10);
+                }
 
-            if (fiber) {
-                fiber.onCleanup(function() {
-                    if (!finished) {
-                        task.cancel();
-                    }
-                });
-            }
-        }.bind(this)).catch(function(e) {
-            if (e.localizedDescription) {
-                console.error(e.localizedDescription);
-            }
-            else {
-                console.error(e);
-            }
+                if (fiber) {
+                    fiber.onCleanup(function () {
+                        if (!finished) {
+                            task.cancel();
+                        }
+                    });
+                }
+            }.bind(this)
+        ).catch(
+            function (e) {
+                if (e.localizedDescription) {
+                    console.error(e.localizedDescription);
+                } else {
+                    console.error(e);
+                }
 
-            throw e;
-        }.bind(this));
+                throw e;
+            }.bind(this)
+        );
     }
 }
 
 export default new FileManager();
-
