@@ -21,7 +21,7 @@ then
     exit 1
 fi
 
-echo "Notarizing "$ZIP" with the bundle id "$BUNDLE" using the email "$EMAIL" and the password "$PASSWORD
+echo "Notarizing "$ZIP" with the bundle id "$BUNDLE" using the email "$EMAIL" and the password ******"
 
 OUTPUT=$(xcrun altool --notarize-app -f $ZIP  --primary-bundle-id $BUNDLE -u $EMAIL -p $PASSWORD)
 
@@ -37,5 +37,5 @@ else
     UUID=$(echo $SECOND_LINE| cut -d '=' -f 2)
 
     echo "Plugin sent to the notarization server. To check the status of the request (might take a few minutes), run:"
-    echo "xcrun altool --notarization-info "$UUID" -u "$EMAIL" -p "$PASSWORD
+    echo "xcrun altool --notarization-info "$UUID" -u "$EMAIL" -p ******"
 fi
