@@ -17,6 +17,7 @@ if [[ -z "$EMAIL" || -z "$PASSWORD" ]];
 then
     echo "Missing email or password. Use the following command to add the credentials to keychain for future use."
     echo "security add-generic-password -a <email> -w <password> -s AC_PASSWORD"
+    echo "More on this in the wiki: https://weare.frontify.com/document/41#/setup/sketch-plugin/publish-the-plugin"
     exit 1
 fi
 
