@@ -1,43 +1,43 @@
 {
-  "name": "frontify-plugin",
-  "description": "Connecting your brand and design worlds",
-  "version": "2.2.4",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Frontify/sketch.git"
-  },
-  "engines": {
-    "sketch": ">=3.0"
-  },
-  "skpm": {
     "name": "frontify-plugin",
-    "manifest": "src/manifest.json",
-    "main": "frontify.sketchplugin"
-  },
-  "scripts": {
-    "build": "skpm-build",
-    "watch": "skpm-build --watch",
-    "start": "skpm-build --watch --run",
-    "postinstall": "npm run build && skpm-link"
-  },
-  "devDependencies": {
-    "@skpm/extract-loader": "^2.0.2",
-    "copy-webpack-plugin": "^4.6.0",
-    "css-loader": "^3.2.0",
-    "dot-tpl-loader": "^1.2.1",
-    "file-loader": "^1.1.11",
-    "html-loader": "^0.5.5",
-    "regexp-replace-loader": "^1.0.1",
-    "style-loader": "^0.19.1",
-    "webpack-concat-plugin": "^3.0.0"
-  },
-  "resources": [
-    "src/assets/js/*.js"
-  ],
-  "dependencies": {
-    "@skpm/builder": "^0.5.15",
-    "@skpm/child_process": "^0.4.1",
-    "mocha-js-delegate": "^0.2.0",
-    "sketch-module-web-view": "^3.1.4"
-  }
+    "description": "Connecting your brand and design worlds",
+    "version": "2.2.5",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Frontify/sketch.git"
+    },
+    "engines": {
+        "sketch": ">=3.0"
+    },
+    "skpm": {
+        "name": "frontify-plugin",
+        "manifest": "src/manifest.json",
+        "main": "frontify.sketchplugin"
+    },
+    "scripts": {
+        "build": "skpm-build",
+        "watch": "skpm-build --watch",
+        "start": "skpm-build --watch --run",
+        "postinstall": "npm run build && skpm-link"
+    },
+    "devDependencies": {
+        "@skpm/extract-loader": "^2.0.2",
+        "copy-webpack-plugin": "^4.6.0",
+        "css-loader": "^3.2.0",
+        "dot-tpl-loader": "^1.2.1",
+        "file-loader": "^1.1.11",
+        "html-loader": "^0.5.5",
+        "regexp-replace-loader": "^1.0.1",
+        "style-loader": "^0.19.1",
+        "webpack-concat-plugin": "^3.0.0"
+    },
+    "resources": [
+        "src/assets/js/*.js"
+    ],
+    "dependencies": {
+        "@skpm/builder": "^0.5.15",
+        "@skpm/child_process": "^0.4.1",
+        "mocha-js-delegate": "^0.2.0",
+        "sketch-module-web-view": "^3.1.4"
+    }
 }
