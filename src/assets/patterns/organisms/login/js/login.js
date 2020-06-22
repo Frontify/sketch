@@ -44,9 +44,8 @@ Tc.Module.Login = Tc.Module.extend({
     },
 
     login: function(domain) {
-        let urlParams = '/api/oauth/authorize?response_type=token&client_id=sketch&redirect_uri=https://frontify.com/sketchplugin';
         window.postMessage('memorizeDomain', domain);
-        window.location.href = domain + urlParams;
+        window.postMessage('beginOauthFlow', domain);
     },
 
     sanitizeUrl: function(url) {

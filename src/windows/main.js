@@ -2,6 +2,7 @@ import BrowserWindow from 'sketch-module-web-view'
 import artboard from '../model/artboard';
 import project from '../model/project';
 import filemanager from '../model/filemanager';
+import OAuth from '../model/oauth';
 import source from '../model/source';
 import target from '../model/target';
 import sketch from '../model/sketch';
@@ -45,6 +46,10 @@ export default function(context, view) {
     win.once('ready-to-show', function() {
         win.show();
     }.bind(this));
+
+    webview.on('beginOauthFlow', (domain) => {
+        OAuth.beginOauthFlow(domain).then(() => {});
+    });
 
     // Load tab if webview ready
     webview.on('did-finish-load', function() {
