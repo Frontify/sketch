@@ -17,6 +17,10 @@ Tc.Module.Login = Tc.Module.extend({
             }.bind(this)
         );
 
+        $ctx.on('click', '.js-o-login__cancel-auth', () => {
+            this.render();
+        });
+
         callback();
     },
 
@@ -51,9 +55,14 @@ Tc.Module.Login = Tc.Module.extend({
         );
     },
 
+    renderAwaitAuthorization() {
+        this.$ctx.html(window.tpl.loginawaitauthorization());
+    },
+
     login: function (domain) {
         window.postMessage('memorizeDomain', domain);
         window.postMessage('beginOauthFlow', domain);
+        this.renderAwaitAuthorization();
     },
 
     sanitizeUrl: function (url) {
