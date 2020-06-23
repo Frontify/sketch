@@ -24,6 +24,10 @@
 	padding: 8px 15px;
 }
 
+.a-btn:hover {
+    cursor: pointer;
+}
+
 /* Sizes */
 .a-btn--xs {
 	padding: 3px 6px 4px 6px;
