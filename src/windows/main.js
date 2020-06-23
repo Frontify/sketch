@@ -51,7 +51,22 @@ export default function (context, view) {
     );
 
     webview.on('beginOauthFlow', (domain) => {
-        OAuth.authorize(domain).then(() => {});
+        OAuth.authorize(domain).then((authData) => {
+            if (authData.hasError) {
+                console.log(authData.error);
+                return;
+            }
+
+            user.login({
+                access_token: authData.accessToken,
+                domain: domain,
+            }).then(
+                function () {
+                    win.close();
+                    runCommand(context);
+                }.bind(this)
+            );
+        });
     });
 
     // Load tab if webview ready
@@ -73,32 +88,6 @@ export default function (context, view) {
         'did-fail-load',
         function (err) {
             console.log('did-fail-load', err);
-        }.bind(this)
-    );
-
-    // Handle authentication redirect
-    webview.on(
-        'did-get-redirect-request',
-        function () {
-            let url = getURL();
-            if (url.startsWith('https://frontify.com/sketchplugin')) {
-                let urlparts = url.split('?#access_token=');
-
-                if (urlparts.length !== 1) {
-                    // login with access token
-                    let access_token = urlparts[1].split('&expires_in=31536000&token_type=bearer')[0];
-
-                    user.login({
-                        access_token: access_token,
-                        domain: domain,
-                    }).then(
-                        function () {
-                            win.close();
-                            runCommand(context);
-                        }.bind(this)
-                    );
-                }
-            }
         }.bind(this)
     );
 
