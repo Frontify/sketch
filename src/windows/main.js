@@ -48,7 +48,7 @@ export default function(context, view) {
     }.bind(this));
 
     webview.on('beginOauthFlow', (domain) => {
-        OAuth.beginOauthFlow(domain).then(() => {});
+        OAuth.authorize(domain).then(() => {});
     });
 
     // Load tab if webview ready
