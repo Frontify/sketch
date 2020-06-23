@@ -6,8 +6,7 @@ class OAuth {
         this.domain = '';
         this.secret = '';
         this.challengeCode = '';
-        this.oAuthToken = null;
-        this.isAuthorized = false;
+        this.accessToken = null;
     }
 
     static CLIENT_ID() {
@@ -50,16 +49,14 @@ class OAuth {
 
         try {
             const authorizationCode = await this.pollAuthorizationCode();
-            console.log(`Authorization code: ${authorizationCode}`);
-            this.oAuthToken = await this.getAccessTokenByAuthorizationCode(authorizationCode);
-            console.log('oAuthToken', this.oAuthToken);
+            this.accessToken = await this.getAccessTokenByAuthorizationCode(authorizationCode);
         } catch (errorMessage) {
             hasError = true;
             error = errorMessage;
         }
 
         return {
-            isAuthorized: this.getIsAuthorized(),
+            accessToken: this.accessToken,
             hasError,
             error,
         };
@@ -80,7 +77,7 @@ class OAuth {
             response_type: 'code',
             client_id: OAuth.CLIENT_ID(),
             scope: 'api:v1',
-            challenge_code_method: 'S256',
+            code_challenge_method: 'S256',
             code_challenge: this.challengeCode,
             redirect_uri: OAuth.REDIRECT_URI(),
             session_id: this.sessionId,
@@ -152,15 +149,13 @@ class OAuth {
         };
 
         const response = await fetch(url, options);
-        return await response.json();
-    }
+        const json = await response.json();
 
-    getIsAuthorized() {
-        return this.isAuthorized;
-    }
+        if (json.error || json.success === false) {
+            throw new Error(json.error);
+        }
 
-    getOAuthToken() {
-        return this.oAuthToken;
+        return json.access_token;
     }
 }
 
