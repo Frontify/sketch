@@ -6,6 +6,7 @@ class OAuth {
         this.domain = '';
         this.secret = '';
         this.challengeCode = '';
+        this.oAuthToken = null;
     }
 
     static CLIENT_ID() {
@@ -44,8 +45,14 @@ class OAuth {
         await this.getSecretAndChallengeCode();
         this.openBrowser();
 
-        // TODO: complete by polling or user click
-        setTimeout(() => this.completeAuthorization().then(), 10000);
+        try {
+            const authorizationCode = await this.pollAuthorizationCode();
+            console.log(`Authorization code: ${authorizationCode}`);
+            this.oAuthToken = await this.getAccessTokenByAuthorizationCode(authorizationCode);
+            console.log('oAuthToken', this.oAuthToken);
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     async getSecretAndChallengeCode() {
@@ -66,7 +73,7 @@ class OAuth {
             challenge_code_method: 'S256',
             code_challenge: this.challengeCode,
             redirect_uri: OAuth.REDIRECT_URI(),
-            session_id: this.sessionId
+            session_id: this.sessionId,
         };
 
         const url_params = [];
@@ -81,36 +88,61 @@ class OAuth {
         NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString(url));
     }
 
-    async completeAuthorization() {
-        let url = `${this.domain}/api/oauth/poll`;
-        let options = {
+    async getAuthorizationCode() {
+        const url = `${this.domain}/api/oauth/poll`;
+        const options = {
             method: 'POST',
             headers: OAuth.POST_HEADERS(),
-            body: JSON.stringify({session_id: this.sessionId })
+            body: JSON.stringify({ session_id: this.sessionId }),
         };
 
-        let response = await fetch(url, options);
-        let json = await response.json();
-        const code = json.data.payload.code;
+        const response = await fetch(url, options);
+        const json = await response.json();
 
-        // TODO: split into separated functions
-        url =`${this.domain}/api/oauth/accesstoken`;
-        options = {
+        if (json.data && json.data.payload.code) {
+            return json.data.payload.code;
+        }
+
+        return false;
+    }
+
+    async pollAuthorizationCode() {
+        const maxAttempts = 30;
+        const pollingInterval = 2 * 1000;
+        let attempts = 0;
+
+        const executePoll = async (resolve, reject) => {
+            const result = await this.getAuthorizationCode();
+            attempts++;
+
+            if (result) {
+                return resolve(result);
+            } else if (maxAttempts && attempts === maxAttempts) {
+                return reject(new Error('Exceeded max attempts'));
+            } else {
+                setTimeout(executePoll, pollingInterval, resolve, reject);
+            }
+        };
+
+        return new Promise(executePoll);
+    }
+
+    async getAccessTokenByAuthorizationCode(authorizationCode) {
+        const url = `${this.domain}/api/oauth/accesstoken`;
+        const options = {
             method: OAuth.REQUEST_METHOD_POST(),
             headers: OAuth.POST_HEADERS(),
             body: JSON.stringify({
                 grant_type: OAuth.GRANT_TYPE(),
-                code,
+                code: authorizationCode,
                 client_id: OAuth.CLIENT_ID(),
                 redirect_uri: OAuth.REDIRECT_URI(),
-                code_verifier: this.secret
-            })
+                code_verifier: this.secret,
+            }),
         };
 
-        response = await fetch(url, options);
-        json = await response.json();
-
-        console.log(json);
+        const response = await fetch(url, options);
+        return await response.json();
     }
 }
 
