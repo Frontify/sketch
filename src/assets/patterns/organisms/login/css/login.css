@@ -1,5 +1,5 @@
 .o-login__header {
-    background: #F5F5F6;
+    background: #f5f5f6;
     background-size: 100% auto;
     height: 100%;
     margin: 0 auto 10% auto;
@@ -16,7 +16,7 @@
     height: 30px;
     display: block;
     content: '';
-    background: url('../images/arch.svg')  no-repeat bottom;
+    background: url('../images/arch.svg') no-repeat bottom;
     background-size: cover;
 }
 
@@ -41,22 +41,27 @@
 .o-login__p {
     text-align: center;
     font-size: 11px;
-    color: rgba(57,64,77,0.5);
+    color: rgba(57, 64, 77, 0.5);
     margin-bottom: 8px;
     font-weight: 200;
 }
 
 .o-login__link {
-    color: rgba(57,64,77,0.5);
+    color: rgba(57, 64, 77, 0.5);
     text-decoration: none;
     font-weight: 600;
     transition: color 0.2s ease-in-out;
 }
 
 .o-login__link:hover {
-    color: rgba(57,64,77,0.7);
+    color: rgba(57, 64, 77, 0.7);
 }
 
 .o-login__link:active {
-    color: rgba(57,64,77,1);
+    color: rgba(57, 64, 77, 1);
+}
+
+.o-login__message_container {
+    padding: 30px;
+    text-align: center;
 }
