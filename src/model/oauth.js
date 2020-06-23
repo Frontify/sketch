@@ -53,7 +53,6 @@ class OAuth {
             console.log(`Authorization code: ${authorizationCode}`);
             this.oAuthToken = await this.getAccessTokenByAuthorizationCode(authorizationCode);
             console.log('oAuthToken', this.oAuthToken);
-
         } catch (errorMessage) {
             hasError = true;
             error = errorMessage;

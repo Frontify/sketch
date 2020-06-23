@@ -125,7 +125,11 @@ class Notification {
                                             this.showNotification({
                                                 title: 'You are not alone',
                                                 image: eventData.actor.image,
-                                                description: eventData.actor.name + ' is currently working on ' + asset.filename + '. This might lead to conflicts.'
+                                                description:
+                                                    eventData.actor.name +
+                                                    ' is currently working on ' +
+                                                    asset.filename +
+                                                    '. This might lead to conflicts.',
                                             });
                                         }
                                     }.bind(this));

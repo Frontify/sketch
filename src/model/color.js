@@ -1,7 +1,7 @@
 import target from './target';
-import fetch from '../helpers/fetch'
+import fetch from '../helpers/fetch';
 import sketch from './sketch';
-import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote'
+import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
 
 let API = require('sketch');
 
@@ -16,20 +16,21 @@ class Color {
         let loop = selection.objectEnumerator();
         let item = null;
 
-        while (item = loop.nextObject()) {
+        while ((item = loop.nextObject())) {
             if (item.class() == MSLayerGroup) {
                 let layers = item.layers();
-                layers.forEach(function (layer) {
-                    this.applyColorToLayer(layer, color);
-                }.bind(this));
-            }
-            else {
+                layers.forEach(
+                    function (layer) {
+                        this.applyColorToLayer(layer, color);
+                    }.bind(this)
+                );
+            } else {
                 this.applyColorToLayer(item, color);
             }
         }
 
         let doc = sketch.getDocument();
-        if(doc) {
+        if (doc) {
             doc.reloadInspector();
         }
     }
@@ -38,7 +39,7 @@ class Color {
         let app = NSApp.delegate();
         let doc = sketch.getDocument();
 
-        if(doc) {
+        if (doc) {
             let assets = doc.documentData().assets();
             let mscolors = this.convertColors(colors);
             assets.addColorAssets(mscolors);
@@ -51,7 +52,7 @@ class Color {
         let app = NSApp.delegate();
         let doc = sketch.getDocument();
 
-        if(doc) {
+        if (doc) {
             let assets = doc.documentData().assets();
             let mscolors = this.convertColors(colors);
             assets.setColorAssets([]);
@@ -59,7 +60,6 @@ class Color {
 
             app.refreshCurrentDocument();
         }
-
     }
 
     addGlobalColors(colors) {
@@ -85,21 +85,35 @@ class Color {
 
     convertColors(colors) {
         let mscolors = [];
-        colors.forEach(function (color) {
-            mscolors.push(this.convertColor(color));
-        }.bind(this));
+        colors.forEach(
+            function (color) {
+                mscolors.push(this.convertColor(color));
+            }.bind(this)
+        );
 
         return mscolors;
     }
 
     convertColor(color, type) {
-        if(type === 'MSColor') {
+        if (type === 'MSColor') {
             // Color for e.g. typostyles
-            return MSColor.colorWithRed_green_blue_alpha(color.r / 255, color.g / 255, color.b / 255, (color.alpha || color.a) / 255);
-        }
-        else {
+            return MSColor.colorWithRed_green_blue_alpha(
+                color.r / 255,
+                color.g / 255,
+                color.b / 255,
+                (color.alpha || color.a) / 255
+            );
+        } else {
             // Asset for document and global colors
-            return MSColorAsset.alloc().initWithAsset_name(MSColor.colorWithRed_green_blue_alpha(color.r / 255, color.g / 255, color.b / 255, (color.alpha || color.a) / 255), color.name);
+            return MSColorAsset.alloc().initWithAsset_name(
+                MSColor.colorWithRed_green_blue_alpha(
+                    color.r / 255,
+                    color.g / 255,
+                    color.b / 255,
+                    (color.alpha || color.a) / 255
+                ),
+                color.name
+            );
         }
     }
 
@@ -109,8 +123,14 @@ class Color {
 
         if (clazz == MSTextLayer) {
             layer.setTextColor(mscolor);
-        }
-        else if(clazz == MSRectangleShape || clazz == MSOvalShape || clazz == MSTriangleShape || clazz == MSStarShape || clazz == MSPolygonShape || clazz == MSShapeGroup) {
+        } else if (
+            clazz == MSRectangleShape ||
+            clazz == MSOvalShape ||
+            clazz == MSTriangleShape ||
+            clazz == MSStarShape ||
+            clazz == MSPolygonShape ||
+            clazz == MSShapeGroup
+        ) {
             let fills = layer.style().fills();
             if (fills.count() <= 0) {
                 fills.addNewStylePart();
@@ -123,19 +143,22 @@ class Color {
     }
 
     showColors() {
-        target.getAssetSourcesForType('colors').then(function(assetSources) {
-            if(assetSources && assetSources.selected) {
-                this.getColors(assetSources.selected.id).then(function (data) {
-                    if (isWebviewPresent('frontifymain')) {
-                        data.project = assetSources.selected;
-                        sendToWebview('frontifymain', 'showAssetSources(' + JSON.stringify(assetSources) + ')');
-                        sendToWebview('frontifymain', 'showColors(' + JSON.stringify(data) + ')');
-                    }
-                }.bind(this));
-            }
-        }.bind(this));
+        target.getAssetSourcesForType('colors').then(
+            function (assetSources) {
+                if (assetSources && assetSources.selected) {
+                    this.getColors(assetSources.selected.id).then(
+                        function (data) {
+                            if (isWebviewPresent('frontifymain')) {
+                                data.project = assetSources.selected;
+                                sendToWebview('frontifymain', 'showAssetSources(' + JSON.stringify(assetSources) + ')');
+                                sendToWebview('frontifymain', 'showColors(' + JSON.stringify(data) + ')');
+                            }
+                        }.bind(this)
+                    );
+                }
+            }.bind(this)
+        );
     }
 }
 
 export default new Color();
-
