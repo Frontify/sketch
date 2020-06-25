@@ -7,6 +7,7 @@ class OAuth {
         this.secret = '';
         this.challengeCode = '';
         this.accessToken = null;
+        this.authorizationPollingAllowed = true;
     }
 
     static CLIENT_ID() {
@@ -119,6 +120,11 @@ class OAuth {
         let attempts = 0;
 
         const executePoll = async (resolve, reject) => {
+            if (this.authorizationPollingAllowed === false) {
+                this.authorizationPollingAllowed = true;
+                return reject(new Error('Authorization was cancelled manually'));
+            }
+
             const result = await this.getAuthorizationCode();
             attempts++;
 
@@ -132,6 +138,10 @@ class OAuth {
         };
 
         return new Promise(executePoll);
+    }
+
+    cancelAuthorizationPolling() {
+        this.authorizationPollingAllowed = false;
     }
 
     async getAccessTokenByAuthorizationCode(authorizationCode) {

@@ -50,6 +50,10 @@ export default function (context, view) {
         }.bind(this)
     );
 
+    webview.on('cancelOauthFlow', () => {
+        OAuth.cancelAuthorizationPolling();
+    });
+
     webview.on('beginOauthFlow', (domain) => {
         OAuth.authorize(domain).then((authData) => {
             if (authData.hasError) {

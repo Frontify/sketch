@@ -18,6 +18,7 @@ Tc.Module.Login = Tc.Module.extend({
         );
 
         $ctx.on('click', '.js-o-login__cancel-auth', () => {
+            window.postMessage('cancelOauthFlow');
             this.render();
         });
 
