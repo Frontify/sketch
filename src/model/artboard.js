@@ -345,7 +345,9 @@ class Artboard {
      */
 
     recursivelyDetachSymbols(layer) {
-        if (layer.type === 'Group') {
+        if (layer === null) {
+            return;
+        } else if (layer.type === 'Group') {
             layer.layers.forEach((layer) => {
                 this.recursivelyDetachSymbols(layer);
             });
@@ -377,8 +379,10 @@ class Artboard {
 
         let detachedlayer = layer.detach({ recursively: false });
 
-        /* detached layer is a now a group, so do detaching for its layers again */
-        this.recursivelyDetachSymbols(detachedlayer);
+        /* if the symbol was detachable, the detached layer is a now a group, so do detaching for its layers again */
+        if (detachedlayer?.type === 'Group') {
+            this.recursivelyDetachSymbols(detachedlayer);
+        }
 
         return detachedlayer;
     }
