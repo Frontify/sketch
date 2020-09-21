@@ -345,7 +345,9 @@ class Artboard {
      */
 
     recursivelyDetachSymbols(layer) {
-        if (layer.type === 'Group') {
+        if (layer === null) {
+            return;
+        } else if (layer.type === 'Group') {
             layer.layers.forEach((layer) => {
                 this.recursivelyDetachSymbols(layer);
             });
@@ -377,10 +379,38 @@ class Artboard {
 
         let detachedlayer = layer.detach({ recursively: false });
 
-        /* detached layer is a now a group, so do detaching for its layers again */
-        this.recursivelyDetachSymbols(detachedlayer);
+        /* fallback for undetachable symbols (e.g. symbols without layers) */
+        if (detachedlayer === null) {
+            detachedlayer = this.getFallbackLayerFromUndetachableSymbol(layer);
+            Settings.setLayerSettingForKey(detachedlayer, 'meta', meta);
+
+            /* remove remaining duplicate because we return an additionally created layer */
+            layer.remove();
+        }
+
+        /* if the symbol was detachable, the detached layer is a now a group, so do detaching for its layers again */
+        if (detachedlayer?.type === 'Group') {
+            this.recursivelyDetachSymbols(detachedlayer);
+        }
 
         return detachedlayer;
+    }
+
+    getFallbackLayerFromUndetachableSymbol(symbolLayer) {
+        const propertiesBlacklist = ['id', 'type', 'symbolId', 'overrides'];
+        const fallbackLayerProperties = {};
+
+        for (const property in symbolLayer) {
+            if (propertiesBlacklist.includes(property)) {
+                continue;
+            }
+
+            fallbackLayerProperties[property] = symbolLayer[property];
+        }
+
+        const fallbackLayer = new DOM.Group(fallbackLayerProperties);
+
+        return fallbackLayer;
     }
 
     exportFormats(doc, layer) {
