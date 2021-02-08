@@ -8,15 +8,20 @@ import user from '../model/user';
 export default function (context) {
     loadFramework('pusher', 'PTPusher', context);
 
-    if(user.isAuthenticated()) {
-        notification.listen();
+    const accessToken = user.getAccessToken();
+
+    if (accessToken) {
+        notification.listen(accessToken);
     }
 }
 
 function loadFramework(name, checkClassName, context) {
     if (NSClassFromString(checkClassName) == null) {
         let mocha = Mocha.sharedRuntime();
-        return mocha.loadFrameworkWithName_inDirectory(name, context.scriptPath.stringByDeletingLastPathComponent() + '/frameworks');
+        return mocha.loadFrameworkWithName_inDirectory(
+            name,
+            context.scriptPath.stringByDeletingLastPathComponent() + '/frameworks'
+        );
     } else {
         return true;
     }

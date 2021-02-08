@@ -1,7 +1,7 @@
-import fetch from '../helpers/fetch'
-import target from "./target";
-import source from "./source";
-import user from "./user";
+import fetch from '../helpers/fetch';
+import target from './target';
+import source from './source';
+import user from './user';
 
 let MochaJSDelegate = require('mocha-js-delegate');
 let threadDictionary = NSThread.mainThread().threadDictionary();
@@ -20,21 +20,27 @@ class Notification {
         }
     }
 
-    connect() {
+    connect(accessToken) {
         if (this.pusher) {
             return Promise.resolve(this.pusher);
         }
 
-        return fetch('/v1/account/environment').then(function (data) {
+        return fetch('/v1/account/environment').then((data) => {
             if (data['pusher']['enabled']) {
                 if (data['pusher']['region'] != 'us') {
-                    this.pusher = PTPusher.pusherWithKey_delegate_encrypted_cluster(data['pusher']['key'], nil, true, data['pusher']['region']);
-                }
-                else {
+                    this.pusher = PTPusher.pusherWithKey_delegate_encrypted_cluster(
+                        data['pusher']['key'],
+                        nil,
+                        true,
+                        data['pusher']['region']
+                    );
+                } else {
                     this.pusher = PTPusher.pusherWithKey_delegate_encrypted(data['pusher']['key'], nil, true);
                 }
 
-                this.pusher.authorizationURL = NSURL.URLWithString(data['domain'] + '/api/pusher/auth');
+                this.pusher.authorizationURL = NSURL.URLWithString(
+                    data['domain'] + `/v1/pusher/auth?access_token=${accessToken}`
+                );
                 this.pusher.connect();
 
                 threadDictionary['frontifynotificationpusher'] = this.pusher;
@@ -42,12 +48,12 @@ class Notification {
             }
 
             throw new Error('Pusher not enabled');
-        }.bind(this));
+        });
     }
 
     disconnect() {
-        if(this.pusher) {
-            if(this.channel) {
+        if (this.pusher) {
+            if (this.channel) {
                 this.unsubscribe();
             }
 
@@ -88,10 +94,10 @@ class Notification {
     on(event, callback) {
         if (this.pusher) {
             let delegate = new MochaJSDelegate({
-                'didReceiveChannelEventNotification:': function (notification) {
+                'didReceiveChannelEventNotification:': (notification) => {
                     let event = notification.userInfo().objectForKey('PTPusherEventUserInfoKey');
                     callback(event);
-                }
+                },
             });
 
             let fiber = require('sketch/async').createFiber();
@@ -99,53 +105,56 @@ class Notification {
             let delegateInstance = delegate.getClassInstance();
             let sel = NSSelectorFromString('didReceiveChannelEventNotification:');
 
-            NSNotificationCenter
-                .defaultCenter()
-                .addObserver_selector_name_object(delegateInstance, sel, 'PTPusherEventReceivedNotification', this.pusher);
-
+            NSNotificationCenter.defaultCenter().addObserver_selector_name_object(
+                delegateInstance,
+                sel,
+                'PTPusherEventReceivedNotification',
+                this.pusher
+            );
         }
     }
 
-    listen() {
-        return this.connect().then(function () {
-            // subscribe to current chosen project
-            return target.getTarget().then(function (target) {
-                if (target.project) {
-                    this.subscribe(target.project.id);
+    listen(accessToken) {
+        return this.connect(accessToken)
+            .then(() => {
+                // subscribe to current chosen project
+                return target.getTarget().then((target) => {
+                    if (target.project) {
+                        this.subscribe(target.project.id);
 
-                    // bind events
-                    this.on('screen-activity', function (event) {
-                        let possibleActivities = ['OPEN', 'LOCAL_CHANGE', 'CLOSE'];
-                        let eventData = event.data();
-                        if (possibleActivities.indexOf('' + eventData.type) > -1) {
-                            source.getCurrentAsset().then(function (asset) {
-                                if (asset && '' + asset.id == '' + eventData.screen) {
-                                    user.getUser().then(function (userData) {
-                                        if ('' + eventData.actor.id != '' + userData.id) {
-                                            this.showNotification({
-                                                title: 'You are not alone',
-                                                image: eventData.actor.image,
-                                                description:
-                                                    eventData.actor.name +
-                                                    ' is currently working on ' +
-                                                    asset.filename +
-                                                    '. This might lead to conflicts.',
-                                            });
-                                        }
-                                    }.bind(this));
-                                }
-                            }.bind(this));
-                        }
-                    }.bind(this));
+                        // bind events
+                        this.on('screen-activity', (event) => {
+                            let possibleActivities = ['OPEN', 'LOCAL_CHANGE', 'CLOSE'];
+                            let eventData = event.data();
+                            if (possibleActivities.indexOf('' + eventData.type) > -1) {
+                                source.getCurrentAsset().then((asset) => {
+                                    if (asset && '' + asset.id == '' + eventData.screen) {
+                                        user.getUser().then((userData) => {
+                                            if ('' + eventData.actor.id != '' + userData.id) {
+                                                this.showNotification({
+                                                    title: 'You are not alone',
+                                                    image: eventData.actor.image,
+                                                    description:
+                                                        eventData.actor.name +
+                                                        ' is currently working on ' +
+                                                        asset.filename +
+                                                        '. This might lead to conflicts.',
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
 
-                    return true;
-                }
-            }.bind(this));
-        }.bind(this)).catch(function(e) {
-            console.error(e);
-        }.bind(this));
+                        return true;
+                    }
+                });
+            })
+            .catch((e) => {
+                console.error(e);
+            });
     }
 }
 
 export default new Notification();
-

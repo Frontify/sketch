@@ -9,7 +9,7 @@ let threadDictionary = NSThread.mainThread().threadDictionary();
 class User {
     constructor() {}
 
-    isAuthenticated() {
+    getAccessToken() {
         let token = readJSON('token');
 
         return token && token.access_token;
@@ -50,11 +50,11 @@ class User {
         );
     }
 
-    login(data) {
+    login(tokens) {
         return Promise.resolve().then(
             function () {
-                writeJSON('token', data);
-                return notification.listen();
+                writeJSON('token', tokens);
+                return notification.listen(tokens.access_token);
             }.bind(this)
         );
     }
