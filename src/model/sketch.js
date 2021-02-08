@@ -7,7 +7,7 @@ class Sketch {
     getViewData() {
         let data = {};
 
-        if (user.getTokens()) {
+        if (user.getAccessToken()) {
             data.url = require('../assets/views/main.html');
             data.width = 480;
             data.height = 600;
