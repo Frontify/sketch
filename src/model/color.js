@@ -36,29 +36,54 @@ class Color {
     }
 
     addDocumentColors(colors) {
-        let app = NSApp.delegate();
-        let doc = sketch.getDocument();
-
-        if (doc) {
-            let assets = doc.documentData().assets();
-            let mscolors = this.convertColors(colors);
-            assets.addColorAssets(mscolors);
-
-            app.refreshCurrentDocument();
+        if (this.getSketchVersion() >= '69') {
+            this.addColorsToDocumentScope(colors);
+        } else {
+            this.addColorsToDocumentScopeLegacy(colors);
         }
     }
 
     replaceDocumentColors(colors) {
-        let app = NSApp.delegate();
-        let doc = sketch.getDocument();
+        if (this.getSketchVersion() >= '69') {
+            this.addColorsToDocumentScope(colors, true);
+        } else {
+            this.addColorsToDocumentScopeLegacy(colors, true);
+        }
+    }
 
-        if (doc) {
-            let assets = doc.documentData().assets();
-            let mscolors = this.convertColors(colors);
-            assets.setColorAssets([]);
-            assets.addColorAssets(mscolors);
+    addColorsToDocumentScope(colors, replaceCurrentColors = false) {
+        let selectedDocument = API.getSelectedDocument();
 
-            app.refreshCurrentDocument();
+        if (selectedDocument) {
+            if (replaceCurrentColors) {
+                selectedDocument.swatches = [];
+            }
+
+            colors.forEach((color) => {
+                selectedDocument.swatches.push(
+                    API.Swatch.from({
+                        name: color.name,
+                        color: color.css_value_hex,
+                    })
+                );
+            });
+        }
+    }
+
+    /**
+     * @deprecated Should only be used in sketch version 68 and older! Use 'addColorsToDocumentScope' instead.
+     */
+    addColorsToDocumentScopeLegacy(colors, replaceCurrentColors = false) {
+        let selectedDocument = API.getSelectedDocument();
+
+        if (selectedDocument) {
+            if (replaceCurrentColors) {
+                selectedDocument.colors = [];
+            }
+
+            this.convertColors(colors).forEach((convertedColor) => {
+                selectedDocument.colors.push(convertedColor);
+            });
         }
     }
 
@@ -158,6 +183,10 @@ class Color {
                 }
             }.bind(this)
         );
+    }
+
+    getSketchVersion() {
+        return API.Settings.version.sketch;
     }
 }
 
