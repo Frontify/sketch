@@ -36,11 +36,19 @@ class Color {
     }
 
     addDocumentColors(colors) {
-        this.addColorsToDocumentScope(colors);
+        if (this.getSketchVersion() >= '69') {
+            this.addColorsToDocumentScope(colors);
+        } else {
+            this.addColorsToDocumentScopeLegacy(colors);
+        }
     }
 
     replaceDocumentColors(colors) {
-        this.addColorsToDocumentScope(colors, true);
+        if (this.getSketchVersion() >= '69') {
+            this.addColorsToDocumentScope(colors, true);
+        } else {
+            this.addColorsToDocumentScopeLegacy(colors, true);
+        }
     }
 
     addColorsToDocumentScope(colors, replaceCurrentColors = false) {
@@ -58,6 +66,23 @@ class Color {
                         color: color.css_value_hex,
                     })
                 );
+            });
+        }
+    }
+
+    /**
+     * @deprecated Should only be used in sketch version 68 and older! Use 'addColorsToDocumentScope' instead.
+     */
+    addColorsToDocumentScopeLegacy(colors, replaceCurrentColors = false) {
+        let selectedDocument = API.getSelectedDocument();
+
+        if (selectedDocument) {
+            if (replaceCurrentColors) {
+                selectedDocument.colors = [];
+            }
+
+            this.convertColors(colors).forEach((convertedColor) => {
+                selectedDocument.colors.push(convertedColor);
             });
         }
     }
@@ -158,6 +183,10 @@ class Color {
                 }
             }.bind(this)
         );
+    }
+
+    getSketchVersion() {
+        return API.Settings.version.sketch;
     }
 }
 
