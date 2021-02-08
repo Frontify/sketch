@@ -36,29 +36,29 @@ class Color {
     }
 
     addDocumentColors(colors) {
-        let app = NSApp.delegate();
-        let doc = sketch.getDocument();
-
-        if (doc) {
-            let assets = doc.documentData().assets();
-            let mscolors = this.convertColors(colors);
-            assets.addColorAssets(mscolors);
-
-            app.refreshCurrentDocument();
-        }
+        this.addColorsToDocumentScope(colors);
     }
 
     replaceDocumentColors(colors) {
-        let app = NSApp.delegate();
-        let doc = sketch.getDocument();
+        this.addColorsToDocumentScope(colors, true);
+    }
 
-        if (doc) {
-            let assets = doc.documentData().assets();
-            let mscolors = this.convertColors(colors);
-            assets.setColorAssets([]);
-            assets.addColorAssets(mscolors);
+    addColorsToDocumentScope(colors, replaceCurrentColors = false) {
+        let selectedDocument = API.getSelectedDocument();
 
-            app.refreshCurrentDocument();
+        if (selectedDocument) {
+            if (replaceCurrentColors) {
+                selectedDocument.swatches = [];
+            }
+
+            colors.forEach((color) => {
+                selectedDocument.swatches.push(
+                    API.Swatch.from({
+                        name: color.name,
+                        color: color.css_value_hex,
+                    })
+                );
+            });
         }
     }
 
