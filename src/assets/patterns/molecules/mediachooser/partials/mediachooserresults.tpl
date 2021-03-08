@@ -14,7 +14,7 @@
                 <i class="icon-play"></i>
             </div>
         {{?}}
-        <img data-src="{{= asset.generic_url.replace('{width}', 400) }}" class="m-mediachooser__image lazyload" />
+        <img data-src="{{= asset.preview_url }}" class="m-mediachooser__image lazyload" />
         {{? it.type !== 'icons' }}
             <div class="m-mediachooser__image-overlay">
                 <h4 class="m-mediachooser__image-title">{{! asset.title }}</h4>
