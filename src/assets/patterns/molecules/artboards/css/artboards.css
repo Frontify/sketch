@@ -76,6 +76,7 @@
 }
 
 .m-artboards__list {
+    flex: 1 1;
     overflow: scroll;
 }
 
