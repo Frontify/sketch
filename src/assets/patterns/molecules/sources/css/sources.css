@@ -76,8 +76,8 @@
 }
 
 .m-sources__list {
-    flex: 1 0;
-    overflow: auto;
+    flex: auto;
+    overflow-y: scroll;
 }
 
 .m-sources__item {
