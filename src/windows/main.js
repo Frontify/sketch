@@ -17,13 +17,16 @@ import sketch3 from 'sketch';
 
 let threadDictionary = NSThread.mainThread().threadDictionary();
 
+// We can use this method to construct the file path to our entry
+// HTML file which will be a static asset within the plugin bundle.
+// The code is copied from the @skpm/sketch-module-web-view which usually
+// does that transformation but needs "require()" to do so. Since we’re
+// building with Vite and not Webpack, this seemed necessary.
 function pathInsidePluginBundle(url) {
     return `file://${
         context.scriptPath.split('.sketchplugin/Contents/Sketch')[0]
     }.sketchplugin/Contents/Resources/${url}`;
 }
-
-const useReact = true;
 
 export default function (context, view) {
     let viewData = sketch.getViewData();
@@ -103,23 +106,8 @@ export default function (context, view) {
         function () {
             sketch.resize(win);
 
-            if (useReact) {
-                let documentPath = sketch3.getSelectedDocument().path;
-                webview.executeJavaScript(`sendData('Sketch Document: ${documentPath}')`).catch(console.error);
-            }
-
-            /**
-             * This code leads to "Possible Unhandled Promise Rejection", so we’ll skip it for now.
-             */
-
-            if (!useReact) {
-                if (decodeURI(getURL()) == mainURL) {
-                    setTimeout(function () {
-                        target.showTarget();
-                        webview.executeJavaScript('switchTab("' + view + '")');
-                    }, 200);
-                }
-            }
+            let documentPath = sketch3.getSelectedDocument().path;
+            webview.executeJavaScript(`sendData('Sketch Document: ${documentPath}')`).catch(console.error);
         }.bind(this)
     );
 

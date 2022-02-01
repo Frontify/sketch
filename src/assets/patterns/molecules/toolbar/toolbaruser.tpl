@@ -1,1 +1,0 @@
-<button class="m-toolbar__btn js-m-toolbar__profile"><img class="m-toolbar__avatar" src="{{= it.image }}" alt="{{= it.name }}"></button>

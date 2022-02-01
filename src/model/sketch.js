@@ -7,11 +7,11 @@ class Sketch {
         let data = {};
 
         if (user.isAuthenticated()) {
-            data.url = require('../assets/views/main.html');
+            // data.url = require('../assets/views/main.html');
             data.width = 480;
             data.height = 600;
         } else {
-            data.url = require('../assets/views/login.html');
+            // data.url = require('../assets/views/login.html');
             data.width = 360;
             data.height = 530;
         }

@@ -16,9 +16,8 @@
     },
     "scripts": {
         "dev": "vite serve src/frontend",
-        "vitebuild": "vite --config vite.config.js build src/frontend --base=./",
-        "vitebuildwatch": "vite --watch --emptyOutDir --config vite.config.js build src/frontend --base=./",
-        "build": "skpm-build",
+        "build": "skpm-build && vite --emptyOutDir --config vite.config.js build src/frontend --base=./",
+        "buildwatch": "skpm-build && vite --watch --emptyOutDir --config vite.config.js build src/frontend --base=./",
         "watch": "skpm-build --watch",
         "start": "skpm-build --watch --run",
         "postinstall": "npm run build && skpm-link"
