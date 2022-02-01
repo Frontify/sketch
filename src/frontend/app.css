@@ -1,0 +1,100 @@
+@import 'assets/fonts/ui/fonts.css';
+/* @import '../../../node_modules/@frontify/arcade-tokens/dist/css/all.css'; */
+
+h2 {
+    font-weight: 600;
+    font-size: 24px;
+}
+
+/* These classes are missing in Arcade */
+.tw-gap-small {
+    gap: 0.5rem;
+}
+
+.tw-gap-medium {
+    gap: 1rem;
+}
+
+.tw-gap-large {
+    gap: 1.5rem;
+}
+
+.tw-gap-xx-large {
+    gap: 2rem;
+}
+
+custom-h-stack {
+    display: flex;
+    flex-direction: row;
+    justify-content: stretch;
+}
+
+custom-h-stack[align-items='center'] {
+    align-items: center;
+}
+
+custom-h-stack[stretch-children] > * {
+    width: 100%;
+}
+
+[padding='x-small'] {
+    padding: var(--space-xs);
+}
+[padding='small'] {
+    padding: var(--space-s);
+}
+[padding='medium'] {
+    padding: var(--space-m);
+}
+[padding='large'] {
+    padding: var(--space-l);
+}
+[gap='small'] {
+    gap: var(--space-s);
+}
+[gap='medium'] {
+    gap: var(--space-m);
+}
+[gap='large'] {
+    gap: var(--space-l);
+}
+
+custom-line {
+    display: block;
+    height: 1px;
+    background: rgba(0, 0, 0, 0.12);
+}
+
+custom-scope-button {
+    padding: 2px 8px;
+    border-radius: 100px;
+}
+
+custom-scope-button[active='true'] {
+    background: var(--box-neutral-color);
+    font-weight: 500;
+}
+
+custom-scope-button input {
+    display: none;
+}
+
+/* Spacer */
+
+custom-spacer {
+    flex: 1;
+}
+
+custom-scope-bar-wrapper {
+    display: block;
+    padding: 8px;
+}
+
+/* Toolbar */
+
+custom-toolbar-wrapper {
+    padding: 8px;
+    display: block;
+    background: var(--box-neutral-strong-color);
+    color: white;
+}

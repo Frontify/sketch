@@ -15,6 +15,9 @@
         "main": "frontify.sketchplugin"
     },
     "scripts": {
+        "dev": "vite serve src/frontend",
+        "vitebuild": "vite --config vite.config.js build src/frontend --base=./",
+        "vitebuildwatch": "vite --watch --emptyOutDir --config vite.config.js build src/frontend --base=./",
         "build": "skpm-build",
         "watch": "skpm-build --watch",
         "start": "skpm-build --watch --run",
@@ -24,6 +27,7 @@
         "@babel/plugin-syntax-async-generators": "^7.8.4",
         "@babel/plugin-transform-runtime": "^7.11.5",
         "@skpm/extract-loader": "^2.0.2",
+        "@vitejs/plugin-react": "^1.0.7",
         "copy-webpack-plugin": "^5.1.2",
         "css-loader": "^3.2.0",
         "dot-tpl-loader": "^1.2.1",
@@ -31,6 +35,7 @@
         "html-loader": "^0.5.5",
         "regexp-replace-loader": "^1.0.1",
         "style-loader": "^0.19.1",
+        "vite": "^2.7.2",
         "webpack-concat-plugin": "^3.0.0"
     },
     "resources": [
@@ -38,9 +43,13 @@
     ],
     "dependencies": {
         "@babel/runtime": "^7.11.2",
+        "@frontify/arcade": "^1.0.0",
         "@skpm/builder": "^0.7.7",
         "@skpm/child_process": "^0.4.1",
+        "@vitejs/plugin-legacy": "^1.6.4",
         "mocha-js-delegate": "^0.2.0",
+        "react": "^17.0.2",
+        "react-dom": "^17.0.2",
         "sketch-module-web-view": "^3.1.4"
     }
 }

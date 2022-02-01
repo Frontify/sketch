@@ -13,12 +13,23 @@ import user from '../model/user';
 import createFolder from '../helpers/createFolder';
 import { runCommand } from '../commands/frontify';
 
+import sketch3 from 'sketch';
+
 let threadDictionary = NSThread.mainThread().threadDictionary();
+
+function pathInsidePluginBundle(url) {
+    return `file://${
+        context.scriptPath.split('.sketchplugin/Contents/Sketch')[0]
+    }.sketchplugin/Contents/Resources/${url}`;
+}
+
+const useReact = true;
 
 export default function (context, view) {
     let viewData = sketch.getViewData();
-    let mainURL = require('../assets/views/main.html');
-    let loginURL = require('../assets/views/login.html');
+
+    let mainURL = 'http://localhost:3000' || pathInsidePluginBundle('index.html');
+
     let domain = '';
 
     // create window and webview
@@ -32,15 +43,28 @@ export default function (context, view) {
         show: false,
         resizable: true,
         fullscreenable: false,
+        minWidth: 320,
+        minHeight: 500,
         maximizable: false,
         minimizable: false,
         alwaysOnTop: true,
+        hidesOnDeactivate: false,
+        remembersWindowFrame: true,
     });
 
-    let webview = win.webContents;
+    win.setAlwaysOnTop(true, 'modal-panel');
 
+    let webview = win.webContents;
     // Load initial url
-    webview.loadURL(viewData.url);
+
+    /**
+     * Here, we used to load viewData.url, but I don’t understand where that URL comes from.
+     * Is it the previously seen URL and we use it to restore the most recent view that the user
+     * has seen? For now, the mainURL will be loaded which will be the entry point for React.
+     */
+
+    // webview.loadURL(viewData.url);
+    webview.loadURL(mainURL);
 
     // Show window if ready
     win.once(
@@ -79,11 +103,22 @@ export default function (context, view) {
         function () {
             sketch.resize(win);
 
-            if (decodeURI(getURL()) == mainURL) {
-                setTimeout(function () {
-                    target.showTarget();
-                    webview.executeJavaScript('switchTab("' + view + '")');
-                }, 200);
+            if (useReact) {
+                let documentPath = sketch3.getSelectedDocument().path;
+                webview.executeJavaScript(`sendData('Sketch Document: ${documentPath}')`).catch(console.error);
+            }
+
+            /**
+             * This code leads to "Possible Unhandled Promise Rejection", so we’ll skip it for now.
+             */
+
+            if (!useReact) {
+                if (decodeURI(getURL()) == mainURL) {
+                    setTimeout(function () {
+                        target.showTarget();
+                        webview.executeJavaScript('switchTab("' + view + '")');
+                    }, 200);
+                }
             }
         }.bind(this)
     );

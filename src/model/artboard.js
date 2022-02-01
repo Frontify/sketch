@@ -41,6 +41,9 @@ class Artboard {
                     remoteStatus = Promise.resolve({ assets: this.remoteAssets });
                 } else {
                     // load remote assets status
+
+                    // TODO: Replace path with external ID
+
                     remoteStatus = fetch(
                         '/v1/assets/status/' +
                             target.project.id +

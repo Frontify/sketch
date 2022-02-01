@@ -1,8 +1,7 @@
 import user from './user';
 
 class Sketch {
-    constructor() {
-    }
+    constructor() {}
 
     getViewData() {
         let data = {};
@@ -11,8 +10,7 @@ class Sketch {
             data.url = require('../assets/views/main.html');
             data.width = 480;
             data.height = 600;
-        }
-        else {
+        } else {
             data.url = require('../assets/views/login.html');
             data.width = 360;
             data.height = 530;
@@ -24,24 +22,23 @@ class Sketch {
     resize(win) {
         let viewData = this.getViewData();
         win.setSize(viewData.width, viewData.height, true);
-
     }
 
     // generic search functions (from https://medium.com/sketch-app-sources/sketch-plugin-snippets-for-plugin-developers-e9e1d2ab6827)
     findLayers(predicate, container, layerType, doc) {
         doc = doc || this.getDocument();
-        if(!doc) {
+        if (!doc) {
             return NSArray.array();
         }
 
         let scope;
         switch (layerType) {
-            case MSPage :
+            case MSPage:
                 scope = doc.pages();
                 return scope.filteredArrayUsingPredicate(predicate);
                 break;
 
-            case MSArtboardGroup :
+            case MSArtboardGroup:
                 if (typeof container !== 'undefined' && container != nil) {
                     if (container.className == 'MSPage') {
                         scope = container.artboards();
@@ -50,26 +47,32 @@ class Sketch {
                 } else {
                     // search all pages
                     let filteredArray = NSArray.array();
-                    let loopPages = doc.pages().objectEnumerator(), page;
-                    while (page = loopPages.nextObject()) {
+                    let loopPages = doc.pages().objectEnumerator(),
+                        page;
+                    while ((page = loopPages.nextObject())) {
                         scope = page.artboards();
-                        filteredArray = filteredArray.arrayByAddingObjectsFromArray(scope.filteredArrayUsingPredicate(predicate));
+                        filteredArray = filteredArray.arrayByAddingObjectsFromArray(
+                            scope.filteredArrayUsingPredicate(predicate)
+                        );
                     }
                     return filteredArray;
                 }
                 break;
 
-            default :
+            default:
                 if (typeof container !== 'undefined' && container != nil) {
                     scope = container.children();
                     return scope.filteredArrayUsingPredicate(predicate);
                 } else {
                     // search all pages
                     let filteredArray = NSArray.array();
-                    let loopPages = doc.pages().objectEnumerator(), page;
-                    while (page = loopPages.nextObject()) {
+                    let loopPages = doc.pages().objectEnumerator(),
+                        page;
+                    while ((page = loopPages.nextObject())) {
                         scope = page.children();
-                        filteredArray = filteredArray.arrayByAddingObjectsFromArray(scope.filteredArrayUsingPredicate(predicate));
+                        filteredArray = filteredArray.arrayByAddingObjectsFromArray(
+                            scope.filteredArrayUsingPredicate(predicate)
+                        );
                     }
                     return filteredArray;
                 }
@@ -84,7 +87,7 @@ class Sketch {
 
     getSelection() {
         let doc = this.getDocument();
-        if(!doc) {
+        if (!doc) {
             return NSArray.array();
         }
 
@@ -97,4 +100,3 @@ class Sketch {
 }
 
 export default new Sketch();
-
