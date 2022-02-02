@@ -19,15 +19,19 @@ export function NavigationBar() {
     const [source, setSource] = useState({ title: ' workspace_template-chooser' });
 
     return (
-        <custom-h-stack gap="small" padding="small">
-            <button>
+        <custom-h-stack gap="small" padding="small" align-items="center">
+            <Link to="/">
                 <IconArrowLeft size="Size16"></IconArrowLeft>
-            </button>
+            </Link>
             <custom-h-stack align-items="center" gap="small">
                 <IconSketch size="Size24"></IconSketch>
                 <Stack direction="column">
                     <Breadcrumbs
-                        items={[{ label: 'Arcade' }, { label: 'inventory' }, { label: 'workspace_template-chooser' }]}
+                        items={[
+                            { label: 'Arcade' },
+                            { label: 'inventory' },
+                            { bold: true, label: 'workspace_template-chooser' },
+                        ]}
                     ></Breadcrumbs>
                     {/* <custom-breadcrumbs>
                         {path.map((entry) => {

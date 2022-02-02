@@ -112,3 +112,15 @@ custom-breadcrumbs > * + *:before {
     display: inline-block;
     margin: 0 var(--space-s);
 }
+
+custom-console {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    height: 100px;
+    width: 100%;
+    background: black;
+    color: greenyellow;
+    padding: 1rem;
+    overflow: auto;
+}

@@ -1,10 +1,7 @@
 import React from 'react';
-import { Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route, Link, useLocation } from 'react-router-dom';
 
 import '@frontify/arcade/style';
-
-import { Button } from '@frontify/arcade/components/Button';
-import { Dropdown } from '@frontify/arcade/components/Dropdown';
 
 import { Stack } from '@frontify/arcade/foundation/layout/Stack';
 import { BrandView } from './BrandView';
@@ -53,7 +50,12 @@ export default class extends React.Component {
     render() {
         return (
             <div>
-                <pre>{this.state.data}</pre>
+                <custom-console>
+                    <pre>{new Date().toLocaleTimeString()}</pre>
+                    <pre>---</pre>
+                    <pre>{this.state.data}</pre>
+                    <pre>{window.location.pathname}</pre>
+                </custom-console>
                 <Toolbar></Toolbar>
                 <NavigationBar></NavigationBar>
                 <custom-line></custom-line>
@@ -90,8 +92,6 @@ export default class extends React.Component {
                         <button className="tw-underline">Current document</button>
                     </Stack>
                 </custom-scope-bar-wrapper>
-                <custom-line></custom-line>
-
                 <custom-line></custom-line>
 
                 <Routes>

@@ -2,15 +2,16 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './components/App';
 import { BrowserRouter } from 'react-router-dom';
+import { UserContextProvider } from './UserContext';
 
-(() => {
-    ReactDOM.render(
+ReactDOM.render(
+    <UserContextProvider>
         <BrowserRouter>
             <App />
-        </BrowserRouter>,
-        document.getElementById('root')
-    );
-})();
+        </BrowserRouter>
+    </UserContextProvider>,
+    document.getElementById('root')
+);
 
 /**
  * Messaging
