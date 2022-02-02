@@ -15,6 +15,8 @@ import { runCommand } from '../commands/frontify';
 
 import sketch3 from 'sketch';
 
+const isDev = true;
+
 let threadDictionary = NSThread.mainThread().threadDictionary();
 
 // We can use this method to construct the file path to our entry
@@ -31,31 +33,27 @@ function pathInsidePluginBundle(url) {
 export default function (context, view) {
     let viewData = sketch.getViewData();
 
-    let mainURL = 'http://localhost:3000' || pathInsidePluginBundle('index.html');
+    let mainURL = isDev ? 'http://localhost:3000' : pathInsidePluginBundle('index.html');
 
     let domain = '';
 
     // create window and webview
     let win = new BrowserWindow({
-        identifier: 'frontifymain',
-        titleBarStyle: 'default',
-        backgroundColor: '#FFFFFF',
-        width: viewData.width,
-        height: viewData.height,
-        title: 'Frontify',
-        show: false,
-        resizable: true,
-        fullscreenable: false,
-        minWidth: 320,
-        minHeight: 500,
-        maximizable: false,
-        minimizable: false,
+        acceptsFirstMouse: true,
         alwaysOnTop: true,
+        fullscreenable: false,
+        height: viewData.height,
         hidesOnDeactivate: false,
-        remembersWindowFrame: true,
+        identifier: 'frontifymain',
+        maximizable: false,
+        minHeight: 500,
+        minimizable: false,
+        minWidth: 320,
+        resizable: true,
+        show: false,
+        title: 'Frontify',
+        width: viewData.width,
     });
-
-    win.setAlwaysOnTop(true, 'modal-panel');
 
     let webview = win.webContents;
     // Load initial url

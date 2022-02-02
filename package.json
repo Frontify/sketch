@@ -49,6 +49,6 @@
         "mocha-js-delegate": "^0.2.0",
         "react": "^17.0.2",
         "react-dom": "^17.0.2",
-        "sketch-module-web-view": "^3.1.4"
+        "sketch-module-web-view": "^3.5.1"
     }
 }
