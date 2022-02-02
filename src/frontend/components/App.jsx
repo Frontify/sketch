@@ -1,4 +1,5 @@
 import React from 'react';
+import { Routes, Route, Link } from 'react-router-dom';
 
 import '@frontify/arcade/style';
 
@@ -6,7 +7,9 @@ import { Button } from '@frontify/arcade/components/Button';
 import { Dropdown } from '@frontify/arcade/components/Dropdown';
 
 import { Stack } from '@frontify/arcade/foundation/layout/Stack';
+import { BrandView } from './BrandView';
 import { RecentSourcesView } from './RecentSourcesView';
+import { NavigationBar } from './NavigationBar';
 import { Toolbar } from './Toolbar';
 import { Text } from '@frontify/arcade/foundation/typography/Text';
 
@@ -52,6 +55,8 @@ export default class extends React.Component {
             <div>
                 <pre>{this.state.data}</pre>
                 <Toolbar></Toolbar>
+                <NavigationBar></NavigationBar>
+                <custom-line></custom-line>
                 <custom-scope-bar-wrapper>
                     <Stack padding="small">
                         <custom-scope-button className="tw-round" active={this.state.activeView == 'open'}>
@@ -86,41 +91,46 @@ export default class extends React.Component {
                     </Stack>
                 </custom-scope-bar-wrapper>
                 <custom-line></custom-line>
-                <RecentSourcesView></RecentSourcesView>
-                <Button onClick={this.reloadWebView}>Reload</Button>
-                <p>{new Date().toLocaleTimeString()}</p>
+
+                <custom-line></custom-line>
+
+                <Routes>
+                    <Route path="/" element={<RecentSourcesView />} />
+                    <Route path="/arcade" element={<BrandView />} />
+                </Routes>
+
                 <h2>Source Picker</h2>
                 <ul>
                     <li>Toolbar with User, Brand, Notifications, Refresh</li>
                     <li>Source Picker with Open, Recent, Current Document</li>
                 </ul>
+                <custom-line></custom-line>
                 <h2>Source View</h2>
                 <ul>
                     <li>Toolbar with User, Brand, Notifications, Refresh</li>
                     <li>Source Navigation Bar with Upload and Contextmenu</li>
                     <li>Tabbed View with Brand and Artboards</li>
                 </ul>
+                <custom-line></custom-line>
                 <h2>Brand View</h2>
                 <ul>
                     <li>Button Group with Colors, Symbols, Typography, Icons, Images, Logos</li>
                     <li>Scoped Search with Settings</li>
                     <li>Collection View for Assets</li>
                 </ul>
+                <custom-line></custom-line>
                 <h2>Artboards View</h2>
                 <ul>
                     <li>List of Artboard</li>
                     <li>Upload Destination Picker</li>
                 </ul>
+                <custom-line></custom-line>
                 <h2>Upload Destination Picker</h2>
                 <li>Breadcrumbs / Path</li>
                 <li>New Folder (?)</li>
                 <li>Files & Directories</li>
                 <li>Cancel and Upload Button</li>
                 <li>Progress Bar</li>
-                <Button size="Small">Hello</Button>
-                <Button size="Medium">Hello</Button>
-                <Button size="Large">Hello</Button>
-                <Dropdown menuBlocks={[]} onChange={() => {}} placeholder="select item" size="Small" />
             </div>
         );
     }

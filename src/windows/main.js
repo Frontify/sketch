@@ -15,8 +15,6 @@ import { runCommand } from '../commands/frontify';
 
 import sketch3 from 'sketch';
 
-console.log('👋 Frontify Plugin is now running. NODE_ENV: ', process.env.NODE_ENV);
-
 const isDev = process.env.NODE_ENV == 'development';
 
 let threadDictionary = NSThread.mainThread().threadDictionary();
@@ -73,6 +71,7 @@ export default function (context, view) {
     win.once(
         'ready-to-show',
         function () {
+            console.log('👋 Frontify Plugin is now running. NODE_ENV: ', process.env.NODE_ENV);
             win.show();
         }.bind(this)
     );

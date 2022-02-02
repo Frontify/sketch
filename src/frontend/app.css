@@ -49,6 +49,9 @@ custom-h-stack[stretch-children] > * {
 [padding='large'] {
     padding: var(--space-l);
 }
+[gap='x-small'] {
+    gap: var(--space-xs);
+}
 [gap='small'] {
     gap: var(--space-s);
 }
@@ -97,4 +100,15 @@ custom-toolbar-wrapper {
     display: block;
     background: var(--box-neutral-strong-color);
     color: white;
+}
+
+custom-breadcrumbs {
+    display: flex;
+    gap: var(--space-s);
+}
+
+custom-breadcrumbs > * + *:before {
+    content: '/';
+    display: inline-block;
+    margin: 0 var(--space-s);
 }
