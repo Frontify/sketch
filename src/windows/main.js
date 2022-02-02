@@ -15,7 +15,9 @@ import { runCommand } from '../commands/frontify';
 
 import sketch3 from 'sketch';
 
-const isDev = true;
+console.log('👋 Frontify Plugin is now running. NODE_ENV: ', process.env.NODE_ENV);
+
+const isDev = process.env.NODE_ENV == 'development';
 
 let threadDictionary = NSThread.mainThread().threadDictionary();
 
@@ -103,9 +105,6 @@ export default function (context, view) {
         'did-finish-load',
         function () {
             sketch.resize(win);
-
-            let documentPath = sketch3.getSelectedDocument().path;
-            webview.executeJavaScript(`sendData('Sketch Document: ${documentPath}')`).catch(console.error);
         }.bind(this)
     );
 
