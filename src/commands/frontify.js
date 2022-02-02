@@ -1,16 +1,15 @@
 import main from '../windows/main';
 import executeSafely from '../helpers/executeSafely';
 import source from '../model/source';
-import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote'
-
+import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
+import sketch3 from 'sketch';
 export function runCommand(context) {
     let threadDictionary = NSThread.mainThread().threadDictionary();
 
     executeSafely(context, function () {
-        if(!threadDictionary['frontifywindow']) {
+        if (!threadDictionary['frontifywindow']) {
             threadDictionary['frontifywindow'] = main(context, 'artboards');
-        }
-        else {
+        } else {
             threadDictionary['frontifywindow'].close();
         }
     });
@@ -46,9 +45,18 @@ export function closeCommand(context) {
 }
 
 export function selectionChangedCommand(context) {
-    executeSafely(context, function() {
+    executeSafely(context, function () {
         if (isWebviewPresent('frontifymain')) {
             sendToWebview('frontifymain', 'selectionChanged()');
+
+            let layers = context.actionContext.document.selectedLayers().layers().slice();
+            let layerInformation = layers.map((layer) => {
+                let nativeLayer = sketch3.fromNative(layer);
+                return `${nativeLayer.name} (${nativeLayer.id}`;
+            });
+            layers.forEach((layer) => {
+                view.send('sketch.document.selection', `${layers.length} layers: ${layerInformation}`);
+            });
         }
     });
 }
@@ -58,3 +66,11 @@ function refresh() {
         sendToWebview('frontifymain', 'refresh()');
     }
 }
+/**
+ * We can use this helper to make it more convenient to send messages to the webview.
+ */
+const view = {
+    send(type, payload) {
+        sendToWebview('frontifymain', `sendData(${JSON.stringify(payload)})`);
+    },
+};

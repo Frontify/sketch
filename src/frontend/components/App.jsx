@@ -50,6 +50,7 @@ export default class extends React.Component {
     render() {
         return (
             <div>
+                <pre>{this.state.data}</pre>
                 <Toolbar></Toolbar>
                 <custom-scope-bar-wrapper>
                     <Stack padding="small">
@@ -120,7 +121,6 @@ export default class extends React.Component {
                 <Button size="Medium">Hello</Button>
                 <Button size="Large">Hello</Button>
                 <Dropdown menuBlocks={[]} onChange={() => {}} placeholder="select item" size="Small" />
-                <pre>{this.state.data}</pre>
             </div>
         );
     }
