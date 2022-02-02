@@ -14,7 +14,7 @@ export default class extends React.Component {
     constructor(props) {
         super(props);
 
-        this.handleSendDataEvent = this.handleSendDataEvent.bind(this);
+        this.handleSendEvent = this.handleSendEvent.bind(this);
         this.handleActiveViewChange = this.handleActiveViewChange.bind(this);
 
         this.state = {
@@ -32,14 +32,14 @@ export default class extends React.Component {
     }
 
     componentDidMount() {
-        window.addEventListener('send-data', this.handleSendDataEvent);
+        window.addEventListener('send-data', this.handleSendEvent);
     }
 
     componentWillUnmount() {
-        window.removeEventListener('send-data', this.handleSendDataEvent);
+        window.removeEventListener('send-data', this.handleSendEvent);
     }
 
-    handleSendDataEvent(e) {
+    handleSendEvent(e) {
         this.setState({
             data: e.detail.data,
         });

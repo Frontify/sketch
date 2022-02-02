@@ -3,6 +3,7 @@ import executeSafely from '../helpers/executeSafely';
 import source from '../model/source';
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
 import sketch3 from 'sketch';
+
 export function runCommand(context) {
     let threadDictionary = NSThread.mainThread().threadDictionary();
 
@@ -71,6 +72,6 @@ function refresh() {
  */
 const view = {
     send(type, payload) {
-        sendToWebview('frontifymain', `sendData(${JSON.stringify(payload)})`);
+        sendToWebview('frontifymain', `send(${JSON.stringify(payload)})`);
     },
 };

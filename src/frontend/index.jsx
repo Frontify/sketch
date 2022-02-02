@@ -10,7 +10,7 @@ import App from './components/App';
  * Messaging
  */
 
-window.sendData = (data) => {
+window.send = (data) => {
     // create and dispatch the event including the data
     var event = new CustomEvent('send-data', {
         detail: {
