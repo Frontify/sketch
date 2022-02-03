@@ -44,10 +44,13 @@
     "dependencies": {
         "@babel/runtime": "^7.11.2",
         "@frontify/arcade": "^1.0.0",
+        "@frontify/frontify-authenticator": "^2.0.0",
         "@skpm/builder": "^0.7.7",
         "@skpm/child_process": "^0.4.1",
         "@vitejs/plugin-legacy": "^1.6.4",
+        "create-hash": "^1.2.0",
         "mocha-js-delegate": "^0.2.0",
+        "random-bytes": "^1.0.0",
         "react": "^17.0.2",
         "react-dom": "^17.0.2",
         "react-router-dom": "^6.2.1",

@@ -8,10 +8,9 @@
     <body style="background: white">
         <div id="root"></div>
         <script type="text/javascript">
-            window.onerror = function (message, source, lineno, colno, error) {
-                console.log(message);
-            };
-            console.log('index.html here');
+            // Hack needed for crypto stuff inside browser.js (auth flow)
+            // The libraries are assuming NodeJS built-ins
+            var global = global || window;
         </script>
 
         <!-- For Development -->
