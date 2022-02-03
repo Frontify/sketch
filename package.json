@@ -15,12 +15,13 @@
         "main": "frontify.sketchplugin"
     },
     "scripts": {
-        "dev": "vite serve src/frontend",
         "build": "NODE_ENV=production skpm-build && vite --emptyOutDir --config vite.config.js build src/frontend --base=./",
         "buildwatch": "skpm-build && vite --watch --emptyOutDir --config vite.config.js build src/frontend --base=./",
-        "watch": "NODE_ENV=development skpm-build --watch",
+        "cert": "rm -rf .cert && mkdir -p .cert && mkcert -key-file ./.cert/key.pem -cert-file ./.cert/cert.pem 'localhost'",
+        "dev": "vite serve src/frontend",
+        "postinstall": "npm run build && skpm-link",
         "start": "skpm-build --watch --run",
-        "postinstall": "npm run build && skpm-link"
+        "watch": "NODE_ENV=development skpm-build --watch"
     },
     "devDependencies": {
         "@babel/plugin-syntax-async-generators": "^7.8.4",

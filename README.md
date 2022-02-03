@@ -1,3 +1,44 @@
+# TODO: Update README for the React version of the plugin
+
+# SSL Certificate for Development
+
+The plugin is using a WebView to show a website. To speed up development, we’re pointing the WebView to our local dev server (Vite) that serves the frontend at http://localhost:3000. For security reasons, we can only load secure websites into a WebView. We can make our dev server secure by creating SSL certificates and provide those to the dev server config.
+
+## Step: 1
+
+Install mkcert tool - macOS; you can see the mkcert repo for details
+`brew install mkcert`
+
+## Step: 2
+
+Setup mkcert on your machine (creates a CA)
+`mkcert -install`
+
+## Step: 3
+
+Create certificates
+`npm run cert`
+
+# Development
+
+## 1. Build the plugin
+
+This command will use `skpm` and `webpack` to bundle the plugin. It takes care of creating the .sketchplugin bundle, moves the plugin commands and scripts and more. It does not care about the frontend.
+`npm run watch`
+
+## 2. Start the dev server
+
+This command will start the Vite dev server. While in development, the plugin will use the dev server url.
+`npm run dev`
+
+# Build
+
+This command will first build the plugin using `skpm`. Then, it builds the frontend using Vite. The output of Vite will be moved inside the previously built `frontify.sketchplugin/Resources/` – without any modifications. The WebView of the plugin will point to the `index.html` of that static build, no more SSL certificats required.
+
+`npm run build`
+
+---
+
 # Frontify for Sketch
 
 A [Sketch] plugin that provides integration with Frontify. Get it @ [Frontify Sketch Plugin]
