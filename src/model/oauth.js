@@ -77,21 +77,21 @@ class OAuth {
         const parameters = {
             response_type: 'code',
             client_id: OAuth.CLIENT_ID(),
-            scope: 'api:v1',
             code_challenge_method: 'S256',
             code_challenge: this.challengeCode,
             redirect_uri: OAuth.REDIRECT_URI(),
             session_id: this.sessionId,
+            scope: 'basic:read',
         };
 
         const url_params = [];
 
         for (const name in parameters) {
-            const value = encodeURI(parameters[name]);
+            const value = encodeURIComponent(parameters[name]);
             url_params.push(`${name}=${value}`);
         }
-
         const url = `${this.domain}/api/oauth/authorize?${url_params.join('&')}`;
+        console.log('open browser', url);
 
         NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString(url));
     }

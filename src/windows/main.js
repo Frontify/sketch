@@ -12,9 +12,12 @@ import asset from '../model/asset';
 import user from '../model/user';
 import createFolder from '../helpers/createFolder';
 import { runCommand } from '../commands/frontify';
+import { sendToWebview } from 'sketch-module-web-view/remote';
 
-import sketch3 from 'sketch';
+// Identifier for the plugin window that we can use for message passing
+const IDENTIFIER = 'frontifymain';
 
+// Dev/Prod switch that we can use to point the webview to different URLs
 const isDev = process.env.NODE_ENV == 'development';
 
 let threadDictionary = NSThread.mainThread().threadDictionary();
@@ -30,10 +33,21 @@ function pathInsidePluginBundle(url) {
     }.sketchplugin/Contents/Resources/${url}`;
 }
 
+/**
+ * We can use this helper to make it more convenient to send messages to the webview.
+ */
+const frontend = {
+    send(type, payload) {
+        sendToWebview(IDENTIFIER, `send(${JSON.stringify({ type, payload })})`);
+    },
+};
+
 export default function (context, view) {
     let viewData = sketch.getViewData();
 
-    let mainURL = isDev ? 'http://localhost:3000' : pathInsidePluginBundle('index.html');
+    // viewData.url -> depending on the authorization state, returns "/" or "/signin"
+    let baseURL = isDev ? 'http://localhost:3000' : pathInsidePluginBundle('index.html');
+    let mainURL = `${baseURL}${viewData.url}`;
 
     let domain = '';
 
@@ -44,7 +58,7 @@ export default function (context, view) {
         fullscreenable: false,
         height: viewData.height,
         hidesOnDeactivate: false,
-        identifier: 'frontifymain',
+        identifier: IDENTIFIER,
         maximizable: false,
         minHeight: 500,
         minimizable: false,
@@ -68,13 +82,14 @@ export default function (context, view) {
     webview.loadURL(mainURL);
 
     // Show window if ready
-    win.once(
-        'ready-to-show',
-        function () {
-            console.log('👋 Frontify Plugin is now running. NODE_ENV: ', process.env.NODE_ENV);
-            win.show();
-        }.bind(this)
-    );
+    win.once('ready-to-show', () => {
+        console.log('👋 Frontify Plugin is now running. NODE_ENV: ', process.env.NODE_ENV);
+        win.show();
+        // Provide the authentication details to React
+        let auth = user.getAuthentication();
+        console.log('send user.authentication', frontend);
+        frontend.send('user.authentication', auth);
+    });
 
     webview.on('cancelOauthFlow', () => {
         OAuth.cancelAuthorizationPolling();
@@ -86,6 +101,7 @@ export default function (context, view) {
                 console.log(authData.error);
                 return;
             }
+            console.log('successfully authenticated', authData);
 
             user.login({
                 access_token: authData.accessToken,
@@ -93,6 +109,7 @@ export default function (context, view) {
             }).then(
                 function () {
                     win.close();
+                    // I guess this re-starts the plugin, which will then have the access token available?
                     runCommand(context);
                 }.bind(this)
             );

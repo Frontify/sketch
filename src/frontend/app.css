@@ -124,3 +124,11 @@ custom-console {
     padding: 1rem;
     overflow: auto;
 }
+
+custom-avatar {
+    border-radius: 3px;
+    display: block;
+    overflow: hidden;
+    width: 24px;
+    height: 24px;
+}

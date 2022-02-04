@@ -5,13 +5,15 @@ class Sketch {
 
     getViewData() {
         let data = {};
-
+        // Note: Here we used to switch the entry of the frontend based on the authentication state.
+        // With the React setup and router, we will always load the same entry, thus we need to make the switch on the
+        // frontend instead.
         if (user.isAuthenticated()) {
-            // data.url = require('../assets/views/main.html');
+            data.url = '/';
             data.width = 480;
             data.height = 600;
         } else {
-            // data.url = require('../assets/views/login.html');
+            data.url = '/signin';
             data.width = 360;
             data.height = 530;
         }
