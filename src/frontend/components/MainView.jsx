@@ -22,6 +22,37 @@ export function MainView() {
 
     let [data, setData] = useState({});
     let [activeView, setActiveView] = useState('open');
+    let [activeScope, setActiveScope] = useState('colors');
+
+    /**
+     * Scope buttons for each library type
+     */
+    let [scopes] = useState([
+        {
+            key: 'colors',
+            title: 'Colors',
+        },
+        {
+            key: 'symbols',
+            title: 'Symbols',
+        },
+        {
+            key: 'typography',
+            title: 'Typography',
+        },
+        {
+            key: 'icons',
+            title: 'Icons',
+        },
+        {
+            key: 'images',
+            title: 'Images',
+        },
+        {
+            key: 'logos',
+            title: 'Logos',
+        },
+    ]);
 
     function handleMessage(event) {
         let { type, payload } = event.detail.data;
@@ -56,7 +87,8 @@ export function MainView() {
             >
                 Sign out
             </button>
-            <custom-console>
+
+            <custom-console style={{ display: 'none' }}>
                 <pre>{new Date().toLocaleTimeString()}</pre>
                 <pre>---</pre>
                 <pre>{JSON.stringify(data)}</pre>
@@ -69,15 +101,6 @@ export function MainView() {
             <NavigationBar></NavigationBar>
             <custom-line></custom-line>
 
-            <h2>Brands</h2>
-            <ul>
-                {context.brands.length &&
-                    context.brands.map((brand) => {
-                        return <li>{brand.name}</li>;
-                    })}
-            </ul>
-
-            <custom-line></custom-line>
             <custom-scope-bar-wrapper>
                 <Stack padding="small">
                     <custom-scope-button className="tw-round" active={activeView == 'open'}>
@@ -115,40 +138,58 @@ export function MainView() {
                     <button className="tw-underline">Current document</button>
                 </Stack>
             </custom-scope-bar-wrapper>
+
+            <custom-line></custom-line>
+            <h2>Brands</h2>
+            <ul>
+                {context.brands.entries.length &&
+                    context.brands.entries.map((brand) => {
+                        return (
+                            <li
+                                onClick={() => {
+                                    context.brands.select(brand.id);
+                                }}
+                            >
+                                {brand.name}
+                            </li>
+                        );
+                    })}
+            </ul>
+
+            <pre>
+                {context.brands.selected &&
+                    JSON.stringify(
+                        context.brands.selected.projects.map((project) => {
+                            return { name: project.name, __typename: project.__typename };
+                        }),
+                        null,
+                        2
+                    )}
+            </pre>
+            <h2>Guidelines</h2>
+            <pre>{context.guidelines && JSON.stringify(context.guidelines, null, 2)}</pre>
             <custom-line></custom-line>
 
-            <h2>Source Picker</h2>
-            <ul>
-                <li>Toolbar with User, Brand, Notifications, Refresh</li>
-                <li>Source Picker with Open, Recent, Current Document</li>
-            </ul>
-            <custom-line></custom-line>
-            <h2>Source View</h2>
-            <ul>
-                <li>Toolbar with User, Brand, Notifications, Refresh</li>
-                <li>Source Navigation Bar with Upload and Contextmenu</li>
-                <li>Tabbed View with Brand and Artboards</li>
-            </ul>
-            <custom-line></custom-line>
-            <h2>Brand View</h2>
-            <ul>
-                <li>Button Group with Colors, Symbols, Typography, Icons, Images, Logos</li>
-                <li>Scoped Search with Settings</li>
-                <li>Collection View for Assets</li>
-            </ul>
-            <custom-line></custom-line>
-            <h2>Artboards View</h2>
-            <ul>
-                <li>List of Artboard</li>
-                <li>Upload Destination Picker</li>
-            </ul>
-            <custom-line></custom-line>
-            <h2>Upload Destination Picker</h2>
-            <li>Breadcrumbs / Path</li>
-            <li>New Folder (?)</li>
-            <li>Files & Directories</li>
-            <li>Cancel and Upload Button</li>
-            <li>Progress Bar</li>
+            <custom-scope-bar-wrapper>
+                <Stack padding="small">
+                    {scopes.map((scope) => (
+                        <custom-scope-button className="tw-round" active={activeScope == scope.key}>
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="activeView"
+                                    value="recent"
+                                    checked={activeScope == scope.key}
+                                    onChange={(event) => {
+                                        setActiveScope(scope.key);
+                                    }}
+                                />
+                                <Text>{scope.title}</Text>
+                            </label>
+                        </custom-scope-button>
+                    ))}
+                </Stack>
+            </custom-scope-bar-wrapper>
         </div>
     );
 }

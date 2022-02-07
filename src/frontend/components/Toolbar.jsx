@@ -23,7 +23,7 @@ export function Toolbar() {
                         <button>
                             <custom-h-stack gap="x-small">
                                 <Text as="span" color="white" size="medium" weight="strong">
-                                    *Brand*
+                                    {context.brands.selected && context.brands.selected.name}
                                 </Text>
                                 <IconCaretDown></IconCaretDown>
                             </custom-h-stack>
