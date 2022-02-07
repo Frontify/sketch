@@ -2,39 +2,10 @@ import React from 'react';
 import { useState } from 'react';
 import { useEffect } from 'react/cjs/react.development';
 import { queryGraphQLWithAuth } from './graphql';
+import { userQuery } from './user.graphql';
 export const UserContext = React.createContext();
 
-let userQuery = `{
-    currentUser {
-        name
-        id
-        email
-        avatar
-    }
-    brands {
-        name
-        id
-        color
-        avatar
-        projects(types: [MEDIA_LIBRARY, ICON_LIBRARY, LOGO_LIBRARY]) {
-            ... on MediaLibrary {
-            id
-            name
-            __typename
-            }
-            ... on IconLibrary {
-            id
-            name
-            __typename
-            }
-            ... on LogoLibrary {
-            id
-            name
-            __typename
-            }
-        }
-      }
-}`;
+console.log(userQuery);
 
 export const UserContextProvider = ({ children }) => {
     // Auth
@@ -65,20 +36,18 @@ export const UserContextProvider = ({ children }) => {
 
     let [guidelines, setGuidelines] = useState({
         entries: [],
-        fetch(brandId) {
-            fetch(`${auth.domain}/v1/guidelines/${brandId}`, {
+        async fetch(brandId) {
+            let response = await fetch(`${auth.domain}/v1/guidelines/${brandId}`, {
                 method: 'GET',
                 headers: new Headers({
                     Authorization: 'Bearer ' + auth.token,
                 }),
-            }).then((reponse) => {
-                setGuidelines(async (state) => {
-                    let guidelines = await reponse.json();
-                    return {
-                        ...state,
-                        entries: guidelines,
-                    };
-                });
+            });
+            let json = await response.json();
+            let guidelines = json.data.guidelines;
+            setGuidelines((state) => {
+                let newState = { ...state, entries: guidelines };
+                return newState;
             });
         },
     });

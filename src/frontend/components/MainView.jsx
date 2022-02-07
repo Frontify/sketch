@@ -5,6 +5,7 @@ import '@frontify/arcade/style';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 
 // Arcade Components
+import { Button } from '@frontify/arcade';
 import { Stack } from '@frontify/arcade/foundation/layout/Stack';
 import { Text } from '@frontify/arcade/foundation/typography/Text';
 
@@ -80,14 +81,13 @@ export function MainView() {
     }, []);
     return (
         <div>
-            <button
+            <Button
                 onClick={() => {
                     window.postMessage('logout');
                 }}
             >
                 Sign out
-            </button>
-
+            </Button>
             <custom-console style={{ display: 'none' }}>
                 <pre>{new Date().toLocaleTimeString()}</pre>
                 <pre>---</pre>
@@ -100,7 +100,6 @@ export function MainView() {
             <Toolbar></Toolbar>
             <NavigationBar></NavigationBar>
             <custom-line></custom-line>
-
             <custom-scope-bar-wrapper>
                 <Stack padding="small">
                     <custom-scope-button className="tw-round" active={activeView == 'open'}>
@@ -138,7 +137,6 @@ export function MainView() {
                     <button className="tw-underline">Current document</button>
                 </Stack>
             </custom-scope-bar-wrapper>
-
             <custom-line></custom-line>
             <h2>Brands</h2>
             <ul>
@@ -155,8 +153,7 @@ export function MainView() {
                         );
                     })}
             </ul>
-
-            <pre>
+            {/* <pre>
                 {context.brands.selected &&
                     JSON.stringify(
                         context.brands.selected.projects.map((project) => {
@@ -165,11 +162,16 @@ export function MainView() {
                         null,
                         2
                     )}
-            </pre>
+            </pre> */}
             <h2>Guidelines</h2>
-            <pre>{context.guidelines && JSON.stringify(context.guidelines, null, 2)}</pre>
-            <custom-line></custom-line>
+            {context.guidelines.entries &&
+                context.guidelines.entries.map((guideline) => (
+                    <div>
+                        {guideline.name} ({guideline.id})
+                    </div>
+                ))}
 
+            <custom-line></custom-line>
             <custom-scope-bar-wrapper>
                 <Stack padding="small">
                     {scopes.map((scope) => (
