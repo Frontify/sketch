@@ -139,6 +139,29 @@ export function MainView() {
             </custom-scope-bar-wrapper>
 
             <custom-line></custom-line>
+            <custom-scope-bar-wrapper>
+                <Stack padding="small">
+                    {scopes.map((scope) => (
+                        <custom-scope-button className="tw-round" active={activeScope == scope.key} key={scope.key}>
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="activeView"
+                                    value="recent"
+                                    checked={activeScope == scope.key}
+                                    onChange={(event) => {
+                                        setActiveScope(scope.key);
+                                    }}
+                                />
+                                <Text>{scope.title}</Text>
+                            </label>
+                        </custom-scope-button>
+                    ))}
+                </Stack>
+            </custom-scope-bar-wrapper>
+
+            <custom-line></custom-line>
+
             <h2>Guidelines</h2>
             {context.guidelines.entries &&
                 context.guidelines.entries.map((guideline) => (
@@ -173,28 +196,6 @@ export function MainView() {
                         </custom-v-stack>
                     ))}
             </custom-v-stack>
-
-            <custom-line></custom-line>
-            <custom-scope-bar-wrapper>
-                <Stack padding="small">
-                    {scopes.map((scope) => (
-                        <custom-scope-button className="tw-round" active={activeScope == scope.key} key={scope.key}>
-                            <label>
-                                <input
-                                    type="radio"
-                                    name="activeView"
-                                    value="recent"
-                                    checked={activeScope == scope.key}
-                                    onChange={(event) => {
-                                        setActiveScope(scope.key);
-                                    }}
-                                />
-                                <Text>{scope.title}</Text>
-                            </label>
-                        </custom-scope-button>
-                    ))}
-                </Stack>
-            </custom-scope-bar-wrapper>
         </div>
     );
 }

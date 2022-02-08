@@ -154,7 +154,8 @@ custom-tab {
 }
 
 custom-tab[active] {
-    box-shadow: inset 0px -2px 0 0px var(--box-neutral-strong-color);
+    box-shadow: inset 0px -2px 0 0px var(--box-selected-strong-color);
+    font-weight: bold;
 }
 
 custom-tab + custom-tab {
