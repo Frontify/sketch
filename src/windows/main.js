@@ -56,17 +56,16 @@ export default function (context, view) {
         acceptsFirstMouse: true,
         alwaysOnTop: true,
         fullscreenable: false,
-        height: viewData.height,
         hidesOnDeactivate: false,
         identifier: IDENTIFIER,
         maximizable: false,
         minHeight: 500,
         minimizable: false,
-        minWidth: 320,
+        minWidth: 400,
+        remembersWindowFrame: true,
         resizable: true,
         show: false,
         title: 'Frontify',
-        width: viewData.width,
     });
 
     let webview = win.webContents;
@@ -117,12 +116,7 @@ export default function (context, view) {
     });
 
     // Load tab if webview ready
-    webview.on(
-        'did-finish-load',
-        function () {
-            sketch.resize(win);
-        }.bind(this)
-    );
+    webview.on('did-finish-load');
 
     webview.on(
         'did-fail-load',

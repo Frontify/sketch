@@ -37,6 +37,11 @@ custom-h-stack[stretch-children] > * {
     width: 100%;
 }
 
+custom-v-stack {
+    display: flex;
+    flex-direction: column;
+}
+
 [padding='x-small'] {
     padding: var(--space-xs);
 }
@@ -131,4 +136,9 @@ custom-avatar {
     overflow: hidden;
     width: 24px;
     height: 24px;
+}
+/* Hack to prevent the wrapping button of the flyout trigger to show up  */
+[data-test-id='flyout-trigger'] {
+    -webkit-appearance: none;
+    background: none;
 }

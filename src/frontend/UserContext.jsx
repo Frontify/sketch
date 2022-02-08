@@ -5,10 +5,9 @@ import { queryGraphQLWithAuth } from './graphql';
 import { userQuery } from './user.graphql';
 export const UserContext = React.createContext();
 
-console.log(userQuery);
-
 export const UserContextProvider = ({ children }) => {
     // Auth
+    // ------------------------------------------------------------------------
     let cachedAuth = localStorage.getItem('cache.auth')
         ? JSON.parse(localStorage.getItem('cache.auth'))
         : { domain: null, token: null };
@@ -16,6 +15,7 @@ export const UserContextProvider = ({ children }) => {
     let [auth, setAuth] = useState(cachedAuth);
 
     // Brands
+    // ------------------------------------------------------------------------
     let [brands, setBrands] = useState({
         entries: [],
         selected: null,
@@ -34,6 +34,8 @@ export const UserContextProvider = ({ children }) => {
         },
     });
 
+    // Guidelines
+    // ------------------------------------------------------------------------
     let [guidelines, setGuidelines] = useState({
         entries: [],
         async fetch(brandId) {
@@ -45,14 +47,60 @@ export const UserContextProvider = ({ children }) => {
             });
             let json = await response.json();
             let guidelines = json.data.guidelines;
+
             setGuidelines((state) => {
                 let newState = { ...state, entries: guidelines };
                 return newState;
             });
+
+            // Fetch palettes
+
+            let guidelinePalettes = [];
+            console.log('primise all', brandId);
+            Promise.all(
+                guidelines.map(async (guideline) => {
+                    let palettes = await getPalettesForGuideline(guideline);
+                    console.log('awaited', palettes);
+                    guidelinePalettes = guidelinePalettes.concat(palettes);
+                    console.log('concat', guidelinePalettes);
+                })
+            ).then(() => {
+                setPalettes((state) => {
+                    return { ...state, entries: guidelinePalettes };
+                });
+            });
         },
     });
 
+    let [palettes, setPalettes] = useState({
+        entries: [],
+    });
+
+    async function getPalettesForGuideline(guideline) {
+        return new Promise(async (resolve, reject) => {
+            let response = await fetch(`${auth.domain}/v1/color/library/${guideline.project_id}`, {
+                method: 'GET',
+                headers: new Headers({
+                    Authorization: 'Bearer ' + auth.token,
+                }),
+            });
+            let result = await response.json();
+            console.log({ result });
+
+            // reverse order of palettes and colors
+            let palettes = result.palettes;
+            palettes.reverse();
+            console.log('palettes', palettes);
+
+            palettes.forEach((palette) => {
+                palette.colors = palette.colors.reverse();
+            });
+            resolve(palettes);
+        });
+    }
+
     // User
+    // ------------------------------------------------------------------------
     let [user, setUser] = useState({
         name: '',
         id: null,
@@ -88,6 +136,7 @@ export const UserContextProvider = ({ children }) => {
         },
     });
     // Initial Effect: Load Brands from localStorage
+    // ------------------------------------------------------------------------
     useEffect(() => {
         if (localStorage.getItem('cache.brands')) {
             setBrands((state) => {
@@ -99,7 +148,7 @@ export const UserContextProvider = ({ children }) => {
         }
     }, []);
 
-    let context = { user, brands, guidelines };
+    let context = { user, brands, guidelines, palettes };
 
     return <UserContext.Provider value={context}>{children}</UserContext.Provider>;
 };

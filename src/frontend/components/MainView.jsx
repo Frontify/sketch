@@ -138,31 +138,6 @@ export function MainView() {
                 </Stack>
             </custom-scope-bar-wrapper>
             <custom-line></custom-line>
-            <h2>Brands</h2>
-            <ul>
-                {context.brands.entries.length &&
-                    context.brands.entries.map((brand) => {
-                        return (
-                            <li
-                                onClick={() => {
-                                    context.brands.select(brand.id);
-                                }}
-                            >
-                                {brand.name}
-                            </li>
-                        );
-                    })}
-            </ul>
-            {/* <pre>
-                {context.brands.selected &&
-                    JSON.stringify(
-                        context.brands.selected.projects.map((project) => {
-                            return { name: project.name, __typename: project.__typename };
-                        }),
-                        null,
-                        2
-                    )}
-            </pre> */}
             <h2>Guidelines</h2>
             {context.guidelines.entries &&
                 context.guidelines.entries.map((guideline) => (
@@ -172,10 +147,37 @@ export function MainView() {
                 ))}
 
             <custom-line></custom-line>
+            <h2>Palettes</h2>
+
+            <custom-v-stack gap="large" padding="small">
+                {context.palettes.entries &&
+                    context.palettes.entries.map((palette) => (
+                        <custom-v-stack gap="small" key={palette.id}>
+                            <Text weight="strong">
+                                {palette.name || 'Untitled Palette'} ({palette.id})
+                            </Text>
+                            {palette.colors &&
+                                palette.colors.map((color) => (
+                                    <custom-h-stack gap="small">
+                                        <div
+                                            style={{
+                                                width: '24px',
+                                                height: '24px',
+                                                backgroundColor: color.css_value_hex,
+                                            }}
+                                        ></div>
+                                        {color.name}
+                                    </custom-h-stack>
+                                ))}
+                        </custom-v-stack>
+                    ))}
+            </custom-v-stack>
+
+            <custom-line></custom-line>
             <custom-scope-bar-wrapper>
                 <Stack padding="small">
                     {scopes.map((scope) => (
-                        <custom-scope-button className="tw-round" active={activeScope == scope.key}>
+                        <custom-scope-button className="tw-round" active={activeScope == scope.key} key={scope.key}>
                             <label>
                                 <input
                                     type="radio"
