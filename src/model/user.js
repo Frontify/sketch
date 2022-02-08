@@ -43,6 +43,7 @@ class User {
     }
 
     logout() {
+        console.log('LOGOUT IN SKETCH');
         // Previously, the API endpoint "logout" was called but we’ve removed it.
         return new Promise((resolve, reject) => {
             Settings.setSettingForKey('domain', null);

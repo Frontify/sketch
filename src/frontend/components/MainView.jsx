@@ -19,6 +19,8 @@ import { useContext, useEffect, useState } from 'react';
 import { UserContext } from '../UserContext';
 
 export function MainView() {
+    window.postMessage('nativeLog', 'Called from the webview');
+
     const context = useContext(UserContext);
 
     let [data, setData] = useState({});
@@ -81,25 +83,23 @@ export function MainView() {
     }, []);
     return (
         <div>
-            <Button
-                onClick={() => {
-                    window.postMessage('logout');
-                }}
-            >
-                Sign out
-            </Button>
-            <custom-console style={{ display: 'none' }}>
-                <pre>{new Date().toLocaleTimeString()}</pre>
-                <pre>---</pre>
-                <pre>{JSON.stringify(data)}</pre>
-                <pre>{JSON.stringify(context.user)}</pre>
-                <pre>{JSON.stringify(context.brands)}</pre>
-
-                <pre>{window.location.pathname}</pre>
-            </custom-console>
             <Toolbar></Toolbar>
             <NavigationBar></NavigationBar>
             <custom-line></custom-line>
+
+            <custom-tabs>
+                <custom-tab active>
+                    <Text>Brand</Text>
+                </custom-tab>
+                <custom-tab>
+                    <Text>Artboards</Text>
+                </custom-tab>
+            </custom-tabs>
+
+            <custom-line></custom-line>
+
+            <custom-gap></custom-gap>
+
             <custom-scope-bar-wrapper>
                 <Stack padding="small">
                     <custom-scope-button className="tw-round" active={activeView == 'open'}>
@@ -137,6 +137,7 @@ export function MainView() {
                     <button className="tw-underline">Current document</button>
                 </Stack>
             </custom-scope-bar-wrapper>
+
             <custom-line></custom-line>
             <h2>Guidelines</h2>
             {context.guidelines.entries &&

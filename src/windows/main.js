@@ -86,7 +86,6 @@ export default function (context, view) {
         win.show();
         // Provide the authentication details to React
         let auth = user.getAuthentication();
-        console.log('send user.authentication', frontend);
         frontend.send('user.authentication', auth);
     });
 
@@ -116,14 +115,17 @@ export default function (context, view) {
     });
 
     // Load tab if webview ready
-    webview.on('did-finish-load');
+    webview.on('did-finish-load', () => {});
 
-    webview.on(
-        'did-fail-load',
-        function (err) {
-            console.log('did-fail-load', err);
-        }.bind(this)
-    );
+    webview.on('did-fail-load', () => {
+        console.log('did-fail-load', err);
+    });
+
+    webview.on('nativeLog', function (s) {
+        sketch.UI.message(s);
+
+        return 'result';
+    });
 
     win.on(
         'close',
@@ -157,7 +159,7 @@ export default function (context, view) {
         source.showSources();
     });
 
-    webview.on('uploadArtboard', function (data) {
+    webview.on('uploadArtboard', (data) => {
         artboard.uploadArtboards([data]);
     });
 

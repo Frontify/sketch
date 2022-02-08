@@ -1,5 +1,4 @@
 export async function queryGraphQLWithAuth({ query, auth }) {
-    console.log('queryGraphQLWithAuth', query, auth);
     let response = await fetch(`${auth.domain}/graphql`, {
         method: 'post',
         headers: {

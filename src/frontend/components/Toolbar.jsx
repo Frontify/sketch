@@ -3,20 +3,20 @@ import { useContext, useState } from 'react';
 import { UserContext } from '../UserContext';
 
 import { Text } from '@frontify/arcade/foundation/typography/Text';
-import { Button, Flyout, IconCaretDown, IconCheck, IconNotifications, IconRefresh } from '@frontify/arcade';
+import { Button, Flyout, IconCaretDown, IconCheck, IconLogout, IconNotifications, IconRefresh } from '@frontify/arcade';
 
 export function Toolbar() {
     const context = useContext(UserContext);
     const [open, setOpen] = useState(false);
+    function logout() {
+        console.log('logout');
+        window.postMessage('logout');
+    }
     return (
         <div>
             <custom-toolbar-wrapper>
                 <custom-h-stack gap="small" padding="x-small" align-items="center">
-                    <custom-h-stack direction="row" gap="small" align-items="center">
-                        <custom-avatar>
-                            <img src={context.user.avatar} alt={context.user.name} />
-                        </custom-avatar>
-
+                    <custom-h-stack direction="row" align-items="center">
                         <Text as="span" color="white" size="medium" weight="medium">
                             {context.user.name}
                         </Text>
@@ -28,22 +28,44 @@ export function Toolbar() {
                             onOpenChange={(isOpen) => setOpen(isOpen)}
                             legacyFooter={false}
                             trigger={
-                                <Button onClick={() => setOpen((open) => !open)}>
+                                <Text onClick={() => setOpen((open) => !open)} color="white">
                                     <custom-h-stack gap="x-small">
-                                        <Text as="span" color="white" size="medium" weight="strong">
-                                            {context.brands.selected && context.brands.selected.name}
-                                        </Text>
+                                        <button>
+                                            <Text as="span" color="white" size="medium" weight="strong">
+                                                {context.brands.selected && context.brands.selected.name}
+                                            </Text>
+                                        </button>
                                         <IconCaretDown></IconCaretDown>
                                     </custom-h-stack>
-                                </Button>
+                                </Text>
                             }
                         >
-                            <div padding="small">
-                                <custom-v-stack gap="small">
+                            <custom-v-stack>
+                                <custom-h-stack direction="row" gap="small" align-items="center" padding="small">
+                                    <custom-avatar>
+                                        <img src={context.user.avatar} alt={context.user.name} />
+                                    </custom-avatar>
+
+                                    <Text as="span" color="white" size="medium" weight="medium">
+                                        {context.user.name}
+                                    </Text>
+                                    <custom-spacer></custom-spacer>
+                                    <Button
+                                        onClick={() => {
+                                            logout();
+                                        }}
+                                    >
+                                        Logout
+                                    </Button>
+                                </custom-h-stack>
+                                <custom-line></custom-line>
+
+                                <custom-v-stack gap="small" padding="small">
                                     {context.brands.entries &&
                                         context.brands.entries.map((brand) => {
                                             return (
                                                 <custom-h-stack
+                                                    key={brand.id}
                                                     gap="small"
                                                     onClick={() => {
                                                         context.brands.select(brand.id);
@@ -59,7 +81,7 @@ export function Toolbar() {
                                             );
                                         })}
                                 </custom-v-stack>
-                            </div>
+                            </custom-v-stack>
                         </Flyout>
                     </custom-h-stack>
                     <custom-spacer></custom-spacer>
