@@ -2,19 +2,39 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { MainView } from './components/MainView';
 import { SignInView } from './components/SignInView';
-import { BrowserRouter } from 'react-router-dom';
 import { UserContextProvider } from './UserContext';
+
+// Router
+import { BrowserRouter } from 'react-router-dom';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 
+// i18n
+import { I18nextProvider } from 'react-i18next';
+import i18next from 'i18next';
+
+import common_de from './translations/de.json';
+import common_en from './translations/en.json';
+
+i18next.init({
+    interpolation: { escapeValue: false }, // React already does escaping
+    lng: 'de', // language to use
+    resources: {
+        en: common_en,
+        de: common_de,
+    },
+});
+
 ReactDOM.render(
-    <UserContextProvider>
-        <BrowserRouter>
-            <Routes>
-                <Route path="/" element={<MainView />} />
-                <Route path="/signin" element={<SignInView />} />
-            </Routes>
-        </BrowserRouter>
-    </UserContextProvider>,
+    <I18nextProvider i18n={i18next}>
+        <UserContextProvider>
+            <BrowserRouter>
+                <Routes>
+                    <Route path="/" element={<MainView />} />
+                    <Route path="/signin" element={<SignInView />} />
+                </Routes>
+            </BrowserRouter>
+        </UserContextProvider>
+    </I18nextProvider>,
     document.getElementById('root')
 );
 

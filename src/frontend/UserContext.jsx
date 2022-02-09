@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useEffect } from 'react/cjs/react.development';
 import { queryGraphQLWithAuth } from './graphql';
 import { userQuery } from './user.graphql';
+
 export const UserContext = React.createContext();
 
 export const UserContextProvider = ({ children }) => {
@@ -38,6 +39,12 @@ export const UserContextProvider = ({ children }) => {
     // ------------------------------------------------------------------------
     let [guidelines, setGuidelines] = useState({
         entries: [],
+        set(guidelines) {
+            console.log('set guidelines', guidelines);
+            setGuidelines((state) => {
+                return { ...state, entries: [...guidelines] };
+            });
+        },
         async fetch(brandId) {
             let response = await fetch(`${auth.domain}/v1/guidelines/${brandId}`, {
                 method: 'GET',
@@ -46,7 +53,12 @@ export const UserContextProvider = ({ children }) => {
                 }),
             });
             let json = await response.json();
-            let guidelines = json.data.guidelines;
+            let guidelines = json.data.guidelines.map((guideline) => {
+                return {
+                    active: true,
+                    ...guideline,
+                };
+            });
 
             setGuidelines((state) => {
                 let newState = { ...state, entries: guidelines };
@@ -56,7 +68,7 @@ export const UserContextProvider = ({ children }) => {
             // Fetch palettes
 
             let guidelinePalettes = [];
-            console.log('primise all', brandId);
+
             Promise.all(
                 guidelines.map(async (guideline) => {
                     let palettes = await getPalettesForGuideline(guideline);

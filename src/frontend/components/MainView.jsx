@@ -17,11 +17,16 @@ import { Toolbar } from './Toolbar';
 // Context
 import { useContext, useEffect, useState } from 'react';
 import { UserContext } from '../UserContext';
+import { PalettesView } from './PalettesView';
+
+// i18n
+import { useTranslation } from 'react-i18next';
 
 export function MainView() {
     window.postMessage('nativeLog', 'Called from the webview');
 
     const context = useContext(UserContext);
+    const { t, i18n } = useTranslation();
 
     let [data, setData] = useState({});
     let [activeView, setActiveView] = useState('open');
@@ -134,7 +139,7 @@ export function MainView() {
 
                     <custom-spacer></custom-spacer>
 
-                    <button className="tw-underline">Current document</button>
+                    <button className="tw-underline">{t('sources.current_document')}</button>
                 </Stack>
             </custom-scope-bar-wrapper>
 
@@ -162,40 +167,7 @@ export function MainView() {
 
             <custom-line></custom-line>
 
-            <h2>Guidelines</h2>
-            {context.guidelines.entries &&
-                context.guidelines.entries.map((guideline) => (
-                    <div>
-                        {guideline.name} ({guideline.id})
-                    </div>
-                ))}
-
-            <custom-line></custom-line>
-            <h2>Palettes</h2>
-
-            <custom-v-stack gap="large" padding="small">
-                {context.palettes.entries &&
-                    context.palettes.entries.map((palette) => (
-                        <custom-v-stack gap="small" key={palette.id}>
-                            <Text weight="strong">
-                                {palette.name || 'Untitled Palette'} ({palette.id})
-                            </Text>
-                            {palette.colors &&
-                                palette.colors.map((color) => (
-                                    <custom-h-stack gap="small">
-                                        <div
-                                            style={{
-                                                width: '24px',
-                                                height: '24px',
-                                                backgroundColor: color.css_value_hex,
-                                            }}
-                                        ></div>
-                                        {color.name}
-                                    </custom-h-stack>
-                                ))}
-                        </custom-v-stack>
-                    ))}
-            </custom-v-stack>
+            <PalettesView palettes={context.palettes.entries} guidelines={context.guidelines.entries}></PalettesView>
         </div>
     );
 }
