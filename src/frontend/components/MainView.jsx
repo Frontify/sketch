@@ -2,7 +2,7 @@ import React from 'react';
 import '@frontify/arcade/style';
 
 // Router
-import { Routes, Route, Link, useLocation } from 'react-router-dom';
+import { Routes, Route, Link, useLocation, useNavigate, Outlet, Navigate } from 'react-router-dom';
 
 // Arcade Components
 import { Button } from '@frontify/arcade';
@@ -26,11 +26,14 @@ export function MainView() {
     window.postMessage('nativeLog', 'Called from the webview');
 
     const context = useContext(UserContext);
+    console.log('main', context);
     const { t, i18n } = useTranslation();
 
     let [data, setData] = useState({});
     let [activeView, setActiveView] = useState('open');
     let [activeScope, setActiveScope] = useState('colors');
+
+    const navigate = useNavigate();
 
     /**
      * Scope buttons for each library type
@@ -91,7 +94,6 @@ export function MainView() {
             <Toolbar></Toolbar>
             <NavigationBar></NavigationBar>
             <custom-line></custom-line>
-
             <custom-tabs>
                 <custom-tab active>
                     <Text>Brand</Text>
@@ -100,12 +102,9 @@ export function MainView() {
                     <Text>Artboards</Text>
                 </custom-tab>
             </custom-tabs>
-
             <custom-line></custom-line>
-
             <custom-gap></custom-gap>
-
-            <custom-scope-bar-wrapper>
+            {/* <custom-scope-bar-wrapper>
                 <Stack padding="small">
                     <custom-scope-button className="tw-round" active={activeView == 'open'}>
                         <label>
@@ -141,8 +140,7 @@ export function MainView() {
 
                     <button className="tw-underline">{t('sources.current_document')}</button>
                 </Stack>
-            </custom-scope-bar-wrapper>
-
+            </custom-scope-bar-wrapper> */}
             <custom-line></custom-line>
             <custom-scope-bar-wrapper>
                 <Stack padding="small">
@@ -155,6 +153,7 @@ export function MainView() {
                                     value="recent"
                                     checked={activeScope == scope.key}
                                     onChange={(event) => {
+                                        navigate('/brand/' + scope.key);
                                         setActiveScope(scope.key);
                                     }}
                                 />
@@ -164,10 +163,10 @@ export function MainView() {
                     ))}
                 </Stack>
             </custom-scope-bar-wrapper>
-
             <custom-line></custom-line>
 
-            <PalettesView palettes={context.palettes.entries} guidelines={context.guidelines.entries}></PalettesView>
+            {/* Router Outlet that displays colors, text styles or any of the media libraries. */}
+            <Outlet />
         </div>
     );
 }

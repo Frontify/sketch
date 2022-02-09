@@ -30,19 +30,22 @@ export function PalettesView({ palettes, guidelines }) {
 
     return (
         <custom-v-stack padding="small" gap="large">
-            <custom-h-stack>
+            <custom-h-stack stretch-children>
                 <SearchField
                     onChange={(value) => {
                         setQuery(value);
                     }}
                 ></SearchField>
-                <Switcher
-                    guidelines={guidelines}
-                    onChange={(changedGuidelines) => {
-                        context.guidelines.set(changedGuidelines);
-                    }}
-                ></Switcher>
+                <div style={{ flex: 0 }}>
+                    <Switcher
+                        guidelines={guidelines}
+                        onChange={(changedGuidelines) => {
+                            context.guidelines.set(changedGuidelines);
+                        }}
+                    ></Switcher>
+                </div>
             </custom-h-stack>
+
             {filteredPalettes.map((palette) => {
                 if (query == '' || palette.colors.length) {
                     return (

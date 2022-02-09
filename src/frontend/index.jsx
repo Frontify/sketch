@@ -1,12 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { MainView } from './components/MainView';
-import { SignInView } from './components/SignInView';
-import { UserContextProvider } from './UserContext';
+import { App } from './components/App';
 
-// Router
-import { BrowserRouter } from 'react-router-dom';
-import { Routes, Route, Link, useLocation } from 'react-router-dom';
+// Context
+import { useContext } from 'react';
+import { UserContext, UserContextProvider } from './UserContext';
 
 // i18n
 import { I18nextProvider } from 'react-i18next';
@@ -27,12 +25,7 @@ i18next.init({
 ReactDOM.render(
     <I18nextProvider i18n={i18next}>
         <UserContextProvider>
-            <BrowserRouter>
-                <Routes>
-                    <Route path="/" element={<MainView />} />
-                    <Route path="/signin" element={<SignInView />} />
-                </Routes>
-            </BrowserRouter>
+            <App />
         </UserContextProvider>
     </I18nextProvider>,
     document.getElementById('root')

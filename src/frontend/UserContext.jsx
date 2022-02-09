@@ -25,11 +25,12 @@ export const UserContextProvider = ({ children }) => {
         },
         select(id) {
             setBrands((state) => {
+                console.log('set brands');
                 let brand = this.entries.find((brand) => brand.id == id) || this.entries[0];
                 let newState = { ...state, selected: brand };
                 localStorage.setItem('cache.brands', JSON.stringify(newState));
-
                 guidelines.fetch(brand.id);
+
                 return newState;
             });
         },
@@ -40,7 +41,6 @@ export const UserContextProvider = ({ children }) => {
     let [guidelines, setGuidelines] = useState({
         entries: [],
         set(guidelines) {
-            console.log('set guidelines', guidelines);
             setGuidelines((state) => {
                 return { ...state, entries: [...guidelines] };
             });
@@ -151,12 +151,16 @@ export const UserContextProvider = ({ children }) => {
     // ------------------------------------------------------------------------
     useEffect(() => {
         if (localStorage.getItem('cache.brands')) {
+            let cachedBrands = JSON.parse(localStorage.getItem('cache.brands'));
             setBrands((state) => {
                 return {
                     ...state,
-                    ...JSON.parse(localStorage.getItem('cache.brands')),
+                    ...cachedBrands,
                 };
             });
+            if (cachedBrands.selected?.id) {
+                guidelines.fetch(cachedBrands.selected.id);
+            }
         }
     }, []);
 

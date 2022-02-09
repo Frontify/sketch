@@ -9,7 +9,6 @@ export function Toolbar() {
     const context = useContext(UserContext);
     const [open, setOpen] = useState(false);
     function logout() {
-        console.log('logout');
         window.postMessage('logout');
     }
     return (
@@ -32,7 +31,9 @@ export function Toolbar() {
                                     <custom-h-stack gap="x-small">
                                         <button>
                                             <Text as="span" color="white" size="medium" weight="strong">
-                                                {context.brands.selected && context.brands.selected.name}
+                                                {context.brands &&
+                                                    context.brands.selected &&
+                                                    context.brands.selected.name}
                                             </Text>
                                         </button>
                                         <IconCaretDown></IconCaretDown>
@@ -72,8 +73,8 @@ export function Toolbar() {
                                                         setOpen(false);
                                                     }}
                                                 >
-                                                    {context.brands.selected.id == brand.id && <IconCheck></IconCheck>}
-                                                    {context.brands.selected.id != brand.id && (
+                                                    {context.brands.selected?.id == brand.id && <IconCheck></IconCheck>}
+                                                    {context.brands.selected?.id != brand.id && (
                                                         <div style={{ width: '16px' }}></div>
                                                     )}
                                                     <Text>{brand.name}</Text>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { guideline } from './textStyles.js';
+
 import { Text } from '@frontify/arcade';
 
 export function TypographyView() {
