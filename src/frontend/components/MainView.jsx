@@ -21,49 +21,54 @@ import { PalettesView } from './PalettesView';
 
 // i18n
 import { useTranslation } from 'react-i18next';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+
+// Library scopes
+const libraryScopes = [
+    {
+        key: 'colors',
+        title: 'Colors',
+    },
+    {
+        key: 'symbols',
+        title: 'Symbols',
+    },
+    {
+        key: 'typography',
+        title: 'Typography',
+    },
+    {
+        key: 'icons',
+        title: 'Icons',
+    },
+    {
+        key: 'images',
+        title: 'Images',
+    },
+    {
+        key: 'logos',
+        title: 'Logos',
+    },
+];
 
 export function MainView() {
-    window.postMessage('nativeLog', 'Called from the webview');
-
+    // Context
     const context = useContext(UserContext);
-    console.log('main', context);
+
+    // i18n
     const { t, i18n } = useTranslation();
 
+    // State
     let [data, setData] = useState({});
     let [activeView, setActiveView] = useState('open');
-    let [activeScope, setActiveScope] = useState('colors');
+    let [activeScope, setActiveScope] = useLocalStorage('cache.activeScope', 'colors');
 
     const navigate = useNavigate();
 
     /**
      * Scope buttons for each library type
      */
-    let [scopes] = useState([
-        {
-            key: 'colors',
-            title: 'Colors',
-        },
-        {
-            key: 'symbols',
-            title: 'Symbols',
-        },
-        {
-            key: 'typography',
-            title: 'Typography',
-        },
-        {
-            key: 'icons',
-            title: 'Icons',
-        },
-        {
-            key: 'images',
-            title: 'Images',
-        },
-        {
-            key: 'logos',
-            title: 'Logos',
-        },
-    ]);
+    let [scopes] = useState(libraryScopes);
 
     function handleMessage(event) {
         let { type, payload } = event.detail.data;
@@ -79,7 +84,14 @@ export function MainView() {
     }
 
     useEffect(() => {
-        context.user.getUser();
+        if (!context.user) {
+            console.log('use effect: getUser()', context);
+            if (context.user?.getUser) {
+                context.user.getUser();
+            } else {
+                console.warn('Didn’t fetch user, because getUser() doesn’t exist.');
+            }
+        }
     }, []);
     useEffect(() => {
         console.log('use effect');
@@ -90,20 +102,7 @@ export function MainView() {
         };
     }, []);
     return (
-        <div>
-            <Toolbar></Toolbar>
-            <NavigationBar></NavigationBar>
-            <custom-line></custom-line>
-            <custom-tabs>
-                <custom-tab active>
-                    <Text>Brand</Text>
-                </custom-tab>
-                <custom-tab>
-                    <Text>Artboards</Text>
-                </custom-tab>
-            </custom-tabs>
-            <custom-line></custom-line>
-            <custom-gap></custom-gap>
+        <div style={{ height: '100%', flex: 1 }}>
             {/* <custom-scope-bar-wrapper>
                 <Stack padding="small">
                     <custom-scope-button className="tw-round" active={activeView == 'open'}>
@@ -153,7 +152,7 @@ export function MainView() {
                                     value="recent"
                                     checked={activeScope == scope.key}
                                     onChange={(event) => {
-                                        navigate('/brand/' + scope.key);
+                                        navigate('/source/brand/' + scope.key);
                                         setActiveScope(scope.key);
                                     }}
                                 />
@@ -166,7 +165,9 @@ export function MainView() {
             <custom-line></custom-line>
 
             {/* Router Outlet that displays colors, text styles or any of the media libraries. */}
-            <Outlet />
+            <div style={{ height: '100%', flex: 1 }}>
+                <Outlet />
+            </div>
         </div>
     );
 }

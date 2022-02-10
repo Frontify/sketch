@@ -25,7 +25,6 @@ export const UserContextProvider = ({ children }) => {
         },
         select(id) {
             setBrands((state) => {
-                console.log('set brands');
                 let brand = this.entries.find((brand) => brand.id == id) || this.entries[0];
                 let newState = { ...state, selected: brand };
                 localStorage.setItem('cache.brands', JSON.stringify(newState));
@@ -72,9 +71,8 @@ export const UserContextProvider = ({ children }) => {
             Promise.all(
                 guidelines.map(async (guideline) => {
                     let palettes = await getPalettesForGuideline(guideline);
-                    console.log('awaited', palettes);
+
                     guidelinePalettes = guidelinePalettes.concat(palettes);
-                    console.log('concat', guidelinePalettes);
                 })
             ).then(() => {
                 setPalettes((state) => {
@@ -83,6 +81,9 @@ export const UserContextProvider = ({ children }) => {
             });
         },
     });
+
+    // Palettes
+    // ------------------------------------------------------------------------
 
     let [palettes, setPalettes] = useState({
         entries: [],
@@ -97,12 +98,10 @@ export const UserContextProvider = ({ children }) => {
                 }),
             });
             let result = await response.json();
-            console.log({ result });
 
             // reverse order of palettes and colors
             let palettes = result.palettes;
             palettes.reverse();
-            console.log('palettes', palettes);
 
             palettes.forEach((palette) => {
                 palette.colors = palette.colors.reverse();

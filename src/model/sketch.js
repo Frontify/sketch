@@ -9,7 +9,7 @@ class Sketch {
         // With the React setup and router, we will always load the same entry, thus we need to make the switch on the
         // frontend instead.
         if (user.isAuthenticated()) {
-            data.url = '/brand';
+            data.url = '/source';
             data.width = 480;
             data.height = 600;
         } else {

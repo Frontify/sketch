@@ -1,9 +1,11 @@
 import React from 'react';
 
+import { ArtboardsView } from './ArtboardsView';
 import { MainView } from './MainView';
 import { PalettesView } from './PalettesView';
 import { TypographyView } from './TypographyView';
 import { SignInView } from './SignInView';
+import { SourceView } from './SourceView';
 
 // Context
 import { useContext } from 'react';
@@ -19,26 +21,32 @@ export function App() {
     return (
         <BrowserRouter>
             <Routes>
-                <Route path="/brand" element={<MainView />}>
-                    <Route
-                        path="colors"
-                        element={
-                            <PalettesView palettes={context.palettes.entries} guidelines={context.guidelines.entries} />
-                        }
-                    ></Route>
-                    <Route path="text-styles" element={<TypographyView />}></Route>
-                    <Route path="symbols"></Route>
-                    <Route path="icons"></Route>
-                    <Route path="images"></Route>
-                    <Route path="logos"></Route>
-                    <Route
-                        path="*"
-                        element={
-                            <main style={{ padding: '1rem' }}>
-                                <p>There's nothing here!</p>
-                            </main>
-                        }
-                    />
+                <Route path="/source/*" element={<SourceView />}>
+                    <Route path="artboards" element={<ArtboardsView />}></Route>
+                    <Route path="brand/*" element={<MainView />}>
+                        <Route
+                            path="colors"
+                            element={
+                                <PalettesView
+                                    palettes={context.palettes.entries}
+                                    guidelines={context.guidelines.entries}
+                                />
+                            }
+                        ></Route>
+                        <Route path="text-styles" element={<TypographyView />}></Route>
+                        <Route path="symbols"></Route>
+                        <Route path="icons"></Route>
+                        <Route path="images"></Route>
+                        <Route path="logos"></Route>
+                        <Route
+                            path="*"
+                            element={
+                                <main style={{ padding: '1rem' }}>
+                                    <p>There's nothing here!</p>
+                                </main>
+                            }
+                        />
+                    </Route>
                 </Route>
                 <Route path="/signin" element={<SignInView />} />
             </Routes>

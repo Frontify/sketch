@@ -1,6 +1,10 @@
 @import 'assets/fonts/ui/fonts.css';
 /* @import '../../../node_modules/@frontify/arcade-tokens/dist/css/all.css'; */
 
+html,
+body {
+    min-height: 100vh;
+}
 h2 {
     font-weight: 600;
     font-size: 24px;
@@ -131,11 +135,11 @@ custom-console {
 }
 
 custom-avatar {
-    border-radius: 3px;
+    border-radius: 100px;
     display: block;
     overflow: hidden;
-    width: 24px;
-    height: 24px;
+    width: 32px;
+    height: 32px;
 }
 /* Hack to prevent the wrapping button of the flyout trigger to show up  */
 [data-test-id='flyout-trigger'] {

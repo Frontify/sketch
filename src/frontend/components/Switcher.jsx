@@ -16,7 +16,7 @@ export function Switcher({ guidelines, onChange }) {
                 {guidelines &&
                     guidelines.map((guideline) => {
                         return (
-                            <custom-h-stack gap="small" padding="small">
+                            <custom-h-stack gap="small" padding="small" key={guideline.id}>
                                 <IconGuidelines size="Size20"></IconGuidelines>
                                 <Text size="large">{guideline.name}</Text>
                                 <custom-spacer></custom-spacer>

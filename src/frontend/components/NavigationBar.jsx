@@ -24,7 +24,9 @@ export function NavigationBar() {
                 <IconArrowLeft size="Size16"></IconArrowLeft>
             </Link>
             <custom-h-stack align-items="center" gap="small">
-                <IconSketch size="Size24"></IconSketch>
+                <div style={{ flex: 0 }}>
+                    <IconSketch size="Size24"></IconSketch>
+                </div>
                 <Stack direction="column">
                     <Breadcrumbs
                         items={[

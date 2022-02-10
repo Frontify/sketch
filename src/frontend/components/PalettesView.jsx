@@ -7,6 +7,7 @@ import { UserContext } from '../UserContext';
 import { SearchField } from './SearchField';
 import { Switcher } from './Switcher';
 import { IconCaretDown } from '@frontify/arcade';
+import { LoadingIndicator } from './LoadingIndicator';
 
 export function PalettesView({ palettes, guidelines }) {
     const context = useContext(UserContext);
@@ -28,7 +29,9 @@ export function PalettesView({ palettes, guidelines }) {
         );
     }, [palettes, query]);
 
-    return (
+    return !filteredPalettes.length ? (
+        <LoadingIndicator></LoadingIndicator>
+    ) : (
         <custom-v-stack padding="small" gap="large">
             <custom-h-stack stretch-children>
                 <SearchField
@@ -45,11 +48,10 @@ export function PalettesView({ palettes, guidelines }) {
                     ></Switcher>
                 </div>
             </custom-h-stack>
-
             {filteredPalettes.map((palette) => {
                 if (query == '' || palette.colors.length) {
                     return (
-                        <custom-v-stack gap="small">
+                        <custom-v-stack gap="small" key={palette.id}>
                             <custom-h-stack gap="x-small">
                                 <IconCaretDown size="Size16"></IconCaretDown>
 
@@ -61,7 +63,7 @@ export function PalettesView({ palettes, guidelines }) {
                                 <custom-v-stack gap="x-small">
                                     {palette.colors.map((color) => {
                                         return (
-                                            <custom-h-stack gap="small" align-items="center">
+                                            <custom-h-stack gap="small" align-items="center" key={color.id}>
                                                 <Swatch color={color.css_value_hex}></Swatch>
                                                 <Text>{color.name}</Text>
                                                 <custom-spacer></custom-spacer>
