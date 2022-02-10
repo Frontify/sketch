@@ -37,9 +37,9 @@ export function SourceView() {
             <custom-line></custom-line>
             <custom-gap></custom-gap>
 
-            <custom-scroll-container>
+            <custom-scroll-view>
                 <Outlet />
-            </custom-scroll-container>
+            </custom-scroll-view>
         </custom-v-stack>
     );
 }
