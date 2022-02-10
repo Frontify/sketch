@@ -20,7 +20,7 @@ export function NavigationBar() {
 
     return (
         <custom-h-stack gap="small" padding="small" align-items="center">
-            <Link to="/">
+            <Link to="/sources">
                 <IconArrowLeft size="Size16"></IconArrowLeft>
             </Link>
             <custom-h-stack align-items="center" gap="small">

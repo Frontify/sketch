@@ -6,6 +6,7 @@ import { PalettesView } from './PalettesView';
 import { TypographyView } from './TypographyView';
 import { SignInView } from './SignInView';
 import { SourceView } from './SourceView';
+import { SourcesView } from './SourcesView';
 
 // Context
 import { useContext } from 'react';
@@ -21,6 +22,7 @@ export function App() {
     return (
         <BrowserRouter>
             <Routes>
+                <Route path="/sources" element={<SourcesView />} />
                 <Route path="/source/*" element={<SourceView />}>
                     <Route path="artboards" element={<ArtboardsView />}></Route>
                     <Route path="brand/*" element={<MainView />}>

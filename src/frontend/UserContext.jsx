@@ -136,7 +136,7 @@ export const UserContextProvider = ({ children }) => {
                 let { data } = await queryGraphQLWithAuth({ query: userQuery, auth });
 
                 setUser((state) => {
-                    return data.currentUser;
+                    return { ...state, ...data.currentUser };
                 });
                 setBrands((state) => {
                     return { ...state, entries: data.brands };

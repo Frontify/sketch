@@ -89,7 +89,12 @@ export function Toolbar() {
                     <button>
                         <IconNotifications icon="Notifications" size="Size20" />
                     </button>
-                    <button>
+
+                    <button
+                        onClick={() => {
+                            window.postMessage('reload');
+                        }}
+                    >
                         <IconRefresh icon="Refresh" size="Size20" />
                     </button>
                 </custom-h-stack>

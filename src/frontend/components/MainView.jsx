@@ -60,7 +60,6 @@ export function MainView() {
 
     // State
     let [data, setData] = useState({});
-    let [activeView, setActiveView] = useState('open');
     let [activeScope, setActiveScope] = useLocalStorage('cache.activeScope', 'colors');
 
     const navigate = useNavigate();
@@ -84,8 +83,7 @@ export function MainView() {
     }
 
     useEffect(() => {
-        if (!context.user) {
-            console.log('use effect: getUser()', context);
+        if (!context.user?.name) {
             if (context.user?.getUser) {
                 context.user.getUser();
             } else {

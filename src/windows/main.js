@@ -337,6 +337,9 @@ export default function (context, view) {
         webview.executeJavaScript('switchTab("' + view + '")');
     });
 
+    webview.on('reload', function () {
+        webview.reload();
+    });
     // Images, Logos and Icons
     webview.on('showLibrary', function (type) {
         view = type;
