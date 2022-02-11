@@ -4,11 +4,14 @@ import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { SearchField } from './SearchField';
 import { useState } from 'react';
 import { useEffect } from 'react/cjs/react.development';
+import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
 
 export function ArtboardsView() {
     const [open, setOpen] = useState(false);
     const [destinationPickerOpen, setDestinationPickerOpen] = useState(false);
     const [currentSource, setCurrentSource] = useState({});
+    const { t } = useTranslation();
 
     const [sources, setSources] = useState([
         {
@@ -62,10 +65,10 @@ export function ArtboardsView() {
                         <SearchField placeholder="Search Artboards" onChange={() => {}}></SearchField>
                     </div>
                     <custom-line></custom-line>
-                    <custom-scroll-view padding="small">
+                    <custom-scroll-view>
                         {sources.map((source) => {
                             return (
-                                <custom-v-stack key={source.id} gap="medium">
+                                <custom-v-stack key={source.id} gap="medium" padding="small">
                                     <custom-h-stack gap="x-small" align-items="center">
                                         <IconCaretDown size="Size16"></IconCaretDown>
                                         <Text size="x-small">{source.path}</Text>
@@ -118,7 +121,7 @@ export function ArtboardsView() {
                                             setDestinationPickerOpen((destinationPickerOpen) => !destinationPickerOpen);
                                         }}
                                     >
-                                        Upload selected to …
+                                        {t('sources.upload_selection')}
                                     </Button>
                                 }
                                 isOpen={destinationPickerOpen}
@@ -130,7 +133,7 @@ export function ArtboardsView() {
                                     <Text>Other …</Text>
                                 </custom-v-stack>
                             </Flyout>
-                            <Button style="Primary">Update Artboards</Button>
+                            <Button style="Primary">{t('sources.update_artboards')}</Button>
                         </custom-h-stack>
                     </custom-v-stack>
                 </custom-v-stack>

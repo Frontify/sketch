@@ -10,8 +10,10 @@ import {
 import React from 'react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 
 export function NavigationBar() {
+    let [activeSourceScope, setActiveSourceScope] = useLocalStorage('cache.activeSourceScope', 'open');
     const [path, setPath] = useState([
         { title: 'Arcade', url: '/' },
         { title: 'Inventory', url: '/inventory' },
@@ -20,7 +22,7 @@ export function NavigationBar() {
 
     return (
         <custom-h-stack gap="small" padding="small" align-items="center">
-            <Link to="/sources">
+            <Link to={`/sources/${activeSourceScope}`}>
                 <IconArrowLeft size="Size16"></IconArrowLeft>
             </Link>
             <custom-h-stack align-items="center" gap="small">

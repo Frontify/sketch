@@ -55,7 +55,7 @@ export function PalettesView({ palettes, guidelines }) {
                             <custom-h-stack gap="x-small">
                                 <IconCaretDown size="Size16"></IconCaretDown>
 
-                                <Text as="span">
+                                <Text as="span" size="x-small">
                                     {palette.project_name} / <strong>{palette.name}</strong>
                                 </Text>
                             </custom-h-stack>
@@ -63,8 +63,20 @@ export function PalettesView({ palettes, guidelines }) {
                                 <custom-v-stack gap="x-small">
                                     {palette.colors.map((color) => {
                                         return (
-                                            <custom-h-stack gap="small" align-items="center" key={color.id}>
-                                                <Swatch color={color.css_value_hex}></Swatch>
+                                            <custom-h-stack
+                                                gap="small"
+                                                align-items="center"
+                                                key={color.id}
+                                                onClick={() => {
+                                                    window.postMessage('applyColor', {
+                                                        r: color.r,
+                                                        g: color.g,
+                                                        b: color.b,
+                                                        a: color.alpha,
+                                                    });
+                                                }}
+                                            >
+                                                <Swatch color={color.css_value}></Swatch>
                                                 <Text>{color.name}</Text>
                                                 <custom-spacer></custom-spacer>
                                                 <Text color="weak">{color.css_value_hex}</Text>

@@ -14,6 +14,8 @@ import createFolder from '../helpers/createFolder';
 import { runCommand } from '../commands/frontify';
 import { sendToWebview } from 'sketch-module-web-view/remote';
 
+let DOM = require('sketch/dom');
+
 // Identifier for the plugin window that we can use for message passing
 const IDENTIFIER = 'frontifymain';
 
@@ -53,7 +55,6 @@ export default function (context, view) {
 
     // create window and webview
     let win = new BrowserWindow({
-        acceptsFirstMouse: true,
         alwaysOnTop: true,
         fullscreenable: false,
         hidesOnDeactivate: false,
@@ -296,6 +297,7 @@ export default function (context, view) {
     });
 
     webview.on('applyColor', function (data) {
+        console.log('apply color', data);
         color.applyColor(data);
     });
 
@@ -360,6 +362,24 @@ export default function (context, view) {
 
     webview.on('applyLibraryAsset', function (data) {
         asset.applyImage(data);
+    });
+
+    /**
+     *
+     * @returns Requests that can be received from the Frontend
+     */
+
+    webview.on('request', ({ type = '', requestUUID = null, args = {} }) => {
+        let payload = {};
+
+        switch (type) {
+            case 'getOpenDocuments':
+                var documents = DOM.getDocuments();
+                payload = { documents };
+                break;
+        }
+
+        frontend.send('response', { responseUUID: requestUUID, ...payload });
     });
 
     // workarounds

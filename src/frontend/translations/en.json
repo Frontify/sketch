@@ -1,3 +1,83 @@
 {
-    "translation": { "general.search": "Search", "sources.current_document": "Current Document" }
+    "translation": {
+        "emptyStates": {
+            "no_items": "No assets found",
+            "loading_items": "Loading …",
+            "no_guidelines": "No guidelines found",
+            "no_libraries": "No libraries found",
+            "no_medialibraries": "No media libraries found",
+            "no_iconlibraries": "No icon libraries found",
+            "no_logolibraries": "No logo libraries found",
+            "no_palettes": "No color palettes found",
+            "no_textstyles": "No text styles found",
+            "untitled": "Untitled",
+            "untitled_palette": "Untitled palette"
+        },
+        "error": {
+            "blacklisted": "Please use your dedicated Frontify domain.",
+            "connection": "Connection failed. Are you connected to the internet?",
+            "domain": "Something doesn’t seem right with your domain.",
+            "get_access_token": "We could not sign you in. Did you grant access too long ago?",
+            "poll_access_token": "We could not sign you in. Did you already grant access in your browser?"
+        },
+        "general": {
+            "apply_fill": "Apply Color to Fill",
+            "apply_border": "Apply Color to Border",
+            "brand": "Brand",
+            "cancel": "Cancel",
+            "coming_soon": "Coming soon",
+            "close": "Close",
+            "collection": "Collection",
+            "download_fonts": "Download Fonts",
+            "get_started": "Get Started",
+            "import": "Add to Assets",
+            "import_all": "Add all to Local Styles",
+            "imported": "Added to assets",
+            "imported_all": "Added all to assets",
+            "offline": "You’re offline",
+            "log_out": "Log out",
+            "retry": "Retry",
+            "search": "Search",
+            "settings": "Settings",
+            "sign_out": "Sign out",
+            "switch": "Switch",
+            "switch_brand": "Switch Brand",
+            "select": "Select",
+            "user": "User",
+            "untitled_collection": "Untitled Collection",
+            "untitled": "Untitled"
+        },
+        "sources": {
+            "browse_all": "Browse all …",
+            "current_document": "Current Document",
+            "open": "Open",
+            "recent": "Recent",
+            "sync_all": "Sync all Sketch Documents",
+            "update_artboards": "Update Artboards",
+            "upload_selection": "Upload selected to …"
+        },
+        "offline": {
+            "title": "Oh noes!",
+            "description": "Looks like you’re offline and can’t access your Frontify assets right now."
+        },
+        "snippets": {
+            "title": "Text Snippets",
+            "description": "Bring your text snippets from Frontify directly into your Figma designs."
+        },
+        "signin": {
+            "create_account": "Create an account",
+            "help_link": "Get help",
+            "loading": "We’re almost there…",
+            "need_help": "Not sure what to do?",
+            "sign_in": "Sign in",
+            "title": "Sign in",
+            "your_frontify_domain": "Your Frontify Domain",
+            "wait_for_authentication": "Once authenticated in your browser, click “Ready” below",
+            "complete_notice": "Please complete the login process in your browser first",
+            "ready": "Ready"
+        },
+        "tips": {
+            "dragDropGrid": "<strong >Drag & drop</strong> items to the canvas or <strong >double click</strong> an item to replace selected layers."
+        }
+    }
 }

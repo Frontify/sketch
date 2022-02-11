@@ -2,22 +2,16 @@ import React from 'react';
 import '@frontify/arcade/style';
 
 // Router
-import { Routes, Route, Link, useLocation, useNavigate, Outlet, Navigate } from 'react-router-dom';
+import { useNavigate, Outlet } from 'react-router-dom';
 
 // Arcade Components
-import { Button } from '@frontify/arcade';
+
 import { Stack } from '@frontify/arcade/foundation/layout/Stack';
 import { Text } from '@frontify/arcade/foundation/typography/Text';
-
-// Custom Components and Views
-import { RecentSourcesView } from './RecentSourcesView';
-import { NavigationBar } from './NavigationBar';
-import { Toolbar } from './Toolbar';
 
 // Context
 import { useContext, useEffect, useState } from 'react';
 import { UserContext } from '../UserContext';
-import { PalettesView } from './PalettesView';
 
 // i18n
 import { useTranslation } from 'react-i18next';
@@ -100,47 +94,10 @@ export function MainView() {
         };
     }, []);
     return (
-        <div style={{ height: '100%', flex: 1 }}>
-            {/* <custom-scope-bar-wrapper>
-                <Stack padding="small">
-                    <custom-scope-button className="tw-round" active={activeView == 'open'}>
-                        <label>
-                            <input
-                                type="radio"
-                                name="activeView"
-                                value="open"
-                                checked={activeView == 'open'}
-                                onChange={(event) => {
-                                    setActiveView(event.target.value);
-                                }}
-                            />
-                            <Text>Open</Text>
-                        </label>
-                    </custom-scope-button>
-
-                    <custom-scope-button className="tw-round" active={activeView == 'recent'}>
-                        <label>
-                            <input
-                                type="radio"
-                                name="activeView"
-                                value="recent"
-                                checked={activeView == 'recent'}
-                                onChange={(event) => {
-                                    setActiveView(event.target.value);
-                                }}
-                            />
-                            <Text>Recent</Text>
-                        </label>
-                    </custom-scope-button>
-
-                    <custom-spacer></custom-spacer>
-
-                    <button className="tw-underline">{t('sources.current_document')}</button>
-                </Stack>
-            </custom-scope-bar-wrapper> */}
+        <custom-v-stack overflow="hidden">
             <custom-line></custom-line>
-            <custom-scope-bar-wrapper>
-                <Stack padding="small">
+            <custom-scope-bar-wrapper padding="small">
+                <custom-h-stack>
                     {scopes.map((scope) => (
                         <custom-scope-button className="tw-round" active={activeScope == scope.key} key={scope.key}>
                             <label>
@@ -158,14 +115,14 @@ export function MainView() {
                             </label>
                         </custom-scope-button>
                     ))}
-                </Stack>
+                </custom-h-stack>
             </custom-scope-bar-wrapper>
             <custom-line></custom-line>
 
             {/* Router Outlet that displays colors, text styles or any of the media libraries. */}
-            <div style={{ height: '100%', flex: 1 }}>
+            <custom-scroll-view>
                 <Outlet />
-            </div>
-        </div>
+            </custom-scroll-view>
+        </custom-v-stack>
     );
 }

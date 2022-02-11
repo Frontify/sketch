@@ -1,3 +1,82 @@
 {
-    "translation": { "general.search": "Suchen", "sources.current_document": "Aktuelles Dokument" }
+    "translation": {
+        "emptyStates": {
+            "no_items": "Keine Assets gefunden",
+            "loading_items": "Lädt …",
+            "no_guidelines": "Keine Richtlinien gefunden",
+            "no_libraries": "Keine Bibliothek gefunden",
+            "no_medialibraries": "Keine Media Library gefunden",
+            "no_iconlibraries": "Keine Icon Library gefunden",
+            "no_logolibraries": "Keine Logo Library gefunden",
+            "no_palettes": "Keine Farbpaletten gefunden",
+            "no_textstyles": "Keine Textstile gefunden",
+            "untitled": "Unbenannt",
+            "untitled_palette": "Unbenannte Farbpalette"
+        },
+        "error": {
+            "blacklisted": "Versuch’s mal mit deiner zugewiesenen Frontify Domain.",
+            "domain": "Irgendwas stimmt mit der Domain nicht…",
+            "get_access_token": "We could not sign you in. Did you grant access too long ago?",
+            "poll_access_token": "Nicht ganz so schnell… Hast du Figma bereits Zugriff in deinem Browser gewährt?"
+        },
+        "general": {
+            "apply_fill": "Farbe auf Füllung anwenden",
+            "apply_border": "Farbe auf Rahmen anwenden",
+            "brand": "Brand",
+            "cancel": "Abbrechen",
+            "coming_soon": "Demnächst verfügbar",
+            "close": "Schliessen",
+            "collection": "Sammlung",
+            "download_fonts": "Download Fonts",
+            "get_started": "Los geht’s",
+            "import": "Zu Assets hinzufügen",
+            "import_all": "Alle zu Local Styles hinzufügen",
+            "imported": "zu Assets hinzugefügt",
+            "imported_all": "alle zu Assets hinzugefügt",
+            "offline": "Du bist offline",
+            "log_out": "Ausloggen",
+            "retry": "Nochmal versuchen",
+            "search": "Durchsuchen",
+            "settings": "Einstellungen",
+            "sign_out": "Abmelden",
+            "switch": "Wechseln",
+            "switch_brand": "Brand wechseln",
+            "select": "Auswählen",
+            "user": "User",
+            "untitled_collection": "Unbenannte Sammlung",
+            "untitled": "Unbenannt"
+        },
+        "sources": {
+            "browse_all": "Auswählen …",
+            "current_document": "Aktuelles Dokument",
+            "open": "Geöffnet",
+            "recent": "Zuletzt verwendet",
+            "sync_all": "Alle Sketch Dokumente synchroniseren",
+            "update_artboards": "Artboards aktualisieren",
+            "upload_selection": "Auswahl hochladen …"
+        },
+        "offline": {
+            "title": "Hoppla!",
+            "description": "Sieht so aus als wenn du offline bist. Versuch’s nochmal."
+        },
+        "snippets": {
+            "title": "Text Snippets",
+            "description": "Verwende deine Text Snippets von Frontify hier in Figma."
+        },
+        "signin": {
+            "create_account": "Konto erstellen",
+            "help_link": "Hilfe & Support",
+            "loading": "Wird geladen… gleich geht's los!",
+            "need_help": "Benötigst du Hilfe?",
+            "sign_in": "Anmelden",
+            "title": "Anmelden",
+            "your_frontify_domain": "Deine Frontify Domain",
+            "wait_for_authentication": "Sobald du Figma im Browser Zugriff gewährt hast, klicke unten auf “Bereit”.",
+            "complete_notice": "Bitte logge dich zuerst im geöffneten Browserfenster ein",
+            "ready": "Bereit"
+        },
+        "tips": {
+            "dragDropGrid": "<strong >Ziehe</strong> Elemente auf die Zeichenfläche oder <strong >klicke doppelt</strong> um ausgewählte Ebenen zu ersetzen."
+        }
+    }
 }

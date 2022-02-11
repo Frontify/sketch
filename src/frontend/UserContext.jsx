@@ -6,12 +6,27 @@ import { userQuery } from './user.graphql';
 
 export const UserContext = React.createContext();
 
+import { useSketch } from './hooks/useSketch';
+
 export const UserContextProvider = ({ children }) => {
     // Auth
     // ------------------------------------------------------------------------
     let cachedAuth = localStorage.getItem('cache.auth')
         ? JSON.parse(localStorage.getItem('cache.auth'))
         : { domain: null, token: null };
+
+    function handleMessage(event) {
+        console.log(event);
+        let { type, payload } = event.detail.data;
+        console.log(type);
+        switch (type) {
+            case 'user.authentication':
+                context.user.setAuth(payload);
+                context.user.getUser();
+                break;
+        }
+    }
+    window.addEventListener('send-data', handleMessage);
 
     let [auth, setAuth] = useState(cachedAuth);
 
@@ -110,6 +125,17 @@ export const UserContextProvider = ({ children }) => {
         });
     }
 
+    // Documents
+    //
+
+    let [documents, setDocuments] = useState({
+        entries: [],
+        async getOpenDocuments() {
+            let { documents } = await useSketch('getOpenDocuments');
+            return documents;
+        },
+    });
+
     // User
     // ------------------------------------------------------------------------
     let [user, setUser] = useState({
@@ -132,18 +158,22 @@ export const UserContextProvider = ({ children }) => {
         },
         async getUser() {
             const isAuthenticated = auth.domain && auth.token;
-            if (isAuthenticated) {
-                let { data } = await queryGraphQLWithAuth({ query: userQuery, auth });
+            return new Promise(async (resolve, reject) => {
+                if (isAuthenticated) {
+                    let { data } = await queryGraphQLWithAuth({ query: userQuery, auth });
 
-                setUser((state) => {
-                    return { ...state, ...data.currentUser };
-                });
-                setBrands((state) => {
-                    return { ...state, entries: data.brands };
-                });
-            } else {
-                console.warn('Not authenticated');
-            }
+                    setUser((state) => {
+                        return { ...state, ...data.currentUser };
+                    });
+                    setBrands((state) => {
+                        return { ...state, entries: data.brands };
+                    });
+                    resolve();
+                } else {
+                    console.warn('Not authenticated');
+                    reject();
+                }
+            });
         },
     });
     // Initial Effect: Load Brands from localStorage
@@ -163,7 +193,7 @@ export const UserContextProvider = ({ children }) => {
         }
     }, []);
 
-    let context = { user, brands, guidelines, palettes };
+    let context = { user, brands, documents, guidelines, palettes };
 
     return <UserContext.Provider value={context}>{children}</UserContext.Provider>;
 };

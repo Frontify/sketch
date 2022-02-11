@@ -15,6 +15,7 @@ class Color {
         let selection = sketch.getSelection();
         let loop = selection.objectEnumerator();
         let item = null;
+        console.log('applyColor', color, selection);
 
         while ((item = loop.nextObject())) {
             if (item.class() == MSLayerGroup) {
