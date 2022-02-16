@@ -79,15 +79,13 @@ export default function (context, view) {
      */
 
     // webview.loadURL(viewData.url);
+    console.log('Sketch, load: ', mainURL);
     webview.loadURL(mainURL);
 
     // Show window if ready
     win.once('ready-to-show', () => {
         console.log('👋 Frontify Plugin is now running. NODE_ENV: ', process.env.NODE_ENV);
         win.show();
-        // Provide the authentication details to React
-        let auth = user.getAuthentication();
-        frontend.send('user.authentication', auth);
     });
 
     webview.on('cancelOauthFlow', () => {
@@ -107,9 +105,9 @@ export default function (context, view) {
                 domain: domain,
             }).then(
                 function () {
-                    win.close();
                     // I guess this re-starts the plugin, which will then have the access token available?
-                    runCommand(context);
+                    frontend.send('user.authentication', { access_token: authData.accessToken, domain: domain });
+                    // runCommand(context);
                 }.bind(this)
             );
         });
@@ -137,12 +135,7 @@ export default function (context, view) {
 
     // Handlers called from webview
     webview.on('logout', function () {
-        user.logout().then(
-            function () {
-                win.close();
-                runCommand(context);
-            }.bind(this)
-        );
+        user.logout().then();
     });
 
     webview.on('memorizeDomain', function (url) {
@@ -296,8 +289,7 @@ export default function (context, view) {
         color.showColors();
     });
 
-    webview.on('applyColor', function (data) {
-        console.log('apply color', data);
+    webview.on('applyColor', (data) => {
         color.applyColor(data);
     });
 
@@ -377,7 +369,17 @@ export default function (context, view) {
                 var documents = DOM.getDocuments();
                 payload = { documents };
                 break;
+            case 'getAuth':
+                let auth = user.getAuthentication();
+                console.log('auth inside sketch -> send crendentials', auth);
+                if (auth) {
+                    payload = { auth };
+                } else {
+                    payload = { error: 'Could not read crendetials from Sketch' };
+                }
+                break;
         }
+        console.log('send to frontend');
 
         frontend.send('response', { responseUUID: requestUUID, ...payload });
     });

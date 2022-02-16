@@ -10,6 +10,7 @@ import { NavigationBar } from './NavigationBar';
 import { Toolbar } from './Toolbar';
 
 import { Text } from '@frontify/arcade';
+import { LoadingIndicator } from './LoadingIndicator';
 
 export function SourceView() {
     const context = useContext(UserContext);
@@ -23,37 +24,30 @@ export function SourceView() {
         setActiveView(location.pathname);
     }, [location]);
 
-    useEffect(() => {
-        if (!context.user?.name) {
-            if (context.user?.getUser) {
-                context.user.getUser();
-            } else {
-                console.warn('Didn’t fetch user, because getUser() doesn’t exist.');
-            }
-        }
-    }, []);
-
-    return (
-        <custom-v-stack stretch>
-            <Toolbar></Toolbar>
-            <NavigationBar></NavigationBar>
-            <custom-line></custom-line>
-            <custom-tabs>
-                <custom-tab active={location.pathname.includes('/source/brand')}>
-                    <Link to={`/source/brand/${activeScope}`}>
-                        <Text>Brand</Text>
-                    </Link>
-                </custom-tab>
-                <custom-tab active={location.pathname.includes('/source/artboards')}>
-                    <Link to="/source/artboards">
-                        <Text>Artboards</Text>
-                    </Link>
-                </custom-tab>
-            </custom-tabs>
-            <custom-line></custom-line>
-            <custom-gap></custom-gap>
-
-            <Outlet />
-        </custom-v-stack>
-    );
+    if (context.user?.name) {
+        return (
+            <custom-v-stack stretch>
+                <Toolbar></Toolbar>
+                <NavigationBar></NavigationBar>
+                <custom-line></custom-line>
+                <custom-tabs>
+                    <custom-tab active={location.pathname.includes('/source/brand')}>
+                        <Link to={`/source/brand/${activeScope}`}>
+                            <Text>Brand</Text>
+                        </Link>
+                    </custom-tab>
+                    <custom-tab active={location.pathname.includes('/source/artboards')}>
+                        <Link to="/source/artboards">
+                            <Text>Artboards</Text>
+                        </Link>
+                    </custom-tab>
+                </custom-tabs>
+                <custom-line></custom-line>
+                <custom-gap></custom-gap>
+                <Outlet />
+            </custom-v-stack>
+        );
+    } else {
+        return <LoadingIndicator />;
+    }
 }

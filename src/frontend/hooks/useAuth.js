@@ -1,16 +1,13 @@
-import { useContext } from 'react';
-import { UserContext } from '../UserContext';
 // Hook
+import { useSketch } from './useSketch';
+import { useEffect } from 'react';
 export function useAuth() {
-    const context = useContext(UserContext);
-    let credentials = localStorage.getItem('cache.auth')
-        ? JSON.parse(localStorage.getItem('cache.auth'))
-        : { domain: null, token: null };
-
-    if (credentials.domain && credentials.token) {
-        context.user.getUser();
-        return { isAuthenticated: true };
-    } else {
-        return { isAuthenticated: false };
-    }
+    useEffect(async () => {
+        let { auth } = await useSketch('getAuth');
+        if (auth && auth.domain && auth.token) {
+            return true;
+        } else {
+            return false;
+        }
+    }, []);
 }

@@ -1,13 +1,22 @@
 import React from 'react';
-import { useLocation, Navigate } from 'react-router-dom';
+
+import { useLocation, useNavigate, Navigate } from 'react-router-dom';
 
 import { useAuth } from '../hooks/useAuth';
+import { useSketch } from '../hooks/useSketch';
+import { useEffect, useState, useContext } from 'react';
+import { UserContext } from '../UserContext';
 
 export function RequireAuth({ children }) {
-    console.log('require auth');
-    const { isAuthenticated } = useAuth();
-    const location = useLocation();
+    const context = useContext(UserContext);
 
-    console.log({ isAuthenticated });
-    return isAuthenticated === true ? children : <Navigate to="/launch" replace state={{ path: location.pathname }} />;
+    let isAuthenticated = context?.auth?.token;
+
+    useEffect(async () => {
+        if (!context.user?.name) {
+            await context.actions.getUser(context.auth);
+        }
+    }, []);
+
+    return isAuthenticated ? children : <Navigate to="/signin" />;
 }

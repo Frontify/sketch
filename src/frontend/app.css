@@ -222,3 +222,45 @@ custom-artboard-preview {
 [flex] {
     flex: 1;
 }
+
+custom-palette-item:hover {
+    background: rgba(0, 0, 0, 0.08);
+
+    cursor: pointer;
+}
+
+custom-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
+}
+
+custom-grid-item {
+    background-image: url(../assets/images/transparent.png);
+    display: flex;
+    border: 1px solid #eaebeb;
+    border-radius: 2px;
+    padding: var(--space-s);
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    height: calc((100vw - 128px) / 3);
+    animation: fade-in 0.25s both;
+}
+
+custom-grid[columns='3'] {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+custom-grid[columns='6'] {
+    grid-template-columns: repeat(6, 1fr);
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}

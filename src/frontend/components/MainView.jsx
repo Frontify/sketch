@@ -6,8 +6,7 @@ import { useNavigate, Outlet } from 'react-router-dom';
 
 // Arcade Components
 
-import { Stack } from '@frontify/arcade/foundation/layout/Stack';
-import { Text } from '@frontify/arcade/foundation/typography/Text';
+import { Text } from '@frontify/arcade';
 
 // Context
 import { useContext, useEffect, useState } from 'react';
@@ -24,19 +23,19 @@ const libraryScopes = [
         title: 'Colors',
     },
     {
-        key: 'symbols',
-        title: 'Symbols',
-    },
-    {
         key: 'typography',
         title: 'Typography',
+    },
+    {
+        key: 'symbols',
+        title: 'Symbols',
     },
     {
         key: 'icons',
         title: 'Icons',
     },
     {
-        key: 'images',
+        key: 'media',
         title: 'Images',
     },
     {
@@ -63,36 +62,6 @@ export function MainView() {
      */
     let [scopes] = useState(libraryScopes);
 
-    function handleMessage(event) {
-        let { type, payload } = event.detail.data;
-        switch (type) {
-            case 'user.authentication':
-                context.user.setAuth(payload);
-                context.user.getUser();
-                break;
-        }
-        setData({
-            data: payload,
-        });
-    }
-
-    useEffect(() => {
-        if (!context.user?.name) {
-            if (context.user?.getUser) {
-                context.user.getUser();
-            } else {
-                console.warn('Didn’t fetch user, because getUser() doesn’t exist.');
-            }
-        }
-    }, []);
-    useEffect(() => {
-        console.log('use effect');
-        window.addEventListener('send-data', handleMessage);
-
-        return () => {
-            window.removeEventListener('send-data', handleMessage);
-        };
-    }, []);
     return (
         <custom-v-stack overflow="hidden">
             <custom-line></custom-line>

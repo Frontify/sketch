@@ -2,13 +2,14 @@ import React, { useEffect, useReducer } from 'react';
 import { useContext, useState } from 'react';
 import { UserContext } from '../UserContext';
 
-import { Text } from '@frontify/arcade/foundation/typography/Text';
+import { Text } from '@frontify/arcade';
 import { Button, Flyout, IconCaretDown, IconCheck, IconLogout, IconNotifications, IconRefresh } from '@frontify/arcade';
 
 export function Toolbar() {
     const context = useContext(UserContext);
     const [open, setOpen] = useState(false);
     function logout() {
+        context.actions.logout();
         window.postMessage('logout');
     }
     return (
@@ -32,8 +33,8 @@ export function Toolbar() {
                                         <button>
                                             <Text as="span" color="white" size="medium" weight="strong">
                                                 {context.brands &&
-                                                    context.brands.selected &&
-                                                    context.brands.selected.name}
+                                                    context.selection.brand &&
+                                                    context.selection.brand.name}
                                             </Text>
                                         </button>
                                         <IconCaretDown></IconCaretDown>
@@ -62,19 +63,20 @@ export function Toolbar() {
                                 <custom-line></custom-line>
 
                                 <custom-v-stack gap="small" padding="small">
-                                    {context.brands.entries &&
-                                        context.brands.entries.map((brand) => {
+                                    {context.brands &&
+                                        context.brands.length &&
+                                        context.brands.map((brand) => {
                                             return (
                                                 <custom-h-stack
                                                     key={brand.id}
                                                     gap="small"
                                                     onClick={() => {
-                                                        context.brands.select(brand.id);
+                                                        context.actions.selectBrand(brand);
                                                         setOpen(false);
                                                     }}
                                                 >
-                                                    {context.brands.selected?.id == brand.id && <IconCheck></IconCheck>}
-                                                    {context.brands.selected?.id != brand.id && (
+                                                    {context.selection.brand?.id == brand.id && <IconCheck></IconCheck>}
+                                                    {context.selection.brand?.id != brand.id && (
                                                         <div style={{ width: '16px' }}></div>
                                                     )}
                                                     <Text>{brand.name}</Text>

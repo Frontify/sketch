@@ -2,8 +2,8 @@ import React from 'react';
 import { Button, Flyout, IconCaretDown, IconMore, Text } from '@frontify/arcade';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { SearchField } from './SearchField';
-import { useState } from 'react';
-import { useEffect } from 'react/cjs/react.development';
+import { useState, useEffect } from 'react';
+
 import { t } from 'i18next';
 import { useTranslation } from 'react-i18next';
 

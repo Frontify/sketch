@@ -14,6 +14,7 @@ export function Switcher({ guidelines, onChange }) {
         >
             <custom-v-stack separator="true">
                 {guidelines &&
+                    guidelines.length &&
                     guidelines.map((guideline) => {
                         return (
                             <custom-h-stack gap="small" padding="small" key={guideline.id}>

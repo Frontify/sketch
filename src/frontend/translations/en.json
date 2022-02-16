@@ -66,13 +66,16 @@
         },
         "signin": {
             "create_account": "Create an account",
+            "creat_account_source": "https://www.frontify.com/signup",
             "help_link": "Get help",
+            "help_link_source": "https://help.frontify.com/en/articles/1629952-how-to-use-the-frontify-sketch-plugin",
             "loading": "We’re almost there…",
             "need_help": "Not sure what to do?",
             "sign_in": "Sign in",
             "title": "Sign in",
             "your_frontify_domain": "Your Frontify Domain",
-            "wait_for_authentication": "Once authenticated in your browser, click “Ready” below",
+            "wait_for_authorization_title": "Awaiting authorization",
+            "wait_for_authorization": "Waiting for your authorization. Please authorize the app in the opened browser window.",
             "complete_notice": "Please complete the login process in your browser first",
             "ready": "Ready"
         },

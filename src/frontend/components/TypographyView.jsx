@@ -1,37 +1,39 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
 
-import { Text } from '@frontify/arcade';
+import { IconCaretDown, Text } from '@frontify/arcade';
 
-export function TypographyView() {
-    const [palettes, setPalettes] = useState(
-        Object.keys(guideline.groups).map((key) => {
-            return guideline.groups[key];
-        })
-    );
-
+export function TypographyView({ palettes }) {
     return (
         <custom-v-stack padding="small" gap="small">
-            {palettes.map((palette) => {
-                return (
-                    <div>
-                        <Text as="span" size="large" weight="strong">
-                            XY Guideline / {palette.title}
-                        </Text>
+            {palettes &&
+                palettes.map((palette) => {
+                    return (
+                        <div key={palette.id}>
+                            <custom-h-stack gap="x-small">
+                                <IconCaretDown size="Size16"></IconCaretDown>
 
-                        <custom-v-stack gap="small">
-                            {palette.styles.map((textStyle) => {
-                                return (
-                                    <custom-h-stack gap="small" align-items="center">
-                                        <span>{textStyle.name}</span>
-                                        <custom-spacer></custom-spacer>
-                                    </custom-h-stack>
-                                );
-                            })}
-                        </custom-v-stack>
-                    </div>
-                );
-            })}
+                                <Text as="span" size="x-small">
+                                    {palette.project_name} / <strong>{palette.title}</strong>
+                                </Text>
+                            </custom-h-stack>
+
+                            <custom-v-stack gap="small">
+                                {palette.styles.map((textStyle) => {
+                                    return (
+                                        <custom-v-stack key={textStyle.id}>
+                                            <span>{textStyle.name}</span>
+                                            <Text size="x-small">
+                                                {textStyle.family || 'Default'} / {textStyle.size} /{' '}
+                                                {textStyle.line_height}
+                                            </Text>
+                                        </custom-v-stack>
+                                    );
+                                })}
+                            </custom-v-stack>
+                        </div>
+                    );
+                })}
         </custom-v-stack>
     );
 }

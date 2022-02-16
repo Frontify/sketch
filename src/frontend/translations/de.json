@@ -65,13 +65,16 @@
         },
         "signin": {
             "create_account": "Konto erstellen",
+            "creat_account_source": "https://www.frontify.com/signup",
             "help_link": "Hilfe & Support",
+            "help_link_source": "https://help.frontify.com/en/articles/1629952-how-to-use-the-frontify-sketch-plugin",
             "loading": "Wird geladen… gleich geht's los!",
             "need_help": "Benötigst du Hilfe?",
             "sign_in": "Anmelden",
             "title": "Anmelden",
             "your_frontify_domain": "Deine Frontify Domain",
-            "wait_for_authentication": "Sobald du Figma im Browser Zugriff gewährt hast, klicke unten auf “Bereit”.",
+            "wait_for_authorization_title": "Autorisierung",
+            "wait_for_authorization": "Bitte autorisiere die App im geöffneten Browser-Fenster.",
             "complete_notice": "Bitte logge dich zuerst im geöffneten Browserfenster ein",
             "ready": "Bereit"
         },

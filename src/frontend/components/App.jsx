@@ -1,15 +1,21 @@
 import React from 'react';
 
 import { ArtboardsView } from './ArtboardsView';
+
+import { IconLibrariesView } from './IconLibrariesView';
+import { LogoLibrariesView } from './LogoLibrariesView';
+import { MediaLibrariesView } from './MediaLibrariesView';
+
 import { MainView } from './MainView';
 import { PalettesView } from './PalettesView';
 import { TypographyView } from './TypographyView';
-import { LaunchView } from './LaunchView';
+
 import { OpenDocumentsView } from './OpenDocumentsView';
 import { RecentDocumentsView } from './RecentDocumentsView';
 import { RequireAuth } from './RequireAuth';
 
 import { SignInView } from './SignInView';
+import { SignInPendingView } from './SignInPendingView';
 import { SourceView } from './SourceView';
 import { SourcesView } from './SourcesView';
 
@@ -28,28 +34,51 @@ export function App() {
     return (
         <BrowserRouter>
             <Routes>
-                <Route path="/sources" element={<SourcesView />}>
+                <Route
+                    path="/sources"
+                    element={
+                        <RequireAuth>
+                            <SourcesView />
+                        </RequireAuth>
+                    }
+                >
                     <Route path="open" element={<OpenDocumentsView />} />
                     <Route path="recent" element={<RecentDocumentsView />} />
                 </Route>
 
-                <Route path="/source/*" element={<SourceView />}>
+                <Route
+                    path="/source/*"
+                    element={
+                        <RequireAuth>
+                            <SourceView />
+                        </RequireAuth>
+                    }
+                >
                     <Route path="artboards" element={<ArtboardsView />}></Route>
                     <Route path="brand/*" element={<MainView />}>
                         <Route
                             path="colors"
                             element={
                                 <PalettesView
-                                    palettes={context.palettes.entries}
-                                    guidelines={context.guidelines.entries}
+                                    palettes={context && context.colorPalettes}
+                                    guidelines={context && context.guidelines}
                                 />
                             }
                         ></Route>
-                        <Route path="text-styles" element={<TypographyView />}></Route>
+                        <Route
+                            path="typography"
+                            element={
+                                <TypographyView
+                                    palettes={context && context.textStylePalettes}
+                                    guidelines={context && context.guidelines}
+                                />
+                            }
+                        ></Route>
+
                         <Route path="symbols"></Route>
-                        <Route path="icons"></Route>
-                        <Route path="images"></Route>
-                        <Route path="logos"></Route>
+                        <Route path="icons" element={<IconLibrariesView />}></Route>
+                        <Route path="media" element={<MediaLibrariesView />}></Route>
+                        <Route path="logos" element={<LogoLibrariesView />}></Route>
                         <Route
                             path="*"
                             element={
@@ -60,8 +89,9 @@ export function App() {
                         />
                     </Route>
                 </Route>
+                <Route path="/" element={<SignInView />} />
                 <Route path="/signin" element={<SignInView />} />
-                <Route path="/launch" element={<LaunchView />} />
+                <Route path="/signin-pending" element={<SignInPendingView />} />
             </Routes>
         </BrowserRouter>
     );

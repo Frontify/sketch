@@ -4,7 +4,7 @@ import { TextInput, IconSearch } from '@frontify/arcade';
 
 import { useTranslation } from 'react-i18next';
 
-export function SearchField({ onChange }) {
+export function SearchField({ onInput, onChange }) {
     const [query, setQuery] = useState('');
     const { t, i18n } = useTranslation();
 
@@ -16,7 +16,10 @@ export function SearchField({ onChange }) {
             value={query}
             onChange={(value) => {
                 setQuery(value);
-                onChange(value);
+                onInput(value);
+            }}
+            onEnterPressed={(event) => {
+                onChange(event.target.value);
             }}
         ></TextInput>
     );
