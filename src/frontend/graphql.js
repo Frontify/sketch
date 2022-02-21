@@ -1,5 +1,4 @@
 export async function queryGraphQLWithAuth({ query, auth }) {
-    console.log(query, auth);
     return new Promise(async (resolve, reject) => {
         try {
             try {

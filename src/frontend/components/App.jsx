@@ -2,8 +2,6 @@ import React from 'react';
 
 import { ArtboardsView } from './ArtboardsView';
 
-import { IconLibrariesView } from './IconLibrariesView';
-import { LogoLibrariesView } from './LogoLibrariesView';
 import { MediaLibrariesView } from './MediaLibrariesView';
 
 import { MainView } from './MainView';
@@ -76,9 +74,10 @@ export function App() {
                         ></Route>
 
                         <Route path="symbols"></Route>
-                        <Route path="icons" element={<IconLibrariesView />}></Route>
-                        <Route path="media" element={<MediaLibrariesView />}></Route>
-                        <Route path="logos" element={<LogoLibrariesView />}></Route>
+                        <Route path="icons" element={<MediaLibrariesView type="IconLibrary" selected="" />}></Route>
+                        <Route path="media" element={<MediaLibrariesView type="MediaLibrary" selected="" />}></Route>
+                        <Route path="logos" element={<MediaLibrariesView type="LogoLibrary" selected="" />}></Route>
+
                         <Route
                             path="*"
                             element={

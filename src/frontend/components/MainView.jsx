@@ -89,9 +89,8 @@ export function MainView() {
             <custom-line></custom-line>
 
             {/* Router Outlet that displays colors, text styles or any of the media libraries. */}
-            <custom-scroll-view>
-                <Outlet />
-            </custom-scroll-view>
+
+            <Outlet />
         </custom-v-stack>
     );
 }
