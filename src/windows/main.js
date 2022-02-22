@@ -40,6 +40,7 @@ function pathInsidePluginBundle(url) {
  */
 const frontend = {
     send(type, payload) {
+        console.log('send to frontend', type, payload);
         sendToWebview(IDENTIFIER, `send(${JSON.stringify({ type, payload })})`);
     },
 };
@@ -352,19 +353,25 @@ export default function (context, view) {
         asset.search(type, query);
     });
 
-    webview.on('applyLibraryAsset', function (data) {
-        asset.applyImage(data);
-    });
-
     /**
      *
      * @returns Requests that can be received from the Frontend
      */
 
-    webview.on('request', ({ type = '', requestUUID = null, args = {} }) => {
+    webview.on('request', async ({ type = '', requestUUID = null, args = {} }) => {
         let payload = {};
-
+        console.log('request', type);
         switch (type) {
+            case 'applyLibraryAsset':
+                try {
+                    await asset.applyImage(args.asset);
+                    // -> Message that we’re done
+                    payload = { sucess: 'true' };
+                } catch (error) {
+                    console.log(error);
+                    payload = { status: 'error' };
+                }
+                break;
             case 'getOpenDocuments':
                 var documents = DOM.getDocuments();
                 payload = { documents };
@@ -379,7 +386,6 @@ export default function (context, view) {
                 }
                 break;
         }
-        console.log('send to frontend');
 
         frontend.send('response', { responseUUID: requestUUID, ...payload });
     });

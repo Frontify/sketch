@@ -48,8 +48,6 @@ export function closeCommand(context) {
 export function selectionChangedCommand(context) {
     executeSafely(context, function () {
         if (isWebviewPresent('frontifymain')) {
-            sendToWebview('frontifymain', 'selectionChanged()');
-
             let layers = context.actionContext.document.selectedLayers().layers().slice();
             let layerInformation = layers.map((layer) => {
                 let nativeLayer = sketch3.fromNative(layer);

@@ -1,5 +1,10 @@
 import React from 'react';
-import { useContext, useEffect, useState } from 'react';
+import { useState, useContext, useEffect } from 'react';
+
+import { Text } from '@frontify/arcade';
+import { LoadingIndicator } from './LoadingIndicator';
+import { SearchField } from './SearchField';
+
 import { UserContext } from '../UserContext';
 import { GridView } from './GridView';
 import { Dropdown } from '@frontify/arcade';
@@ -9,6 +14,107 @@ export function MediaLibrariesView({ type }) {
     const [selectedLibrary, setSelectedLibrary] = useState(null);
     const [libraries, setLibraries] = useState([]);
 
+    let { actions, auth } = useContext(UserContext);
+
+    // This could be a prop, but we'll use it  for all views for now
+    const LIMIT = 25;
+    const THUMB_WIDTH = 320;
+
+    // Loading state
+    let [loading, setLoading] = useState(false);
+
+    // Images, total, current page
+    let [images, setImages] = useState([]);
+    let [totalImages, setTotalImages] = useState(Infinity);
+    let [page, setPage] = useState(1);
+
+    // Image selection
+    let [selection, setSelection] = useState([]);
+
+    // We can use the mode to indicate "browse" or "search"
+    let [mode, setMode] = useState('browse');
+
+    // Query is used for the search field
+    let [query, setQuery] = useState('');
+
+    // When the {project} prop changes, load fresh data
+    useEffect(() => {
+        console.log('selectedLibrary change');
+        setPage(1);
+        setImages([]);
+    }, [selectedLibrary]);
+
+    // Depending on the {newMode}, we’ll load more assets, either by
+    // either using {loadMediaLibrary} or {searchMediaLibrary}.
+    const loadMore = async (newMode) => {
+        console.log('load more omg', loading, images.length, totalImages);
+        let nextPage = page;
+        if (newMode != mode) {
+            setPage(1);
+            nextPage = 1;
+            setMode(newMode);
+            // clear items
+            setImages([]);
+        }
+        setLoading(true);
+
+        let result = null;
+
+        // These parameters are used by both API requests.
+        // The only difference is the {query} parameter for search.
+        let sharedRequestParameters = {
+            auth: auth,
+            id: selectedLibrary.id,
+            libraryType: selectedLibrary.__typename,
+            limit: LIMIT,
+            page: nextPage,
+        };
+
+        switch (newMode) {
+            case 'browse':
+                result = await actions.loadMediaLibrary({
+                    ...sharedRequestParameters,
+                });
+                break;
+            case 'search':
+                result = await context.actions.searchLibraryWithQuery({
+                    ...sharedRequestParameters,
+                    query: query,
+                });
+        }
+
+        let library = result.data.project;
+        let { items, total } = library.assets;
+
+        setImages((state) => {
+            // Merge new images
+            let newState = state.concat(items || []);
+
+            // Update the total number of items
+            setTotalImages(total);
+            return newState;
+        });
+
+        setLoading(false);
+        setPage((page) => page + 1);
+    };
+
+    function handleIntersect() {
+        console.log('handle intersect in media library', loading);
+        if (loading) return;
+
+        if (images.length >= totalImages) {
+            return;
+        }
+        setLoading(true);
+        loadMore(mode);
+    }
+
+    function handleSelect(selection) {
+        setSelection(selection);
+    }
+
+    // React to changes of the library type
     useEffect(() => {
         let libraries = context.actions.getLibrariesByType(type);
         setLibraries(libraries);
@@ -18,27 +124,63 @@ export function MediaLibrariesView({ type }) {
     if (!libraries.length) return <div>No Libraries</div>;
 
     return (
-        <custom-v-stack padding="small" gap="small" overflow="hidden">
-            <Dropdown
-                activeItemId={selectedLibrary.id}
-                menuBlocks={[
-                    {
-                        ariaLabel: 'First section',
-                        id: 'block1',
+        <custom-v-stack overflow="hidden" flex>
+            <custom-v-stack padding="small" gap="small" separator="bottom">
+                <Dropdown
+                    activeItemId={selectedLibrary.id}
+                    menuBlocks={[
+                        {
+                            ariaLabel: 'First section',
+                            id: 'block1',
+                            menuItems: libraries.map((library) => {
+                                return { id: library.id, title: library.name };
+                            }),
+                        },
+                    ]}
+                    onChange={(id) => {
+                        let library = libraries.find((library) => library.id == id);
+                        setSelectedLibrary(library);
+                    }}
+                ></Dropdown>
+                <SearchField
+                    onInput={(value) => {
+                        setQuery(value);
+                    }}
+                    onChange={(value) => {
+                        let newMode = value != '' ? 'search' : 'browse';
+                        setQuery(value);
+                        loadMore(newMode);
+                    }}
+                    onClear={() => {
+                        console.log('cleanr');
+                        setQuery('');
+                        loadMore('browse');
+                    }}
+                ></SearchField>
+            </custom-v-stack>
 
-                        menuItems: libraries.map((library) => {
-                            return { id: library.id, title: library.name };
-                        }),
-                    },
-                ]}
-                onChange={(id) => {
-                    let library = libraries.find((library) => library.id == id);
-                    setSelectedLibrary(library);
-                }}
-            ></Dropdown>
+            <custom-scroll-view padding="small" flex>
+                <GridView
+                    images={images}
+                    thumbWidth="320"
+                    onIntersect={handleIntersect}
+                    onSelect={handleSelect}
+                ></GridView>
+            </custom-scroll-view>
 
-            <GridView project={selectedLibrary}></GridView>
-            <custom-status-bar>dsadsa</custom-status-bar>
+            <custom-status-bar padding="small" separator="top">
+                {images ? (
+                    <custom-h-stack style={{ width: '100%' }} justify-content="center">
+                        <Text size="x-small">
+                            {selection && selection.length == 1
+                                ? selection[0].title
+                                : `${images.length} / ${totalImages}`}
+                        </Text>
+                    </custom-h-stack>
+                ) : (
+                    ''
+                )}
+            </custom-status-bar>
         </custom-v-stack>
     );
 }

@@ -10,7 +10,8 @@ export function SearchField({ onInput, onChange }) {
 
     return (
         <TextInput
-            type="search"
+            type="text"
+            clearable="true"
             placeholder={t('general.search')}
             decorator={<IconSearch />}
             value={query}
@@ -20,6 +21,10 @@ export function SearchField({ onInput, onChange }) {
             }}
             onEnterPressed={(event) => {
                 onChange(event.target.value);
+            }}
+            onClear={() => {
+                setQuery('');
+                onChange('');
             }}
         ></TextInput>
     );

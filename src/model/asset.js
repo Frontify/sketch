@@ -3,8 +3,10 @@ import fetch from '../helpers/fetch';
 import sketch from './sketch';
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
 
-let API = require('sketch');
+let sketch3 = require('sketch');
 let DOM = require('sketch/dom');
+
+import { Document, Image, Style } from 'sketch/dom';
 
 class Asset {
     constructor() {}
@@ -54,120 +56,125 @@ class Asset {
     }
 
     applyImage(data) {
-        if (data.url && data.ext) {
-            let url = data.url.replace('{width}', 2000);
-            let ext = data.ext;
+        return new Promise((resolve, reject) => {
+            if (data.previewUrl && data.extension) {
+                let url = data.previewUrl.replace('{width}', 2000);
+                let ext = data.extension;
 
-            let jsdoc = DOM.Document.fromNative(sketch.getDocument());
+                console.log('ext', ext);
 
-            if (ext !== 'svg') {
-                let image = NSImage.alloc().initWithContentsOfURL(NSURL.URLWithString(url));
-                let imageLayer = new DOM.Image({ image: image });
-                let imageSize = image.size();
+                let currentDocument = Document.fromNative(sketch.getDocument());
 
-                if (imageLayer && imageLayer.image) {
-                    imageLayer.frame.width = imageSize.width;
-                    imageLayer.frame.height = imageSize.height;
+                if (ext !== 'svg') {
+                    let image = NSImage.alloc().initWithContentsOfURL(NSURL.URLWithString(url));
+                    let imageLayer = new Image({ image: image });
+                    let imageSize = image.size();
 
-                    let imageData = imageLayer.image;
-                    let app = NSApp.delegate();
-                    let applied = false;
+                    if (imageLayer && imageLayer.image) {
+                        imageLayer.frame.width = imageSize.width;
+                        imageLayer.frame.height = imageSize.height;
 
-                    jsdoc.selectedLayers.forEach(
-                        function (layer) {
+                        let imageData = imageLayer.image;
+
+                        let applied = false;
+
+                        currentDocument.selectedLayers.forEach((layer) => {
                             // check whether layer is a shape
                             if (layer.type != 'Artboard' && layer.style) {
                                 applied = true;
                                 layer.style.fills = [
                                     {
-                                        fill: API.Style.FillType.Pattern,
+                                        fill: Style.FillType.Pattern,
                                         pattern: {
-                                            patternType: API.Style.PatternFillType.Fill,
+                                            patternType: Style.PatternFillType.Fill,
                                             image: imageData,
                                         },
                                     },
                                 ];
                             }
-                        }.bind(this)
-                    );
+                        });
 
-                    if (!applied) {
-                        // no appropriate layer has been selected -> add to document
-                        let parent = null;
+                        if (!applied) {
+                            // no appropriate layer has been selected -> add to document
+                            let parent = null;
 
-                        jsdoc.selectedLayers.forEach(
-                            function (layer) {
+                            currentDocument.selectedLayers.forEach((layer) => {
                                 if (layer.type == 'Artboard') {
                                     parent = layer;
                                 }
-                            }.bind(this)
-                        );
+                            });
 
-                        if (parent) {
-                            imageLayer.parent = parent;
+                            if (parent) {
+                                imageLayer.parent = parent;
 
-                            let ratio = imageSize.height / imageSize.width;
+                                let ratio = imageSize.height / imageSize.width;
 
-                            imageLayer.frame.width = parent.frame.width;
-                            imageLayer.frame.height = ratio * parent.frame.width;
-                        } else {
-                            imageLayer.parent = jsdoc.selectedPage;
-                        }
-
-                        imageLayer.selected = true;
-                        jsdoc.centerOnLayer(imageLayer);
-                        jsdoc.sketchObject.eventHandlerManager().currentHandler().zoomToSelection();
-                    }
-
-                    app.refreshCurrentDocument();
-                }
-            } else {
-                fetch(url, { cdn: true })
-                    .then(
-                        function (blob) {
-                            let app = NSApp.delegate();
-
-                            let svg = NSString.stringWithString(blob);
-                            let svgData = svg.dataUsingEncoding(NSUTF8StringEncoding);
-
-                            let importer = MSSVGImporter.svgImporter();
-
-                            importer.prepareToImportFromData(svgData);
-                            let layer = importer.importAsLayer();
-
-                            let jsLayer = DOM.Group.fromNative(layer).layers[0];
-                            jsLayer.name = data.title || 'SVG';
-
-                            let parent = null;
-
-                            jsdoc.selectedLayers.forEach(
-                                function (selectedLayer) {
-                                    if (!parent && selectedLayer.type == 'Artboard') {
-                                        parent = selectedLayer;
-                                    }
-                                }.bind(this)
-                            );
-
-                            if (!parent) {
-                                parent = jsdoc.selectedPage;
+                                imageLayer.frame.width = parent.frame.width;
+                                imageLayer.frame.height = ratio * parent.frame.width;
+                            } else {
+                                imageLayer.parent = currentDocument.selectedPage;
                             }
 
-                            jsLayer.parent = parent;
+                            imageLayer.selected = true;
+                            currentDocument.centerOnLayer(imageLayer);
+                            currentDocument.sketchObject.eventHandlerManager().currentHandler().zoomToSelection();
+                        }
 
-                            jsLayer.selected = true;
-                            jsdoc.centerOnLayer(jsLayer);
-                            jsdoc.sketchObject.eventHandlerManager().currentHandler().zoomToSelection();
+                        // app.refreshCurrentDocument();
 
-                            app.refreshCurrentDocument();
-                        }.bind(this)
-                    )
-                    .catch(
-                        function (e) {
-                            console.error(e);
-                        }.bind(this)
-                    );
+                        resolve();
+                    }
+                } else {
+                    fetch(url, { cdn: true })
+                        .then((blob) => {
+                            // SVG as Base 64 String
+                            let svgString = NSString.stringWithString(blob);
+
+                            // Import the SVG
+                            const group = sketch3.createLayerFromData(svgString, 'svg');
+
+                            // Change the name of the group
+                            group.name = data.title || 'SVG';
+
+                            // Here we’ll figure out, to which existing layer we’ll add the imported SVG to:
+                            let parent = null;
+
+                            // If the current selection contains an Artboard, we’ll use that…
+                            currentDocument.selectedLayers.forEach((selectedLayer) => {
+                                if (!parent && selectedLayer.type == 'Artboard') {
+                                    parent = selectedLayer;
+                                }
+                            });
+
+                            // Otherwise, we’ll use the current page.
+                            if (!parent) {
+                                parent = currentDocument.selectedPage;
+                            }
+
+                            // Add the SVG to the parent
+                            group.parent = parent;
+
+                            // Deselect the parent
+                            parent.selected = false;
+
+                            // Select the group
+                            group.selected = true;
+                            currentDocument.centerOnLayer(group);
+                            // currentDocument.sketchObject.eventHandlerManager().currentHandler().zoomToSelection();
+
+                            // Todo: Figure out why we used this?
+                            // Problem: If we call this, the Promise won’t resolve afterwards
+                            // app.refreshCurrentDocument();
+                            console.log('resolve SVG ');
+                            resolve();
+                        })
+                        .catch((e) => {
+                            console.error('failed to fetch svg', e);
+                            reject(e);
+                        });
+                }
             }
-        }
+        });
     }
 }
 

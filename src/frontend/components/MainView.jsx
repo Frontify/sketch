@@ -63,7 +63,7 @@ export function MainView() {
     let [scopes] = useState(libraryScopes);
 
     return (
-        <custom-v-stack overflow="hidden">
+        <custom-v-stack overflow="hidden" flex>
             <custom-line></custom-line>
             <custom-scope-bar-wrapper padding="small">
                 <custom-h-stack>

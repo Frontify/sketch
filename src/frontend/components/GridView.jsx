@@ -1,142 +1,132 @@
-import React from 'react';
-import { useState, useContext, useEffect } from 'react';
+import { LoadingCircle } from '@frontify/arcade';
+import React, { useEffect, useState, useRef } from 'react';
+import { useSketch } from '../hooks/useSketch';
 
-import { Text } from '@frontify/arcade';
-import { UserContext } from '../UserContext';
-import { LoadingIndicator } from './LoadingIndicator';
-import { SearchField } from './SearchField';
 import { Observer } from './Observer';
 
-export function GridView({ project }) {
-    let context = useContext(UserContext);
-    let { actions, auth, selection } = useContext(UserContext);
-
-    // This could be a prop, but we'll use it  for all views for now
-    const LIMIT = 25;
-    const THUMB_WIDTH = 320;
-
-    // Loading state
+export function GridView({ images, onIntersect, onSelect, thumbWidth }) {
+    let ref = useRef(null);
+    let [recentlyApplied, setRecentlyApplied] = useState(null);
     let [loading, setLoading] = useState(false);
 
-    // Images, total, current page
-    let [images, setImages] = useState([]);
-    let [total, setTotal] = useState(Infinity);
-    let [page, setPage] = useState(1);
-
-    // We can use the mode to indicate "browse" or "search"
-    let [mode, setMode] = useState('browse');
-
-    // Query is used for the search field
-    let [query, setQuery] = useState('');
-
-    // When the {project} prop changes, load fresh data
     useEffect(() => {
-        setPage(1);
-        setImages([]);
-    }, [project]);
+        deselect();
+    }, [images]);
 
-    // Depending on the {newMode}, we’ll load more assets, either by
-    // either using {loadMediaLibrary} or {searchMediaLibrary}.
-    const loadMore = async (newMode) => {
-        let nextPage = page;
-        if (newMode != mode) {
-            setPage(1);
-            nextPage = 1;
-            setMode(newMode);
-            // clear items
-            setImages([]);
-        }
+    const applyAsset = async (asset) => {
         setLoading(true);
-
-        let result = null;
-
-        // These parameters are used by both API requests.
-        // The only difference is the {query} parameter for search.
-        let sharedRequestParameters = {
-            auth: auth,
-            id: project.id,
-            libraryType: project.__typename,
-            limit: LIMIT,
-            page: nextPage,
-        };
-
-        switch (newMode) {
-            case 'browse':
-                result = await actions.loadMediaLibrary({
-                    ...sharedRequestParameters,
-                });
-                break;
-            case 'search':
-                result = await context.actions.searchLibraryWithQuery({
-                    ...sharedRequestParameters,
-                    query: query,
-                });
-        }
-
-        let library = result.data.project;
-        let { items, total } = library.assets;
-
-        setImages((state) => {
-            // Merge new images
-            let newState = state.concat(items || []);
-
-            // Update the total number of items
-            setTotal(total);
-            return newState;
+        setRecentlyApplied([]);
+        setTimeout(() => {
+            setRecentlyApplied(asset);
         });
 
-        setLoading(false);
-        setPage((page) => page + 1);
+        // We’re using a timeout here so that the animation can finish without
+        // being interrupted by the blocking fetch request.
+
+        setTimeout(async () => {
+            try {
+                console.log('-> applyLibraryAsset');
+                await useSketch('applyLibraryAsset', { asset });
+            } catch (error) {
+                console.log('Could not apply asset', error);
+            }
+
+            setLoading(false);
+        }, 250);
     };
 
-    function handleIntersect() {
-        if (loading) return;
+    const deselect = () => {
+        setRecentlyApplied([]);
+        onSelect([]);
+    };
 
-        if (images.length >= total) {
-            return;
-        }
-
-        loadMore(mode);
-    }
+    const getBase64Image = async (url) => {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const reader = new FileReader();
+        await new Promise((resolve, reject) => {
+            reader.onload = resolve;
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+        return reader.result.replace(/^data:.+;base64,/, '');
+    };
 
     return (
-        <custom-v-stack gap="small" overflow="hidden">
-            <SearchField
-                onInput={(value) => {
-                    setQuery(value);
-                }}
-                onChange={(value) => {
-                    let newMode = value != '' ? 'search' : 'browse';
-                    setQuery(value);
-                    loadMore(newMode);
-                }}
-            ></SearchField>
-
-            <custom-scroll-view>
-                <custom-grid gap="small">
-                    {images && images.length ? (
-                        images.map((image, index) => {
-                            return (
-                                <custom-grid-item
-                                    title={image.title}
-                                    key={image.id}
-                                    tabindex="0"
-                                    style={{ animationDelay: `${index * 10}ms` }}
-                                >
+        <custom-grid
+            ref={ref}
+            gap="small"
+            onClick={(event) => {
+                if (event.target == ref.current) {
+                    deselect();
+                }
+            }}
+        >
+            {images && images.length ? (
+                images.map((image, index) => {
+                    return (
+                        <custom-grid-item
+                            title={image.title}
+                            key={image.id}
+                            tabindex="0"
+                            style={{
+                                animationDelay: `${index * 10}ms`,
+                                zIndex: recentlyApplied && recentlyApplied.id == image.id ? 2 : 1,
+                            }}
+                            onFocus={(event) => {
+                                onSelect([image]);
+                            }}
+                            onClick={(event) => {
+                                if (event.detail == 2) {
+                                    applyAsset(image);
+                                }
+                            }}
+                            onDragEnd={(event) => {
+                                console.log('drop', event);
+                            }}
+                            onDragStart={async (event) => {
+                                // By default, images can be drag & dropped into Sketch.
+                                // The problem: they will have the same size as the preview.
+                                // But because we don’t want to display high resolution previews
+                                // the dropped images will be too small to be useful.
+                                // A workaround could be to overlay the selected image with an
+                                // invisible high res <img>. But this wouldn’t support multi-select …
+                                // event.preventDefault();
+                            }}
+                        >
+                            <img
+                                src={
+                                    image.extension == 'svg'
+                                        ? image.downloadUrl
+                                        : `${image.previewUrl}?width=${thumbWidth}`
+                                }
+                                alt={image.title}
+                                style={{
+                                    maxWidth: '100%',
+                                    maxHeight: '100%',
+                                    opacity: recentlyApplied && recentlyApplied.id == image.id && loading ? 0.2 : 1,
+                                }}
+                            />
+                            {loading && recentlyApplied && recentlyApplied.id == image.id ? (
+                                <custom-grid-item-ghost>
+                                    {loading ? <LoadingCircle></LoadingCircle> : ''}
                                     <img
-                                        src={`${image.previewUrl}?width=${THUMB_WIDTH}`}
+                                        className="ghost"
+                                        src={`${image.previewUrl}?width=${thumbWidth}`}
                                         alt={image.title}
                                         style={{ maxWidth: '100%', maxHeight: '100%' }}
                                     />
-                                </custom-grid-item>
-                            );
-                        })
-                    ) : (
-                        <div></div>
-                    )}
-                    <Observer onIntersect={handleIntersect}></Observer>
-                </custom-grid>
-            </custom-scroll-view>
-        </custom-v-stack>
+                                </custom-grid-item-ghost>
+                            ) : (
+                                ''
+                            )}
+                        </custom-grid-item>
+                    );
+                })
+            ) : (
+                <div></div>
+            )}
+            <Observer onIntersect={onIntersect}></Observer>
+        </custom-grid>
     );
 }

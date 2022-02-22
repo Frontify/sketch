@@ -37,6 +37,13 @@ ReactDOM.render(
 
 console.log('register window.send');
 
+window.refresh = () => {
+    console.warn('Legacy method call: refresh');
+};
+window.selectionChanged = () => {
+    console.warn('Legacy method call: selectionChanged');
+};
+
 window.send = (data) => {
     console.log('window.send is called', data);
     // create and dispatch the event including the data
