@@ -112,7 +112,11 @@ export function GridView({ images, onIntersect, onSelect, thumbWidth }) {
                                     {loading ? <LoadingCircle></LoadingCircle> : ''}
                                     <img
                                         className="ghost"
-                                        src={`${image.previewUrl}?width=${thumbWidth}`}
+                                        src={
+                                            image.extension == 'svg'
+                                                ? image.downloadUrl
+                                                : `${image.previewUrl}?width=${thumbWidth}`
+                                        }
                                         alt={image.title}
                                         style={{ maxWidth: '100%', maxHeight: '100%' }}
                                     />

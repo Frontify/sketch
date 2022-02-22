@@ -16,7 +16,8 @@ export function searchQuery(id, libraryType, page, limit, term) {
             width,
             height,
             previewUrl,
-            downloadUrl
+            downloadUrl,
+            extension
           },
            ... on Video{
             __typename,
