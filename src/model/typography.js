@@ -56,6 +56,7 @@ class Typography {
     }
 
     applyFontStyle(fontStyle) {
+        console.log('fontStyle', fontStyle);
         let selection = sketch.getSelection();
         let loop = selection.objectEnumerator();
         let item = null;
@@ -115,6 +116,11 @@ class Typography {
                     }
                 }
             }
+        }
+
+        // Make sure that we have at least a default color that we can apply
+        if (colors.length == 0) {
+            colors.push({ name: 'Default', r: 0, g: 0, b: 0, alpha: 255, css_value: 'rgba(0, 0, 0, 1)' });
         }
 
         colors.forEach(
@@ -237,6 +243,8 @@ class Typography {
                 msstyles.push(msstyle);
             }.bind(this)
         );
+
+        console.log(msstyles);
 
         return msstyles;
     }

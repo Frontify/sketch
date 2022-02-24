@@ -31,14 +31,14 @@ export function SourceView() {
                 <NavigationBar></NavigationBar>
                 <custom-line></custom-line>
                 <custom-tabs>
-                    <custom-tab active={location.pathname.includes('/source/brand')}>
-                        <Link to={`/source/brand/${activeScope}`}>
-                            <Text>Brand</Text>
-                        </Link>
-                    </custom-tab>
                     <custom-tab active={location.pathname.includes('/source/artboards')}>
                         <Link to="/source/artboards">
                             <Text>Artboards</Text>
+                        </Link>
+                    </custom-tab>
+                    <custom-tab active={location.pathname.includes('/source/brand')}>
+                        <Link to={`/source/brand/${activeScope}`}>
+                            <Text>Brand</Text>
                         </Link>
                     </custom-tab>
                 </custom-tabs>

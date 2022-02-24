@@ -7,7 +7,7 @@ import { SearchField } from './SearchField';
 
 import { UserContext } from '../UserContext';
 import { GridView } from './GridView';
-import { Dropdown } from '@frontify/arcade';
+import { Dropdown, LoadingCircle } from '@frontify/arcade';
 
 export function MediaLibrariesView({ type }) {
     const context = useContext(UserContext);
@@ -39,10 +39,14 @@ export function MediaLibrariesView({ type }) {
 
     // When the {project} prop changes, load fresh data
     useEffect(() => {
-        console.log('selectedLibrary change');
+        reset();
+    }, [selectedLibrary]);
+
+    const reset = () => {
+        setTotalImages(Infinity);
         setPage(1);
         setImages([]);
-    }, [selectedLibrary]);
+    };
 
     // Depending on the {newMode}, we’ll load more assets, either by
     // either using {loadMediaLibrary} or {searchMediaLibrary}.
@@ -70,6 +74,24 @@ export function MediaLibrariesView({ type }) {
             page: nextPage,
         };
 
+        // Add placeholder items
+
+        setImages((state) => {
+            if (totalImages == Infinity) return state;
+
+            let placeholders = Array(Math.min(LIMIT, totalImages - images.length))
+                .fill(0)
+                .map((entry) => {
+                    return {
+                        extension: 'png',
+                        __typename: 'placeholder',
+                        id: 'placeholder' + Math.random(),
+                    };
+                });
+
+            return state.concat(placeholders);
+        });
+
         switch (newMode) {
             case 'browse':
                 result = await actions.loadMediaLibrary({
@@ -88,7 +110,10 @@ export function MediaLibrariesView({ type }) {
 
         setImages((state) => {
             // Merge new images
-            let newState = state.concat(items || []);
+
+            let oldState = state.filter((entry) => entry.__typename != 'placeholder');
+
+            let newState = oldState.concat(items || []);
 
             // Update the total number of items
             setTotalImages(total);
@@ -100,7 +125,6 @@ export function MediaLibrariesView({ type }) {
     };
 
     function handleIntersect() {
-        console.log('handle intersect in media library', loading);
         if (loading) return;
 
         if (images.length >= totalImages) {
@@ -148,11 +172,11 @@ export function MediaLibrariesView({ type }) {
                     }}
                     onChange={(value) => {
                         let newMode = value != '' ? 'search' : 'browse';
+                        reset();
                         setQuery(value);
                         loadMore(newMode);
                     }}
                     onClear={() => {
-                        console.log('cleanr');
                         setQuery('');
                         loadMore('browse');
                     }}
@@ -169,17 +193,24 @@ export function MediaLibrariesView({ type }) {
             </custom-scroll-view>
 
             <custom-status-bar padding="small" separator="top">
-                {images ? (
-                    <custom-h-stack style={{ width: '100%' }} justify-content="center">
-                        <Text size="x-small">
-                            {selection && selection.length == 1
-                                ? selection[0].title
-                                : `${images.length} / ${totalImages}`}
-                        </Text>
-                    </custom-h-stack>
-                ) : (
-                    ''
-                )}
+                <custom-h-stack align-items="center" justify-content="center">
+                    <div style={{ width: '24px' }}></div>
+                    {images ? (
+                        <custom-h-stack style={{ width: '100%' }} justify-content="center">
+                            <Text size="x-small">
+                                {selection && selection.length == 1
+                                    ? selection[0].title
+                                    : `${images.length} / ${totalImages}`}
+                            </Text>
+                        </custom-h-stack>
+                    ) : (
+                        ''
+                    )}
+
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', width: '24px' }}>
+                        {loading && <LoadingCircle size="ExtraSmall" />}
+                    </div>
+                </custom-h-stack>
             </custom-status-bar>
         </custom-v-stack>
     );

@@ -34,6 +34,10 @@ export function RecentDocumentsView() {
 
     return (
         <custom-v-stack stretch>
+            <div padding="small">
+                <SearchField></SearchField>
+            </div>
+            <custom-line></custom-line>
             <custom-scroll-view stretch style={{ overflowX: 'hidden', width: '100%' }}>
                 {/* Recent Documents */}
                 {sources.map((source) => {

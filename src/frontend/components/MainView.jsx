@@ -80,7 +80,7 @@ export function MainView() {
                                         setActiveScope(scope.key);
                                     }}
                                 />
-                                <Text>{scope.title}</Text>
+                                <Text size="x-small">{scope.title}</Text>
                             </label>
                         </custom-scope-button>
                     ))}

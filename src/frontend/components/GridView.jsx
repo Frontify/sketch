@@ -4,7 +4,7 @@ import { useSketch } from '../hooks/useSketch';
 
 import { Observer } from './Observer';
 
-export function GridView({ images, onIntersect, onSelect, thumbWidth }) {
+export function GridView({ images, limit = 25, onIntersect, onSelect, thumbWidth }) {
     let ref = useRef(null);
     let [recentlyApplied, setRecentlyApplied] = useState(null);
     let [loading, setLoading] = useState(false);
@@ -67,10 +67,10 @@ export function GridView({ images, onIntersect, onSelect, thumbWidth }) {
                     return (
                         <custom-grid-item
                             title={image.title}
-                            key={image.id}
+                            key={index}
                             tabindex="0"
                             style={{
-                                animationDelay: `${index * 10}ms`,
+                                animationDelay: `${(index % limit) * 10}ms`,
                                 zIndex: recentlyApplied && recentlyApplied.id == image.id ? 2 : 1,
                             }}
                             onFocus={(event) => {
@@ -94,20 +94,22 @@ export function GridView({ images, onIntersect, onSelect, thumbWidth }) {
                                 // event.preventDefault();
                             }}
                         >
-                            <img
-                                src={
-                                    image.extension == 'svg'
-                                        ? image.downloadUrl
-                                        : `${image.previewUrl}?width=${thumbWidth}`
-                                }
-                                alt={image.title}
-                                style={{
-                                    maxWidth: '100%',
-                                    maxHeight: '100%',
-                                    opacity: recentlyApplied && recentlyApplied.id == image.id && loading ? 0.2 : 1,
-                                }}
-                            />
-                            {loading && recentlyApplied && recentlyApplied.id == image.id ? (
+                            {image.downloadUrl && (
+                                <img
+                                    src={
+                                        image.extension == 'svg'
+                                            ? image.downloadUrl
+                                            : `${image.previewUrl}?width=${thumbWidth}`
+                                    }
+                                    alt={image.title}
+                                    style={{
+                                        maxWidth: '100%',
+                                        maxHeight: '100%',
+                                        opacity: recentlyApplied && recentlyApplied.id == image.id && loading ? 0.2 : 1,
+                                    }}
+                                />
+                            )}
+                            {image.downloadUrl && loading && recentlyApplied && recentlyApplied.id == image.id ? (
                                 <custom-grid-item-ghost>
                                     {loading ? <LoadingCircle></LoadingCircle> : ''}
                                     <img

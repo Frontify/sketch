@@ -18,6 +18,7 @@ export function SearchField({ onInput, onChange }) {
             onChange={(value) => {
                 setQuery(value);
                 onInput(value);
+                if (value == '') onChange('');
             }}
             onEnterPressed={(event) => {
                 onChange(event.target.value);

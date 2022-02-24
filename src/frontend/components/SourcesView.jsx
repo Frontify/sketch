@@ -39,7 +39,7 @@ export function SourcesView() {
                                     }}
                                 />
 
-                                <Text>{t('sources.open')}</Text>
+                                <Text size="x-small">{t('sources.open')}</Text>
                             </label>
                         </custom-scope-button>
 
@@ -70,10 +70,7 @@ export function SourcesView() {
                         </Link>
                     </custom-h-stack>
                 </custom-scope-bar-wrapper>
-                <custom-line></custom-line>
-                <div padding="small">
-                    <SearchField></SearchField>
-                </div>
+
                 <custom-line></custom-line>
                 <Outlet />
             </custom-v-stack>

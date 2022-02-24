@@ -360,8 +360,16 @@ export default function (context, view) {
 
     webview.on('request', async ({ type = '', requestUUID = null, args = {} }) => {
         let payload = {};
-        console.log('request', type);
+        console.log('request', type, args);
         switch (type) {
+            case 'applyFontStyle':
+                try {
+                    await typography.applyFontStyle(args.textStyle);
+                    payload = { sucess: 'true' };
+                } catch (error) {
+                    payload = { sucess: 'false' };
+                }
+                break;
             case 'applyLibraryAsset':
                 try {
                     await asset.applyImage(args.asset);
@@ -372,6 +380,7 @@ export default function (context, view) {
                     payload = { status: 'error' };
                 }
                 break;
+
             case 'getOpenDocuments':
                 var documents = DOM.getDocuments();
                 payload = { documents };

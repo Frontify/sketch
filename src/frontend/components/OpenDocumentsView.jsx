@@ -1,4 +1,4 @@
-import { Button, Flyout, IconMore, IconSketch, IconUploadAlternative, Text } from '@frontify/arcade';
+import { Button, Flyout, IconMore, IconSketch, IconUploadAlternative, LoadingCircle, Text } from '@frontify/arcade';
 import { Link } from 'react-router-dom';
 import React from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
@@ -15,46 +15,65 @@ export function OpenDocumentsView() {
     let [openDocuments, setOpenDocuments] = useState([]);
     const { t } = useTranslation();
 
+    let [loading, setLoading] = useState(false);
+
     useEffect(async () => {
-        let documents = await context.documents.getOpenDocuments();
+        setLoading(true);
+        let { documents } = await useSketch('getOpenDocuments');
+        setLoading(false);
 
         setOpenDocuments([...documents]);
     }, []);
 
+    if (loading) {
+        return (
+            <custom-v-stack flex padding="small" align-items="center" justify-content="center">
+                <LoadingCircle></LoadingCircle>
+            </custom-v-stack>
+        );
+    }
+
     return (
         <custom-v-stack stretch>
             <custom-scroll-view stretch style={{ overflowX: 'hidden', width: '100%' }}>
-                {openDocuments.map((source) => {
-                    return (
-                        <custom-h-stack
-                            gap="small"
-                            align-items="center"
-                            separator="bottom"
-                            padding="small"
-                            key={source.id}
-                        >
-                            <div style={{ flex: 0 }}>
-                                <IconSketch size="Size24"></IconSketch>
-                            </div>
+                {openDocuments && openDocuments.length
+                    ? openDocuments.map((source) => {
+                          return (
+                              <custom-h-stack
+                                  gap="small"
+                                  align-items="center"
+                                  separator="bottom"
+                                  padding="small"
+                                  key={source.id}
+                              >
+                                  <div style={{ flex: 0 }}>
+                                      <IconSketch size="Size24"></IconSketch>
+                                  </div>
 
-                            <Link to={`/source/artboards/${activeScope}`} style={{ overflow: 'hidden' }}>
-                                <custom-v-stack key={source.id}>
-                                    <div style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                        <Text size="x-small" color="weak">
-                                            {source.path}
-                                        </Text>
-                                    </div>
-                                    <Text>{decodeURI(source.path.split('/')[source.path.split('/').length - 1])}</Text>
-                                </custom-v-stack>
-                            </Link>
-                            <custom-spacer></custom-spacer>
-                            <custom-h-stack style={{ flex: 0 }} gap="small">
-                                <IconUploadAlternative size="Size20"></IconUploadAlternative>
-                                <IconMore size="Size20"></IconMore>
-                            </custom-h-stack>
-                        </custom-h-stack>
-                    );
-                })}
+                                  <Link to={`/source/artboards`} style={{ overflow: 'hidden' }}>
+                                      <custom-v-stack key={source.id}>
+                                          <div style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                              <Text size="x-small" color="weak">
+                                                  {source.path
+                                                      .split('/')
+                                                      .slice(0, [source.path.split('/').length - 1])
+                                                      .join('/')}
+                                              </Text>
+                                          </div>
+                                          <Text>
+                                              {decodeURI(source.path.split('/')[source.path.split('/').length - 1])}
+                                          </Text>
+                                      </custom-v-stack>
+                                  </Link>
+                                  <custom-spacer></custom-spacer>
+                                  <custom-h-stack style={{ flex: 0 }} gap="small">
+                                      <IconUploadAlternative size="Size20"></IconUploadAlternative>
+                                      <IconMore size="Size20"></IconMore>
+                                  </custom-h-stack>
+                              </custom-h-stack>
+                          );
+                      })
+                    : ''}
             </custom-scroll-view>
             <custom-v-stack>
                 <custom-line></custom-line>

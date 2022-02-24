@@ -133,17 +133,17 @@ export const UserContextProvider = ({ children }) => {
                     }),
                 });
                 let json = await response.json();
+
+                // Hydrate the guidelines from the API with an additional client-side only
+                // field {active} that is persistet with local storage.
                 let guidelines = json.data.guidelines.map((guideline) => {
                     return {
-                        active: true,
+                        active: selection.guidelines?.includes(guideline.project_id), // check if the guideline exists in local storage
                         ...guideline,
                     };
                 });
 
-                setGuidelines((state) => {
-                    let newState = { ...state, entries: guidelines };
-                    return newState;
-                });
+                setGuidelines(guidelines);
 
                 // Fetch palettes
 
@@ -168,8 +168,13 @@ export const UserContextProvider = ({ children }) => {
                 Promise.all(
                     guidelines.map(async (guideline) => {
                         let palettes = await getTextStylePalettesForGuideline(guideline);
+                        palettes = palettes.map((palette) => {
+                            return { ...palette, project: guideline.project_id };
+                        });
 
                         guidelineTextStylePalettes = guidelineTextStylePalettes.concat(palettes);
+
+                        console.log(guidelineTextStylePalettes);
                     })
                 ).then(() => {
                     setTextStylePalettes((state) => {
@@ -187,13 +192,19 @@ export const UserContextProvider = ({ children }) => {
             });
         },
         setGuidelines(guidelines) {
-            setGuidelines(guidelines);
+            setSelection((state) => {
+                return {
+                    ...state,
+                    guidelines: guidelines
+                        .filter((guideline) => guideline.active)
+                        .map((guideline) => guideline.project_id),
+                };
+            });
+            setGuidelines([...guidelines]);
         },
         setAuth(authData) {
-            console.log('FUCK OFF', authData);
             if (authData) {
                 setAuth(authData);
-                console.log(localStorage.getItem('cache.auth'));
             } else {
                 console.warn('Trying to call setAuth without authData');
             }

@@ -13,6 +13,8 @@ export function ArtboardsView() {
     const [currentSource, setCurrentSource] = useState({});
     const { t } = useTranslation();
 
+    const [selection, setSelection] = useState([]);
+
     const [sources, setSources] = useState([
         {
             id: 'S1',
@@ -57,94 +59,119 @@ export function ArtboardsView() {
         setCurrentSource(sources[0]);
     }, []);
 
+    let forceEmpty = true;
+    if (forceEmpty) {
+        return (
+            <custom-v-stack gap="small" padding="small" justify-content="center" align-items="center">
+                <Text color="weak">
+                    If artboards were uploaded before the recent plugin improvements you won’t see them here until
+                    they’re next updated. Don't worry, they’re still on Frontify.
+                </Text>
+                <custom-line></custom-line>
+                <Text size="large">No artboards uploaded </Text>
+                <Text>Select some artboards in Sketch and click the button to add them to Frontify.</Text>
+                [remote data goes here]
+                <custom-line></custom-line>
+                {selection.length ? (
+                    <Button>Upload ({selection.length}) artboards to … </Button>
+                ) : (
+                    <Button disabled>No Artboards Selected</Button>
+                )}
+            </custom-v-stack>
+        );
+    }
+
+    if (!sources.length) {
+        return (
+            <custom-v-stack gap="small" padding="small" justify-content="center" align-items="center">
+                <Text size="large" weight="strong">
+                    No artboards uploaded
+                </Text>
+                <Text>Select some artboards in Sketch and click the button to add them to Frontify.</Text>
+            </custom-v-stack>
+        );
+    }
+
     return (
         <custom-scroll-view stretch>
-            {sources.length ? (
-                <custom-v-stack stretch>
-                    <div padding="small">
-                        <SearchField placeholder="Search Artboards" onChange={() => {}}></SearchField>
-                    </div>
-                    <custom-line></custom-line>
-                    <custom-scroll-view>
-                        {sources.map((source) => {
-                            return (
-                                <custom-v-stack key={source.id} gap="medium" padding="small">
-                                    <custom-h-stack gap="x-small" align-items="center">
-                                        <IconCaretDown size="Size16"></IconCaretDown>
-                                        <Text size="x-small">{source.path}</Text>
-                                        <custom-spacer></custom-spacer>
-                                        <Flyout
-                                            trigger={
-                                                <Button
-                                                    icon={<IconMore />}
-                                                    inverted
-                                                    onClick={() => setOpen((open) => !open)}
-                                                ></Button>
-                                            }
-                                            isOpen={open}
-                                            onOpenChange={(isOpen) => setOpen(isOpen)}
-                                            legacyFooter={false}
-                                        >
-                                            <div padding="small">Flyout Content</div>
-                                        </Flyout>
-                                    </custom-h-stack>
-                                    <custom-v-stack gap="small">
-                                        {source.artboards.map((artboard) => {
-                                            return (
-                                                <custom-h-stack gap="small" key={artboard.id}>
-                                                    <custom-artboard-preview></custom-artboard-preview>
-                                                    <custom-v-stack gap="x-small">
-                                                        <Text>{artboard.title}</Text>
-                                                        <Text size="small" color="weak">
-                                                            {artboard.updated} by {artboard.updated_by}
-                                                        </Text>
-                                                    </custom-v-stack>
-                                                </custom-h-stack>
-                                            );
-                                        })}
-                                    </custom-v-stack>
-                                </custom-v-stack>
-                            );
-                        })}
-                    </custom-scroll-view>
-
-                    <custom-v-stack>
-                        <custom-line></custom-line>
-
-                        <custom-h-stack padding="small" gap="small" align-items="center" justify-content="center">
-                            <Flyout
-                                trigger={
-                                    <Button
-                                        style="Secondary"
-                                        onClick={() => {
-                                            console.log('click');
-                                            setDestinationPickerOpen((destinationPickerOpen) => !destinationPickerOpen);
-                                        }}
+            <custom-v-stack stretch>
+                <div padding="small">
+                    <SearchField placeholder="Search Artboards" onChange={() => {}}></SearchField>
+                </div>
+                <custom-line></custom-line>
+                <custom-scroll-view>
+                    {sources.map((source) => {
+                        return (
+                            <custom-v-stack key={source.id} gap="medium" padding="small">
+                                <custom-h-stack gap="x-small" align-items="center">
+                                    <IconCaretDown size="Size16"></IconCaretDown>
+                                    <Text size="x-small">{source.path}</Text>
+                                    <custom-spacer></custom-spacer>
+                                    <Flyout
+                                        trigger={
+                                            <Button
+                                                icon={<IconMore />}
+                                                inverted
+                                                onClick={() => setOpen((open) => !open)}
+                                            ></Button>
+                                        }
+                                        isOpen={open}
+                                        onOpenChange={(isOpen) => setOpen(isOpen)}
+                                        legacyFooter={false}
                                     >
-                                        {t('sources.upload_selection')}
-                                    </Button>
-                                }
-                                isOpen={destinationPickerOpen}
-                                onOpenChange={(isOpen) => setDestinationPickerOpen(isOpen)}
-                                legacyFooter={false}
-                            >
-                                <custom-v-stack padding="small" gap="small">
-                                    <Text>{currentSource.path}</Text>
-                                    <Text>Other …</Text>
+                                        <div padding="small">Flyout Content</div>
+                                    </Flyout>
+                                </custom-h-stack>
+                                <custom-v-stack gap="small">
+                                    {source.artboards.map((artboard) => {
+                                        return (
+                                            <custom-h-stack gap="small" key={artboard.id}>
+                                                <custom-artboard-preview></custom-artboard-preview>
+                                                <custom-v-stack gap="x-small">
+                                                    <Text>{artboard.title}</Text>
+                                                    <Text size="small" color="weak">
+                                                        {artboard.updated} by {artboard.updated_by}
+                                                    </Text>
+                                                </custom-v-stack>
+                                            </custom-h-stack>
+                                        );
+                                    })}
                                 </custom-v-stack>
-                            </Flyout>
-                            <Button style="Primary">{t('sources.update_artboards')}</Button>
-                        </custom-h-stack>
-                    </custom-v-stack>
+                            </custom-v-stack>
+                        );
+                    })}
+                </custom-scroll-view>
+
+                <custom-v-stack>
+                    <custom-line></custom-line>
+
+                    <custom-h-stack padding="small" gap="small" align-items="center" justify-content="center">
+                        <Flyout
+                            trigger={
+                                <Button
+                                    style="Secondary"
+                                    onClick={() => {
+                                        console.log('click');
+                                        setDestinationPickerOpen((destinationPickerOpen) => !destinationPickerOpen);
+                                    }}
+                                >
+                                    {t('sources.upload_selection')}
+                                </Button>
+                            }
+                            isOpen={destinationPickerOpen}
+                            onOpenChange={(isOpen) => setDestinationPickerOpen(isOpen)}
+                            legacyFooter={false}
+                        >
+                            <custom-v-stack padding="small" gap="small">
+                                <Text>{currentSource.path}</Text>
+                                <Text>Other …</Text>
+                            </custom-v-stack>
+                        </Flyout>
+                        <Button style="Primary">{t('sources.update_artboards')}</Button>
+                    </custom-h-stack>
                 </custom-v-stack>
-            ) : (
-                <custom-v-stack gap="small" padding="small" justify-content="center" align-items="center">
-                    <Text size="large" weight="strong">
-                        No artboards uploaded
-                    </Text>
-                    <Text>Select some artboards in Sketch and click the button to add them to Frontify.</Text>
-                </custom-v-stack>
-            )}
+            </custom-v-stack>
+            )
         </custom-scroll-view>
     );
 }
