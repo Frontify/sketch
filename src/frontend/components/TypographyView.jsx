@@ -3,15 +3,17 @@ import { useState, useEffect, useContext } from 'react';
 import { useSketch } from '../hooks/useSketch';
 import { UserContext } from '../UserContext';
 
-import { IconCaretDown, Text } from '@frontify/arcade';
+import { Button, IconCaretDown, Flyout, Text, IconMore } from '@frontify/arcade';
 
+import { Swatch } from './Swatch';
 import { Switcher } from './Switcher';
 import { SearchField } from './SearchField';
 
 export function TypographyView({ guidelines, palettes }) {
-    const { actions, selection } = useContext(UserContext);
+    const { actions, colorMap, selection } = useContext(UserContext);
     const [query, setQuery] = useState('');
     const [filteredPalettes, setFilteredPalettes] = useState(palettes);
+    const [openFlyout, setOpenFlyout] = useState(null);
 
     const sendColor = async (color) => {
         window.postMessage('applyColor', color);
@@ -50,7 +52,7 @@ export function TypographyView({ guidelines, palettes }) {
         let response = await useSketch('applyFontStyle', { textStyle });
     };
     return (
-        <custom-v-stack>
+        <custom-v-stack overflow="hidden">
             <custom-h-stack stretch-children padding="small" separator="bottom">
                 <SearchField
                     onInput={(value) => {
@@ -61,7 +63,7 @@ export function TypographyView({ guidelines, palettes }) {
                     {guidelines.length ? (
                         <Switcher
                             guidelines={guidelines}
-                            selection={selection.guidelines}
+                            selection={selection.guidelines[selection.brand.id]}
                             onChange={(changedGuidelines) => {
                                 actions.setGuidelinesForBrand(changedGuidelines, selection.brand);
                             }}
@@ -75,8 +77,8 @@ export function TypographyView({ guidelines, palettes }) {
                 {filteredPalettes &&
                     filteredPalettes.map((palette) => {
                         return (
-                            <custom-v-stack gap="small" key={palette.id} padding="small">
-                                <custom-h-stack gap="x-small">
+                            <custom-v-stack key={palette.id}>
+                                <custom-h-stack gap="x-small" padding="small" separator="bottom">
                                     <IconCaretDown size="Size16"></IconCaretDown>
 
                                     <Text as="span" size="x-small">
@@ -84,21 +86,72 @@ export function TypographyView({ guidelines, palettes }) {
                                     </Text>
                                 </custom-h-stack>
 
-                                <custom-v-stack gap="small">
+                                <custom-v-stack>
                                     {palette.styles.map((textStyle) => {
                                         return (
-                                            <custom-v-stack
+                                            <custom-palette-item
                                                 key={textStyle.id}
                                                 onClick={() => {
                                                     applyTextStyle(textStyle);
                                                 }}
                                             >
-                                                <span>{textStyle.name}</span>
-                                                <Text size="x-small">
-                                                    {textStyle.family || 'Default'} / {textStyle.size} /{' '}
-                                                    {textStyle.line_height}
-                                                </Text>
-                                            </custom-v-stack>
+                                                <custom-h-stack>
+                                                    <custom-v-stack>
+                                                        <span>{textStyle.name}</span>
+                                                        <Text size="x-small">
+                                                            {textStyle.family || 'Default'} / {textStyle.size} /{' '}
+                                                            {textStyle.line_height}
+                                                        </Text>
+                                                    </custom-v-stack>
+                                                    <custom-spacer></custom-spacer>
+
+                                                    {textStyle.colors?.foreground && colorMap ? (
+                                                        <Flyout
+                                                            isOpen={openFlyout == textStyle.id}
+                                                            onOpenChange={(open) => {
+                                                                if (open) {
+                                                                    setOpenFlyout(textStyle.id);
+                                                                } else {
+                                                                    setOpenFlyout(null);
+                                                                }
+                                                            }}
+                                                            legacyFooter={false}
+                                                            trigger={
+                                                                <Button
+                                                                    icon={<IconMore />}
+                                                                    style="Secondary"
+                                                                    onClick={() => {
+                                                                        if (open) {
+                                                                            setOpenFlyout(textStyle.id);
+                                                                        } else {
+                                                                            setOpenFlyout(null);
+                                                                        }
+                                                                    }}
+                                                                ></Button>
+                                                            }
+                                                        >
+                                                            <custom-v-stack>
+                                                                {Object.keys(textStyle.colors?.foreground).map(
+                                                                    (color) => (
+                                                                        <custom-h-stack
+                                                                            padding="small"
+                                                                            gap="small"
+                                                                            align-items="center"
+                                                                        >
+                                                                            <Swatch
+                                                                                color={colorMap[color]?.css_value}
+                                                                            ></Swatch>
+                                                                            <Text>{colorMap[color]?.name}</Text>
+                                                                        </custom-h-stack>
+                                                                    )
+                                                                )}
+                                                            </custom-v-stack>
+                                                        </Flyout>
+                                                    ) : (
+                                                        ''
+                                                    )}
+                                                </custom-h-stack>
+                                            </custom-palette-item>
                                         );
                                     })}
                                 </custom-v-stack>

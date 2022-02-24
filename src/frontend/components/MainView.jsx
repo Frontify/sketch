@@ -66,7 +66,7 @@ export function MainView() {
         <custom-v-stack overflow="hidden" flex>
             <custom-line></custom-line>
             <custom-scope-bar-wrapper padding="small">
-                <custom-h-stack>
+                <custom-h-stack gap="x-small">
                     {scopes.map((scope) => (
                         <custom-scope-button className="tw-round" active={activeScope == scope.key} key={scope.key}>
                             <label>

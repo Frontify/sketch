@@ -237,10 +237,23 @@ custom-artboard-preview {
     flex: 1;
 }
 
+custom-palette-item {
+    padding: var(--space-xs) var(--space-s);
+    transition: all 0.05s;
+    cursor: default;
+    user-select: none;
+    -webkit-user-select: none;
+}
+custom-palette-item * {
+    cursor: default;
+    user-select: none;
+    -webkit-user-select: none;
+}
 custom-palette-item:hover {
-    background: rgba(0, 0, 0, 0.08);
-
-    cursor: pointer;
+    background: rgba(0, 0, 0, 0.04);
+}
+custom-palette-item:active {
+    background: rgba(0, 0, 0, 0.12);
 }
 
 custom-grid {

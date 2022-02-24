@@ -77,8 +77,8 @@ export function PalettesView({ palettes, guidelines }) {
                 {filteredPalettes.map((palette) => {
                     if (query == '' || palette.colors.length) {
                         return (
-                            <custom-v-stack gap="small" key={palette.id} padding="small">
-                                <custom-h-stack gap="x-small">
+                            <custom-v-stack key={palette.id}>
+                                <custom-h-stack gap="x-small" padding="small" separator="bottom">
                                     <IconCaretDown size="Size16"></IconCaretDown>
 
                                     <Text as="span" size="x-small">
@@ -86,7 +86,7 @@ export function PalettesView({ palettes, guidelines }) {
                                     </Text>
                                 </custom-h-stack>
                                 {palette.colors.length ? (
-                                    <custom-v-stack gap="x-small">
+                                    <custom-v-stack>
                                         {palette.colors.map((color) => {
                                             return (
                                                 <custom-palette-item key={color.id}>
@@ -112,7 +112,9 @@ export function PalettesView({ palettes, guidelines }) {
                                         })}
                                     </custom-v-stack>
                                 ) : (
-                                    <Text color="weak">No colors</Text>
+                                    <div padding="small">
+                                        <Text color="weak">No colors</Text>
+                                    </div>
                                 )}
                             </custom-v-stack>
                         );

@@ -17,6 +17,7 @@ export const UserContextProvider = ({ children }) => {
             token: '',
         },
         brands: [],
+        colorMap: {},
         colorPalettes: [],
         guidelines: [],
         user: { name: '', id: null, email: null, avatar: null },
@@ -35,6 +36,7 @@ export const UserContextProvider = ({ children }) => {
     }
 
     let [selection, setSelection] = useLocalStorage('cache.selection', blueprints.selection);
+    let [colorMap, setColorMap] = useLocalStorage('cache.colorMap', blueprints.colorMap);
 
     // Brands
     // ------------------------------------------------------------------------
@@ -82,7 +84,7 @@ export const UserContextProvider = ({ children }) => {
                     Authorization: 'Bearer ' + auth.token,
                 }),
             });
-            let { groups } = await response.json();
+            let { colors, groups } = await response.json();
 
             // Convert API Object to Array
             let palettes = Object.keys(groups).map((key) => {
@@ -91,6 +93,8 @@ export const UserContextProvider = ({ children }) => {
                 let palette = { ...groups[key], project_name: guideline.name };
                 return palette;
             });
+
+            setColorMap(colors);
 
             resolve(palettes);
         });
@@ -261,7 +265,18 @@ export const UserContextProvider = ({ children }) => {
         }
     }, [selection.brand]);
 
-    let context = { auth, actions, user, brands, documents, guidelines, selection, colorPalettes, textStylePalettes };
+    let context = {
+        auth,
+        actions,
+        user,
+        brands,
+        documents,
+        guidelines,
+        selection,
+        colorPalettes,
+        colorMap,
+        textStylePalettes,
+    };
 
     return <UserContext.Provider value={context}>{children}</UserContext.Provider>;
 };
