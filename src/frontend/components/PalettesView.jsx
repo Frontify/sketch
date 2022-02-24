@@ -27,23 +27,25 @@ export function PalettesView({ palettes, guidelines }) {
             return `${palette.project_name} / ${palette.name}`;
         };
 
-        setFilteredPalettes(
-            palettes
-                .map((palette) => {
-                    // 1. Clone palette
-                    let filteredPalette = { ...palette };
-                    if (palette.colors) {
-                        // 2. Filter colors, change the filteredPalette.colors
-                        filteredPalette.colors = palette.colors.filter((color) => {
-                            return color.name.toLowerCase().includes(query);
-                        });
-                    }
+        setFilteredPalettes((state) => {
+            return [
+                ...palettes
+                    .map((palette) => {
+                        // 1. Clone palette
+                        let filteredPalette = { ...palette };
+                        if (palette.colors) {
+                            // 2. Filter colors, change the filteredPalette.colors
+                            filteredPalette.colors = palette.colors.filter((color) => {
+                                return color.name.toLowerCase().includes(query);
+                            });
+                        }
 
-                    return filteredPalette;
-                })
-                .sort((a, b) => (getDisplayName(a) > getDisplayName(b) ? 1 : -1))
-                .filter((palette) => selection.guidelines.includes(palette.project))
-        );
+                        return filteredPalette;
+                    })
+                    .sort((a, b) => (getDisplayName(a) > getDisplayName(b) ? 1 : -1))
+                    .filter((palette) => selection.guidelines[selection.brand?.id]?.includes(palette.project)),
+            ];
+        });
     }, [selection, palettes, query]);
 
     return !filteredPalettes ? (
@@ -60,9 +62,9 @@ export function PalettesView({ palettes, guidelines }) {
                     {guidelines.length ? (
                         <Switcher
                             guidelines={guidelines}
-                            selection={selection.guidelines}
+                            selection={selection.guidelines[selection.brand?.id] || []}
                             onChange={(changedGuidelines) => {
-                                actions.setGuidelines(changedGuidelines);
+                                actions.setGuidelinesForBrand(changedGuidelines, selection.brand);
                             }}
                         ></Switcher>
                     ) : (

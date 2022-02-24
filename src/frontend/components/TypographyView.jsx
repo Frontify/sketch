@@ -42,7 +42,7 @@ export function TypographyView({ guidelines, palettes }) {
                     return filteredPalette;
                 })
                 .sort((a, b) => (getDisplayName(a) > getDisplayName(b) ? 1 : -1))
-                .filter((palette) => selection.guidelines.includes(palette.project))
+                .filter((palette) => selection.guidelines[selection.brand?.id]?.includes(palette.project))
         );
     }, [selection, palettes, query]);
 
@@ -63,7 +63,7 @@ export function TypographyView({ guidelines, palettes }) {
                             guidelines={guidelines}
                             selection={selection.guidelines}
                             onChange={(changedGuidelines) => {
-                                actions.setGuidelines(changedGuidelines);
+                                actions.setGuidelinesForBrand(changedGuidelines, selection.brand);
                             }}
                         ></Switcher>
                     ) : (

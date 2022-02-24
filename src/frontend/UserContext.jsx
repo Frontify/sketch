@@ -24,7 +24,7 @@ export const UserContextProvider = ({ children }) => {
             artboards: [],
             brand: null,
             document: null,
-            guidelines: [],
+            guidelines: {},
         },
         textStylePalettes: [],
     };
@@ -134,11 +134,24 @@ export const UserContextProvider = ({ children }) => {
                 });
                 let json = await response.json();
 
+                /**
+                 * After changing the brand, we need to make sure that the correct guideline preferences are set.
+                 * a) If it’s the first time that the brand is selected, we activate *all* guidelines.
+                 * b) It the guideline preferences have been persisted to local storage, we’ll restore those.
+                 */
+                let selectedGuidelines = selection.guidelines.hasOwnProperty(brandId)
+                    ? selection.guidelines[brandId]
+                    : json.data.guidelines.map((guideline) => guideline.project_id);
+
+                setSelection((state) => {
+                    return { ...state, guidelines: { ...state.guidelines, [brandId]: selectedGuidelines } };
+                });
+
                 // Hydrate the guidelines from the API with an additional client-side only
                 // field {active} that is persistet with local storage.
                 let guidelines = json.data.guidelines.map((guideline) => {
                     return {
-                        active: selection.guidelines?.includes(guideline.project_id), // check if the guideline exists in local storage
+                        active: selectedGuidelines.includes(guideline.project_id), // check if the guideline exists in local storage
                         ...guideline,
                     };
                 });
@@ -158,7 +171,7 @@ export const UserContextProvider = ({ children }) => {
                     })
                 ).then(() => {
                     setColorPalettes((state) => {
-                        return [...state, ...guidelineColorPalettes];
+                        return [...guidelineColorPalettes];
                     });
                 });
 
@@ -173,8 +186,6 @@ export const UserContextProvider = ({ children }) => {
                         });
 
                         guidelineTextStylePalettes = guidelineTextStylePalettes.concat(palettes);
-
-                        console.log(guidelineTextStylePalettes);
                     })
                 ).then(() => {
                     setTextStylePalettes((state) => {
@@ -191,13 +202,16 @@ export const UserContextProvider = ({ children }) => {
                 return { ...state, brand };
             });
         },
-        setGuidelines(guidelines) {
+        setGuidelinesForBrand(guidelines, brand) {
             setSelection((state) => {
                 return {
                     ...state,
-                    guidelines: guidelines
-                        .filter((guideline) => guideline.active)
-                        .map((guideline) => guideline.project_id),
+                    guidelines: {
+                        ...state.guidelines,
+                        [brand.id]: guidelines
+                            .filter((guideline) => guideline.active)
+                            .map((guideline) => guideline.project_id),
+                    },
                 };
             });
             setGuidelines([...guidelines]);
