@@ -70,7 +70,6 @@ class Asset {
                     imageLayer.frame.height = imageSize.height;
 
                     let imageData = imageLayer.image;
-                    let app = NSApp.delegate();
                     let applied = false;
 
                     jsdoc.selectedLayers.forEach(
@@ -118,15 +117,11 @@ class Asset {
                         jsdoc.centerOnLayer(imageLayer);
                         jsdoc.sketchObject.eventHandlerManager().currentHandler().zoomToSelection();
                     }
-
-                    app.refreshCurrentDocument();
                 }
             } else {
                 fetch(url, { cdn: true })
                     .then(
                         function (blob) {
-                            let app = NSApp.delegate();
-
                             let svg = NSString.stringWithString(blob);
                             let svgData = svg.dataUsingEncoding(NSUTF8StringEncoding);
 
@@ -157,8 +152,6 @@ class Asset {
                             jsLayer.selected = true;
                             jsdoc.centerOnLayer(jsLayer);
                             jsdoc.sketchObject.eventHandlerManager().currentHandler().zoomToSelection();
-
-                            app.refreshCurrentDocument();
                         }.bind(this)
                     )
                     .catch(

@@ -4,6 +4,7 @@ import sketch from './sketch';
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
 
 let API = require('sketch');
+let sketchDom = require('sketch/dom');
 
 class Color {
     getColors(project) {
@@ -36,19 +37,11 @@ class Color {
     }
 
     addDocumentColors(colors) {
-        if (this.getSketchVersion() >= '69') {
-            this.addColorsToDocumentScope(colors);
-        } else {
-            this.addColorsToDocumentScopeLegacy(colors);
-        }
+        this.addColorsToDocumentScope(colors);
     }
 
     replaceDocumentColors(colors) {
-        if (this.getSketchVersion() >= '69') {
-            this.addColorsToDocumentScope(colors, true);
-        } else {
-            this.addColorsToDocumentScopeLegacy(colors, true);
-        }
+        this.addColorsToDocumentScope(colors, true);
     }
 
     addColorsToDocumentScope(colors, replaceCurrentColors = false) {
@@ -59,64 +52,29 @@ class Color {
                 selectedDocument.swatches = [];
             }
 
-            colors.forEach((color) => {
+            colors.forEach((color) =>
                 selectedDocument.swatches.push(
                     API.Swatch.from({
                         name: color.name,
                         color: color.css_value_hex,
                     })
-                );
-            });
-        }
-    }
-
-    /**
-     * @deprecated Should only be used in sketch version 68 and older! Use 'addColorsToDocumentScope' instead.
-     */
-    addColorsToDocumentScopeLegacy(colors, replaceCurrentColors = false) {
-        let selectedDocument = API.getSelectedDocument();
-
-        if (selectedDocument) {
-            if (replaceCurrentColors) {
-                selectedDocument.colors = [];
-            }
-
-            this.convertColors(colors).forEach((convertedColor) => {
-                selectedDocument.colors.push(convertedColor);
-            });
+                )
+            );
         }
     }
 
     addGlobalColors(colors) {
-        let app = NSApp.delegate();
-
-        let assets = MSPersistentAssetCollection.sharedGlobalAssets();
-        let mscolors = this.convertColors(colors);
-        assets.addColorAssets(mscolors);
-
-        app.refreshCurrentDocument();
+        colors.forEach((color) =>
+            sketchDom.globalAssets.colors.push({
+                name: color.name,
+                color: color.css_value_hex,
+            })
+        );
     }
 
     replaceGlobalColors(colors) {
-        let app = NSApp.delegate();
-
-        let assets = app.globalAssets();
-        let mscolors = this.convertColors(colors);
-        assets.setColorAssets([]);
-        assets.addColorAssets(mscolors);
-
-        app.refreshCurrentDocument();
-    }
-
-    convertColors(colors) {
-        let mscolors = [];
-        colors.forEach(
-            function (color) {
-                mscolors.push(this.convertColor(color));
-            }.bind(this)
-        );
-
-        return mscolors;
+        sketchDom.globalAssets.colors = [];
+        this.addGlobalColors(colors);
     }
 
     convertColor(color, type) {
@@ -183,10 +141,6 @@ class Color {
                 }
             }.bind(this)
         );
-    }
-
-    getSketchVersion() {
-        return API.Settings.version.sketch;
     }
 }
 
