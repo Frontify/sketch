@@ -14,7 +14,7 @@ export function SignInPendingView() {
     const context = useContext(UserContext);
 
     useEffect(() => {
-        window.addEventListener('send-data', async (event) => {
+        window.addEventListener('message-from-sketch', async (event) => {
             let { payload, type } = event.detail.data;
 
             if (type == 'user.authentication') {

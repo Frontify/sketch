@@ -12,20 +12,19 @@ export async function useSketch(type, args) {
 
     return new Promise(async (resolve, reject) => {
         const requestUUID = UUIDGeneratorBrowser();
-        console.log('request', requestUUID);
+
         window.postMessage('request', { type, requestUUID, args });
 
         const handler = (event) => {
             let { type, payload } = event.detail.data;
 
             if (type == 'response' && requestUUID == payload.responseUUID) {
-                console.log('resolve', requestUUID);
                 resolve(payload);
             }
 
-            window.removeEventListener('send-data', handler);
+            window.removeEventListener('message-from-sketch', handler);
         };
 
-        window.addEventListener('send-data', handler);
+        window.addEventListener('message-from-sketch', handler);
     });
 }

@@ -47,7 +47,7 @@ window.selectionChanged = () => {
 window.send = (data) => {
     console.log('window.send is called', data);
     // create and dispatch the event including the data
-    var event = new CustomEvent('send-data', {
+    var event = new CustomEvent('message-from-sketch', {
         detail: {
             data,
         },

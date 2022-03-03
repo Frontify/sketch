@@ -48,8 +48,8 @@ export function TypographyView({ guidelines, palettes }) {
         );
     }, [selection, palettes, query]);
 
-    const applyTextStyle = async (textStyle) => {
-        let response = await useSketch('applyFontStyle', { textStyle });
+    const applyTextStyle = async (textStyle, color) => {
+        let response = await useSketch('applyFontStyleWithColor', { textStyle, color });
     };
     return (
         <custom-v-stack overflow="hidden">
@@ -92,7 +92,7 @@ export function TypographyView({ guidelines, palettes }) {
                                             <custom-palette-item
                                                 key={textStyle.id}
                                                 onClick={() => {
-                                                    applyTextStyle(textStyle);
+                                                    applyTextStyle(textStyle, null);
                                                 }}
                                             >
                                                 <custom-h-stack>
@@ -107,6 +107,8 @@ export function TypographyView({ guidelines, palettes }) {
 
                                                     {textStyle.colors?.foreground && colorMap ? (
                                                         <Flyout
+                                                            hug={true}
+                                                            fitContent={true}
                                                             isOpen={openFlyout == textStyle.id}
                                                             onOpenChange={(open) => {
                                                                 if (open) {
@@ -137,6 +139,9 @@ export function TypographyView({ guidelines, palettes }) {
                                                                             padding="small"
                                                                             gap="small"
                                                                             align-items="center"
+                                                                            onClick={() => {
+                                                                                applyTextStyle(textStyle, color);
+                                                                            }}
                                                                         >
                                                                             <Swatch
                                                                                 color={colorMap[color]?.css_value}

@@ -1,7 +1,16 @@
-import { Button, Flyout, IconMore, IconSketch, IconUploadAlternative, LoadingCircle, Text } from '@frontify/arcade';
-import { Link } from 'react-router-dom';
+import {
+    Button,
+    Breadcrumbs,
+    Flyout,
+    IconMore,
+    IconSketch,
+    IconUploadAlternative,
+    LoadingCircle,
+    Text,
+} from '@frontify/arcade';
+import { useNavigate } from 'react-router-dom';
 import React from 'react';
-import { useLocalStorage } from '../hooks/useLocalStorage';
+
 import { useSketch } from '../hooks/useSketch';
 
 import { useContext, useState, useEffect } from 'react';
@@ -11,8 +20,8 @@ import { UserContext } from '../UserContext';
 export function OpenDocumentsView() {
     let context = useContext(UserContext);
 
-    let [activeScope] = useLocalStorage('cache.activeScope', 'colors');
     let [openDocuments, setOpenDocuments] = useState([]);
+    let navigate = useNavigate();
     const { t } = useTranslation();
 
     let [loading, setLoading] = useState(false);
@@ -50,24 +59,30 @@ export function OpenDocumentsView() {
                                       <IconSketch size="Size24"></IconSketch>
                                   </div>
 
-                                  <Link to={`/source/artboards`} style={{ overflow: 'hidden' }}>
-                                      <custom-v-stack key={source.id}>
-                                          <div style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                              <Text size="x-small" color="weak">
-                                                  {source.path
-                                                      .split('/')
-                                                      .slice(0, [source.path.split('/').length - 1])
-                                                      .join('/')}
-                                              </Text>
-                                          </div>
-                                          <Text>
-                                              {decodeURI(source.path.split('/')[source.path.split('/').length - 1])}
-                                          </Text>
+                                  <div
+                                      onClick={() => {
+                                          context.actions.openSource(source);
+                                          navigate('/source/artboards');
+                                      }}
+                                  >
+                                      <custom-v-stack key={source.id} style={{ pointerEvents: 'none' }}>
+                                          <Breadcrumbs
+                                              items={decodeURI(source.path)
+                                                  .split('/')
+                                                  .map((item) => {
+                                                      return { label: item };
+                                                  })}
+                                          ></Breadcrumbs>
                                       </custom-v-stack>
-                                  </Link>
+                                  </div>
                                   <custom-spacer></custom-spacer>
                                   <custom-h-stack style={{ flex: 0 }} gap="small">
-                                      <IconUploadAlternative size="Size20"></IconUploadAlternative>
+                                      <IconUploadAlternative
+                                          size="Size20"
+                                          onClick={() => {
+                                              useSketch('moveCurrent');
+                                          }}
+                                      ></IconUploadAlternative>
                                       <IconMore size="Size20"></IconMore>
                                   </custom-h-stack>
                               </custom-h-stack>

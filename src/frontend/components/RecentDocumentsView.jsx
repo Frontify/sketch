@@ -1,35 +1,21 @@
 import React from 'react';
-import { useState, useContext, useEffect } from 'react';
+import { useContext } from 'react';
 
-import { Link, Outlet } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { SearchField } from './SearchField';
-import { Toolbar } from './Toolbar';
-import { Button, Flyout, IconSketch, Stack, Text } from '@frontify/arcade';
+
+import { Button, Breadcrumbs, Flyout, IconSketch, Text, IconUploadAlternative, IconPen } from '@frontify/arcade';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useTranslation } from 'react-i18next';
 
 import { UserContext } from '../UserContext';
+import { useSketch } from '../hooks/useSketch';
 
 export function RecentDocumentsView() {
-    let [activeView, setActiveView] = useLocalStorage('cache.activeView', 'brand');
     let [activeScope] = useLocalStorage('cache.activeScope', 'colors');
-    let [activeSourceScope, setActiveSourceScope] = useLocalStorage('cache.activeSourceScope', 'open');
-    let context = useContext(UserContext);
 
-    let [sources] = useState([
-        {
-            id: 'S1',
-            title: 'workspace_template-chooser.sketch',
-            path: 'Arcade / Inventory / Graphics / Illustrations',
-            artboards: [],
-        },
-        {
-            id: 'S2',
-            title: 'some other file',
-            path: 'Arcade / Inventory / Graphics / Illustrations',
-            artboards: [],
-        },
-    ]);
+    let { sources } = useContext(UserContext);
+
     const { t } = useTranslation();
 
     return (
@@ -43,22 +29,64 @@ export function RecentDocumentsView() {
                 {sources.map((source) => {
                     return (
                         <custom-h-stack
-                            gap="small"
-                            align-items="center"
+                            gap="medium"
+                            align-items="start"
                             separator="bottom"
                             padding="small"
                             key={source.id}
                         >
-                            <IconSketch size="Size24"></IconSketch>
+                            <div>
+                                <IconSketch size="Size24"></IconSketch>
+                            </div>
 
-                            <Link to={`/source/artboards/${activeScope}`}>
-                                <custom-v-stack key={source.id}>
-                                    <Text size="x-small" color="weak">
-                                        {source.path}
-                                    </Text>
-                                    <Text>{source.title}</Text>
-                                </custom-v-stack>
-                            </Link>
+                            <custom-v-stack key={source.id}>
+                                <Breadcrumbs
+                                    items={
+                                        source.localpath
+                                            ? source.localpath.split('/').map((item) => {
+                                                  return { label: item };
+                                              })
+                                            : []
+                                    }
+                                ></Breadcrumbs>
+
+                                <Text>{source.state}</Text>
+
+                                {source.state == 'addable' ? <Text>{source.filename}</Text> : ''}
+                                <Link to={`/source/artboards/${activeScope}`}>
+                                    <Text>{source.modifier_name}</Text>
+                                    <Text>{source.modified_localized_ago}</Text>
+                                </Link>
+                            </custom-v-stack>
+
+                            <div>
+                                {source.state == 'addable' && (
+                                    <Button
+                                        onClick={() => {
+                                            useSketch('addSource', { source });
+                                        }}
+                                        icon={<IconUploadAlternative />}
+                                    ></Button>
+                                )}
+
+                                {source.state == 'same' && (
+                                    <Button
+                                        onClick={() => {
+                                            useSketch('openSource', { source });
+                                        }}
+                                        icon={<IconPen />}
+                                    ></Button>
+                                )}
+
+                                {source.state == 'push' && (
+                                    <Button
+                                        onClick={() => {
+                                            useSketch('addSource', source);
+                                        }}
+                                        icon={<IconUploadAlternative />}
+                                    ></Button>
+                                )}
+                            </div>
                         </custom-h-stack>
                     );
                 })}

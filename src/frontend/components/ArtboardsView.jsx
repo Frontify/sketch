@@ -1,10 +1,9 @@
 import React from 'react';
 import { Button, Flyout, IconCaretDown, IconMore, Text } from '@frontify/arcade';
-import { Routes, Route, Link, useLocation } from 'react-router-dom';
+
 import { SearchField } from './SearchField';
 import { useState, useEffect } from 'react';
 
-import { t } from 'i18next';
 import { useTranslation } from 'react-i18next';
 
 export function ArtboardsView() {
@@ -13,9 +12,9 @@ export function ArtboardsView() {
     const [currentSource, setCurrentSource] = useState({});
     const { t } = useTranslation();
 
-    const [selection, setSelection] = useState([]);
+    const [selection] = useState([]);
 
-    const [sources, setSources] = useState([
+    const [sources] = useState([
         {
             id: 'S1',
             title: 'workspace_template-chooser',

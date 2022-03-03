@@ -19,7 +19,10 @@ export const UserContextProvider = ({ children }) => {
         brands: [],
         colorMap: {},
         colorPalettes: [],
+        currentDocument: {},
         guidelines: [],
+        lastFetched: null,
+        sources: [],
         user: { name: '', id: null, email: null, avatar: null },
         selection: {
             artboards: [],
@@ -29,6 +32,29 @@ export const UserContextProvider = ({ children }) => {
         },
         textStylePalettes: [],
     };
+
+    useEffect(() => {
+        let handler = (event) => {
+            console.log(event);
+            let { type, payload } = event.detail.data;
+            console.log('Message', type, payload);
+
+            switch (type) {
+                case 'current-document.changed':
+                    console.log('yo');
+                    break;
+            }
+        };
+        window.addEventListener('message-from-sketch', handler);
+
+        return () => {
+            window.removeEventListener('message-from-sketch', handler);
+        };
+    }, []);
+
+    let [currentDocument, setCurrentDocument] = useState(blueprints.currentDocument);
+    let [lastFetched, setLastFetched] = useState(blueprints.lastFetched);
+
     let [auth, setAuth] = useLocalStorage('cache.auth', blueprints.auth);
 
     function isAuthenticated() {
@@ -110,6 +136,8 @@ export const UserContextProvider = ({ children }) => {
             return documents;
         },
     });
+
+    let [sources, setSources] = useState(blueprints.sources);
 
     // User
     // ------------------------------------------------------------------------
@@ -201,6 +229,19 @@ export const UserContextProvider = ({ children }) => {
         loadMediaLibrary({ auth, id, libraryType, page = 1, limit = 50 }) {
             return queryGraphQLWithAuth({ query: listQuery(id, libraryType, page, limit), auth });
         },
+        openSource(source) {
+            console.log(source);
+            setCurrentDocument(source);
+        },
+        async refresh() {
+            let { sources } = await useSketch('getLocalAndRemoteSourceFiles');
+            setSources(sources.sources);
+            setLastFetched(new Date().getTime());
+
+            let { currentDocument } = await useSketch('getCurrentDocument');
+            console.log({ currentDocument });
+            setCurrentDocument(currentDocument);
+        },
         selectBrand(brand) {
             setSelection((state) => {
                 return { ...state, brand };
@@ -265,17 +306,24 @@ export const UserContextProvider = ({ children }) => {
         }
     }, [selection.brand]);
 
+    useEffect(async () => {
+        actions.refresh();
+    }, []);
+
     let context = {
-        auth,
         actions,
-        user,
+        auth,
         brands,
+        colorMap,
+        colorPalettes,
+        currentDocument,
         documents,
         guidelines,
+        lastFetched,
         selection,
-        colorPalettes,
-        colorMap,
+        sources,
         textStylePalettes,
+        user,
     };
 
     return <UserContext.Provider value={context}>{children}</UserContext.Provider>;

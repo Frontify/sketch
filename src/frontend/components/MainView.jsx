@@ -9,11 +9,10 @@ import { useNavigate, Outlet } from 'react-router-dom';
 import { Text } from '@frontify/arcade';
 
 // Context
-import { useContext, useEffect, useState } from 'react';
-import { UserContext } from '../UserContext';
+import { useState } from 'react';
 
 // i18n
-import { useTranslation } from 'react-i18next';
+
 import { useLocalStorage } from '../hooks/useLocalStorage';
 
 // Library scopes
@@ -26,10 +25,7 @@ const libraryScopes = [
         key: 'typography',
         title: 'Typography',
     },
-    {
-        key: 'symbols',
-        title: 'Symbols',
-    },
+
     {
         key: 'icons',
         title: 'Icons',
@@ -45,14 +41,6 @@ const libraryScopes = [
 ];
 
 export function MainView() {
-    // Context
-    const context = useContext(UserContext);
-
-    // i18n
-    const { t, i18n } = useTranslation();
-
-    // State
-    let [data, setData] = useState({});
     let [activeScope, setActiveScope] = useLocalStorage('cache.activeScope', 'colors');
 
     const navigate = useNavigate();
@@ -75,7 +63,7 @@ export function MainView() {
                                     name="activeView"
                                     value="recent"
                                     checked={activeScope == scope.key}
-                                    onChange={(event) => {
+                                    onChange={() => {
                                         navigate('/source/brand/' + scope.key);
                                         setActiveScope(scope.key);
                                     }}

@@ -17,6 +17,7 @@ export function runCommand(context) {
 }
 
 export function openCommand(context) {
+    console.log('document: opened');
     executeSafely(context, function () {
         let interval = setInterval(function () {
             if (context.actionContext.document.documentWindow()) {
@@ -30,6 +31,7 @@ export function openCommand(context) {
 }
 
 export function savedCommand(context) {
+    console.log('document: saved');
     executeSafely(context, function () {
         source.saved().then(function () {
             refresh();
@@ -38,6 +40,7 @@ export function savedCommand(context) {
 }
 
 export function closeCommand(context) {
+    console.log('document: closed');
     executeSafely(context, function () {
         source.closed().then(function () {
             refresh();
@@ -46,6 +49,7 @@ export function closeCommand(context) {
 }
 
 export function selectionChangedCommand(context) {
+    console.log('selection changed');
     executeSafely(context, function () {
         if (isWebviewPresent('frontifymain')) {
             let layers = context.actionContext.document.selectedLayers().layers().slice();

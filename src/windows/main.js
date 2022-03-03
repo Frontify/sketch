@@ -15,6 +15,7 @@ import { runCommand } from '../commands/frontify';
 import { sendToWebview } from 'sketch-module-web-view/remote';
 
 let DOM = require('sketch/dom');
+let sketch3 = require('sketch');
 
 // Identifier for the plugin window that we can use for message passing
 const IDENTIFIER = 'frontifymain';
@@ -44,6 +45,28 @@ const frontend = {
         sendToWebview(IDENTIFIER, `send(${JSON.stringify({ type, payload })})`);
     },
 };
+
+/**
+ * Setup notification when the current document window changes
+ */
+
+// var fiber = require('sketch/async').createFiber();
+
+// let center = NSNotificationCenter.defaultCenter();
+// let block = __mocha__.createBlock_function('v16@?0@"NSNotification"8', function (notification) {
+//     sketch3.UI.message('changed focus');
+//     let currentDocument = Document.fromNative(sketch.getDocument());
+//     if (currentDocument) {
+//         frontend.send('current-document.changed', { currentDocument });
+//     }
+//     fiber.cleanup();
+// });
+// center.addObserverForName_object_queue_usingBlock('NSWindowDidBecomeKeyNotification', null, null, block);
+
+// setTimeout(function () {
+//     sketch3.UI.message('timed out');
+//     fiber.cleanup();
+// }, 3000);
 
 export default function (context, view) {
     let viewData = sketch.getViewData();
@@ -362,9 +385,17 @@ export default function (context, view) {
         let payload = {};
         console.log('request', type, args);
         switch (type) {
-            case 'applyFontStyle':
+            case 'addSource':
                 try {
-                    await typography.applyFontStyle(args.textStyle);
+                    await source.addSource(args.source);
+                    payload = { success: true };
+                } catch (error) {
+                    payload = { success: false, error };
+                }
+                break;
+            case 'applyFontStyleWithColor':
+                try {
+                    await typography.applyFontStyle(args.textStyle, args.color);
                     payload = { sucess: 'true' };
                 } catch (error) {
                     payload = { sucess: 'false' };
@@ -380,7 +411,10 @@ export default function (context, view) {
                     payload = { status: 'error' };
                 }
                 break;
-
+            case 'getCurrentDocument':
+                let currentDocument = await source.getCurrentAsset();
+                payload = { currentDocument };
+                break;
             case 'getOpenDocuments':
                 var documents = DOM.getDocuments();
                 payload = { documents };
@@ -392,6 +426,39 @@ export default function (context, view) {
                     payload = { auth };
                 } else {
                     payload = { error: 'Could not read crendetials from Sketch' };
+                }
+                break;
+            case 'getLocalAndRemoteSourceFiles':
+                try {
+                    let sources = await source.getLocalAndRemoteSourceFiles();
+                    payload = { success: true, sources };
+                } catch (error) {
+                    payload = { success: false, error };
+                }
+                break;
+
+            case 'moveCurrent':
+                try {
+                    await filemanager.moveCurrent();
+                    payload = { success: true };
+                } catch (error) {
+                    payload = { success: false, error };
+                }
+                break;
+            case 'openSource':
+                try {
+                    await source.openSource(args.source);
+                    payload = { success: true };
+                } catch (error) {
+                    payload = { success: false, error };
+                }
+                break;
+            case 'pushSource':
+                try {
+                    await source.pushSource(args.source);
+                    payload = { success: true };
+                } catch (error) {
+                    payload = { success: false, error };
                 }
                 break;
         }
