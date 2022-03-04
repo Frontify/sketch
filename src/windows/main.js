@@ -17,6 +17,7 @@ import { sendToWebview } from 'sketch-module-web-view/remote';
 let DOM = require('sketch/dom');
 let sketch3 = require('sketch');
 
+console.log('main.js');
 // Identifier for the plugin window that we can use for message passing
 const IDENTIFIER = 'frontifymain';
 
@@ -429,6 +430,7 @@ export default function (context, view) {
                 }
                 break;
             case 'getLocalAndRemoteSourceFiles':
+                console.log('getLocalAndRemoteSourceFiles');
                 try {
                     let sources = await source.getLocalAndRemoteSourceFiles();
                     payload = { success: true, sources };

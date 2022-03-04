@@ -18,7 +18,7 @@ import { SourceView } from './SourceView';
 import { SourcesView } from './SourcesView';
 
 // Context
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { UserContext, UserContextProvider } from '../UserContext';
 
 // Router
@@ -26,9 +26,16 @@ import { BrowserRouter } from 'react-router-dom';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
+console.log('LAUNCH');
+
 export function App() {
     let context = useContext(UserContext);
     let { t } = useTranslation();
+    useEffect(() => {
+        console.log('APP');
+        context.actions.refresh();
+    }, []);
+
     return (
         <BrowserRouter>
             <Routes>

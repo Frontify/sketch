@@ -411,7 +411,7 @@ class Source {
                             filemanager.updateAssetStatus(target.project.id, data);
 
                             // reload source file list
-                            return this.showSources();
+                            // return this.showSources();
                         }.bind(this)
                     )
                     .catch(

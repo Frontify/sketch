@@ -66,14 +66,19 @@ export function selectionChangedCommand(context) {
 
 function refresh() {
     if (isWebviewPresent('frontifymain')) {
-        sendToWebview('frontifymain', 'refresh()');
+        console.log('frontify.js > refresh');
+        frontend.send('refresh');
     }
 }
+
+// Identifier for the plugin window that we can use for message passing
+const IDENTIFIER = 'frontifymain';
 /**
  * We can use this helper to make it more convenient to send messages to the webview.
  */
-const view = {
+const frontend = {
     send(type, payload) {
-        sendToWebview('frontifymain', `send(${JSON.stringify(payload)})`);
+        console.log('send to frontend', type, payload);
+        sendToWebview(IDENTIFIER, `send(${JSON.stringify({ type, payload })})`);
     },
 };

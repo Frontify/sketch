@@ -2,6 +2,7 @@ import {
     Breadcrumbs,
     IconArrowLeft,
     IconMore,
+    IconRefresh,
     IconSketch,
     IconUploadAlternative,
     Text,
@@ -15,12 +16,38 @@ import { useLocalStorage } from '../hooks/useLocalStorage';
 import { UserContext } from '../UserContext';
 import { useSketch } from '../hooks/useSketch';
 
+function SourceAction({ status, actions }) {
+    switch (status) {
+        case 'same':
+            return (
+                <IconRefresh
+                    size="Size20"
+                    onClick={() => {
+                        actions.refresh();
+                    }}
+                ></IconRefresh>
+            );
+
+        case 'push':
+            return (
+                <IconUploadAlternative
+                    size="Size20"
+                    onClick={() => {
+                        actions.pushSource();
+                    }}
+                ></IconUploadAlternative>
+            );
+    }
+    return <div>{JSON.stringify(status)}</div>;
+}
+
 export function NavigationBar() {
     let [activeSourceScope] = useLocalStorage('cache.activeSourceScope', 'open');
     let context = useContext(UserContext);
     let [documentPath, setDocumentPath] = useState([]);
     let [matchedSource, setMatchedSource] = useState(null);
     let [loading, setLoading] = useState(false);
+    let [relativeLastFetched, setRelativeLastFetched] = useState(null);
 
     const pushSource = async () => {
         setLoading(true);
@@ -29,6 +56,41 @@ export function NavigationBar() {
         context.actions.refresh();
         setLoading(false);
     };
+
+    const refresh = async () => {
+        setLoading(true);
+        await context.actions.refresh();
+        setLoading(false);
+    };
+    useEffect(() => {
+        let interval = setInterval(() => {
+            let timeAgo = '';
+
+            // Time differences
+            let diff = new Date().getTime() - context.lastFetched;
+            let minutesAgo = Math.round(diff / 1000 / 60);
+
+            // These constants help us to convert the time difference from milliseconds to minutes
+            const minute = 60000;
+            const twoMinutes = minute * 2;
+            const oneHour = minute * 60;
+
+            // 2 Minutes, so we don’t have to pluralize, ha ha.
+            let displayJustNow = diff < twoMinutes;
+            let displayMinutesAgo = diff > twoMinutes;
+            let displayExactDate = diff > oneHour;
+
+            // Here we decide what text should be displayed depending on the time difference
+            if (displayJustNow) timeAgo = 'just now';
+            if (displayMinutesAgo) timeAgo = `${minutesAgo} minutes ago`;
+            if (displayExactDate) timeAgo = new Date(context.lastFetched).toLocaleString();
+
+            setRelativeLastFetched(timeAgo);
+        }, 1000);
+        return () => {
+            clearInterval(interval);
+        };
+    }, [context.lastFetched]);
 
     useEffect(() => {
         if (context.currentDocument && context.currentDocument?.localpath) {
@@ -55,30 +117,38 @@ export function NavigationBar() {
 
                 {matchedSource ? (
                     <custom-v-stack>
-                        <Text size="x-small" color="weak">
+                        {/* <Text size="x-small" color="weak">
                             {matchedSource.localpath}
+                        </Text> */}
+
+                        <Text size="large" weight="strong">
+                            {matchedSource.filename}
                         </Text>
-                        <Text size="large">{matchedSource.filename}</Text>
-                        <Text size="x-small">Last fetched {context.lastFetched}</Text>
                         <Text size="x-small">
                             Last modified {matchedSource.modified_localized_ago} by {matchedSource.modifier_name}
                         </Text>
-                        {loading ? <LoadingCircle></LoadingCircle> : ''}
+                        {loading ? (
+                            <Text size="x-small">Fetching …</Text>
+                        ) : (
+                            <Text size="x-small">Last fetched {relativeLastFetched}</Text>
+                        )}
                     </custom-v-stack>
                 ) : (
                     ''
                 )}
             </custom-h-stack>
             <custom-spacer></custom-spacer>
-
-            <button>
-                <IconUploadAlternative
-                    size="Size20"
-                    onClick={() => {
-                        pushSource();
-                    }}
-                ></IconUploadAlternative>
-            </button>
+            {matchedSource ? (
+                <button>
+                    {loading ? (
+                        <LoadingCircle size="Small"></LoadingCircle>
+                    ) : (
+                        <SourceAction status={matchedSource.state} actions={{ pushSource, refresh }}></SourceAction>
+                    )}
+                </button>
+            ) : (
+                ''
+            )}{' '}
             <button>
                 <IconMore size="Size20"></IconMore>
             </button>
