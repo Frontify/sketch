@@ -242,7 +242,6 @@ class Typography {
     }
 
     addFontStyles(fontStyles) {
-        let app = NSApp.delegate();
         let doc = sketch.getDocument();
         if (doc) {
             let msstyles = this.convertFontStyles(fontStyles);
@@ -259,8 +258,6 @@ class Typography {
                     this.updateLayersWithStyle(sharedStyles.objects(), msstyle.name(), msstyle.style());
                 }.bind(this)
             );
-
-            app.refreshCurrentDocument();
         }
     }
 
