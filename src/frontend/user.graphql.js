@@ -10,6 +10,15 @@ export const userQuery = `{
         id
         color
         avatar
+        workspaceProjects {
+            ... on WorkspaceProjectItems {
+              __typename
+              items {
+                id
+                name
+                }
+            }
+        }
         projects(types: [MEDIA_LIBRARY, ICON_LIBRARY, LOGO_LIBRARY, DOCUMENT_LIBRARY]) {
             ... on MediaLibrary {
                 id

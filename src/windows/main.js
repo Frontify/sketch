@@ -386,6 +386,14 @@ export default function (context, view) {
         let payload = {};
         console.log('request', type, args);
         switch (type) {
+            case 'addCurrentFile':
+                try {
+                    await source.addCurrentFile();
+                    payload = { success: true };
+                } catch (error) {
+                    payload = { success: false, error };
+                }
+                break;
             case 'addSource':
                 try {
                     await source.addSource(args.source);
@@ -414,6 +422,7 @@ export default function (context, view) {
                 break;
             case 'getCurrentDocument':
                 let currentDocument = await source.getCurrentAsset();
+                if (!currentDocument) currentDocument = { filename: source.getCurrentFilename(), state: 'untracked' };
                 payload = { currentDocument };
                 break;
             case 'getOpenDocuments':

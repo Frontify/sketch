@@ -1,6 +1,8 @@
 import React from 'react';
 import { useState, useEffect, useMemo } from 'react';
 import { queryGraphQLWithAuth } from './graphql';
+import { browseWorkspaceProject } from './browse.graphql';
+import { foldersQuery } from './folders.graphql';
 import { listQuery } from './list.graphql';
 import { searchQuery } from './search.graphql';
 import { userQuery } from './user.graphql';
@@ -151,175 +153,181 @@ export const UserContextProvider = ({ children }) => {
     /**
      * Actions that can be access via {context.actions}, e.g. context.actions.getUser()
      */
-    let actions = useMemo(() => {
-        return {
-            getLibrariesByType(type) {
-                return selection.brand.projects.filter((project) => {
-                    return project.__typename == type;
+    const actions = {
+        getProjectFolders(project) {
+            return queryGraphQLWithAuth({ query: browseWorkspaceProject(project), auth });
+        },
+        getFolders(folder) {
+            return queryGraphQLWithAuth({ query: foldersQuery(folder), auth });
+        },
+        getLibrariesByType(type) {
+            return selection.brand.projects.filter((project) => {
+                return project.__typename == type;
+            });
+        },
+        searchLibraryWithQuery({ auth, id, libraryType, page = 1, limit = 50, query = '' }) {
+            // search, then return the results
+            return queryGraphQLWithAuth({ query: searchQuery(id, libraryType, page, limit, query), auth });
+        },
+        async fetchGuidelines(brandId) {
+            if (isAuthenticated()) {
+                let response = await fetch(`${auth.domain}/v1/guidelines/${brandId}`, {
+                    method: 'GET',
+                    headers: new Headers({
+                        Authorization: 'Bearer ' + auth.token,
+                    }),
                 });
-            },
-            searchLibraryWithQuery({ auth, id, libraryType, page = 1, limit = 50, query = '' }) {
-                // search, then return the results
-                return queryGraphQLWithAuth({ query: searchQuery(id, libraryType, page, limit, query), auth });
-            },
-            async fetchGuidelines(brandId) {
-                if (isAuthenticated()) {
-                    let response = await fetch(`${auth.domain}/v1/guidelines/${brandId}`, {
-                        method: 'GET',
-                        headers: new Headers({
-                            Authorization: 'Bearer ' + auth.token,
-                        }),
-                    });
-                    let json = await response.json();
+                let json = await response.json();
 
-                    /**
-                     * After changing the brand, we need to make sure that the correct guideline preferences are set.
-                     * a) If it’s the first time that the brand is selected, we activate *all* guidelines.
-                     * b) It the guideline preferences have been persisted to local storage, we’ll restore those.
-                     */
-                    let selectedGuidelines = selection.guidelines.hasOwnProperty(brandId)
-                        ? selection.guidelines[brandId]
-                        : json.data.guidelines.map((guideline) => guideline.project_id);
+                /**
+                 * After changing the brand, we need to make sure that the correct guideline preferences are set.
+                 * a) If it’s the first time that the brand is selected, we activate *all* guidelines.
+                 * b) It the guideline preferences have been persisted to local storage, we’ll restore those.
+                 */
+                let selectedGuidelines = selection.guidelines.hasOwnProperty(brandId)
+                    ? selection.guidelines[brandId]
+                    : json.data.guidelines.map((guideline) => guideline.project_id);
 
-                    setSelection((state) => {
-                        return { ...state, guidelines: { ...state.guidelines, [brandId]: selectedGuidelines } };
-                    });
-
-                    // Hydrate the guidelines from the API with an additional client-side only
-                    // field {active} that is persistet with local storage.
-                    let guidelines = json.data.guidelines.map((guideline) => {
-                        return {
-                            active: selectedGuidelines.includes(guideline.project_id), // check if the guideline exists in local storage
-                            ...guideline,
-                        };
-                    });
-
-                    setGuidelines(guidelines);
-
-                    // Fetch palettes
-
-                    let guidelineColorPalettes = [];
-
-                    // Fetch Color Palettes
-                    Promise.all(
-                        guidelines.map(async (guideline) => {
-                            let palettes = await getColorPalettesForGuideline(guideline);
-
-                            guidelineColorPalettes = guidelineColorPalettes.concat(palettes);
-                        })
-                    ).then(() => {
-                        setColorPalettes((state) => {
-                            return [...guidelineColorPalettes];
-                        });
-                    });
-
-                    let guidelineTextStylePalettes = [];
-
-                    // Fetch Text Style Palettes
-                    Promise.all(
-                        guidelines.map(async (guideline) => {
-                            let palettes = await getTextStylePalettesForGuideline(guideline);
-                            palettes = palettes.map((palette) => {
-                                return { ...palette, project: guideline.project_id };
-                            });
-
-                            guidelineTextStylePalettes = guidelineTextStylePalettes.concat(palettes);
-                        })
-                    ).then(() => {
-                        setTextStylePalettes((state) => {
-                            return [...guidelineTextStylePalettes];
-                        });
-                    });
-                }
-            },
-            loadMediaLibrary({ auth, id, libraryType, page = 1, limit = 50 }) {
-                return queryGraphQLWithAuth({ query: listQuery(id, libraryType, page, limit), auth });
-            },
-            openSource(source) {
-                console.log(source);
-                setCurrentDocument(source);
-            },
-            async refresh() {
-                if (refreshing) {
-                    console.warn('Still refreshing…');
-                    return;
-                }
-                setRefreshing(true);
-                console.log('🌀 refresh');
-                let { sources } = await useSketch('getLocalAndRemoteSourceFiles');
-                console.log('got sources');
-                setSources(sources.sources);
-                setLastFetched(new Date().getTime());
-                console.log('got date');
-
-                let { currentDocument } = await useSketch('getCurrentDocument');
-                console.log('got document');
-                console.log({ currentDocument });
-                setCurrentDocument(currentDocument);
-
-                setRefreshing(false);
-            },
-            selectBrand(brand) {
                 setSelection((state) => {
-                    return { ...state, brand };
+                    return { ...state, guidelines: { ...state.guidelines, [brandId]: selectedGuidelines } };
                 });
-            },
-            setGuidelinesForBrand(guidelines, brand) {
-                setSelection((state) => {
+
+                // Hydrate the guidelines from the API with an additional client-side only
+                // field {active} that is persistet with local storage.
+                let guidelines = json.data.guidelines.map((guideline) => {
                     return {
-                        ...state,
-                        guidelines: {
-                            ...state.guidelines,
-                            [brand.id]: guidelines
-                                .filter((guideline) => guideline.active)
-                                .map((guideline) => guideline.project_id),
-                        },
+                        active: selectedGuidelines.includes(guideline.project_id), // check if the guideline exists in local storage
+                        ...guideline,
                     };
                 });
-                setGuidelines([...guidelines]);
-            },
-            setAuth(authData) {
-                if (authData) {
-                    setAuth(authData);
-                } else {
-                    console.warn('Trying to call setAuth without authData');
-                }
-            },
-            logout() {
-                // Reset state and cached localStorage
-                setSelection(blueprints.selection);
-                setAuth(blueprints.auth);
-                setUser(blueprints.user);
-                setBrands(blueprints.brands);
-            },
-            async getUser(credentials) {
-                console.log('>>>>getUser');
-                return new Promise(async (resolve, reject) => {
-                    if (credentials && credentials.domain && credentials.token) {
-                        try {
-                            let { data } = await queryGraphQLWithAuth({ query: userQuery, auth: credentials });
 
-                            setUser((state) => {
-                                return { ...state, ...data.currentUser };
-                            });
+                setGuidelines(guidelines);
 
-                            setBrands(data.brands);
+                // Fetch palettes
 
-                            actions.selectBrand(selection.brand || data.brands[0]);
+                let guidelineColorPalettes = [];
 
-                            resolve();
-                        } catch (error) {
-                            console.error(error);
-                        }
-                    } else {
-                        reject('Not authenticated');
-                    }
+                // Fetch Color Palettes
+                Promise.all(
+                    guidelines.map(async (guideline) => {
+                        let palettes = await getColorPalettesForGuideline(guideline);
+
+                        guidelineColorPalettes = guidelineColorPalettes.concat(palettes);
+                    })
+                ).then(() => {
+                    setColorPalettes((state) => {
+                        return [...guidelineColorPalettes];
+                    });
                 });
-            },
-        };
-    }, []);
+
+                let guidelineTextStylePalettes = [];
+
+                // Fetch Text Style Palettes
+                Promise.all(
+                    guidelines.map(async (guideline) => {
+                        let palettes = await getTextStylePalettesForGuideline(guideline);
+                        palettes = palettes.map((palette) => {
+                            return { ...palette, project: guideline.project_id };
+                        });
+
+                        guidelineTextStylePalettes = guidelineTextStylePalettes.concat(palettes);
+                    })
+                ).then(() => {
+                    setTextStylePalettes((state) => {
+                        return [...guidelineTextStylePalettes];
+                    });
+                });
+            }
+        },
+        loadMediaLibrary({ auth, id, libraryType, page = 1, limit = 50 }) {
+            return queryGraphQLWithAuth({ query: listQuery(id, libraryType, page, limit), auth });
+        },
+        openSource(source) {
+            console.log(source);
+            setCurrentDocument(source);
+        },
+        async refresh() {
+            if (refreshing) {
+                console.warn('Still refreshing…');
+                return;
+            }
+            setRefreshing(true);
+            console.log('🌀 refresh');
+            let { sources } = await useSketch('getLocalAndRemoteSourceFiles');
+            console.log('got sources');
+            setSources(sources.sources);
+            setLastFetched(new Date().getTime());
+            console.log('got date');
+
+            let { currentDocument } = await useSketch('getCurrentDocument');
+            console.log('got document');
+            console.log({ currentDocument });
+            setCurrentDocument(currentDocument);
+
+            setRefreshing(false);
+        },
+        selectBrand(brand) {
+            console.log('selectBrand', brand);
+            setSelection((state) => {
+                return { ...state, brand };
+            });
+        },
+        setGuidelinesForBrand(guidelines, brand) {
+            setSelection((state) => {
+                return {
+                    ...state,
+                    guidelines: {
+                        ...state.guidelines,
+                        [brand.id]: guidelines
+                            .filter((guideline) => guideline.active)
+                            .map((guideline) => guideline.project_id),
+                    },
+                };
+            });
+            setGuidelines([...guidelines]);
+        },
+        setAuth(authData) {
+            if (authData) {
+                setAuth(authData);
+            } else {
+                console.warn('Trying to call setAuth without authData');
+            }
+        },
+        logout() {
+            // Reset state and cached localStorage
+            setSelection(blueprints.selection);
+            setAuth(blueprints.auth);
+            setUser(blueprints.user);
+            setBrands(blueprints.brands);
+        },
+        async getUser(credentials) {
+            console.log('>>>>getUser');
+            return new Promise(async (resolve, reject) => {
+                if (credentials && credentials.domain && credentials.token) {
+                    try {
+                        let { data } = await queryGraphQLWithAuth({ query: userQuery, auth: credentials });
+
+                        setUser((state) => {
+                            return { ...state, ...data.currentUser };
+                        });
+
+                        setBrands(data.brands);
+
+                        actions.selectBrand(selection.brand || data.brands[0]);
+
+                        resolve();
+                    } catch (error) {
+                        console.error(error);
+                    }
+                } else {
+                    reject('Not authenticated');
+                }
+            });
+        },
+    };
 
     useEffect(async () => {
+        console.log('effect: selection brand changed', selection.brand);
         if (selection.brand) {
             await actions.fetchGuidelines(selection.brand.id);
         }

@@ -1,13 +1,16 @@
 import {
+    Button,
     Breadcrumbs,
     IconArrowLeft,
     IconMore,
     IconRefresh,
     IconSketch,
     IconUploadAlternative,
+    Flyout,
     Text,
     Stack,
     LoadingCircle,
+    IconAdd,
 } from '@frontify/arcade';
 import React from 'react';
 import { useContext, useEffect, useState } from 'react';
@@ -15,6 +18,7 @@ import { Link } from 'react-router-dom';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { UserContext } from '../UserContext';
 import { useSketch } from '../hooks/useSketch';
+import { UploadDestinationPicker } from './UploadDestinationPicker';
 
 function SourceAction({ status, actions }) {
     switch (status) {
@@ -30,12 +34,14 @@ function SourceAction({ status, actions }) {
 
         case 'push':
             return (
-                <IconUploadAlternative
-                    size="Size20"
+                <Button
+                    icon={<IconUploadAlternative />}
                     onClick={() => {
                         actions.pushSource();
                     }}
-                ></IconUploadAlternative>
+                >
+                    Push changes
+                </Button>
             );
     }
     return <div>{JSON.stringify(status)}</div>;
@@ -48,6 +54,16 @@ export function NavigationBar() {
     let [matchedSource, setMatchedSource] = useState(null);
     let [loading, setLoading] = useState(false);
     let [relativeLastFetched, setRelativeLastFetched] = useState(null);
+    let [showDestinationPicker, setShowDestinationPicker] = useState(false);
+
+    const addCurrentFile = async () => {
+        setLoading(true);
+
+        await useSketch('moveCurrent');
+        await useSketch('addSource');
+        context.actions.refresh();
+        setLoading(false);
+    };
 
     const pushSource = async () => {
         setLoading(true);
@@ -121,20 +137,31 @@ export function NavigationBar() {
                             {matchedSource.localpath}
                         </Text> */}
 
-                        <Text size="large" weight="strong">
-                            {matchedSource.filename}
-                        </Text>
-                        <Text size="x-small">
-                            Last modified {matchedSource.modified_localized_ago} by {matchedSource.modifier_name}
-                        </Text>
+                        <Text weight="strong">{matchedSource.filename}</Text>
+
+                        {matchedSource.state == 'same' ? (
+                            <Text size="x-small">
+                                Last revision by {matchedSource.modifier_name} {matchedSource.modified_localized_ago}
+                            </Text>
+                        ) : (
+                            ''
+                        )}
+
+                        {matchedSource.state == 'push' ? <Text size="x-small">Push changes</Text> : ''}
+
                         {loading ? (
                             <Text size="x-small">Fetching …</Text>
                         ) : (
-                            <Text size="x-small">Last fetched {relativeLastFetched}</Text>
+                            <Text size="x-small" color="weak">
+                                Last fetched {relativeLastFetched}
+                            </Text>
                         )}
                     </custom-v-stack>
                 ) : (
-                    ''
+                    <custom-v-stack>
+                        <Text weight="strong">{context.currentDocument.filename}</Text>
+                        <Text>Untracked Document</Text>
+                    </custom-v-stack>
                 )}
             </custom-h-stack>
             <custom-spacer></custom-spacer>
@@ -147,7 +174,45 @@ export function NavigationBar() {
                     )}
                 </button>
             ) : (
-                ''
+                <Flyout
+                    onCancel={() => setShowDestinationPicker(false)}
+                    isOpen={showDestinationPicker}
+                    onOpenChange={(open) => {
+                        if (open) {
+                            setShowDestinationPicker(false);
+                        } else {
+                            setShowDestinationPicker(true);
+                        }
+                    }}
+                    trigger={
+                        <Button
+                            onClick={() => {
+                                setShowDestinationPicker(true);
+                            }}
+                            icon={<IconUploadAlternative />}
+                        >
+                            Publish …
+                        </Button>
+                    }
+                >
+                    <custom-v-stack padding="small" gap="small">
+                        <h2>Destination</h2>
+                        <Text>
+                            Choose the folder where you want to publish{' '}
+                            <strong>{context.currentDocument.filename}</strong>
+                        </Text>
+                        <hr />
+                        <UploadDestinationPicker></UploadDestinationPicker>
+                        <hr />
+                        <Button
+                            onClick={() => {
+                                addCurrentFile();
+                            }}
+                        >
+                            Confirm
+                        </Button>
+                    </custom-v-stack>
+                </Flyout>
             )}{' '}
             <button>
                 <IconMore size="Size20"></IconMore>
