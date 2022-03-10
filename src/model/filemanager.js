@@ -5,7 +5,7 @@ import createFolder from '../helpers/createFolder';
 import target from './target';
 import sketch from './sketch';
 import FormData from 'sketch-polyfill-fetch/lib/form-data';
-import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
+
 import extend from '../helpers/extend';
 import response from '../helpers/response';
 
@@ -59,29 +59,29 @@ class FileManager {
         );
     }
 
-    moveCurrent() {
-        return target.getTarget('sources').then(
-            function (data) {
-                if (createFolder(data.path)) {
-                    let doc = sketch.getDocument();
+    moveCurrent(brand, project, folder) {
+        let base = target.getPathToSyncFolderForBrandAndProject(brand, project);
+        let path = `${base}/${folder}/`;
+        console.log('move current', path);
 
-                    if (doc) {
-                        let nsurl = doc.fileURL();
-                        let path = nsurl.path();
-                        let parts = path.split('/');
-                        let currentFilename = parts.pop();
-                        let newNsurl = NSURL.fileURLWithPath(data.path + currentFilename);
+        if (createFolder(path)) {
+            let doc = sketch.getDocument();
 
-                        // move to the target folder
-                        doc.moveToURL_completionHandler_(newNsurl, null);
-                    }
+            if (doc) {
+                let nsurl = doc.fileURL();
+                let nsPath = nsurl.path();
+                let parts = nsPath.split('/');
+                let currentFilename = parts.pop();
+                let newNsurl = NSURL.fileURLWithPath(path + currentFilename);
 
-                    return true;
-                }
+                // move to the target folder
+                doc.moveToURL_completionHandler_(newNsurl, null);
+            }
 
-                return false;
-            }.bind(this)
-        );
+            return true;
+        }
+
+        return false;
     }
 
     updateAssetStatus(project, asset) {
@@ -109,6 +109,7 @@ class FileManager {
     }
 
     uploadFile(info, overallProgress) {
+        console.log({ info });
         // remap slashes in filename to folders
         let filenameParts = info.filename.split('/');
         let filename = filenameParts.pop();
@@ -120,6 +121,7 @@ class FileManager {
             filename: filename,
             origin: 'SKETCH',
             id_external: info.id_external,
+            externalId: info.id_external,
         };
 
         if (info.pixel_ratio) {
@@ -188,6 +190,8 @@ class FileManager {
             coscript.shouldKeepAround = true;
         }
 
+        console.log('🚀 Upload', data, options);
+
         return new Promise(function (resolve, reject) {
             var url = NSURL.alloc().initWithString(uri);
             var request = NSMutableURLRequest.requestWithURL(url);
@@ -197,15 +201,23 @@ class FileManager {
                 request.setValue_forHTTPHeaderField(options.headers[i], i);
             });
 
+            console.log('new form data');
+            console.error(options.filepath);
+
             let formData = new FormData();
 
             // Form encoded params
             if (options.filepath) {
-                formData.append('file', {
+                let attachment = {
                     fileName: options.body.filename,
                     mimeType: options.body.mimetype,
                     data: NSData.alloc().initWithContentsOfFile(options.filepath),
-                });
+                };
+                if (!attachment.data) {
+                    console.error('Could not allocate file', options.filepath);
+                    reject();
+                }
+                formData.append('file', attachment);
             }
 
             if (options.body) {
@@ -234,26 +246,25 @@ class FileManager {
             var task = NSURLSession.sharedSession().uploadTaskWithRequest_fromData_completionHandler(
                 request,
                 data,
-                __mocha__.createBlock_function('v32@?0@"NSData"8@"NSURLResponse"16@"NSError"24', function (
-                    data,
-                    res,
-                    error
-                ) {
-                    task.progress().setCompletedUnitCount(100);
+                __mocha__.createBlock_function(
+                    'v32@?0@"NSData"8@"NSURLResponse"16@"NSError"24',
+                    function (data, res, error) {
+                        task.progress().setCompletedUnitCount(100);
 
-                    if (fiber) {
-                        fiber.cleanup();
-                    } else {
-                        coscript.shouldKeepAround = false;
+                        if (fiber) {
+                            fiber.cleanup();
+                        } else {
+                            coscript.shouldKeepAround = false;
+                        }
+
+                        if (error) {
+                            finished = true;
+                            return reject(error);
+                        }
+
+                        return resolve(response(res, data));
                     }
-
-                    if (error) {
-                        finished = true;
-                        return reject(error);
-                    }
-
-                    return resolve(response(res, data));
-                })
+                )
             );
 
             task.resume();
@@ -271,7 +282,10 @@ class FileManager {
             }
         })
             .then(
-                function (response) {
+                async function (response) {
+                    console.log('🌟 Uploaded');
+                    let json = await response.json();
+                    console.log(json);
                     return response.json();
                 }.bind(this)
             )
@@ -344,36 +358,35 @@ class FileManager {
 
                 var task = NSURLSession.sharedSession().downloadTaskWithRequest_completionHandler(
                     request,
-                    __mocha__.createBlock_function('v32@?0@"NSURL"8@"NSURLResponse"16@"NSError"24', function (
-                        location,
-                        res,
-                        error
-                    ) {
-                        let fileManager = NSFileManager.defaultManager();
-                        let targetUrl = NSURL.fileURLWithPath(info.path);
+                    __mocha__.createBlock_function(
+                        'v32@?0@"NSURL"8@"NSURLResponse"16@"NSError"24',
+                        function (location, res, error) {
+                            let fileManager = NSFileManager.defaultManager();
+                            let targetUrl = NSURL.fileURLWithPath(info.path);
 
-                        fileManager.replaceItemAtURL_withItemAtURL_backupItemName_options_resultingItemURL_error(
-                            targetUrl,
-                            location,
-                            nil,
-                            NSFileManagerItemReplacementUsingNewMetadataOnly,
-                            nil,
-                            nil
-                        );
-                        task.progress().setCompletedUnitCount(100);
+                            fileManager.replaceItemAtURL_withItemAtURL_backupItemName_options_resultingItemURL_error(
+                                targetUrl,
+                                location,
+                                nil,
+                                NSFileManagerItemReplacementUsingNewMetadataOnly,
+                                nil,
+                                nil
+                            );
+                            task.progress().setCompletedUnitCount(100);
 
-                        if (fiber) {
-                            fiber.cleanup();
-                        } else {
-                            coscript.shouldKeepAround = false;
+                            if (fiber) {
+                                fiber.cleanup();
+                            } else {
+                                coscript.shouldKeepAround = false;
+                            }
+
+                            if (error) {
+                                finished = true;
+                                return reject(error);
+                            }
+                            return resolve(targetUrl.path());
                         }
-
-                        if (error) {
-                            finished = true;
-                            return reject(error);
-                        }
-                        return resolve(targetUrl.path());
-                    })
+                    )
                 );
 
                 task.resume();

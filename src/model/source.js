@@ -9,6 +9,25 @@ import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
 class Source {
     constructor() {}
 
+    getRemoteAssetForProjectIDByAssetID(projectID, assetID) {
+        // Ideally, this would be Infinity or we would use the global GraphQL endpoint …
+        const depth = 999999999;
+        return fetch(
+            `/v1/assets/status/${projectID}?include_screen_activity=true&${depth}=0&ext=sketch&id=${assetID}`
+        ).then((result) => {
+            if (result.assets != null) {
+                // The API returns {assets} as an Object (?), and we’re interested in the first one
+                // that matches the given ID.
+
+                // TODO: It would be much better if we could query the API with a specific ID …
+                let key = Object.keys(result.assets).find((key) => {
+                    return result.assets[key].id == assetID;
+                });
+                return result.assets[key];
+            }
+        });
+    }
+
     getLocalAndRemoteSourceFiles() {
         return target.getTarget('sources').then(
             function (target) {
@@ -16,6 +35,7 @@ class Source {
                 return this.getRemoteSourceFiles().then(
                     function (assets) {
                         let sources = [];
+                        // Here we get the cached information about the assets with their modified date etc.
                         let status = readJSON('sources-' + target.project.id) || { assets: {} };
                         let alreadyAdded = false;
 
@@ -119,6 +139,7 @@ class Source {
     getRemoteSourceFiles() {
         return target.getTarget('sources').then(
             function (target) {
+                console.log('🎯 getRemoteSourceFiles', { target });
                 return fetch(
                     '/v1/assets/status/' +
                         target.project.id +
@@ -325,65 +346,61 @@ class Source {
         );
     }
 
-    pushSource(source) {
-        return target.getTarget('sources').then(
-            function (target) {
-                // map source to file structure
-                let file = {
-                    path: target.path + source.filename,
-                    filename: source.filename,
-                    name: source.filename,
-                    id: source.id,
-                    id_external: source.id,
-                    folder: target.set.path,
-                    project: target.project.id,
-                    type: 'source',
-                };
+    pushSource(source, target) {
+        let file = {
+            path: target.path,
+            filename: source.filename,
+            name: source.filename,
+            id: source.id,
+            id_external: source.id,
+            folder: target.set.path,
+            project: target.project.id,
+            type: 'source',
+        };
+        console.log('PUSH SOURCE', file, target);
 
-                var sourceProgress = NSProgress.progressWithTotalUnitCount(10);
-                sourceProgress.setCompletedUnitCount(0);
+        var sourceProgress = NSProgress.progressWithTotalUnitCount(10);
+        sourceProgress.setCompletedUnitCount(0);
 
-                var polling = setInterval(
-                    function () {
-                        this.updateUploadProgress(file, sourceProgress);
-                    }.bind(this),
-                    100
-                );
-
-                return filemanager
-                    .uploadFile(file, sourceProgress)
-                    .then(
-                        function (data) {
-                            clearInterval(polling);
-                            file.id = data.id;
-                            if (isWebviewPresent('frontifymain')) {
-                                sendToWebview('frontifymain', 'sourceUploaded(' + JSON.stringify(file) + ')');
-                            }
-
-                            filemanager.updateAssetStatus(target.project.id, data);
-
-                            return true;
-                        }.bind(this)
-                    )
-                    .catch(
-                        function (e) {
-                            clearInterval(polling);
-                            if (isWebviewPresent('frontifymain')) {
-                                sendToWebview('frontifymain', 'sourceUploadFailed(' + JSON.stringify(source) + ')');
-                            }
-                            return true;
-                        }.bind(this)
-                    );
-            }.bind(this)
+        var polling = setInterval(
+            function () {
+                this.updateUploadProgress(file, sourceProgress);
+            }.bind(this),
+            100
         );
+
+        return filemanager
+            .uploadFile(file, sourceProgress)
+            .then(
+                function (data) {
+                    clearInterval(polling);
+                    file.id = data.id;
+                    if (isWebviewPresent('frontifymain')) {
+                        // sendToWebview('frontifymain', 'sourceUploaded(' + JSON.stringify(file) + ')');
+                    }
+
+                    filemanager.updateAssetStatus(target.project.id, data);
+
+                    return true;
+                }.bind(this)
+            )
+            .catch(
+                function (e) {
+                    clearInterval(polling);
+                    if (isWebviewPresent('frontifymain')) {
+                        // sendToWebview('frontifymain', 'sourceUploadFailed(' + JSON.stringify(source) + ')');
+                    }
+                    return true;
+                }.bind(this)
+            );
     }
 
-    addSource(source) {
-        return target.getTarget('sources').then(
-            function (target) {
-                // map source to file structure
+    addSource(source, target) {
+        return new Promise((resolve, reject) => {
+            console.log('>>> add source', source, target);
+            try {
                 let file = {
-                    path: target.path + source.filename,
+                    path: target.path,
                     filename: source.filename,
                     name: source.filename,
                     id: null,
@@ -393,38 +410,31 @@ class Source {
                     type: 'source',
                 };
 
+                console.log('attempt to upload source to frontify', file);
+
                 var sourceProgress = NSProgress.progressWithTotalUnitCount(100);
 
-                var polling = setInterval(
-                    function () {
-                        this.updateUploadProgress(file, sourceProgress);
-                    }.bind(this),
-                    100
-                );
+                var polling = setInterval(() => {
+                    this.updateUploadProgress(file, sourceProgress);
+                }, 100);
 
-                return filemanager
+                filemanager
                     .uploadFile(file, sourceProgress)
-                    .then(
-                        function (data) {
-                            clearInterval(polling);
-                            data.modified = data.created;
-                            filemanager.updateAssetStatus(target.project.id, data);
+                    .then((data) => {
+                        clearInterval(polling);
+                        data.modified = data.created;
+                        filemanager.updateAssetStatus(target.project.id, data);
 
-                            // reload source file list
-                            // return this.showSources();
-                        }.bind(this)
-                    )
-                    .catch(
-                        function (e) {
-                            clearInterval(polling);
-                            if (isWebviewPresent('frontifymain')) {
-                                sendToWebview('frontifymain', 'sourceUploadFailed(' + JSON.stringify(source) + ')');
-                            }
-                            return true;
-                        }.bind(this)
-                    );
-            }.bind(this)
-        );
+                        resolve(data);
+                    })
+                    .catch((error) => {
+                        clearInterval(polling);
+                        reject('source upload failed', error);
+                    });
+            } catch (error) {
+                console.log(error);
+            }
+        });
     }
 
     addCurrentFile() {
@@ -454,6 +464,7 @@ class Source {
         return this.getRemoteSourceFiles().then(
             function (assets) {
                 return assets.find(function (asset) {
+                    console.log('matching', asset);
                     return asset.filename == currentFilename;
                 });
             }.bind(this)

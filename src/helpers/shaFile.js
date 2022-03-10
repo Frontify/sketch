@@ -1,14 +1,12 @@
-let fileManager = NSFileManager.defaultManager();
-
 export default function (path) {
-    if(!fileManager.fileExistsAtPath(path)) {
+    if (!NSFileManager.defaultManager().fileExistsAtPath(path)) {
         return null;
     }
 
     let error = MOPointer.alloc().init();
     let data = NSData.dataWithContentsOfFile_options_error(path, NSDataReadingUncached, error);
 
-    if(error.value()) {
+    if (error.value()) {
         return '';
     }
 

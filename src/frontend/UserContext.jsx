@@ -38,7 +38,6 @@ export const UserContextProvider = ({ children }) => {
     let [refreshing, setRefreshing] = useState(false);
 
     useEffect(() => {
-        console.log('handler called refresh');
         let handler = (event) => {
             let { type, payload } = event.detail.data;
 
@@ -51,7 +50,7 @@ export const UserContextProvider = ({ children }) => {
                     break;
             }
         };
-        console.log('add event listener');
+
         window.addEventListener('message-from-sketch', handler);
 
         return () => {
@@ -246,28 +245,43 @@ export const UserContextProvider = ({ children }) => {
             console.log(source);
             setCurrentDocument(source);
         },
+        async getCurrentDocument() {
+            if (refreshing) {
+                console.warn('Still refreshing…');
+                return;
+            }
+
+            setRefreshing(true);
+
+            setLastFetched(new Date().getTime());
+
+            let { currentDocument } = await useSketch('getCurrentDocument');
+
+            setCurrentDocument(currentDocument);
+
+            setRefreshing(false);
+        },
         async refresh() {
             if (refreshing) {
                 console.warn('Still refreshing…');
                 return;
             }
+
             setRefreshing(true);
+
             console.log('🌀 refresh');
             let { sources } = await useSketch('getLocalAndRemoteSourceFiles');
-            console.log('got sources');
+
             setSources(sources.sources);
             setLastFetched(new Date().getTime());
-            console.log('got date');
 
             let { currentDocument } = await useSketch('getCurrentDocument');
-            console.log('got document');
-            console.log({ currentDocument });
+
             setCurrentDocument(currentDocument);
 
             setRefreshing(false);
         },
         selectBrand(brand) {
-            console.log('selectBrand', brand);
             setSelection((state) => {
                 return { ...state, brand };
             });
@@ -327,7 +341,6 @@ export const UserContextProvider = ({ children }) => {
     };
 
     useEffect(async () => {
-        console.log('effect: selection brand changed', selection.brand);
         if (selection.brand) {
             await actions.fetchGuidelines(selection.brand.id);
         }
@@ -343,6 +356,7 @@ export const UserContextProvider = ({ children }) => {
         documents,
         guidelines,
         lastFetched,
+        refreshing,
         selection,
         sources,
         textStylePalettes,

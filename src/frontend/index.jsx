@@ -35,8 +35,6 @@ ReactDOM.render(
  * Messaging
  */
 
-console.log('register window.send');
-
 window.refresh = () => {
     console.warn('Legacy method call: refresh');
 };

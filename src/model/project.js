@@ -1,37 +1,39 @@
-import fetch from '../helpers/fetch'
+import fetch from '../helpers/fetch';
 import target from './target';
-import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote'
+import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
 
 class Project {
     constructor() {}
 
-    getProjects() {
-        return fetch('/v1/brand/list/?project_limit=999').then(
-            function (data) {
-                return data.brands;
-            }.bind(this)
-        );
+    getProjectsForBrand(brand) {
+        return fetch('/v1/brand/list/?project_limit=999').then((data) => {
+            let match = data.brands.find((entry) => entry.name == brand.name);
+            console.log('found', match);
+            return match.projects;
+        });
     }
 
-    getFolders(folder) {
-        return target.getSimpleTarget().then(
-            function (target) {
-                // browse project
-                let url = '/v1/project/browse/' + target.project;
-                if (folder) {
-                    url += '/' + folder;
-                }
+    getProjectFolders(project, folder) {
+        return new Promise((resolve, reject) => {
+            console.log('getProjectFolders', project, folder);
+            // browse project
+            let url = '/v1/project/browse/' + project.id;
+            if (folder) {
+                url += '/' + folder;
+            }
 
-                return fetch(url).then(
-                    function (result) {
-                        return {
-                            folder: result.folder,
-                            folders: result.folders,
-                        };
-                    }.bind(this)
-                );
-            }.bind(this)
-        );
+            console.log('fetch url', url);
+
+            fetch(url)
+                .then((result) => {
+                    console.log('result', result);
+                    resolve({
+                        folder: result.folder,
+                        folders: result.folders,
+                    });
+                })
+                .catch((error) => reject(error));
+        });
     }
 
     showProjectChooser() {

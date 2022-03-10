@@ -2,7 +2,7 @@ import main from '../windows/main';
 import executeSafely from '../helpers/executeSafely';
 import source from '../model/source';
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
-import sketch3 from 'sketch';
+const sketch3 = require('sketch');
 
 export function runCommand(context) {
     let threadDictionary = NSThread.mainThread().threadDictionary();
@@ -49,17 +49,33 @@ export function closeCommand(context) {
 }
 
 export function selectionChangedCommand(context) {
-    console.log('selection changed');
+    // console.log('selection changed');
     executeSafely(context, function () {
         if (isWebviewPresent('frontifymain')) {
-            let layers = context.actionContext.document.selectedLayers().layers().slice();
-            let layerInformation = layers.map((layer) => {
-                let nativeLayer = sketch3.fromNative(layer);
-                return `${nativeLayer.name} (${nativeLayer.id}`;
-            });
-            layers.forEach((layer) => {
-                view.send('sketch.document.selection', `${layers.length} layers: ${layerInformation}`);
-            });
+            // let layers = context.actionContext.document.selectedLayers().layers().slice();
+            // let layerInformation = layers.map((layer) => {
+            //     let nativeLayer = sketch3.fromNative(layer);
+            //     return `${nativeLayer.name} (${nativeLayer.id}`;
+            // });
+            // layers.forEach((layer) => {
+            //     view.send('sketch.document.selection', `${layers.length} layers: ${layerInformation}`);
+            // });
+
+            let key = 'com.frontify.sketch.recent.document';
+            let oldDocumentID = sketch3.Settings.sessionVariable(key);
+
+            let newDocument = sketch3.Document.getSelectedDocument();
+            if (newDocument) {
+                let newDocumentID = newDocument.id;
+                sketch3.Settings.setSessionVariable(key, newDocumentID);
+
+                if (oldDocumentID != newDocumentID) {
+                    // refresh
+                    frontend.send('refresh');
+                }
+            }
+
+            console.log('Reading session variable…', documentID);
         }
     });
 }

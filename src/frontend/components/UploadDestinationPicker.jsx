@@ -10,15 +10,17 @@ import {
     IconArrowLeft,
     LoadingCircle,
 } from '@frontify/arcade';
+import { useSketch } from '../hooks/useSketch';
 
-export function UploadDestinationPicker() {
+export function UploadDestinationPicker({ onChange }) {
     let { actions, selection } = useContext(UserContext);
 
     // Loading
     let [loading, setLoading] = useState(false);
 
     // Project
-    let [project, setProject] = useState('');
+    let [project, setProject] = useState(null);
+    let [projects, setProjects] = useState(null);
 
     // Folders
     let [folders, setFolders] = useState([]);
@@ -27,24 +29,37 @@ export function UploadDestinationPicker() {
 
     // Watch projectID
     useEffect(async () => {
-        await fetchProjectFolders(project.id);
+        console.log('watched projecz', project);
+        if (project) await fetchProjectFolders(project);
     }, [project]);
 
     // Watch folderID
     useEffect(async () => {
-        if (folder && folder.id) {
+        if (project && folder) {
             setLoading(true);
-            let result = await actions.getFolders(folder.id);
-            setFolders(result.data.node.subFolders.items);
+            let result = await useSketch('getProjectFolders', { project, folder: folder?.id });
+            // let { success, folders, folder } = await actions.getProjectFolders(project.id, folder.path);
+            setFolders(result.folders);
+            // GraphQL:
+            // setFolders(result.data.node.subFolders.items);
             setLoading(false);
         }
     }, [folder]);
 
-    const fetchProjectFolders = async (projectID) => {
+    useEffect(async () => {
+        let { projects } = await useSketch('getProjectsForBrand', { brand: selection.brand });
+        setProjects(projects);
+    }, []);
+    const fetchProjectFolders = async (project) => {
+        console.log('fetchProjectFolders', project, folder);
         setLoading(true);
-        let result = await actions.getProjectFolders(projectID);
-        let folders = result.data.workspaceProject.browse.subFolders.items;
-        setFolders(folders);
+        // GraphQL:
+        // let result = await actions.getProjectFolders(projectID);
+        // let folders = result.data.workspaceProject.browse.subFolders.items;
+
+        let result = await useSketch('getProjectFolders', { project, folder: folder?.id || '' });
+        console.log('🚧', result);
+        setFolders(result.folders);
         setLoading(false);
     };
 
@@ -59,19 +74,22 @@ export function UploadDestinationPicker() {
         if (!previous) {
             setProject(null);
             setFolder(null);
-            fetchProjectFolders(project.id);
+            fetchProjectFolders(project);
         }
     };
 
     const enterFolder = (folder) => {
         setFolder(folder);
         setBreadcrumbs((state) => state.concat(folder));
+        onChange({ folder, project });
     };
+
+    if (!projects) return <LoadingCircle></LoadingCircle>;
 
     if (!project)
         return (
             <custom-v-stack>
-                {selection.brand?.workspaceProjects?.items.map((project) => {
+                {projects.map((project) => {
                     return (
                         <custom-palette-item
                             onClick={() => {
@@ -129,4 +147,5 @@ export function UploadDestinationPicker() {
             </custom-v-stack>
         );
     }
+    return <LoadingCircle></LoadingCircle>;
 }

@@ -66,7 +66,9 @@ export function RecentDocumentsView() {
                                             useSketch('addSource', { source });
                                         }}
                                         icon={<IconUploadAlternative />}
-                                    ></Button>
+                                    >
+                                        {source.id}
+                                    </Button>
                                 )}
 
                                 {source.state == 'same' && (

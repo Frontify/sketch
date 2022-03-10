@@ -1,9 +1,7 @@
-import writeJSON from '../helpers/writeJSON';
-import readJSON from '../helpers/readJSON';
 import fetch from '../helpers/fetch';
 import notification from './notification';
-import target from './target';
-const Settings = require('sketch/settings');
+
+import { Settings } from 'sketch';
 
 let threadDictionary = NSThread.mainThread().threadDictionary();
 

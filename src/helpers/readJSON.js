@@ -1,9 +1,7 @@
-let fileManager = NSFileManager.defaultManager();
-
 export default function (key) {
     let jsContentFilePath = '' + NSHomeDirectory() + '/Frontify/.config/' + key + '.json';
 
-    if(!fileManager.fileExistsAtPath(jsContentFilePath)) {
+    if (!NSFileManager.defaultManager().fileExistsAtPath(jsContentFilePath)) {
         return null;
     }
 

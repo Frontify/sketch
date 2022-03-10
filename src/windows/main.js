@@ -11,7 +11,7 @@ import typography from '../model/typography';
 import asset from '../model/asset';
 import user from '../model/user';
 import createFolder from '../helpers/createFolder';
-import { runCommand } from '../commands/frontify';
+
 import { sendToWebview } from 'sketch-module-web-view/remote';
 
 let DOM = require('sketch/dom');
@@ -396,8 +396,20 @@ export default function (context, view) {
                 break;
             case 'addSource':
                 try {
-                    await source.addSource(args.source);
-                    payload = { success: true };
+                    let response = await source.addSource(args.source, args.target);
+                    console.log('add source >>', response);
+                    if (response.id) {
+                        // Set Asset ID, saved inside the Sketch File
+                        sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'remote_id', response.id);
+
+                        // Set Project ID, saved inside the Sketch File
+                        sketch3.Settings.setDocumentSettingForKey(
+                            sketch.getDocument(),
+                            'remote_project_id',
+                            args.target.project.id
+                        );
+                    }
+                    payload = { success: true, response };
                 } catch (error) {
                     payload = { success: false, error };
                 }
@@ -421,9 +433,63 @@ export default function (context, view) {
                 }
                 break;
             case 'getCurrentDocument':
+                console.log('🔥');
                 let currentDocument = await source.getCurrentAsset();
-                if (!currentDocument) currentDocument = { filename: source.getCurrentFilename(), state: 'untracked' };
+                console.log('✅', currentDocument);
+                if (!currentDocument) {
+                    let doc;
+                    try {
+                        doc = sketch.getDocument();
+                        console.log(doc);
+                        currentDocument = sketch3.Document.fromNative(doc);
+                    } catch (error) {
+                        console.log(error);
+                    }
+                    currentDocument = {
+                        remote_id: sketch3.Settings.documentSettingForKey(sketch.getDocument(), 'remote_id'),
+                        remote_project_id: sketch3.Settings.documentSettingForKey(
+                            sketch.getDocument(),
+                            'remote_project_id'
+                        ),
+                        id: currentDocument.id,
+                        filename: source.getCurrentFilename(),
+                        path: '' + doc.fileURL().path(),
+                        state: 'untracked',
+                    };
+                    if (currentDocument.remote_id && currentDocument.remote_project_id) {
+                        // MARK: Hardcoded project id
+                        let remoteAsset = await source.getRemoteAssetForProjectIDByAssetID(
+                            currentDocument.remote_project_id,
+                            currentDocument.remote_id
+                        );
+                        if (remoteAsset) {
+                            currentDocument.state = 'same';
+                            currentDocument.asset = remoteAsset;
+                        } else {
+                            currentDocument.asset = null;
+                        }
+                    }
+                }
+
                 payload = { currentDocument };
+                break;
+            case 'getProjectsForBrand':
+                console.log('get projects');
+                try {
+                    let projects = await project.getProjectsForBrand(args.brand);
+                    payload = { success: true, projects };
+                } catch (error) {
+                    payload = { success: false, error };
+                }
+                break;
+            case 'getProjectFolders':
+                try {
+                    let { folder, folders } = await project.getProjectFolders(args.project, args.folder);
+                    payload = { success: true, folder, folders };
+                } catch (error) {
+                    console.error(error);
+                    payload = { success: false, error };
+                }
                 break;
             case 'getOpenDocuments':
                 var documents = DOM.getDocuments();
@@ -450,7 +516,8 @@ export default function (context, view) {
 
             case 'moveCurrent':
                 try {
-                    await filemanager.moveCurrent();
+                    console.log('move current file to', args.folder);
+                    await filemanager.moveCurrent(args.brand, args.project, args.folder);
                     payload = { success: true };
                 } catch (error) {
                     payload = { success: false, error };
@@ -466,7 +533,7 @@ export default function (context, view) {
                 break;
             case 'pushSource':
                 try {
-                    await source.pushSource(args.source);
+                    await source.pushSource(args.source, args.target);
                     payload = { success: true };
                 } catch (error) {
                     payload = { success: false, error };

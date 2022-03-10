@@ -20,160 +20,21 @@ import { UserContext } from '../UserContext';
 import { useSketch } from '../hooks/useSketch';
 import { UploadDestinationPicker } from './UploadDestinationPicker';
 
-function SourceAction({ status, actions }) {
-    switch (status) {
-        case 'same':
-            return (
-                <IconRefresh
-                    size="Size20"
-                    onClick={() => {
-                        actions.refresh();
-                    }}
-                ></IconRefresh>
-            );
-
-        case 'push':
-            return (
-                <Button
-                    icon={<IconUploadAlternative />}
-                    onClick={() => {
-                        actions.pushSource();
-                    }}
-                >
-                    Push changes
-                </Button>
-            );
-    }
-    return <div>{JSON.stringify(status)}</div>;
-}
-
-export function NavigationBar() {
-    let [activeSourceScope] = useLocalStorage('cache.activeSourceScope', 'open');
+function SourceAction({ status, actions, loading }) {
     let context = useContext(UserContext);
-    let [documentPath, setDocumentPath] = useState([]);
-    let [matchedSource, setMatchedSource] = useState(null);
-    let [loading, setLoading] = useState(false);
-    let [relativeLastFetched, setRelativeLastFetched] = useState(null);
     let [showDestinationPicker, setShowDestinationPicker] = useState(false);
+    let [destination, setDestination] = useState(null);
 
-    const addCurrentFile = async () => {
-        setLoading(true);
+    if (loading || context.refreshing)
+        return (
+            <div>
+                <LoadingCircle size="Small"></LoadingCircle>
+            </div>
+        );
 
-        await useSketch('moveCurrent');
-        await useSketch('addSource');
-        context.actions.refresh();
-        setLoading(false);
-    };
-
-    const pushSource = async () => {
-        setLoading(true);
-
-        let result = await useSketch('pushSource', { source: matchedSource });
-        context.actions.refresh();
-        setLoading(false);
-    };
-
-    const refresh = async () => {
-        setLoading(true);
-        await context.actions.refresh();
-        setLoading(false);
-    };
-    useEffect(() => {
-        let interval = setInterval(() => {
-            let timeAgo = '';
-
-            // Time differences
-            let diff = new Date().getTime() - context.lastFetched;
-            let minutesAgo = Math.round(diff / 1000 / 60);
-
-            // These constants help us to convert the time difference from milliseconds to minutes
-            const minute = 60000;
-            const twoMinutes = minute * 2;
-            const oneHour = minute * 60;
-
-            // 2 Minutes, so we don’t have to pluralize, ha ha.
-            let displayJustNow = diff < twoMinutes;
-            let displayMinutesAgo = diff > twoMinutes;
-            let displayExactDate = diff > oneHour;
-
-            // Here we decide what text should be displayed depending on the time difference
-            if (displayJustNow) timeAgo = 'just now';
-            if (displayMinutesAgo) timeAgo = `${minutesAgo} minutes ago`;
-            if (displayExactDate) timeAgo = new Date(context.lastFetched).toLocaleString();
-
-            setRelativeLastFetched(timeAgo);
-        }, 1000);
-        return () => {
-            clearInterval(interval);
-        };
-    }, [context.lastFetched]);
-
-    useEffect(() => {
-        if (context.currentDocument && context.currentDocument?.localpath) {
-            let pathArray = decodeURI(context.currentDocument.localpath)
-                .split('/')
-                .map((item) => {
-                    return { label: item };
-                });
-            console.log(pathArray);
-            setDocumentPath(pathArray);
-            setMatchedSource(context.sources.find((source) => source.localpath == context.currentDocument.localpath));
-        }
-    }, [context.currentDocument]);
-
-    return (
-        <custom-h-stack gap="small" padding="small" align-items="center">
-            <Link to={`/sources/${activeSourceScope}`}>
-                <IconArrowLeft size="Size16"></IconArrowLeft>
-            </Link>
-            <custom-h-stack align-items="center" gap="small">
-                <div style={{ flex: 0 }}>
-                    <IconSketch size="Size24"></IconSketch>
-                </div>
-
-                {matchedSource ? (
-                    <custom-v-stack>
-                        {/* <Text size="x-small" color="weak">
-                            {matchedSource.localpath}
-                        </Text> */}
-
-                        <Text weight="strong">{matchedSource.filename}</Text>
-
-                        {matchedSource.state == 'same' ? (
-                            <Text size="x-small">
-                                Last revision by {matchedSource.modifier_name} {matchedSource.modified_localized_ago}
-                            </Text>
-                        ) : (
-                            ''
-                        )}
-
-                        {matchedSource.state == 'push' ? <Text size="x-small">Push changes</Text> : ''}
-
-                        {loading ? (
-                            <Text size="x-small">Fetching …</Text>
-                        ) : (
-                            <Text size="x-small" color="weak">
-                                Last fetched {relativeLastFetched}
-                            </Text>
-                        )}
-                    </custom-v-stack>
-                ) : (
-                    <custom-v-stack>
-                        <Text weight="strong">{context.currentDocument.filename}</Text>
-                        <Text>Untracked Document</Text>
-                    </custom-v-stack>
-                )}
-            </custom-h-stack>
-            <custom-spacer></custom-spacer>
-            {matchedSource ? (
-                <button>
-                    {loading ? (
-                        <LoadingCircle size="Small"></LoadingCircle>
-                    ) : (
-                        <SourceAction status={matchedSource.state} actions={{ pushSource, refresh }}></SourceAction>
-                    )}
-                </button>
-            ) : (
+    switch (status) {
+        case 'untracked':
+            return (
                 <Flyout
                     onCancel={() => setShowDestinationPicker(false)}
                     isOpen={showDestinationPicker}
@@ -202,18 +63,242 @@ export function NavigationBar() {
                             <strong>{context.currentDocument.filename}</strong>
                         </Text>
                         <hr />
-                        <UploadDestinationPicker></UploadDestinationPicker>
+                        <UploadDestinationPicker
+                            onChange={(value) => {
+                                setDestination(value);
+                            }}
+                        ></UploadDestinationPicker>
                         <hr />
                         <Button
                             onClick={() => {
-                                addCurrentFile();
+                                actions.publish(destination);
+
+                                setShowDestinationPicker(false);
                             }}
                         >
                             Confirm
                         </Button>
                     </custom-v-stack>
                 </Flyout>
-            )}{' '}
+            );
+        case 'same':
+            return (
+                <Button>
+                    <IconRefresh
+                        size="Size20"
+                        onClick={async () => {
+                            await actions.refresh();
+                        }}
+                    ></IconRefresh>
+                </Button>
+            );
+
+        case 'push':
+            return (
+                <Button
+                    icon={<IconUploadAlternative />}
+                    onClick={() => {
+                        actions.pushSource();
+                    }}
+                >
+                    Push changes
+                </Button>
+            );
+    }
+    return <div>{JSON.stringify(status)}</div>;
+}
+
+export function NavigationBar() {
+    let [activeSourceScope] = useLocalStorage('cache.activeSourceScope', 'open');
+    let context = useContext(UserContext);
+    let [documentPath, setDocumentPath] = useState([]);
+    let [matchedSource, setMatchedSource] = useState(null);
+    let [loading, setLoading] = useState(false);
+    let [relativeLastFetched, setRelativeLastFetched] = useState('just now');
+    let [status, setStatus] = useState('PENDING');
+
+    let target = {
+        brand: context.selection.brand,
+        project: { id: 190741 },
+        // ${brand.name}/Projects/${project.name}/${folder.name}
+        path: '/Users/florians/Frontify/Super Brand/Projects/Annual Report/Test/',
+        set: {
+            path: '/Test/',
+            id: 102196,
+            name: 'Test',
+            folders: ['Test'],
+        },
+        set_sources: {},
+        target_changed: false,
+    };
+
+    const publish = async (destination) => {
+        setLoading(true);
+
+        console.log('publish', { destination });
+
+        target.project = destination.project;
+        target.path = context.currentDocument.path;
+        target.set.path = destination.folder.name;
+        /**
+         * This is the legacy data model "target" that was used to cache
+         * the destination for *any* source/artboard related action.
+         * With the new plugin, the "target" needs to be linked to the actual
+         * asset and not global.
+         */
+
+        // 1. Move the current file to the local Frontify folder
+        await useSketch('moveCurrent', {
+            brand: context.selection.brand,
+            project: destination.project,
+            folder: target.set.path,
+        });
+
+        // 2. Upload to Frontify
+        let response = await useSketch('addSource', { source: context.currentDocument, target });
+
+        // 3. Refresh
+        context.actions.refresh();
+        setLoading(false);
+    };
+
+    const pushSource = async () => {
+        setLoading(true);
+        setStatus('PUSHING');
+        // Set correct local path
+        target.path = context.currentDocument.path;
+        console.log('push source', context.currentDocument, target);
+        await useSketch('pushSource', { source: context.currentDocument.asset, target });
+        setStatus('FETCHING');
+        await context.actions.refresh();
+        setStatus('PENDING');
+        setLoading(false);
+    };
+
+    const refresh = async () => {
+        setLoading(true);
+        setStatus('FETCHING');
+        await context.actions.getCurrentDocument();
+        setStatus('PENDING');
+        setLoading(false);
+    };
+    useEffect(() => {
+        // Update the relative time display every minute
+        const intervalInMilliseconds = 60000;
+
+        let interval = setInterval(() => {
+            let timeAgo = '';
+
+            // Time differences
+            let diff = new Date().getTime() - context.lastFetched;
+            let minutesAgo = Math.round(diff / 1000 / 60);
+
+            // These constants help us to convert the time difference from milliseconds to minutes
+            const minute = 60000;
+            const twoMinutes = minute * 2;
+            const oneHour = minute * 60;
+
+            // 2 Minutes, so we don’t have to pluralize, ha ha.
+            let displayJustNow = diff < twoMinutes;
+            let displayMinutesAgo = diff > twoMinutes;
+            let displayExactDate = diff > oneHour;
+
+            // Here we decide what text should be displayed depending on the time difference
+            if (displayJustNow) timeAgo = 'just now';
+            if (displayMinutesAgo) timeAgo = `${minutesAgo} minutes ago`;
+            if (displayExactDate) timeAgo = new Date(context.lastFetched).toLocaleString();
+
+            setRelativeLastFetched(timeAgo);
+        }, intervalInMilliseconds);
+        return () => {
+            clearInterval(interval);
+        };
+    }, [context.lastFetched]);
+
+    useEffect(() => {
+        if (context.currentDocument && context.currentDocument?.localpath) {
+            let pathArray = decodeURI(context.currentDocument.localpath)
+                .split('/')
+                .map((item) => {
+                    return { label: item };
+                });
+            console.log(pathArray);
+            setDocumentPath(pathArray);
+            setMatchedSource(
+                context.sources.find((source) => source.localpath == context.currentDocument.asset.localpath)
+            );
+        }
+    }, [context.currentDocument]);
+
+    return (
+        <custom-h-stack gap="small" padding="small" align-items="center">
+            <Link to={`/sources/${activeSourceScope}`}>
+                <IconArrowLeft size="Size16"></IconArrowLeft>
+            </Link>
+            <custom-h-stack align-items="center" gap="small">
+                <div style={{ flex: 0 }}>
+                    <IconSketch size="Size24"></IconSketch>
+                </div>
+
+                {context.currentDocument && context.currentDocument.asset ? (
+                    <custom-v-stack>
+                        {/* <Text size="x-small" color="weak">
+                            {context.currentDocument.localpath}
+                        </Text> */}
+
+                        <Text weight="strong">{context.currentDocument.filename}</Text>
+                        {/* <Text weight="strong">{JSON.stringify(context.currentDocument, null, 2)}</Text> */}
+
+                        {context.currentDocument.state == 'same' ? (
+                            <Text size="x-small">
+                                Last revision by {context.currentDocument.asset.modifier_name}{' '}
+                                {context.currentDocument.asset.modified_localized_ago}
+                            </Text>
+                        ) : (
+                            ''
+                        )}
+
+                        {context.currentDocument.state == 'push' ? <Text size="x-small">Push changes</Text> : ''}
+
+                        {loading ? (
+                            status == 'PUSHING' ? (
+                                <Text size="x-small">Pushing …</Text>
+                            ) : '' || status == 'FETCHING' ? (
+                                <Text size="x-small">Fetching …</Text>
+                            ) : (
+                                ''
+                            )
+                        ) : (
+                            <Text size="x-small" color="weak">
+                                Last fetched {relativeLastFetched}
+                            </Text>
+                        )}
+                        <Button
+                            onClick={async () => {
+                                await pushSource();
+                            }}
+                        >
+                            Force Push
+                        </Button>
+                    </custom-v-stack>
+                ) : (
+                    <custom-v-stack>
+                        <Text weight="strong">{context.currentDocument.filename}</Text>
+                        <Text weight="strong">{JSON.stringify(context.currentDocument, null, 2)}</Text>
+                        <Text>Untracked Document</Text>
+                    </custom-v-stack>
+                )}
+            </custom-h-stack>
+            <custom-spacer></custom-spacer>
+            {context.currentDocument ? (
+                <SourceAction
+                    status={context.currentDocument.state}
+                    actions={{ pushSource, refresh, publish }}
+                    loading={loading}
+                ></SourceAction>
+            ) : (
+                ''
+            )}
             <button>
                 <IconMore size="Size20"></IconMore>
             </button>
