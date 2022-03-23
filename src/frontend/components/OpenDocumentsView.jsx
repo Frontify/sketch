@@ -44,6 +44,50 @@ export function OpenDocumentsView() {
 
     return (
         <custom-v-stack stretch>
+            <custom-scroll-view padding="small" style={{ background: 'lavender' }}>
+                <h2>🚧 List of open Sketch files</h2>
+                <p>
+                    Here, we should see a list of open Sketch files. Each file knows the{' '}
+                    <strong>remote_project_id & remote_id </strong> – otherwise, the file is new and not tracked on
+                    Frontify.
+                </p>
+                <br />
+                <h2>Remote status</h2>
+                <p>
+                    The problem is, that the upload is done via API v1. But the ID returned by the API has a different
+                    format compared to a GraphQL upload.
+                </p>
+
+                <br />
+
+                <h2>API v1: </h2>
+                <p>
+                    remote_project_id: <pre>191277</pre>
+                    <br />
+                    remote_id: <pre>6405542</pre>
+                </p>
+                <br />
+                <h2>GraphQL</h2>
+
+                <p>
+                    remote_project_id: <pre>eyJpZGVudGlmaWVyIjoxOTA3NDEsInR5cGUiOiJwcm9qZWN0In0=</pre>
+                    <br />
+                    remote_id: <pre>eyJpZGVudGlmaWVyIjo2MzcwNDgyLCJ0eXBlIjoiYXNzZXQifQ==</pre>
+                </p>
+                <br />
+
+                <p>
+                    Fetching information about open files is possible via the old API. But it’s hacky because the
+                    endpoint doesn’t seem to support an ID?
+                </p>
+                <br />
+                <p>
+                    Also, the depth needs to be really high to get a complete list of files that we can then filter on
+                    the client. Not ideal.
+                </p>
+                <pre>/v1/assets/status/PROJECT_ID?include_screen_activity=true&depth=999999&ext=sketchs</pre>
+                <p>---</p>
+            </custom-scroll-view>
             <custom-scroll-view stretch style={{ overflowX: 'hidden', width: '100%' }}>
                 {openDocuments && openDocuments.length
                     ? openDocuments.map((source) => {
@@ -90,6 +134,7 @@ export function OpenDocumentsView() {
                       })
                     : ''}
             </custom-scroll-view>
+
             <custom-v-stack>
                 <custom-line></custom-line>
 

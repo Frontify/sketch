@@ -6,15 +6,19 @@ import sketch from './sketch';
 import filemanager from './filemanager';
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
 
+let sketch3 = require('sketch');
+
 class Source {
     constructor() {}
 
     getRemoteAssetForProjectIDByAssetID(projectID, assetID) {
+        console.log('getRemoteAssetForProjectIDByAssetID');
         // Ideally, this would be Infinity or we would use the global GraphQL endpoint …
         const depth = 999999999;
         return fetch(
-            `/v1/assets/status/${projectID}?include_screen_activity=true&${depth}=0&ext=sketch&id=${assetID}`
+            `/v1/assets/status/${projectID}?include_screen_activity=true&depth=${depth}&ext=sketch&id=${assetID}`
         ).then((result) => {
+            console.log(result);
             if (result.assets != null) {
                 // The API returns {assets} as an Object (?), and we’re interested in the first one
                 // that matches the given ID.
@@ -24,6 +28,8 @@ class Source {
                     return result.assets[key].id == assetID;
                 });
                 return result.assets[key];
+            } else {
+                return false;
             }
         });
     }
@@ -157,6 +163,8 @@ class Source {
                         }
 
                         this.assets = assets;
+
+                        console.log('remote source files', assets);
                         return assets;
                     }.bind(this)
                 );
@@ -223,6 +231,7 @@ class Source {
     }
 
     opened() {
+        sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'dirty', false);
         return this.getCurrentAsset().then(function (asset) {
             if (asset) {
                 return fetch('/v1/screen/activity/' + asset.id, {
@@ -236,14 +245,20 @@ class Source {
     }
 
     saved() {
-        return this.getCurrentAsset().then(function (asset) {
+        console.log('saved');
+        sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'dirty', true);
+
+        return this.getCurrentAsset().then(async (asset) => {
             if (asset) {
                 let sha = shaFile(asset.localpath);
                 if (sha != asset.sha) {
-                    return fetch('/v1/screen/activity/' + asset.id, {
+                    console.log('🌀 Status Update');
+                    let result = await fetch('/v1/screen/activity/' + asset.id, {
                         method: 'POST',
                         body: JSON.stringify({ activity: 'LOCAL_CHANGE' }),
                     });
+                    console.log('updated', result);
+                    return result;
                 }
             }
 
@@ -312,7 +327,7 @@ class Source {
                     clearInterval(polling);
 
                     if (isWebviewPresent('frontifymain')) {
-                        sendToWebview('frontifymain', 'sourceDownloaded(' + JSON.stringify(source) + ')');
+                        // sendToWebview('frontifymain', 'sourceDownloaded(' + JSON.stringify(source) + ')');
                     }
 
                     return path;
@@ -334,11 +349,13 @@ class Source {
     pullSource(source) {
         return this.downloadSource(source).then(
             function (path) {
+                console.log('🎯🎯🎯🎯🎯DOWNLOADED SOURCE');
                 if (
                     path &&
                     source.current == true &&
                     NSDocumentController.sharedDocumentController().currentDocument()
                 ) {
+                    console.log('>>>>>OPEN FILE');
                     NSDocumentController.sharedDocumentController().currentDocument().close();
                     filemanager.openFile(path);
                 }
@@ -381,7 +398,7 @@ class Source {
 
                     filemanager.updateAssetStatus(target.project.id, data);
 
-                    return true;
+                    return data;
                 }.bind(this)
             )
             .catch(
@@ -390,7 +407,7 @@ class Source {
                     if (isWebviewPresent('frontifymain')) {
                         // sendToWebview('frontifymain', 'sourceUploadFailed(' + JSON.stringify(source) + ')');
                     }
-                    return true;
+                    return false;
                 }.bind(this)
             );
     }

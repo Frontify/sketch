@@ -11,7 +11,7 @@ export const userQuery = `{
         color
         avatar
         workspaceProjects {
-            ... on WorkspaceProjectItems {
+            ... on WorkspaceItems {
               __typename
               items {
                 id

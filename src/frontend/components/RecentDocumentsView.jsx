@@ -24,6 +24,33 @@ export function RecentDocumentsView() {
                 <SearchField></SearchField>
             </div>
             <custom-line></custom-line>
+            <div padding="small" style={{ background: 'lavender' }}>
+                <p>🚧 Here, we should see a list of all Sketch files that the user has modified. </p>
+                <p>---</p>
+                <p>
+                    <strong>Option 1: Local Cache (Sketch or Local Storage). </strong>
+                </p>
+
+                <p>Simply log all files that are opened through the plugin.</p>
+                <p>---</p>
+                <p>
+                    <strong>Option 2: GraphQL Query</strong>
+                    <p>Make this a API view only and query GraphQL for all Sketch files that this user has modified</p>
+                    <br />
+                    <br />
+                    <ul>
+                        <li>
+                            <strong>extension:</strong> sketch
+                        </li>
+                        <li>
+                            <strong>modified_by:</strong> john@company.com
+                        </li>
+                        <li>
+                            <strong>sort:</strong> modified
+                        </li>
+                    </ul>
+                </p>
+            </div>
             <custom-scroll-view stretch style={{ overflowX: 'hidden', width: '100%' }}>
                 {/* Recent Documents */}
                 {sources.map((source) => {

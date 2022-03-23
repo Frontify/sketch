@@ -11,6 +11,7 @@ import typography from '../model/typography';
 import asset from '../model/asset';
 import user from '../model/user';
 import createFolder from '../helpers/createFolder';
+import shaFile from '../helpers/shaFile';
 
 import { sendToWebview } from 'sketch-module-web-view/remote';
 
@@ -433,43 +434,164 @@ export default function (context, view) {
                 }
                 break;
             case 'getCurrentDocument':
-                console.log('🔥');
-                let currentDocument = await source.getCurrentAsset();
-                console.log('✅', currentDocument);
-                if (!currentDocument) {
-                    let doc;
-                    try {
-                        doc = sketch.getDocument();
-                        console.log(doc);
-                        currentDocument = sketch3.Document.fromNative(doc);
-                    } catch (error) {
-                        console.log(error);
+                console.log('🔥 GET CURRENT DOCUMENT');
+                /**
+                 * The shape of the returned object.
+                 * We’ll merge local, remote and meta information.
+                 *
+                 * Local:   This is the Sketch file.
+                 * Remote:  This is the asset on Frontify.
+                 * Refs:    This contains information stored inside the Sketch File that can
+                 *          be used to find the corresponding asset on Frontify.
+                 */
+                let currentDocument = {
+                    dirty: false,
+                    state: 'untracked',
+                    local: {
+                        id: '',
+                        filename: '',
+                        path: '',
+                        modified: '',
+                    },
+                    remote: {},
+                    refs: {
+                        remote_id: '',
+                        remote_project_id: '',
+                    },
+                };
+
+                let nativeSketchDocument = sketch.getDocument();
+
+                let openSketchDocument;
+                try {
+                    openSketchDocument = sketch3.Document.fromNative(nativeSketchDocument);
+                } catch (error) {
+                    console.log(error);
+                }
+
+                let modified = sketch3.Settings.documentSettingForKey(sketch.getDocument(), 'remote_modified');
+                console.log('MODIFIED', modified);
+
+                /**
+                 * Refs.
+                 *
+                 * This is information (eventually) stored inside the Sketch file.
+                 * This information can be used to find the corresponding asset on Frontify.
+                 */
+
+                currentDocument.refs = {
+                    remote_id: sketch3.Settings.documentSettingForKey(openSketchDocument, 'remote_id'),
+                    remote_project_id: sketch3.Settings.documentSettingForKey(openSketchDocument, 'remote_project_id'),
+                };
+
+                console.log('refs', currentDocument.refs);
+
+                /**
+                 * State.
+                 *
+                 * This is the sync state.
+                 *
+                 */
+
+                function getState(document) {
+                    let { remote, local } = document;
+
+                    let saved = local.id;
+                    let tracked = remote.id;
+                    let sameFile = local.sha == remote.sha;
+                    let sameDate = local.modified == remote.modified;
+                    let ahead = local.modified >= remote.modified ? 'local' : 'remote';
+                    let conflict = (document.dirty && !sameFile) || (!sameFile && !sameDate);
+
+                    console.log('conflict?', document, sameFile, conflict);
+
+                    if (!saved) return 'unsaved';
+                    if (!tracked) return 'untracked';
+
+                    if (sameDate && !sameFile) {
+                        return 'push';
                     }
-                    currentDocument = {
-                        remote_id: sketch3.Settings.documentSettingForKey(sketch.getDocument(), 'remote_id'),
-                        remote_project_id: sketch3.Settings.documentSettingForKey(
-                            sketch.getDocument(),
-                            'remote_project_id'
-                        ),
-                        id: currentDocument.id,
-                        filename: source.getCurrentFilename(),
-                        path: '' + doc.fileURL().path(),
-                        state: 'untracked',
-                    };
-                    if (currentDocument.remote_id && currentDocument.remote_project_id) {
-                        // MARK: Hardcoded project id
-                        let remoteAsset = await source.getRemoteAssetForProjectIDByAssetID(
-                            currentDocument.remote_project_id,
-                            currentDocument.remote_id
-                        );
-                        if (remoteAsset) {
-                            currentDocument.state = 'same';
-                            currentDocument.asset = remoteAsset;
-                        } else {
-                            currentDocument.asset = null;
-                        }
+
+                    if (sameFile && sameDate) {
+                        return 'same';
+                    }
+
+                    if (conflict) {
+                        return 'conflict';
+                    }
+
+                    if (ahead == 'local' || !local.modified) return 'push';
+                    if (ahead == 'remote') return 'pull';
+
+                    return 'unknown';
+                }
+
+                if (currentDocument.refs.remote_id && currentDocument.refs.remote_project_id) {
+                    // MARK: Hardcoded project id
+                    let remoteAsset = await source.getRemoteAssetForProjectIDByAssetID(
+                        currentDocument.refs.remote_project_id,
+                        currentDocument.refs.remote_id
+                    );
+                    console.log(remoteAsset);
+                    if (remoteAsset) {
+                        currentDocument.remote = remoteAsset;
+                    } else {
+                        currentDocument.remote = null;
+                        // Ooops! Could not find remote asset …
+                        console.warn('No remote asset found', remoteAsset);
                     }
                 }
+
+                /**
+                 * Local document.
+                 *
+                 * This is information about the document on the file system.
+                 */
+
+                if (!filemanager.isCurrentSaved()) {
+                    currentDocument.state = 'unsaved';
+                }
+
+                if (filemanager.isCurrentSaved()) {
+                    let filePath = '' + nativeSketchDocument.fileURL().path();
+                    console.log(shaFile(filePath));
+                    currentDocument.local = {
+                        id: openSketchDocument.id,
+                        filename: source.getCurrentFilename(),
+                        path: filePath,
+                        sha: '' + shaFile(filePath),
+                        modified: modified,
+                    };
+                }
+
+                /**
+                 * Check if the document has a modified date from a previous fetch request.
+                 * If not, then set it by using the remote modified date and store it the file.
+                 * We can later use that information to compare local/remote changes.
+                 *
+                 * Good to know:
+                 *
+                 * The "modified" inside the file will also be mutated in other places, for example,
+                 * after opening a file.
+                 */
+
+                if (!modified || currentDocument.remote.sha == currentDocument.local.sha) {
+                    sketch3.Settings.setDocumentSettingForKey(
+                        sketch.getDocument(),
+                        'remote_modified',
+                        currentDocument.remote.modified
+                    );
+                }
+
+                console.log('💥 local & remote state gathered');
+
+                console.log({ payload });
+
+                // Dirty
+                currentDocument.dirty = sketch3.Settings.documentSettingForKey(sketch.getDocument(), 'dirty');
+
+                // Sync State
+                currentDocument.state = getState(currentDocument);
 
                 payload = { currentDocument };
                 break;
@@ -531,9 +653,46 @@ export default function (context, view) {
                     payload = { success: false, error };
                 }
                 break;
+            case 'pullSource':
+                try {
+                    let result = await source.pullSource(args.source);
+                    payload = { success: true, result };
+                } catch (error) {
+                    payload = { success: false, error };
+                }
+
+                break;
             case 'pushSource':
                 try {
-                    await source.pushSource(args.source, args.target);
+                    let result = await source.pushSource(args.source, args.target);
+                    console.log(result);
+
+                    console.log('should update date modified', result, result.modified);
+
+                    /**
+                     * Check if the document has a modified date from a previous fetch request.
+                     * If not, then set it by using the remote modified date and store it the file.
+                     * We can later use that information to compare local/remote changes.
+                     *
+                     * Good to know:
+                     *
+                     * The "modified" inside the file will also be mutated in other places, for example,
+                     * after opening a file.
+                     */
+
+                    // compare SHA
+                    let localAndRemoteAreEqual = true;
+                    if (localAndRemoteAreEqual) {
+                        sketch3.Settings.setDocumentSettingForKey(
+                            sketch.getDocument(),
+                            'remote_modified',
+                            result.modified
+                        );
+
+                        // Mark document as clean, because there are no untracked changes
+                        sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'dirty', false);
+                    }
+                    console.log('🌟 DONE PUSHING');
                     payload = { success: true };
                 } catch (error) {
                     payload = { success: false, error };

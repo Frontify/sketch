@@ -1,48 +1,61 @@
-import readJSON from './readJSON'
-import extend from '../helpers/extend'
-import fetch from 'sketch-polyfill-fetch'
+import readJSON from './readJSON';
+import extend from '../helpers/extend';
+import fetch from 'sketch-polyfill-fetch';
+let sketch3 = require('sketch');
 
 export default function (uri, options) {
     // get token
-    let token = readJSON('token');
+    let domain = sketch3.Settings.settingForKey('domain');
+    let access_token = sketch3.Settings.settingForKey('token');
+
+    let token = {
+        domain,
+        access_token,
+    };
+
+    console.log(token);
     let defaults = {
         method: 'GET',
         headers: {
-            'Authorization': 'Bearer ' + token.access_token,
-        }
+            Authorization: 'Bearer ' + token.access_token,
+        },
     };
 
     options = extend({}, defaults, options);
 
-
-    if(!options.cdn) {
+    if (!options.cdn) {
         uri = token.domain + uri;
     }
 
-    return fetch(uri, options).then(function (response) {
-        let contentType = response.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) {
-            return response.json();
-        }
+    return fetch(uri, options)
+        .then(
+            function (response) {
+                let contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    return response.json();
+                }
 
-        if (contentType && (contentType.includes("text/html") || contentType.includes("image/svg+xml"))) {
-            return response.text();
-        }
+                if (contentType && (contentType.includes('text/html') || contentType.includes('image/svg+xml'))) {
+                    return response.text();
+                }
 
-        throw new TypeError("Invalid response");
-    }.bind(this)).catch(function (e) {
-        // whitelist uris
-        if (uri.indexOf('/v1/user/logout') > -1) {
-            return '';
-        }
+                throw new TypeError('Invalid response');
+            }.bind(this)
+        )
+        .catch(
+            function (e) {
+                // whitelist uris
+                if (uri.indexOf('/v1/user/logout') > -1) {
+                    return '';
+                }
 
-        if (e.localizedDescription) {
-            console.error(e.localizedDescription);
-        }
-        else {
-            console.error(e);
-        }
+                if (e.localizedDescription) {
+                    console.error(e.localizedDescription);
+                } else {
+                    console.error(e);
+                }
 
-        throw e;
-    }.bind(this));
+                throw e;
+            }.bind(this)
+        );
 }

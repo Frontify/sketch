@@ -9,6 +9,8 @@ import FormData from 'sketch-polyfill-fetch/lib/form-data';
 import extend from '../helpers/extend';
 import response from '../helpers/response';
 
+let sketch3 = require('sketch');
+
 class FileManager {
     constructor() {
         this.exportPath = NSTemporaryDirectory() + 'sketch-frontify/';
@@ -167,7 +169,16 @@ class FileManager {
         };
 
         // get token
-        let token = readJSON('token');
+
+        // get token
+        let domain = sketch3.Settings.settingForKey('domain');
+        let access_token = sketch3.Settings.settingForKey('token');
+
+        let token = {
+            domain,
+            access_token,
+        };
+
         let defaults = {
             method: 'GET',
             headers: {
@@ -323,7 +334,16 @@ class FileManager {
 
     downloadFile(info, overallProgress) {
         // get token
-        let token = readJSON('token');
+
+        // get token
+        let domain = sketch3.Settings.settingForKey('domain');
+        let access_token = sketch3.Settings.settingForKey('token');
+
+        let token = {
+            domain,
+            access_token,
+        };
+
         var uri = token.domain + info.uri;
 
         let options = {

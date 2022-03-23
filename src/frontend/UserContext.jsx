@@ -266,6 +266,9 @@ export const UserContextProvider = ({ children }) => {
                 console.warn('Still refreshing…');
                 return;
             }
+            let { currentDocument } = await useSketch('getCurrentDocument');
+
+            setCurrentDocument(currentDocument);
 
             setRefreshing(true);
 
@@ -274,10 +277,6 @@ export const UserContextProvider = ({ children }) => {
 
             setSources(sources.sources);
             setLastFetched(new Date().getTime());
-
-            let { currentDocument } = await useSketch('getCurrentDocument');
-
-            setCurrentDocument(currentDocument);
 
             setRefreshing(false);
         },
@@ -319,7 +318,16 @@ export const UserContextProvider = ({ children }) => {
             return new Promise(async (resolve, reject) => {
                 if (credentials && credentials.domain && credentials.token) {
                     try {
-                        let { data } = await queryGraphQLWithAuth({ query: userQuery, auth: credentials });
+                        let { data, errors } = await queryGraphQLWithAuth({ query: userQuery, auth: credentials });
+
+                        if (errors) {
+                            console.error(
+                                'Could not load user data from GraphQL, because errors were returned',
+                                errors
+                            );
+                        }
+
+                        reject();
 
                         setUser((state) => {
                             return { ...state, ...data.currentUser };

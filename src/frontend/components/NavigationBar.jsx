@@ -11,6 +11,8 @@ import {
     Stack,
     LoadingCircle,
     IconAdd,
+    IconDownloadAlternative,
+    IconAlert,
 } from '@frontify/arcade';
 import React from 'react';
 import { useContext, useEffect, useState } from 'react';
@@ -60,7 +62,7 @@ function SourceAction({ status, actions, loading }) {
                         <h2>Destination</h2>
                         <Text>
                             Choose the folder where you want to publish{' '}
-                            <strong>{context.currentDocument.filename}</strong>
+                            <strong>{context.currentDocument.local.filename}</strong>
                         </Text>
                         <hr />
                         <UploadDestinationPicker
@@ -104,6 +106,30 @@ function SourceAction({ status, actions, loading }) {
                     Push changes
                 </Button>
             );
+
+        case 'pull':
+            return (
+                <Button
+                    icon={<IconDownloadAlternative />}
+                    onClick={() => {
+                        actions.pullSource();
+                    }}
+                >
+                    Pull Remote Changes
+                </Button>
+            );
+
+        case 'conflict':
+            return (
+                <Button
+                    icon={<IconAlert />}
+                    onClick={() => {
+                        actions.pushSource();
+                    }}
+                >
+                    Force Push
+                </Button>
+            );
     }
     return <div>{JSON.stringify(status)}</div>;
 }
@@ -138,7 +164,7 @@ export function NavigationBar() {
         console.log('publish', { destination });
 
         target.project = destination.project;
-        target.path = context.currentDocument.path;
+        target.path = context.currentDocument.local.path;
         target.set.path = destination.folder.name;
         /**
          * This is the legacy data model "target" that was used to cache
@@ -147,15 +173,15 @@ export function NavigationBar() {
          * asset and not global.
          */
 
-        // 1. Move the current file to the local Frontify folder
+        // 1. Upload to Frontify
+        let response = await useSketch('addSource', { source: context.currentDocument.local, target });
+
+        // 2. Move the current file to the local Frontify folder
         await useSketch('moveCurrent', {
             brand: context.selection.brand,
             project: destination.project,
             folder: target.set.path,
         });
-
-        // 2. Upload to Frontify
-        let response = await useSketch('addSource', { source: context.currentDocument, target });
 
         // 3. Refresh
         context.actions.refresh();
@@ -166,9 +192,22 @@ export function NavigationBar() {
         setLoading(true);
         setStatus('PUSHING');
         // Set correct local path
-        target.path = context.currentDocument.path;
-        console.log('push source', context.currentDocument, target);
-        await useSketch('pushSource', { source: context.currentDocument.asset, target });
+        target.path = context.currentDocument.local.path;
+
+        await useSketch('pushSource', { source: context.currentDocument.remote, target });
+        setStatus('FETCHING');
+        await context.actions.refresh();
+        setStatus('PENDING');
+        setLoading(false);
+    };
+
+    const pullSource = async () => {
+        setLoading(true);
+        setStatus('PULLING');
+        // Set correct local path
+        target.path = context.currentDocument.local.path;
+
+        await useSketch('pullSource', { source: context.currentDocument.remote });
         setStatus('FETCHING');
         await context.actions.refresh();
         setStatus('PENDING');
@@ -225,10 +264,21 @@ export function NavigationBar() {
             console.log(pathArray);
             setDocumentPath(pathArray);
             setMatchedSource(
-                context.sources.find((source) => source.localpath == context.currentDocument.asset.localpath)
+                context.sources.find((source) => source.localpath == context.currentDocument.remote.localpath)
             );
         }
     }, [context.currentDocument]);
+
+    if (!context.currentDocument.local)
+        return <div padding="medium">Waiting for Sketch … {JSON.stringify(context.currentDocument.state)}</div>;
+
+    if (context.currentDocument.state == 'unsaved')
+        return (
+            <custom-v-stack padding="medium">
+                <Text>Unsaved document</Text>
+                <Text>To start tracking this file on Frontify, save it first to your computer.</Text>
+            </custom-v-stack>
+        );
 
     return (
         <custom-h-stack gap="small" padding="small" align-items="center">
@@ -240,19 +290,19 @@ export function NavigationBar() {
                     <IconSketch size="Size24"></IconSketch>
                 </div>
 
-                {context.currentDocument && context.currentDocument.asset ? (
+                {context.currentDocument && context.currentDocument.remote.id ? (
                     <custom-v-stack>
                         {/* <Text size="x-small" color="weak">
                             {context.currentDocument.localpath}
                         </Text> */}
 
-                        <Text weight="strong">{context.currentDocument.filename}</Text>
+                        <Text weight="strong">{context.currentDocument.local.filename}</Text>
                         {/* <Text weight="strong">{JSON.stringify(context.currentDocument, null, 2)}</Text> */}
 
                         {context.currentDocument.state == 'same' ? (
                             <Text size="x-small">
-                                Last revision by {context.currentDocument.asset.modifier_name}{' '}
-                                {context.currentDocument.asset.modified_localized_ago}
+                                Last revision by {context.currentDocument.remote.modifier_name}{' '}
+                                {context.currentDocument.remote.modified_localized_ago}
                             </Text>
                         ) : (
                             ''
@@ -273,18 +323,11 @@ export function NavigationBar() {
                                 Last fetched {relativeLastFetched}
                             </Text>
                         )}
-                        <Button
-                            onClick={async () => {
-                                await pushSource();
-                            }}
-                        >
-                            Force Push
-                        </Button>
                     </custom-v-stack>
                 ) : (
                     <custom-v-stack>
-                        <Text weight="strong">{context.currentDocument.filename}</Text>
-                        <Text weight="strong">{JSON.stringify(context.currentDocument, null, 2)}</Text>
+                        <Text weight="strong">{context.currentDocument.local.filename}</Text>
+
                         <Text>Untracked Document</Text>
                     </custom-v-stack>
                 )}
@@ -293,7 +336,7 @@ export function NavigationBar() {
             {context.currentDocument ? (
                 <SourceAction
                     status={context.currentDocument.state}
-                    actions={{ pushSource, refresh, publish }}
+                    actions={{ pushSource, refresh, publish, pullSource }}
                     loading={loading}
                 ></SourceAction>
             ) : (

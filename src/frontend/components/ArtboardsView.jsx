@@ -2,15 +2,18 @@ import React from 'react';
 import { Button, Flyout, IconCaretDown, IconMore, Text } from '@frontify/arcade';
 
 import { SearchField } from './SearchField';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useContext } from 'react';
 
 import { useTranslation } from 'react-i18next';
+import { UserContext } from '../UserContext';
 
 export function ArtboardsView() {
     const [open, setOpen] = useState(false);
     const [destinationPickerOpen, setDestinationPickerOpen] = useState(false);
     const [currentSource, setCurrentSource] = useState({});
     const { t } = useTranslation();
+
+    const context = useContext(UserContext);
 
     const [selection] = useState([]);
 
@@ -62,6 +65,31 @@ export function ArtboardsView() {
     if (forceEmpty) {
         return (
             <custom-v-stack gap="small" padding="small" justify-content="center" align-items="center">
+                <div padding="small" style={{ background: 'lavender' }}>
+                    <h2>🚧 Artboards View</h2>
+                    <p> Here, we should see artboards that have been uploaded to Frontify for this file.</p>
+                    <p>---</p>
+                    <p>
+                        <strong>Requirement 1: Store external_id </strong>
+                    </p>
+
+                    <p>Every artboard needs to be able to store the ID of the Sketch file.</p>
+                    <p>---</p>
+                    <p>
+                        <strong>Requirement 2: Query by external_id</strong>
+                        <p>It should be possible to query the API for all artboards that belong to a Sketch file.</p>
+                        <br />
+
+                        <ul>
+                            <li>
+                                <strong>external_id:</strong> id of the Sketch file
+                            </li>
+                        </ul>
+                    </p>
+                </div>
+                <div style={{ width: '100%' }}>
+                    <pre>{JSON.stringify(context.currentDocument, null, 2)}</pre>
+                </div>
                 <Text color="weak">
                     If artboards were uploaded before the recent plugin improvements you won’t see them here until
                     they’re next updated. Don't worry, they’re still on Frontify.
