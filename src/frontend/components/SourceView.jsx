@@ -30,6 +30,7 @@ export function SourceView() {
                 <Toolbar></Toolbar>
                 <NavigationBar></NavigationBar>
                 <custom-line></custom-line>
+                <custom-gap></custom-gap>
                 <custom-tabs>
                     <custom-tab active={location.pathname.includes('/source/artboards')}>
                         <Link to="/source/artboards">
@@ -43,7 +44,6 @@ export function SourceView() {
                     </custom-tab>
                 </custom-tabs>
                 <custom-line></custom-line>
-                <custom-gap></custom-gap>
                 <Outlet />
             </custom-v-stack>
         );

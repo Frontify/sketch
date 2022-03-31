@@ -88,17 +88,21 @@ function SourceAction({ status, actions, loading }) {
         case 'same':
             return (
                 <Button
+                    style="Secondary"
                     onClick={async () => {
                         await actions.refresh();
                     }}
                 >
-                    <IconRefresh size="Size20"></IconRefresh>
+                    <custom-h-stack gap="small" align-items="center">
+                        <IconRefresh size="Size20"></IconRefresh>
+                    </custom-h-stack>
                 </Button>
             );
 
         case 'push':
             return (
                 <Button
+                    style="Positive"
                     icon={<IconUploadAlternative />}
                     onClick={() => {
                         actions.pushSource();
@@ -330,70 +334,76 @@ export function NavigationBar() {
         );
 
     return (
-        <custom-h-stack gap="small" padding="small" align-items="center">
-            <Link to={`/sources/${activeSourceScope}`}>
-                <IconArrowLeft size="Size16"></IconArrowLeft>
-            </Link>
-            <custom-h-stack align-items="center" gap="small">
-                <div style={{ flex: 0 }}>
-                    <IconSketch size="Size24"></IconSketch>
-                </div>
+        <custom-v-stack>
+            <custom-h-stack gap="small" padding="small">
+                <Link to={`/sources/${activeSourceScope}`}>
+                    <IconArrowLeft size="Size16"></IconArrowLeft>
+                </Link>
+                <custom-h-stack gap="small">
+                    <div style={{ flex: 0 }}>
+                        <IconSketch size="Size24"></IconSketch>
+                    </div>
+                    {context.currentDocument && context.currentDocument.remote.id ? (
+                        <custom-v-stack gap="small">
+                            <custom-v-stack>
+                                <Text weight="strong">{context.currentDocument.local.filename}</Text>
+                                {context.currentDocument.state == 'same' ? (
+                                    <Text size="x-small">
+                                        Last revision by {context.currentDocument.remote.modifier_name}{' '}
+                                        {context.currentDocument.remote.modified_localized_ago}
+                                    </Text>
+                                ) : (
+                                    ''
+                                )}
+                                {context.currentDocument.state == 'push' ? (
+                                    <Text size="x-small">Push changes</Text>
+                                ) : (
+                                    ''
+                                )}
+                                {loading ? (
+                                    status == 'PUSHING' ? (
+                                        <Text size="x-small">Pushing …</Text>
+                                    ) : '' || status == 'FETCHING' ? (
+                                        <Text size="x-small">Fetching …</Text>
+                                    ) : (
+                                        ''
+                                    )
+                                ) : (
+                                    <Text size="x-small" color="weak">
+                                        Last fetched {relativeLastFetched}
+                                    </Text>
+                                )}
+                            </custom-v-stack>
+                            {/* <custom-h-stack flex>
+                                <SourceAction
+                                    flex
+                                    status={context.currentDocument.state}
+                                    actions={{ pushSource, refresh, publish, pullSource }}
+                                    loading={loading}
+                                ></SourceAction>
+                            </custom-h-stack> */}
+                        </custom-v-stack>
+                    ) : (
+                        <custom-v-stack>
+                            <Text weight="strong">{context.currentDocument.local.filename}</Text>
+                            <Text>Untracked Document</Text>
+                        </custom-v-stack>
+                    )}
+                </custom-h-stack>
+                <custom-spacer></custom-spacer>
+                <custom-h-stack align-items="center" gap="small">
+                    <SourceAction
+                        flex
+                        status={context.currentDocument.state}
+                        actions={{ pushSource, refresh, publish, pullSource }}
+                        loading={loading}
+                    ></SourceAction>
 
-                {context.currentDocument && context.currentDocument.remote.id ? (
-                    <custom-v-stack>
-                        {/* <Text size="x-small" color="weak">
-                            {context.currentDocument.localpath}
-                        </Text> */}
-
-                        <Text weight="strong">{context.currentDocument.local.filename}</Text>
-                        {/* <Text weight="strong">{JSON.stringify(context.currentDocument, null, 2)}</Text> */}
-
-                        {context.currentDocument.state == 'same' ? (
-                            <Text size="x-small">
-                                Last revision by {context.currentDocument.remote.modifier_name}{' '}
-                                {context.currentDocument.remote.modified_localized_ago}
-                            </Text>
-                        ) : (
-                            ''
-                        )}
-
-                        {context.currentDocument.state == 'push' ? <Text size="x-small">Push changes</Text> : ''}
-
-                        {loading ? (
-                            status == 'PUSHING' ? (
-                                <Text size="x-small">Pushing …</Text>
-                            ) : '' || status == 'FETCHING' ? (
-                                <Text size="x-small">Fetching …</Text>
-                            ) : (
-                                ''
-                            )
-                        ) : (
-                            <Text size="x-small" color="weak">
-                                Last fetched {relativeLastFetched}
-                            </Text>
-                        )}
-                    </custom-v-stack>
-                ) : (
-                    <custom-v-stack>
-                        <Text weight="strong">{context.currentDocument.local.filename}</Text>
-
-                        <Text>Untracked Document</Text>
-                    </custom-v-stack>
-                )}
+                    <button>
+                        <IconMore size="Size20"></IconMore>
+                    </button>
+                </custom-h-stack>
             </custom-h-stack>
-            <custom-spacer></custom-spacer>
-            {context.currentDocument ? (
-                <SourceAction
-                    status={context.currentDocument.state}
-                    actions={{ pushSource, refresh, publish, pullSource }}
-                    loading={loading}
-                ></SourceAction>
-            ) : (
-                ''
-            )}
-            <button>
-                <IconMore size="Size20"></IconMore>
-            </button>
-        </custom-h-stack>
+        </custom-v-stack>
     );
 }
