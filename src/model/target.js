@@ -6,6 +6,9 @@ import notification from './notification';
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
 
 class Target {
+    getPathToSyncFolder() {
+        return `${NSHomeDirectory()}/Frontify`;
+    }
     getPathToSyncFolderForBrandAndProject(brand, project) {
         return `${NSHomeDirectory()}/Frontify/${brand.name}/Projects/${project.name}`;
     }

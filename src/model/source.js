@@ -4,6 +4,9 @@ import fetch from '../helpers/fetch';
 import target from './target';
 import sketch from './sketch';
 import filemanager from './filemanager';
+
+import recentFiles from '../model/recent';
+
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
 
 let sketch3 = require('sketch');
@@ -208,14 +211,8 @@ class Source {
         );
     }
 
-    openSource(source) {
-        return target.getTarget('sources').then(
-            function (target) {
-                let file = target.path + source.filename;
-                filemanager.openFile(file);
-                return true;
-            }.bind(this)
-        );
+    openSourceAtPath(path) {
+        filemanager.openFile(path);
     }
 
     showSources() {
@@ -244,8 +241,67 @@ class Source {
         });
     }
 
-    saved() {
-        console.log('saved');
+    async saved() {
+        let document = sketch3.Document.fromNative(sketch.getDocument());
+        let nativeSketchDocument = sketch.getDocument();
+
+        let refs = {
+            remote_id: sketch3.Settings.documentSettingForKey(sketch.getDocument(), 'remote_id'),
+            remote_project_id: sketch3.Settings.documentSettingForKey(sketch.getDocument(), 'remote_project_id'),
+            remote_graphql_id: sketch3.Settings.documentSettingForKey(sketch.getDocument(), 'remote_graphql_id'),
+        };
+
+        let path = '' + nativeSketchDocument.fileURL().path();
+        let filename = path.split('/');
+
+        /**
+         * Do we have the GraphQL ID? If not, let’s fetch it first.
+         */
+        console.log('id?', refs.remote_graphql_id);
+        if (!refs.remote_graphql_id) {
+            // fetch!
+            console.log('fetch graphql id');
+            let query = `{
+                asset(id: ${refs.remote_id}) {
+                  id
+                  title
+                  createdAt
+                  creator {
+                    name
+                    email
+                  }
+                  modifiedAt
+                  modifier {
+                      name
+                      email
+                  }
+                  ...on File {
+                    downloadUrl
+                  }
+                  
+                }
+              }`;
+            let url = `/graphql`;
+            const options = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    query: query.replace(/(\r\n|\n|\r)/gm, ''),
+                }),
+            };
+            let response = await fetch(url, options);
+            let id = response.data?.asset?.id;
+
+            console.log('fetched id ', id);
+            sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'remote_graphql_id', id);
+            refs.remote_graphql_id = id;
+        }
+
+        console.log(refs);
+        recentFiles.push({ uuid: document.id, path, filename: filename[filename.length - 1], refs });
+
         sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'dirty', true);
 
         return this.getCurrentAsset().then(async (asset) => {

@@ -4,13 +4,17 @@ import {
     Button,
     IconBackward5Seconds,
     IconFolder,
+    IconSketch,
     IconProjects,
     Text,
     Breadcrumbs,
     IconArrowLeft,
     LoadingCircle,
 } from '@frontify/arcade';
+
 import { useSketch } from '../hooks/useSketch';
+
+import { queryGraphQLWithAuth } from '../graphql';
 
 export function UploadDestinationPicker({ onChange }) {
     let { actions, selection } = useContext(UserContext);
@@ -24,8 +28,11 @@ export function UploadDestinationPicker({ onChange }) {
 
     // Folders
     let [folders, setFolders] = useState([]);
+    let [files, setFiles] = useState([]);
     let [folder, setFolder] = useState(null);
     let [breadcrumbs, setBreadcrumbs] = useState([]);
+
+    let context = useContext(UserContext);
 
     // Watch projectID
     useEffect(async () => {
@@ -37,9 +44,46 @@ export function UploadDestinationPicker({ onChange }) {
     useEffect(async () => {
         if (project && folder) {
             setLoading(true);
-            let result = await useSketch('getProjectFolders', { project, folder: folder?.id });
+
+            let query = `{
+                node(id: "${folder.id}") {
+                  __typename
+                  id
+                  ...on SubFolder {
+                    id
+                    name
+                    assets {
+                      items {
+                        id
+                        title
+                        ...on File {
+                          filename
+                          extension
+                          externalId
+                          downloadUrl
+                        }
+                      }
+                    }
+                    subFolders {
+                      items {
+                        id
+                      }
+                    }
+                    
+                 } 
+                  
+                }
+              }`;
+
+            let graphQLresult = await queryGraphQLWithAuth({ query, auth: context.auth });
+
+            let files = graphQLresult.data.node.assets.items;
+            let folders = graphQLresult.data.node.subFolders.items;
+
             // let { success, folders, folder } = await actions.getProjectFolders(project.id, folder.path);
-            setFolders(result.folders);
+            setFiles(files);
+            setFolders(folders);
+
             // GraphQL:
             // setFolders(result.data.node.subFolders.items);
             setLoading(false);
@@ -47,19 +91,26 @@ export function UploadDestinationPicker({ onChange }) {
     }, [folder]);
 
     useEffect(async () => {
+        console.log('get projects for brand');
         let { projects } = await useSketch('getProjectsForBrand', { brand: selection.brand });
+        console.log(projects);
         setProjects(projects);
     }, []);
     const fetchProjectFolders = async (project) => {
         console.log('fetchProjectFolders', project, folder);
         setLoading(true);
         // GraphQL:
-        // let result = await actions.getProjectFolders(projectID);
-        // let folders = result.data.workspaceProject.browse.subFolders.items;
+        let graphQLresult = await actions.getProjectFolders(project.id);
+        console.log(graphQLresult);
+        let files = graphQLresult.data.workspaceProject.browse.assets.items;
+        let folders = graphQLresult.data.workspaceProject.browse.subFolders.items;
+        console.log(files);
+        setFiles(files);
+        setFolders(folders);
 
-        let result = await useSketch('getProjectFolders', { project, folder: folder?.id || '' });
-        console.log('🚧', result);
-        setFolders(result.folders);
+        // let result = await useSketch('getProjectFolders', { project, folder: folder?.id || '' });
+        // console.log('🚧', result);
+        // setFolders(result.folders);
         setLoading(false);
     };
 
@@ -81,7 +132,19 @@ export function UploadDestinationPicker({ onChange }) {
     const enterFolder = (folder) => {
         setFolder(folder);
         setBreadcrumbs((state) => state.concat(folder));
-        onChange({ folder, project });
+        onChange({ type: 'folder', folder, project });
+    };
+
+    const pickFile = (file) => {
+        onChange({
+            type: 'file',
+            file,
+            project,
+            breadcrumbs,
+            path: [selection.brand.name, project.name]
+                .concat(breadcrumbs.map((breadcrumb) => breadcrumb.name))
+                .join('/'),
+        });
     };
 
     if (!projects) return <LoadingCircle></LoadingCircle>;
@@ -92,7 +155,7 @@ export function UploadDestinationPicker({ onChange }) {
                 {projects.map((project) => {
                     return (
                         <custom-palette-item
-                            onClick={() => {
+                            onDoubleClick={() => {
                                 setProject(project);
                             }}
                             key={project.id}
@@ -133,16 +196,37 @@ export function UploadDestinationPicker({ onChange }) {
                         <LoadingCircle size="Small"></LoadingCircle>
                     </custom-palette-item>
                 ) : (
-                    folders.map((folder) => {
-                        return (
-                            <custom-palette-item key={folder.id}>
-                                <custom-h-stack gap="small" align-items="center" onClick={() => enterFolder(folder)}>
-                                    <IconFolder></IconFolder>
-                                    <Text>{folder.name}</Text>
-                                </custom-h-stack>
-                            </custom-palette-item>
-                        );
-                    })
+                    <custom-v-stack>
+                        {folders.map((folder) => {
+                            return (
+                                <custom-palette-item selectable key={folder.id} tabindex="-1">
+                                    <custom-h-stack
+                                        gap="small"
+                                        align-items="center"
+                                        onDoubleClick={() => enterFolder(folder)}
+                                    >
+                                        <IconFolder></IconFolder>
+                                        <Text>{folder.name}</Text>
+                                    </custom-h-stack>
+                                </custom-palette-item>
+                            );
+                        })}
+
+                        {files.map((file) => {
+                            return (
+                                <custom-palette-item selectable key={file.id} tabindex="-1">
+                                    <custom-h-stack
+                                        gap="small"
+                                        align-items="center"
+                                        onDoubleClick={() => pickFile(file)}
+                                    >
+                                        <IconSketch></IconSketch>
+                                        <Text>{file.filename}</Text>
+                                    </custom-h-stack>
+                                </custom-palette-item>
+                            );
+                        })}
+                    </custom-v-stack>
                 )}
             </custom-v-stack>
         );

@@ -24,8 +24,8 @@ export const UserContextProvider = ({ children }) => {
         currentDocument: {},
         guidelines: [],
         lastFetched: null,
+        recentDocuments: [],
         sources: [],
-        user: { name: '', id: null, email: null, avatar: null },
         selection: {
             artboards: [],
             brand: null,
@@ -33,6 +33,7 @@ export const UserContextProvider = ({ children }) => {
             guidelines: {},
         },
         textStylePalettes: [],
+        user: { name: '', id: null, email: null, avatar: null },
     };
 
     let [refreshing, setRefreshing] = useState(false);
@@ -46,7 +47,8 @@ export const UserContextProvider = ({ children }) => {
                     console.log('yo');
                     break;
                 case 'refresh':
-                    actions.refresh();
+                    console.log('🌀', payload);
+                    actions.refresh(payload);
                     break;
             }
         };
@@ -60,6 +62,10 @@ export const UserContextProvider = ({ children }) => {
 
     let [currentDocument, setCurrentDocument] = useState(blueprints.currentDocument);
     let [lastFetched, setLastFetched] = useState(blueprints.lastFetched);
+
+    // Recent Documents
+    // ------------------------------------------------------------------------
+    let [recentDocuments, setRecentDocuments] = useState(blueprints.recentDocuments);
 
     let [auth, setAuth] = useLocalStorage('cache.auth', blueprints.auth);
 
@@ -154,6 +160,7 @@ export const UserContextProvider = ({ children }) => {
      */
     const actions = {
         getProjectFolders(project) {
+            console.log('getProjectFolders');
             return queryGraphQLWithAuth({ query: browseWorkspaceProject(project), auth });
         },
         getFolders(folder) {
@@ -261,11 +268,16 @@ export const UserContextProvider = ({ children }) => {
 
             setRefreshing(false);
         },
-        async refresh() {
+        async refresh(payload) {
             if (refreshing) {
                 console.warn('Still refreshing…');
                 return;
             }
+
+            if (payload?.recentDocuments) {
+                setRecentDocuments(payload.recentDocuments);
+            }
+
             let { currentDocument } = await useSketch('getCurrentDocument');
 
             setCurrentDocument(currentDocument);
@@ -365,6 +377,7 @@ export const UserContextProvider = ({ children }) => {
         guidelines,
         lastFetched,
         refreshing,
+        recentDocuments,
         selection,
         sources,
         textStylePalettes,

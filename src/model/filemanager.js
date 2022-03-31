@@ -123,7 +123,6 @@ class FileManager {
             filename: filename,
             origin: 'SKETCH',
             id_external: info.id_external,
-            externalId: info.id_external,
         };
 
         if (info.pixel_ratio) {
@@ -294,7 +293,7 @@ class FileManager {
         })
             .then(
                 async function (response) {
-                    console.log('🌟 Uploaded');
+                    console.log('🌟 Uploaded', options);
                     let json = await response.json();
                     console.log(json);
                     return response.json();
@@ -332,25 +331,15 @@ class FileManager {
         );
     }
 
-    downloadFile(info, overallProgress) {
+    downloadFileToPath(uri, path, overallProgress) {
         // get token
+        console.log('downloadFileToPath', uri, path, overallProgress);
 
-        // get token
-        let domain = sketch3.Settings.settingForKey('domain');
-        let access_token = sketch3.Settings.settingForKey('token');
-
-        let token = {
-            domain,
-            access_token,
-        };
-
-        var uri = token.domain + info.uri;
-
+        /**
+         * No access token is required to download a file.
+         */
         let options = {
             method: 'GET',
-            headers: {
-                Authorization: 'Bearer ' + token.access_token,
-            },
         };
 
         if (!uri) {
@@ -382,7 +371,7 @@ class FileManager {
                         'v32@?0@"NSURL"8@"NSURLResponse"16@"NSError"24',
                         function (location, res, error) {
                             let fileManager = NSFileManager.defaultManager();
-                            let targetUrl = NSURL.fileURLWithPath(info.path);
+                            let targetUrl = NSURL.fileURLWithPath(path);
 
                             fileManager.replaceItemAtURL_withItemAtURL_backupItemName_options_resultingItemURL_error(
                                 targetUrl,
@@ -404,6 +393,7 @@ class FileManager {
                                 finished = true;
                                 return reject(error);
                             }
+
                             return resolve(targetUrl.path());
                         }
                     )

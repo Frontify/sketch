@@ -85,13 +85,12 @@ function SourceAction({ status, actions, loading }) {
             );
         case 'same':
             return (
-                <Button>
-                    <IconRefresh
-                        size="Size20"
-                        onClick={async () => {
-                            await actions.refresh();
-                        }}
-                    ></IconRefresh>
+                <Button
+                    onClick={async () => {
+                        await actions.refresh();
+                    }}
+                >
+                    <IconRefresh size="Size20"></IconRefresh>
                 </Button>
             );
 
@@ -275,7 +274,7 @@ export function NavigationBar() {
     if (context.currentDocument.state == 'unsaved')
         return (
             <custom-v-stack padding="medium">
-                <Text>Unsaved document</Text>
+                <Text weight="strong">Unsaved document</Text>
                 <Text>To start tracking this file on Frontify, save it first to your computer.</Text>
             </custom-v-stack>
         );

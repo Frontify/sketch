@@ -13,12 +13,22 @@ import user from '../model/user';
 import createFolder from '../helpers/createFolder';
 import shaFile from '../helpers/shaFile';
 
+import recentFiles from '../model/recent';
+
 import { sendToWebview } from 'sketch-module-web-view/remote';
 
 let DOM = require('sketch/dom');
 let sketch3 = require('sketch');
 
-console.log('main.js');
+export function getPluginState() {
+    let payload = {
+        currentDocument: null,
+        recentDocuments: recentFiles.get(),
+        localDocuments: [],
+    };
+    return payload;
+}
+
 // Identifier for the plugin window that we can use for message passing
 const IDENTIFIER = 'frontifymain';
 
@@ -47,6 +57,27 @@ const frontend = {
         sendToWebview(IDENTIFIER, `send(${JSON.stringify({ type, payload })})`);
     },
 };
+
+export const state = {
+    foo: 'bar',
+};
+
+state.foo = 'yo';
+
+function refresh() {
+    /**
+     * Gather environment data
+     *
+     * 1. Current Document
+     * 2. Recent Document
+     * 3. Local Documents
+     *
+     */
+
+    let payload = getPluginState();
+
+    frontend.send('refresh', payload);
+}
 
 /**
  * Setup notification when the current document window changes
@@ -382,10 +413,12 @@ export default function (context, view) {
      *
      * @returns Requests that can be received from the Frontend
      */
+    webview.off('request', handleRequestFromFrontend);
+    webview.on('request', handleRequestFromFrontend);
 
-    webview.on('request', async ({ type = '', requestUUID = null, args = {} }) => {
+    async function handleRequestFromFrontend({ type = '', requestUUID = null, args = {} }) {
         let payload = {};
-        console.log('request', type, args);
+        console.log('request!', new Date().getTime(), type, args);
         switch (type) {
             case 'addCurrentFile':
                 try {
@@ -431,6 +464,49 @@ export default function (context, view) {
                 } catch (error) {
                     console.log(error);
                     payload = { status: 'error' };
+                }
+                break;
+            case 'checkout':
+                try {
+                    /**
+                     * Step 1: Download the file to the Sync Folder.
+                     */
+                    var progress = NSProgress.progressWithTotalUnitCount(10);
+                    progress.setCompletedUnitCount(0);
+                    console.log('start download', args);
+
+                    // Base + File Path
+                    let base = target.getPathToSyncFolder();
+                    let folder = `${base}/${args.path}`;
+                    let path = `${folder}/${args.file.filename}`;
+
+                    if (createFolder(folder)) {
+                        let result = await filemanager.downloadFileToPath(args.file.downloadUrl, path, progress);
+                        console.log('Finish download', result);
+                        payload = { success: true };
+                    } else {
+                        throw new Error('Could not create folder');
+                    }
+
+                    /**
+                     * Step 2: Open the file in Sketch
+                     */
+
+                    source.openSourceAtPath(path);
+
+                    /**
+                     * Step 3: Add the file to the Recent Files.
+                     */
+
+                    /**
+                     * Step 4: Write the remote fields "modified" to the file.
+                     */
+                    console.log('Open file at', path);
+                    console.log(sketch.getDocument());
+                    sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'remote_modified', null);
+                } catch (error) {
+                    console.log(error);
+                    payload = { success: false, error };
                 }
                 break;
             case 'getCurrentDocument':
@@ -482,6 +558,7 @@ export default function (context, view) {
                 currentDocument.refs = {
                     remote_id: sketch3.Settings.documentSettingForKey(openSketchDocument, 'remote_id'),
                     remote_project_id: sketch3.Settings.documentSettingForKey(openSketchDocument, 'remote_project_id'),
+                    remote_graphql_id: sketch3.Settings.documentSettingForKey(openSketchDocument, 'remote_graphql_id'),
                 };
 
                 console.log('refs', currentDocument.refs);
@@ -501,7 +578,7 @@ export default function (context, view) {
                     let sameFile = local.sha == remote.sha;
                     let sameDate = local.modified == remote.modified;
                     let ahead = local.modified >= remote.modified ? 'local' : 'remote';
-                    let conflict = (document.dirty && !sameFile) || (!sameFile && !sameDate);
+                    let conflict = (document.dirty && !sameFile) || (document.dirty && !sameFile && !sameDate);
 
                     console.log('conflict?', document, sameFile, conflict);
 
@@ -511,6 +588,8 @@ export default function (context, view) {
                     if (sameDate && !sameFile) {
                         return 'push';
                     }
+
+                    if (sameFile) return 'same';
 
                     if (sameFile && sameDate) {
                         return 'same';
@@ -595,6 +674,17 @@ export default function (context, view) {
 
                 payload = { currentDocument };
                 break;
+
+            case 'getRecentFiles':
+                try {
+                    let files = recentFiles.get();
+                    console.log('get recent files', files.length);
+                    payload = { success: true, files };
+                } catch (error) {
+                    payload = { success: false, error };
+                }
+                break;
+
             case 'getProjectsForBrand':
                 console.log('get projects');
                 try {
@@ -647,14 +737,22 @@ export default function (context, view) {
                 break;
             case 'openSource':
                 try {
-                    await source.openSource(args.source);
+                    await source.openSourceAtPath(args.path);
                     payload = { success: true };
                 } catch (error) {
                     payload = { success: false, error };
                 }
                 break;
+            case 'requestUpdate':
+                refresh();
+
+                break;
             case 'pullSource':
                 try {
+                    /**
+                     * 1. Checkout file
+                     */
+
                     let result = await source.pullSource(args.source);
                     payload = { success: true, result };
                 } catch (error) {
@@ -701,7 +799,7 @@ export default function (context, view) {
         }
 
         frontend.send('response', { responseUUID: requestUUID, ...payload });
-    });
+    }
 
     // workarounds
     function getURL() {

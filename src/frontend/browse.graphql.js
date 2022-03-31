@@ -5,6 +5,18 @@ export function browseWorkspaceProject(project) {
           id
           name
           browse {
+            assets {
+              items {
+                id
+                title
+                ...on File {
+                  extension
+                  filename
+                  downloadUrl
+                }
+              }
+              
+            }
             subFolders {
               items {
                 id

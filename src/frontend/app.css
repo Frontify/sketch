@@ -238,8 +238,8 @@ custom-artboard-preview {
 }
 
 custom-palette-item {
+    display: block;
     padding: var(--space-xs) var(--space-s);
-    transition: all 0.05s;
     cursor: default;
     user-select: none;
     -webkit-user-select: none;
@@ -254,6 +254,16 @@ custom-palette-item:hover {
 }
 custom-palette-item:active {
     background: rgba(0, 0, 0, 0.12);
+}
+
+custom-palette-item[selectable]:focus {
+    box-shadow: inset 0 0 0 2px var(--box-selected-strong-color);
+    outline: none;
+    color: white;
+    background: var(--box-selected-strong-color);
+}
+custom-palette-item[selectable]:focus * {
+    color: white;
 }
 
 custom-grid {

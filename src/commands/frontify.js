@@ -4,6 +4,8 @@ import source from '../model/source';
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
 const sketch3 = require('sketch');
 
+import { getPluginState } from '../windows/main';
+
 export function runCommand(context) {
     let threadDictionary = NSThread.mainThread().threadDictionary();
 
@@ -49,18 +51,8 @@ export function closeCommand(context) {
 }
 
 export function selectionChangedCommand(context) {
-    // console.log('selection changed');
     executeSafely(context, function () {
         if (isWebviewPresent('frontifymain')) {
-            // let layers = context.actionContext.document.selectedLayers().layers().slice();
-            // let layerInformation = layers.map((layer) => {
-            //     let nativeLayer = sketch3.fromNative(layer);
-            //     return `${nativeLayer.name} (${nativeLayer.id}`;
-            // });
-            // layers.forEach((layer) => {
-            //     view.send('sketch.document.selection', `${layers.length} layers: ${layerInformation}`);
-            // });
-
             let key = 'com.frontify.sketch.recent.document';
             let oldDocumentID = sketch3.Settings.sessionVariable(key);
 
@@ -71,7 +63,7 @@ export function selectionChangedCommand(context) {
 
                 if (oldDocumentID != newDocumentID) {
                     // refresh
-                    frontend.send('refresh');
+                    refresh();
                 }
             }
 
@@ -81,9 +73,18 @@ export function selectionChangedCommand(context) {
 }
 
 function refresh() {
+    /**
+     * Gather environment data
+     *
+     * 1. Current Document
+     * 2. Recent Document
+     * 3. Local Documents
+     *
+     */
+
+    let payload = getPluginState();
     if (isWebviewPresent('frontifymain')) {
-        console.log('frontify.js > refresh');
-        frontend.send('refresh');
+        frontend.send('refresh', payload);
     }
 }
 
