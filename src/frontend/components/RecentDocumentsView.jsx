@@ -105,7 +105,7 @@ export function RecentDocumentsView() {
     }
 
     return (
-        <custom-v-stack stretch>
+        <custom-v-stack stretch overflow="hidden">
             <div padding="small">
                 <SearchField></SearchField>
             </div>

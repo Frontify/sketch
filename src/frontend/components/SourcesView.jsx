@@ -26,7 +26,7 @@ export function SourcesView() {
 
                 <custom-scope-bar-wrapper padding="small">
                     <custom-h-stack align-items="center">
-                        <custom-scope-button className="tw-round" active={location.pathname.includes('/sources/open')}>
+                        {/* <custom-scope-button className="tw-round" active={location.pathname.includes('/sources/open')}>
                             <label>
                                 <input
                                     type="radio"
@@ -41,7 +41,7 @@ export function SourcesView() {
 
                                 <Text size="x-small">{t('sources.open')}</Text>
                             </label>
-                        </custom-scope-button>
+                        </custom-scope-button> */}
 
                         <custom-scope-button
                             className="tw-round"

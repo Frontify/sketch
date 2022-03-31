@@ -471,26 +471,35 @@ export default function (context, view) {
                     /**
                      * Step 1: Download the file to the Sync Folder.
                      */
+
                     var progress = NSProgress.progressWithTotalUnitCount(10);
                     progress.setCompletedUnitCount(0);
                     console.log('start download', args);
 
                     // Base + File Path
-                    let base = target.getPathToSyncFolder();
-                    let folder = `${base}/${args.path}`;
-                    let path = `${folder}/${args.file.filename}`;
 
-                    if (createFolder(folder)) {
-                        let result = await filemanager.downloadFileToPath(args.file.downloadUrl, path, progress);
-                        console.log('Finish download', result);
-                        payload = { success: true };
-                    } else {
-                        throw new Error('Could not create folder');
+                    let path = args.path;
+
+                    if (!args.useFullPath) {
+                        let base = target.getPathToSyncFolder();
+                        let folder = `${base}/${args.path}`;
+                        path = `${folder}/${args.file.filename}`;
+
+                        if (createFolder(folder)) {
+                        } else {
+                            throw new Error('Could not create folder');
+                        }
                     }
+
+                    let result = await filemanager.downloadFileToPath(args.file.downloadUrl, path, progress);
+                    console.log('Finish download', result);
+                    payload = { success: true };
 
                     /**
                      * Step 2: Open the file in Sketch
                      */
+                    // Close file first?
+                    NSDocumentController.sharedDocumentController().currentDocument().close();
 
                     source.openSourceAtPath(path);
 
@@ -501,8 +510,7 @@ export default function (context, view) {
                     /**
                      * Step 4: Write the remote fields "modified" to the file.
                      */
-                    console.log('Open file at', path);
-                    console.log(sketch.getDocument());
+
                     sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'remote_modified', null);
                 } catch (error) {
                     console.log(error);

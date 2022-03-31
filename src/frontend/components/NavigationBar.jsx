@@ -22,6 +22,8 @@ import { UserContext } from '../UserContext';
 import { useSketch } from '../hooks/useSketch';
 import { UploadDestinationPicker } from './UploadDestinationPicker';
 
+import { queryGraphQLWithAuth } from '../graphql';
+
 function SourceAction({ status, actions, loading }) {
     let context = useContext(UserContext);
     let [showDestinationPicker, setShowDestinationPicker] = useState(false);
@@ -102,7 +104,7 @@ function SourceAction({ status, actions, loading }) {
                         actions.pushSource();
                     }}
                 >
-                    Push changes
+                    Push
                 </Button>
             );
 
@@ -120,14 +122,24 @@ function SourceAction({ status, actions, loading }) {
 
         case 'conflict':
             return (
-                <Button
-                    icon={<IconAlert />}
-                    onClick={() => {
-                        actions.pushSource();
-                    }}
-                >
-                    Force Push
-                </Button>
+                <custom-h-stack>
+                    <Button
+                        icon={<IconAlert />}
+                        onClick={() => {
+                            actions.pushSource();
+                        }}
+                    >
+                        Force Push
+                    </Button>
+                    <Button
+                        icon={<IconAlert />}
+                        onClick={() => {
+                            actions.pullSource();
+                        }}
+                    >
+                        Pull
+                    </Button>
+                </custom-h-stack>
             );
     }
     return <div>{JSON.stringify(status)}</div>;
@@ -206,7 +218,42 @@ export function NavigationBar() {
         // Set correct local path
         target.path = context.currentDocument.local.path;
 
-        await useSketch('pullSource', { source: context.currentDocument.remote });
+        // await useSketch('pullSource', { source: context.currentDocument.remote });
+
+        // 1. Get downloadUrl via GraphQL
+
+        let query = `{
+            asset(id: ${context.currentDocument.refs.remote_id}) {
+              id
+              title
+              createdAt
+              creator {
+                name
+                email
+              }
+              modifiedAt
+              modifier {
+                  name
+                  email
+              }
+              ...on File {
+                downloadUrl
+              }
+              
+            }
+          }`;
+        let response = await queryGraphQLWithAuth({ query, auth: context.auth });
+        let asset = response.data.asset;
+
+        let args = {
+            path: context.currentDocument.local.path,
+            useFullPath: true,
+            file: {
+                filename: context.currentDocument.local.filename,
+                downloadUrl: asset.downloadUrl,
+            },
+        };
+        await useSketch('checkout', args);
         setStatus('FETCHING');
         await context.actions.refresh();
         setStatus('PENDING');
@@ -276,6 +323,9 @@ export function NavigationBar() {
             <custom-v-stack padding="medium">
                 <Text weight="strong">Unsaved document</Text>
                 <Text>To start tracking this file on Frontify, save it first to your computer.</Text>
+                <Link to={`/sources/${activeSourceScope}`}>
+                    <IconArrowLeft size="Size16"></IconArrowLeft>
+                </Link>
             </custom-v-stack>
         );
 
