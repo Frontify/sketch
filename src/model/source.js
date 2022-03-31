@@ -228,6 +228,7 @@ class Source {
     }
 
     opened() {
+        // Todo: Don’t rely on fetching data here but instead just open the file and resolve it
         sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'dirty', false);
         return this.getCurrentAsset().then(function (asset) {
             if (asset) {

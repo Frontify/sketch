@@ -26,6 +26,7 @@ export function openCommand(context) {
                 clearInterval(interval);
                 source.opened().then(function () {
                     refresh();
+                    console.log('called refresh after interval');
                 });
             }
         }, 200);
