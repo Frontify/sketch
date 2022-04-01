@@ -255,6 +255,10 @@ custom-palette-item:hover {
 custom-palette-item:active {
     background: rgba(0, 0, 0, 0.12);
 }
+custom-palette-item[disabled] {
+    opacity: 0.5;
+    pointer-events: none;
+}
 
 custom-palette-item[selectable]:focus {
     box-shadow: inset 0 0 0 2px var(--box-selected-strong-color);

@@ -41,7 +41,7 @@ export function RecentDocumentsView() {
     };
 
     const redirectToDocument = (document) => {
-        navigate(`/source/artboards/${activeScope}`);
+        navigate(`/source/artboards/`);
     };
 
     useEffect(() => {
@@ -133,10 +133,12 @@ export function RecentDocumentsView() {
                                     <Text size="small">{document.local.path}</Text>
                                     <div>{document.remote.title}</div>
                                     <Text size="small">
-                                        {document.remote.creator.name} ({document.remote.creator.email})
+                                        <custom-h-stack gap="x-small">
+                                            <span>{document.remote.creator.name}</span>
+                                            <span>•</span>
+                                            <span>{new Date(document.remote.modifiedAt).toLocaleString()}</span>
+                                        </custom-h-stack>
                                     </Text>
-                                    <Text size="small">{document.remote.modifiedAt}</Text>
-                                    <Text size="small">{JSON.stringify(document.local.refs?.remote_graphql_id)}</Text>
                                 </custom-v-stack>
                             </custom-h-stack>
                         </custom-palette-item>

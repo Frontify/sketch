@@ -15,7 +15,7 @@ export function FileBrowser() {
     let [activeScope] = useLocalStorage('cache.activeScope', 'colors');
 
     const redirectToDocument = () => {
-        navigate(`/source/artboards/${activeScope}`);
+        navigate(`/source/artboards/`);
     };
 
     const checkout = async ({ path, file }) => {

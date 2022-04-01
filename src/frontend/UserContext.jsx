@@ -24,6 +24,7 @@ export const UserContextProvider = ({ children }) => {
         currentDocument: {},
         guidelines: [],
         lastFetched: null,
+        transferMap: {},
         recentDocuments: [],
         sources: [],
         selection: {
@@ -36,6 +37,8 @@ export const UserContextProvider = ({ children }) => {
         user: { name: '', id: null, email: null, avatar: null },
     };
 
+    let [transferMap, setTransferMap] = useState(blueprints.transferMap);
+
     let [refreshing, setRefreshing] = useState(false);
 
     useEffect(() => {
@@ -43,6 +46,26 @@ export const UserContextProvider = ({ children }) => {
             let { type, payload } = event.detail.data;
 
             switch (type) {
+                case 'progress':
+                    console.log('progress', payload);
+                    switch (payload.state) {
+                        case "upload-failed'":
+                            break;
+                        case "upload-complete'":
+                            console.log('compelte');
+                            setTransferMap((state) => {
+                                // Remove the entry from transferMap
+                                delete state[payload.id];
+                                return { ...state };
+                            });
+                            break;
+                        default:
+                            setTransferMap((state) => {
+                                return { ...state, [payload.id]: payload };
+                            });
+                    }
+
+                    break;
                 case 'current-document.changed':
                     console.log('yo');
                     break;
@@ -252,6 +275,8 @@ export const UserContextProvider = ({ children }) => {
             console.log(source);
             setCurrentDocument(source);
         },
+
+        // todo: Isn’t getCurrentDocument() == refresh() ?
         async getCurrentDocument() {
             if (refreshing) {
                 console.warn('Still refreshing…');
@@ -381,6 +406,7 @@ export const UserContextProvider = ({ children }) => {
         selection,
         sources,
         textStylePalettes,
+        transferMap,
         user,
     };
 

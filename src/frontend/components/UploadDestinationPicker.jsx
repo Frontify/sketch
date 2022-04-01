@@ -10,6 +10,7 @@ import {
     Breadcrumbs,
     IconArrowLeft,
     LoadingCircle,
+    IconFile,
 } from '@frontify/arcade';
 
 import { useSketch } from '../hooks/useSketch';
@@ -36,7 +37,6 @@ export function UploadDestinationPicker({ onChange }) {
 
     // Watch projectID
     useEffect(async () => {
-        console.log('watched projecz', project);
         if (project) await fetchProjectFolders(project);
     }, [project]);
 
@@ -91,26 +91,21 @@ export function UploadDestinationPicker({ onChange }) {
     }, [folder]);
 
     useEffect(async () => {
-        console.log('get projects for brand');
         let { projects } = await useSketch('getProjectsForBrand', { brand: selection.brand });
-        console.log(projects);
+
         setProjects(projects);
     }, []);
     const fetchProjectFolders = async (project) => {
-        console.log('fetchProjectFolders', project, folder);
         setLoading(true);
         // GraphQL:
         let graphQLresult = await actions.getProjectFolders(project.id);
-        console.log(graphQLresult);
+
         let files = graphQLresult.data.workspaceProject.browse.assets.items;
         let folders = graphQLresult.data.workspaceProject.browse.subFolders.items;
-        console.log(files);
+
         setFiles(files);
         setFolders(folders);
 
-        // let result = await useSketch('getProjectFolders', { project, folder: folder?.id || '' });
-        // console.log('🚧', result);
-        // setFolders(result.folders);
         setLoading(false);
     };
 
@@ -151,7 +146,7 @@ export function UploadDestinationPicker({ onChange }) {
 
     if (!project)
         return (
-            <custom-v-stack>
+            <custom-scroll-view>
                 {projects.map((project) => {
                     return (
                         <custom-palette-item
@@ -167,14 +162,14 @@ export function UploadDestinationPicker({ onChange }) {
                         </custom-palette-item>
                     );
                 })}
-            </custom-v-stack>
+            </custom-scroll-view>
         );
 
     if (project && folders) {
         return (
-            <custom-v-stack>
+            <custom-scroll-view>
                 <custom-palette-item
-                    onClick={() => {
+                    onDoubleClick={() => {
                         browseBack();
                     }}
                 >
@@ -196,7 +191,7 @@ export function UploadDestinationPicker({ onChange }) {
                         <LoadingCircle size="Small"></LoadingCircle>
                     </custom-palette-item>
                 ) : (
-                    <custom-v-stack>
+                    <custom-v-stack stretch>
                         {folders.map((folder) => {
                             return (
                                 <custom-palette-item selectable key={folder.id} tabindex="-1">
@@ -213,22 +208,49 @@ export function UploadDestinationPicker({ onChange }) {
                         })}
 
                         {files.map((file) => {
-                            return (
-                                <custom-palette-item selectable key={file.id} tabindex="-1">
-                                    <custom-h-stack
-                                        gap="small"
-                                        align-items="center"
-                                        onDoubleClick={() => pickFile(file)}
-                                    >
-                                        <IconSketch></IconSketch>
-                                        <Text>{file.filename}</Text>
-                                    </custom-h-stack>
-                                </custom-palette-item>
-                            );
+                            if (file.extension == 'sketch') {
+                                return (
+                                    <custom-palette-item selectable key={file.id} tabindex="-1">
+                                        <custom-h-stack
+                                            gap="small"
+                                            align-items="center"
+                                            onDoubleClick={() => pickFile(file)}
+                                        >
+                                            <IconSketch></IconSketch>
+                                            <Text>
+                                                {file.title}
+                                                <span style={{ opacity: 0.5 }}>.{file.extension}</span>
+                                            </Text>
+                                        </custom-h-stack>
+                                    </custom-palette-item>
+                                );
+                            }
+
+                            if (file.extension != 'sketch') {
+                                return (
+                                    <custom-palette-item key={file.id} disabled>
+                                        <custom-h-stack
+                                            gap="small"
+                                            align-items="center"
+                                            onDoubleClick={() => pickFile(file)}
+                                        >
+                                            <IconFile></IconFile>
+                                            <Text>
+                                                {file.title}
+                                                {file.extension ? (
+                                                    <span style={{ opacity: 0.5 }}>.{file.extension}</span>
+                                                ) : (
+                                                    ''
+                                                )}
+                                            </Text>
+                                        </custom-h-stack>
+                                    </custom-palette-item>
+                                );
+                            }
                         })}
                     </custom-v-stack>
                 )}
-            </custom-v-stack>
+            </custom-scroll-view>
         );
     }
     return <LoadingCircle></LoadingCircle>;

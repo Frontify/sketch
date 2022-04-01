@@ -48,10 +48,13 @@
             "untitled": "Untitled"
         },
         "sources": {
+            "browse": "Browse",
             "browse_all": "Browse all …",
             "current_document": "Current Document",
+            "local": "Local",
             "open": "Open",
             "recent": "Recent",
+            "remote": "Remote",
             "sync_all": "Sync all Sketch Documents",
             "update_artboards": "Update Artboards",
             "upload_selection": "Upload selected to …"

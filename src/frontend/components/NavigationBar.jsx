@@ -362,7 +362,19 @@ export function NavigationBar() {
                                 )}
                                 {loading ? (
                                     status == 'PUSHING' ? (
-                                        <Text size="x-small">Pushing …</Text>
+                                        <Text size="x-small">
+                                            Pushing …{' '}
+                                            {context.transferMap[context.currentDocument.remote.id]?.progress ? (
+                                                <span style={{ fontFeatureSettings: 'tnum' }}>
+                                                    {Math.floor(
+                                                        context.transferMap[context.currentDocument.remote.id]?.progress
+                                                    )}
+                                                    %
+                                                </span>
+                                            ) : (
+                                                ''
+                                            )}
+                                        </Text>
                                     ) : '' || status == 'FETCHING' ? (
                                         <Text size="x-small">Fetching …</Text>
                                     ) : (

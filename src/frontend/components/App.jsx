@@ -10,6 +10,7 @@ import { TypographyView } from './TypographyView';
 
 import { OpenDocumentsView } from './OpenDocumentsView';
 import { RecentDocumentsView } from './RecentDocumentsView';
+import { RemoteDocumentsView } from './RemoteDocumentsView';
 import { RequireAuth } from './RequireAuth';
 
 import { SignInView } from './SignInView';
@@ -46,6 +47,7 @@ export function App() {
                 >
                     <Route path="open" element={<OpenDocumentsView />} />
                     <Route path="recent" element={<RecentDocumentsView />} />
+                    <Route path="remote" element={<RemoteDocumentsView />} />
                 </Route>
 
                 <Route

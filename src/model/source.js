@@ -337,32 +337,19 @@ class Source {
 
     updateUploadProgress(options, progress) {
         if (isWebviewPresent('frontifymain')) {
-            // MARK: Removed tracking of progress event
-            // sendToWebview(
-            //     'frontifymain',
-            //     'sourceUploadProgress(' +
-            //         JSON.stringify({
-            //             id: options.id,
-            //             id_external: options.id_external,
-            //             progress: progress.fractionCompleted() * 100,
-            //         }) +
-            //         ')'
-            // );
+            // progress, id, id_external
+            frontend.send('progress', { state: 'uploading', progress: progress.fractionCompleted() * 100, ...options });
         }
     }
 
     updateDownloadProgress(options, progress) {
         if (isWebviewPresent('frontifymain')) {
-            sendToWebview(
-                'frontifymain',
-                'sourceDownloadProgress(' +
-                    JSON.stringify({
-                        id: options.id,
-                        id_external: options.id_external,
-                        progress: progress.fractionCompleted() * 100,
-                    }) +
-                    ')'
-            );
+            // progress, id, id_external
+            frontend.send('progress', {
+                state: 'downloading',
+                progress: progress.fractionCompleted() * 100,
+                ...options,
+            });
         }
     }
 
@@ -450,7 +437,10 @@ class Source {
                     clearInterval(polling);
                     file.id = data.id;
                     if (isWebviewPresent('frontifymain')) {
-                        // sendToWebview('frontifymain', 'sourceUploaded(' + JSON.stringify(file) + ')');
+                        frontend.send('progress', {
+                            state: 'upload-complete',
+                            ...file,
+                        });
                     }
 
                     filemanager.updateAssetStatus(target.project.id, data);
@@ -462,7 +452,10 @@ class Source {
                 function (e) {
                     clearInterval(polling);
                     if (isWebviewPresent('frontifymain')) {
-                        // sendToWebview('frontifymain', 'sourceUploadFailed(' + JSON.stringify(source) + ')');
+                        frontend.send('progress', {
+                            state: 'upload-failed',
+                            ...file,
+                        });
                     }
                     return false;
                 }.bind(this)
@@ -565,5 +558,17 @@ class Source {
         return currentFilename;
     }
 }
+
+// Identifier for the plugin window that we can use for message passing
+const IDENTIFIER = 'frontifymain';
+/**
+ * We can use this helper to make it more convenient to send messages to the webview.
+ */
+const frontend = {
+    send(type, payload) {
+        console.log('send to frontend', type, payload);
+        sendToWebview(IDENTIFIER, `send(${JSON.stringify({ type, payload })})`);
+    },
+};
 
 export default new Source();

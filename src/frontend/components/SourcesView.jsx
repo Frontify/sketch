@@ -26,23 +26,6 @@ export function SourcesView() {
 
                 <custom-scope-bar-wrapper padding="small">
                     <custom-h-stack align-items="center">
-                        {/* <custom-scope-button className="tw-round" active={location.pathname.includes('/sources/open')}>
-                            <label>
-                                <input
-                                    type="radio"
-                                    name="activeView"
-                                    value="open"
-                                    checked={activeSourceScope == 'open'}
-                                    onChange={(event) => {
-                                        navigate('/sources/open');
-                                        setActiveSourceScope(event.target.value);
-                                    }}
-                                />
-
-                                <Text size="x-small">{t('sources.open')}</Text>
-                            </label>
-                        </custom-scope-button> */}
-
                         <custom-scope-button
                             className="tw-round"
                             active={location.pathname.includes('/sources/recent')}
@@ -59,7 +42,27 @@ export function SourcesView() {
                                     }}
                                 />
 
-                                <Text>{t('sources.recent')}</Text>
+                                <Text>{t('sources.local')}</Text>
+                            </label>
+                        </custom-scope-button>
+
+                        <custom-scope-button
+                            className="tw-round"
+                            active={location.pathname.includes('/sources/remote')}
+                        >
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="activeView"
+                                    value="remote"
+                                    checked={activeSourceScope == 'remote'}
+                                    onChange={(event) => {
+                                        navigate('/sources/remote');
+                                        setActiveSourceScope(event.target.value);
+                                    }}
+                                />
+
+                                <Text size="x-small">{t('sources.remote')}</Text>
                             </label>
                         </custom-scope-button>
 

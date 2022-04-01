@@ -499,6 +499,7 @@ export default function (context, view) {
                      * Step 2: Open the file in Sketch
                      */
                     // Close file first?
+                    // Todo: Only close the document if it’s the same one that has been checked out (pull / checkout override)
                     NSDocumentController.sharedDocumentController().currentDocument().close();
 
                     source.openSourceAtPath(path);

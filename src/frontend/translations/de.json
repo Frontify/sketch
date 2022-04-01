@@ -47,10 +47,13 @@
             "untitled": "Unbenannt"
         },
         "sources": {
+            "browse": "Durchsuchen",
             "browse_all": "Auswählen …",
             "current_document": "Aktuelles Dokument",
+            "local": "Lokal",
             "open": "Geöffnet",
             "recent": "Zuletzt verwendet",
+            "remote": "Remote",
             "sync_all": "Alle Sketch Dokumente synchroniseren",
             "update_artboards": "Artboards aktualisieren",
             "upload_selection": "Auswahl hochladen …"
