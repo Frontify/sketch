@@ -228,6 +228,12 @@ custom-artboard-preview {
 [separator='bottom'] {
     border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
+[separator='right'] {
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+}
+[separator='left'] {
+    border-left: 1px solid rgba(0, 0, 0, 0.08);
+}
 
 [overflow='hidden'] {
     overflow: hidden;

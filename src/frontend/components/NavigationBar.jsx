@@ -13,6 +13,7 @@ import {
     IconAdd,
     IconDownloadAlternative,
     IconAlert,
+    IconAngleDown,
 } from '@frontify/arcade';
 import React from 'react';
 import { useContext, useEffect, useState } from 'react';
@@ -102,7 +103,7 @@ function SourceAction({ status, actions, loading }) {
         case 'push':
             return (
                 <Button
-                    style="Positive"
+                    style="Primary"
                     icon={<IconUploadAlternative />}
                     onClick={() => {
                         actions.pushSource();
@@ -335,85 +336,90 @@ export function NavigationBar() {
 
     return (
         <custom-v-stack>
-            <custom-h-stack gap="small" padding="small">
-                <Link to={`/sources/${activeSourceScope}`}>
-                    <IconArrowLeft size="Size16"></IconArrowLeft>
-                </Link>
-                <custom-h-stack gap="small">
-                    <div style={{ flex: 0 }}>
-                        <IconSketch size="Size24"></IconSketch>
-                    </div>
-                    {context.currentDocument && context.currentDocument.remote.id ? (
-                        <custom-v-stack gap="small">
-                            <custom-v-stack>
-                                <Text weight="strong">{context.currentDocument.local.filename}</Text>
-                                {context.currentDocument.state == 'same' ? (
-                                    <Text size="x-small">
-                                        Last revision by {context.currentDocument.remote.modifier_name}{' '}
-                                        {context.currentDocument.remote.modified_localized_ago}
-                                    </Text>
-                                ) : (
-                                    ''
-                                )}
-                                {context.currentDocument.state == 'push' ? (
-                                    <Text size="x-small">Push changes</Text>
-                                ) : (
-                                    ''
-                                )}
-                                {loading ? (
-                                    status == 'PUSHING' ? (
-                                        <Text size="x-small">
-                                            Pushing …{' '}
-                                            {context.transferMap[context.currentDocument.remote.id]?.progress ? (
-                                                <span style={{ fontFeatureSettings: 'tnum' }}>
-                                                    {Math.floor(
-                                                        context.transferMap[context.currentDocument.remote.id]?.progress
-                                                    )}
-                                                    %
-                                                </span>
+            <custom-h-stack>
+                <custom-palette-item flex separator="right">
+                    <Link to={`/sources/${activeSourceScope}`}>
+                        <custom-h-stack gap="small" padding="x-small">
+                            <IconSketch size="Size24"></IconSketch>
+                            <custom-h-stack gap="small" flex>
+                                {context.currentDocument && context.currentDocument.remote.id ? (
+                                    <custom-v-stack gap="small" flex>
+                                        <custom-v-stack>
+                                            <Text weight="strong">{context.currentDocument.local.filename}</Text>
+                                            {context.currentDocument.state == 'same' && !loading ? (
+                                                <Text size="x-small">
+                                                    Last revision by {context.currentDocument.remote.modifier_name}{' '}
+                                                    {context.currentDocument.remote.modified_localized_ago}
+                                                </Text>
                                             ) : (
                                                 ''
                                             )}
-                                        </Text>
-                                    ) : '' || status == 'FETCHING' ? (
-                                        <Text size="x-small">Fetching …</Text>
-                                    ) : (
-                                        ''
-                                    )
+                                            {context.currentDocument.state == 'push' && !loading ? (
+                                                <Text size="x-small">Push changes</Text>
+                                            ) : (
+                                                ''
+                                            )}
+                                            {loading ? (
+                                                status == 'PUSHING' ? (
+                                                    <Text size="x-small">
+                                                        Pushing …{' '}
+                                                        {context.transferMap[context.currentDocument.remote.id]
+                                                            ?.progress ? (
+                                                            <span style={{ fontFeatureSettings: 'tnum' }}>
+                                                                {Math.floor(
+                                                                    context.transferMap[
+                                                                        context.currentDocument.remote.id
+                                                                    ]?.progress
+                                                                )}
+                                                                %
+                                                            </span>
+                                                        ) : (
+                                                            ''
+                                                        )}
+                                                    </Text>
+                                                ) : '' || status == 'FETCHING' ? (
+                                                    <Text size="x-small">Fetching …</Text>
+                                                ) : (
+                                                    ''
+                                                )
+                                            ) : (
+                                                <Text size="x-small" color="weak">
+                                                    Last fetched {relativeLastFetched}
+                                                </Text>
+                                            )}
+                                        </custom-v-stack>
+                                        {/* <custom-h-stack flex>
+                                            <SourceAction
+                                                flex
+                                                status={context.currentDocument.state}
+                                                actions={{ pushSource, refresh, publish, pullSource }}
+                                                loading={loading}
+                                            ></SourceAction>
+                                        </custom-h-stack> */}
+                                    </custom-v-stack>
                                 ) : (
-                                    <Text size="x-small" color="weak">
-                                        Last fetched {relativeLastFetched}
-                                    </Text>
+                                    <custom-v-stack>
+                                        <Text weight="strong">{context.currentDocument.local.filename}</Text>
+                                        <Text>Untracked Document</Text>
+                                    </custom-v-stack>
                                 )}
-                            </custom-v-stack>
-                            {/* <custom-h-stack flex>
-                                <SourceAction
-                                    flex
-                                    status={context.currentDocument.state}
-                                    actions={{ pushSource, refresh, publish, pullSource }}
-                                    loading={loading}
-                                ></SourceAction>
-                            </custom-h-stack> */}
-                        </custom-v-stack>
-                    ) : (
-                        <custom-v-stack>
-                            <Text weight="strong">{context.currentDocument.local.filename}</Text>
-                            <Text>Untracked Document</Text>
-                        </custom-v-stack>
-                    )}
-                </custom-h-stack>
-                <custom-spacer></custom-spacer>
-                <custom-h-stack align-items="center" gap="small">
+                            </custom-h-stack>
+
+                            <IconAngleDown size="Size24"></IconAngleDown>
+                        </custom-h-stack>
+                    </Link>
+                </custom-palette-item>
+
+                <custom-h-stack gap="small" padding="small">
+                    <Button style="Secondary">
+                        <IconMore size="Size20"></IconMore>
+                    </Button>
                     <SourceAction
                         flex
                         status={context.currentDocument.state}
                         actions={{ pushSource, refresh, publish, pullSource }}
                         loading={loading}
                     ></SourceAction>
-
-                    <button>
-                        <IconMore size="Size20"></IconMore>
-                    </button>
                 </custom-h-stack>
             </custom-h-stack>
         </custom-v-stack>
