@@ -14,6 +14,8 @@ import {
     IconDownloadAlternative,
     IconAlert,
     IconAngleDown,
+    IconQuestion,
+    MenuItem,
 } from '@frontify/arcade';
 import React from 'react';
 import { useContext, useEffect, useState } from 'react';
@@ -32,9 +34,9 @@ function SourceAction({ status, actions, loading }) {
 
     if (loading || context.refreshing)
         return (
-            <div>
+            <Button align-items="center" style={{ minWidth: '52px' }}>
                 <LoadingCircle size="Small"></LoadingCircle>
-            </div>
+            </Button>
         );
 
     switch (status) {
@@ -103,13 +105,16 @@ function SourceAction({ status, actions, loading }) {
         case 'push':
             return (
                 <Button
-                    style="Primary"
-                    icon={<IconUploadAlternative />}
+                    hugWidth={false}
+                    style="Positive"
                     onClick={() => {
                         actions.pushSource();
                     }}
                 >
-                    Push
+                    <custom-h-stack gap="x-small" align-items="center">
+                        <IconUploadAlternative size="Size20" />
+                        <span>Push</span>
+                    </custom-h-stack>
                 </Button>
             );
 
@@ -158,6 +163,7 @@ export function NavigationBar() {
     let [loading, setLoading] = useState(false);
     let [relativeLastFetched, setRelativeLastFetched] = useState('just now');
     let [status, setStatus] = useState('PENDING');
+    let [open, setOpen] = useState(false);
 
     let target = {
         brand: context.selection.brand,
@@ -172,6 +178,10 @@ export function NavigationBar() {
         },
         set_sources: {},
         target_changed: false,
+    };
+
+    const openExternal = () => {
+        useSketch('openUrl', { url: 'https://frontify.com' });
     };
 
     const publish = async (destination) => {
@@ -321,7 +331,32 @@ export function NavigationBar() {
     }, [context.currentDocument]);
 
     if (!context.currentDocument.local)
-        return <div padding="medium">Waiting for Sketch … {JSON.stringify(context.currentDocument.state)}</div>;
+        return (
+            <custom-h-stack align-items="center">
+                <custom-h-stack gap="small" padding="small">
+                    <IconQuestion size="Size24"></IconQuestion>
+
+                    <custom-v-stack>
+                        <Text weight="strong">No Sketch Document</Text>
+                        <Text size="x-small">Open a document and refresh.</Text>
+                    </custom-v-stack>
+                </custom-h-stack>
+                <custom-spacer></custom-spacer>
+                <div padding="small">
+                    <Button
+                        style="Secondary"
+                        onClick={async () => {
+                            await refresh();
+                        }}
+                    >
+                        <custom-h-stack gap="small" align-items="center">
+                            <IconRefresh size="Size20"></IconRefresh>
+                            <span>Refresh</span>
+                        </custom-h-stack>
+                    </Button>
+                </div>
+            </custom-h-stack>
+        );
 
     if (context.currentDocument.state == 'unsaved')
         return (
@@ -336,12 +371,17 @@ export function NavigationBar() {
 
     return (
         <custom-v-stack>
-            <custom-h-stack>
-                <custom-palette-item flex separator="right">
-                    <Link to={`/sources/${activeSourceScope}`}>
-                        <custom-h-stack gap="small" padding="x-small">
+            <custom-h-stack align-items="center">
+                <custom-palette-item
+                    flex
+                    separator="right"
+                    style={{ display: 'flex', height: ' 100%' }}
+                    align-items="center"
+                >
+                    <Link to={`/sources/recent`} style={{ width: '100%' }}>
+                        <custom-h-stack gap="small" align-items="center">
                             <IconSketch size="Size24"></IconSketch>
-                            <custom-h-stack gap="small" flex>
+                            <custom-h-stack gap="small" flex align-items="center">
                                 {context.currentDocument && context.currentDocument.remote.id ? (
                                     <custom-v-stack gap="small" flex>
                                         <custom-v-stack>
@@ -383,9 +423,10 @@ export function NavigationBar() {
                                                     ''
                                                 )
                                             ) : (
-                                                <Text size="x-small" color="weak">
-                                                    Last fetched {relativeLastFetched}
-                                                </Text>
+                                                ''
+                                                // <Text size="x-small" color="weak">
+                                                //     Last fetched {relativeLastFetched}
+                                                // </Text>
                                             )}
                                         </custom-v-stack>
                                         {/* <custom-h-stack flex>
@@ -410,16 +451,50 @@ export function NavigationBar() {
                     </Link>
                 </custom-palette-item>
 
-                <custom-h-stack gap="small" padding="small">
-                    <Button style="Secondary">
-                        <IconMore size="Size20"></IconMore>
-                    </Button>
+                <custom-h-stack padding="small">
                     <SourceAction
                         flex
+                        style={{ flex: 0 }}
                         status={context.currentDocument.state}
                         actions={{ pushSource, refresh, publish, pullSource }}
                         loading={loading}
                     ></SourceAction>
+
+                    <Flyout
+                        hug={true}
+                        fitContent={true}
+                        isOpen={open}
+                        onOpenChange={(isOpen) => setOpen(isOpen)}
+                        legacyFooter={false}
+                        trigger={
+                            <Button style="Secondary" onClick={() => setOpen((open) => !open)}>
+                                <IconMore size="Size20"></IconMore>
+                            </Button>
+                        }
+                    >
+                        <custom-v-stack>
+                            <MenuItem
+                                title="View on Frontify"
+                                onClick={() => {
+                                    openExternal();
+                                    setOpen(false);
+                                }}
+                            >
+                                View on Frontify
+                            </MenuItem>
+                            <div padding="small">
+                                {' '}
+                                <Button
+                                    onClick={() => {
+                                        openExternal();
+                                        setOpen(false);
+                                    }}
+                                >
+                                    View on Frontify
+                                </Button>
+                            </div>
+                        </custom-v-stack>
+                    </Flyout>
                 </custom-h-stack>
             </custom-h-stack>
         </custom-v-stack>

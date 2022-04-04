@@ -66,7 +66,10 @@ export function ArtboardsView() {
         return (
             <custom-v-stack gap="small" padding="small" justify-content="center" align-items="center">
                 <div style={{ width: '100%' }}>
-                    <pre>{JSON.stringify(context.currentDocument, null, 2)}</pre>
+                    <details>
+                        <summary>View Payload</summary>
+                        <pre>{JSON.stringify(context.currentDocument, null, 2)}</pre>
+                    </details>
                 </div>
                 <Text color="weak">
                     If artboards were uploaded before the recent plugin improvements you won’t see them here until

@@ -3,37 +3,35 @@ import fetch from '../helpers/fetch';
 import sketch from './sketch';
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
 
-let API = require('sketch');
+let sketch3 = require('sketch');
+
+console.log('color called');
 
 class Color {
+    constructor() {
+        console.log('NEW COLOR CONSTRUCTOR');
+    }
     getColors(project) {
         // load remote assets status
         return fetch('/v1/color/library/' + project);
     }
 
     applyColor(color) {
-        let selection = sketch.getSelection();
-        let loop = selection.objectEnumerator();
-        let item = null;
-        console.log('applyColor', color, selection);
+        // let selection = sketch.getSelection();
 
-        while ((item = loop.nextObject())) {
-            if (item.class() == MSLayerGroup) {
-                let layers = item.layers();
-                layers.forEach(
-                    function (layer) {
-                        this.applyColorToLayer(layer, color);
-                    }.bind(this)
-                );
+        let currentDocument = sketch3.getSelectedDocument();
+        let selection = currentDocument.selectedLayers;
+
+        selection.layers.forEach((layer) => {
+            if (layer.layers) {
+                let children = layer.layers();
+                children.forEach((child) => {
+                    this.applyColorToLayer(child, color);
+                });
             } else {
-                this.applyColorToLayer(item, color);
+                this.applyColorToLayer(layer, color);
             }
-        }
-
-        let doc = sketch.getDocument();
-        if (doc) {
-            doc.reloadInspector();
-        }
+        });
     }
 
     addDocumentColors(colors) {
@@ -53,7 +51,7 @@ class Color {
     }
 
     addColorsToDocumentScope(colors, replaceCurrentColors = false) {
-        let selectedDocument = API.getSelectedDocument();
+        let selectedDocument = sketch3.getSelectedDocument();
 
         if (selectedDocument) {
             if (replaceCurrentColors) {
@@ -62,7 +60,7 @@ class Color {
 
             colors.forEach((color) => {
                 selectedDocument.swatches.push(
-                    API.Swatch.from({
+                    sketch3.Swatch.from({
                         name: color.name,
                         color: color.css_value_hex,
                     })
@@ -75,7 +73,7 @@ class Color {
      * @deprecated Should only be used in sketch version 68 and older! Use 'addColorsToDocumentScope' instead.
      */
     addColorsToDocumentScopeLegacy(colors, replaceCurrentColors = false) {
-        let selectedDocument = API.getSelectedDocument();
+        let selectedDocument = sketch3.getSelectedDocument();
 
         if (selectedDocument) {
             if (replaceCurrentColors) {
@@ -145,26 +143,27 @@ class Color {
 
     applyColorToLayer(layer, color) {
         let mscolor = MSColor.colorWithRed_green_blue_alpha(color.r / 255, color.g / 255, color.b / 255, color.a / 255);
-        let clazz = layer.class();
+        console.log(layer.type);
+        let layerType = layer.type;
 
-        if (clazz == MSTextLayer) {
-            layer.setTextColor(mscolor);
-        } else if (
-            clazz == MSRectangleShape ||
-            clazz == MSOvalShape ||
-            clazz == MSTriangleShape ||
-            clazz == MSStarShape ||
-            clazz == MSPolygonShape ||
-            clazz == MSShapeGroup
-        ) {
-            let fills = layer.style().fills();
-            if (fills.count() <= 0) {
-                fills.addNewStylePart();
-            }
-            let fill = fills.firstObject();
-            fill.isEnabled = true;
-            fill.setFillType(0);
-            fill.setColor(mscolor);
+        switch (layerType) {
+            case 'Text':
+                layer.style.fills = [
+                    {
+                        color: mscolor,
+                        fillType: sketch3.Style.FillType.Color,
+                    },
+                ];
+                break;
+            case 'Shape':
+            case 'ShapePath':
+                // Todo: Make the fill replacement less destructive. For example, keep existing fills and only replace the first one.
+                layer.style.fills = [
+                    {
+                        color: mscolor,
+                        fillType: sketch3.Style.FillType.Color,
+                    },
+                ];
         }
     }
 
@@ -187,7 +186,7 @@ class Color {
     }
 
     getSketchVersion() {
-        return API.Settings.version.sketch;
+        return sketch3.Settings.version.sketch;
     }
 }
 

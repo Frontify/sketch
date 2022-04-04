@@ -46,10 +46,10 @@ export function FileBrowser() {
                 </Button>
             }
         >
-            <custom-v-stack padding="small" gap="small">
+            <custom-v-stack gap="small">
                 <h2>Checkout a file</h2>
                 <Text>Choose a remote file that you want to checkout.</Text>
-                <hr />
+
                 <UploadDestinationPicker
                     onChange={(value) => {
                         console.log(value);
@@ -58,7 +58,7 @@ export function FileBrowser() {
                         }
                     }}
                 ></UploadDestinationPicker>
-                <hr />
+
                 <Button
                     onClick={() => {
                         setShowDestinationPicker(false);

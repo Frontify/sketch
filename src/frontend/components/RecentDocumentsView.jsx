@@ -150,11 +150,6 @@ export function RecentDocumentsView() {
                 <custom-line></custom-line>
 
                 <custom-h-stack padding="small" gap="small" align-items="center" justify-content="center">
-                    <FileBrowser
-                        onChange={(event) => {
-                            console.log('should pull', event);
-                        }}
-                    ></FileBrowser>
                     <Button style="Primary">{t('sources.sync_all')}</Button>
                 </custom-h-stack>
             </custom-v-stack>

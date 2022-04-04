@@ -3,7 +3,7 @@ import { useState, useEffect, useContext } from 'react';
 import { Text } from '@frontify/arcade';
 import { Swatch } from './Swatch';
 import { UserContext } from '../UserContext';
-
+import { useSketch } from '../hooks/useSketch';
 import { SearchField } from './SearchField';
 import { Switcher } from './Switcher';
 import { IconCaretDown } from '@frontify/arcade';
@@ -15,7 +15,7 @@ export function PalettesView({ palettes, guidelines }) {
     const [filteredPalettes, setFilteredPalettes] = useState(palettes);
 
     const sendColor = async (color) => {
-        window.postMessage('applyColor', color);
+        useSketch('applyColor', color);
     };
 
     useEffect(() => {

@@ -1,17 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { UserContext } from '../UserContext';
-import {
-    Button,
-    IconBackward5Seconds,
-    IconFolder,
-    IconSketch,
-    IconProjects,
-    Text,
-    Breadcrumbs,
-    IconArrowLeft,
-    LoadingCircle,
-    IconFile,
-} from '@frontify/arcade';
+import { IconFolder, IconSketch, IconProjects, Text, IconArrowLeft, LoadingCircle, IconFile } from '@frontify/arcade';
 
 import { useSketch } from '../hooks/useSketch';
 
@@ -37,14 +26,14 @@ export function UploadDestinationPicker({ onChange }) {
 
     // Watch projectID
     useEffect(async () => {
-        if (project) await fetchProjectFolders(project);
+        if (project) fetchProjectFolders(project);
     }, [project]);
 
     // Watch folderID
     useEffect(async () => {
         if (project && folder) {
             setLoading(true);
-
+            console.log('folder id', folder.id);
             let query = `{
                 node(id: "${folder.id}") {
                   __typename

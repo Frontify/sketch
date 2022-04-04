@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState } from 'react';
-import { Button, Flyout, IconFolder, IconUploadAlternative, Text } from '@frontify/arcade';
+import { Button } from '@frontify/arcade';
 import { UploadDestinationPicker } from '../components/UploadDestinationPicker';
 import { useNavigate } from 'react-router-dom';
 import { useLocalStorage } from '../hooks/useLocalStorage';
@@ -8,11 +8,9 @@ import { useTranslation } from 'react-i18next';
 import { useSketch } from '../hooks/useSketch';
 
 export function RemoteDocumentsView() {
-    const { t, i18n } = useTranslation();
     let [showDestinationPicker, setShowDestinationPicker] = useState(false);
 
     let navigate = useNavigate();
-    let [activeScope] = useLocalStorage('cache.activeScope', 'colors');
 
     const redirectToDocument = () => {
         navigate(`/source/artboards/`);
@@ -27,19 +25,20 @@ export function RemoteDocumentsView() {
 
     return (
         <custom-v-stack padding="small" gap="small" stretch overflow="hidden">
-            <h2>Checkout a file</h2>
-            <Text>Choose a remote file that you want to checkout.</Text>
-            <hr />
-            <UploadDestinationPicker
-                stretch
-                onChange={(value) => {
-                    console.log(value);
-                    if (value.type == 'file' && value.file.extension == 'sketch') {
-                        checkout({ path: value.path, file: value.file });
-                    }
-                }}
-            ></UploadDestinationPicker>
-            <hr />
+            {/* <h2>Checkout a file</h2>
+            <Text>Choose a remote file that you want to checkout.</Text> */}
+
+            <custom-v-stack style={{ border: ' 1px solid rgba(0, 0, 0, 0.08)', height: ' 100%', borderRadius: '8px' }}>
+                <UploadDestinationPicker
+                    stretch
+                    onChange={(value) => {
+                        if (value.type == 'file' && value.file.extension == 'sketch') {
+                            checkout({ path: value.path, file: value.file });
+                        }
+                    }}
+                ></UploadDestinationPicker>
+            </custom-v-stack>
+
             <div>
                 <Button
                     hugWidth={false}

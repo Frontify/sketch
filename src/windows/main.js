@@ -12,6 +12,7 @@ import asset from '../model/asset';
 import user from '../model/user';
 import createFolder from '../helpers/createFolder';
 import shaFile from '../helpers/shaFile';
+import executeSafely from '../helpers/executeSafely';
 
 import recentFiles from '../model/recent';
 
@@ -19,6 +20,8 @@ import { sendToWebview } from 'sketch-module-web-view/remote';
 
 let DOM = require('sketch/dom');
 let sketch3 = require('sketch');
+
+console.log('called main.js');
 
 export function getPluginState() {
     let payload = {
@@ -245,6 +248,7 @@ export default function (context, view) {
     });
 
     webview.on('openUrl', function (url, absolute) {
+        console.log('open url');
         if (absolute) {
             NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString(url));
         } else {
@@ -447,6 +451,11 @@ export default function (context, view) {
                 } catch (error) {
                     payload = { success: false, error };
                 }
+                break;
+            case 'applyColor':
+                executeSafely(context, () => {
+                    color.applyColor(args);
+                });
                 break;
             case 'applyFontStyleWithColor':
                 try {
@@ -734,7 +743,21 @@ export default function (context, view) {
                     payload = { success: false, error };
                 }
                 break;
+            case 'openUrl':
+                let url = args.url;
+                let absolute = args.absolute || true;
 
+                console.log('open url', url, absolute);
+                if (absolute) {
+                    NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString(url));
+                } else {
+                    target.getDomain().then(
+                        function (data) {
+                            NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString(data + url));
+                        }.bind(this)
+                    );
+                }
+                break;
             case 'moveCurrent':
                 try {
                     console.log('move current file to', args.folder);

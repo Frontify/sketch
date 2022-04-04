@@ -21,61 +21,72 @@ export function SourcesView() {
 
     if (context.user?.name) {
         return (
-            <custom-v-stack stretch>
+            <custom-v-stack stretch style={{ background: 'rgba(0, 0, 0, 0.5)' }}>
                 <Toolbar></Toolbar>
+                <custom-v-stack
+                    style={{
+                        borderRadius: '16px',
+                        overflow: 'hidden',
+                        margin: ' 1rem',
+                        height: ' 100%',
+                        background: 'white',
+                    }}
+                >
+                    <custom-scope-bar-wrapper padding="small">
+                        <custom-h-stack align-items="center" gap="x-small">
+                            <custom-scope-button
+                                className="tw-round"
+                                active={location.pathname.includes('/sources/recent')}
+                            >
+                                <label>
+                                    <input
+                                        type="radio"
+                                        name="activeView"
+                                        value="recent"
+                                        checked={activeSourceScope == 'recent'}
+                                        onChange={(event) => {
+                                            navigate('/sources/recent');
+                                            setActiveSourceScope(event.target.value);
+                                        }}
+                                    />
+                                    <Text>{t('sources.local')}</Text>
+                                </label>
+                            </custom-scope-button>
+                            <custom-scope-button
+                                className="tw-round"
+                                active={location.pathname.includes('/sources/remote')}
+                            >
+                                <label>
+                                    <input
+                                        type="radio"
+                                        name="activeView"
+                                        value="remote"
+                                        checked={activeSourceScope == 'remote'}
+                                        onChange={(event) => {
+                                            navigate('/sources/remote');
+                                            setActiveSourceScope(event.target.value);
+                                        }}
+                                    />
+                                    <Text size="x-small">{t('sources.remote')}</Text>
+                                </label>
+                            </custom-scope-button>
+                            <custom-spacer></custom-spacer>
 
-                <custom-scope-bar-wrapper padding="small">
-                    <custom-h-stack align-items="center">
-                        <custom-scope-button
-                            className="tw-round"
-                            active={location.pathname.includes('/sources/recent')}
-                        >
-                            <label>
-                                <input
-                                    type="radio"
-                                    name="activeView"
-                                    value="recent"
-                                    checked={activeSourceScope == 'recent'}
-                                    onChange={(event) => {
-                                        navigate('/sources/recent');
-                                        setActiveSourceScope(event.target.value);
+                            <div>
+                                <Button
+                                    style="Secondary"
+                                    onClick={() => {
+                                        navigate('/source/artboards');
                                     }}
-                                />
-
-                                <Text>{t('sources.local')}</Text>
-                            </label>
-                        </custom-scope-button>
-
-                        <custom-scope-button
-                            className="tw-round"
-                            active={location.pathname.includes('/sources/remote')}
-                        >
-                            <label>
-                                <input
-                                    type="radio"
-                                    name="activeView"
-                                    value="remote"
-                                    checked={activeSourceScope == 'remote'}
-                                    onChange={(event) => {
-                                        navigate('/sources/remote');
-                                        setActiveSourceScope(event.target.value);
-                                    }}
-                                />
-
-                                <Text size="x-small">{t('sources.remote')}</Text>
-                            </label>
-                        </custom-scope-button>
-
-                        <custom-spacer></custom-spacer>
-
-                        <Link to={`/source/artboards`}>
-                            <Text>{t('sources.current_document')}</Text>
-                        </Link>
-                    </custom-h-stack>
-                </custom-scope-bar-wrapper>
-
-                <custom-line></custom-line>
-                <Outlet />
+                                >
+                                    {t('general.close')}
+                                </Button>
+                            </div>
+                        </custom-h-stack>
+                    </custom-scope-bar-wrapper>
+                    <custom-line></custom-line>
+                    <Outlet />
+                </custom-v-stack>
             </custom-v-stack>
         );
     } else {

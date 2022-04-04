@@ -86,11 +86,11 @@ custom-line {
 }
 
 custom-scope-button {
+    display: inline-block;
     line-height: 1;
     padding: 4px 8px;
     border-radius: 100px;
-    user-select: none;
-    -webkit-user-select: none;
+    background: var(--box-neutral-color);
 }
 
 custom-scope-button:hover {
@@ -352,4 +352,10 @@ custom-grid[columns='6'] {
     to {
         opacity: 1;
     }
+}
+
+custom-modal {
+    display: block;
+    margin: 1rem;
+    background: rgba(0, 0, 0, 0.5);
 }
