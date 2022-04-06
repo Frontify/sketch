@@ -106,14 +106,13 @@ function SourceAction({ status, actions, loading }) {
             return (
                 <Button
                     hugWidth={false}
-                    style="Positive"
                     onClick={() => {
                         actions.pushSource();
                     }}
                 >
                     <custom-h-stack gap="x-small" align-items="center">
                         <IconUploadAlternative size="Size20" />
-                        <span>Push</span>
+                        {/* <span>Push</span> */}
                     </custom-h-stack>
                 </Button>
             );
@@ -121,12 +120,13 @@ function SourceAction({ status, actions, loading }) {
         case 'pull':
             return (
                 <Button
+                    inverted={true}
                     icon={<IconDownloadAlternative />}
                     onClick={() => {
                         actions.pullSource();
                     }}
                 >
-                    Pull Remote Changes
+                    Pull
                 </Button>
             );
 
@@ -180,14 +180,12 @@ export function NavigationBar() {
         target_changed: false,
     };
 
-    const openExternal = () => {
-        useSketch('openUrl', { url: 'https://frontify.com' });
+    const openExternal = (id) => {
+        useSketch('openUrl', { url: 'https://company-136571.frontify.com/screens/' + id });
     };
 
     const publish = async (destination) => {
         setLoading(true);
-
-        console.log('publish', { destination });
 
         target.project = destination.project;
         target.path = context.currentDocument.local.path;
@@ -322,7 +320,7 @@ export function NavigationBar() {
                 .map((item) => {
                     return { label: item };
                 });
-            console.log(pathArray);
+
             setDocumentPath(pathArray);
             setMatchedSource(
                 context.sources.find((source) => source.localpath == context.currentDocument.remote.localpath)
@@ -476,7 +474,7 @@ export function NavigationBar() {
                             <MenuItem
                                 title="View on Frontify"
                                 onClick={() => {
-                                    openExternal();
+                                    openExternal(context.currentDocument.refs.remote_id);
                                     setOpen(false);
                                 }}
                             >
@@ -486,7 +484,7 @@ export function NavigationBar() {
                                 {' '}
                                 <Button
                                     onClick={() => {
-                                        openExternal();
+                                        openExternal(context.currentDocument.refs.remote_id);
                                         setOpen(false);
                                     }}
                                 >

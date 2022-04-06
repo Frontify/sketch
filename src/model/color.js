@@ -5,12 +5,8 @@ import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
 
 let sketch3 = require('sketch');
 
-console.log('color called');
-
 class Color {
-    constructor() {
-        console.log('NEW COLOR CONSTRUCTOR');
-    }
+    constructor() {}
     getColors(project) {
         // load remote assets status
         return fetch('/v1/color/library/' + project);
@@ -143,7 +139,7 @@ class Color {
 
     applyColorToLayer(layer, color) {
         let mscolor = MSColor.colorWithRed_green_blue_alpha(color.r / 255, color.g / 255, color.b / 255, color.a / 255);
-        console.log(layer.type);
+
         let layerType = layer.type;
 
         switch (layerType) {

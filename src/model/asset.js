@@ -61,8 +61,6 @@ class Asset {
                 let url = data.previewUrl.replace('{width}', 2000);
                 let ext = data.extension;
 
-                console.log('ext', ext);
-
                 let currentDocument = Document.fromNative(sketch.getDocument());
 
                 if (ext !== 'svg') {
@@ -165,7 +163,7 @@ class Asset {
                             // Todo: Figure out why we used this?
                             // Problem: If we call this, the Promise won’t resolve afterwards
                             // app.refreshCurrentDocument();
-                            console.log('resolve SVG ');
+
                             resolve();
                         })
                         .catch((e) => {

@@ -36,7 +36,6 @@ export function RecentDocumentsView() {
     const { t } = useTranslation();
 
     const openSource = async (document) => {
-        console.log('open:', document);
         await useSketch('openSource', { path: document.local.path });
     };
 
@@ -50,7 +49,7 @@ export function RecentDocumentsView() {
 
     useEffect(async () => {
         // Query GraphQL
-        console.log(context.recentDocuments);
+
         let ids = context.recentDocuments.map((document) => document.refs?.remote_id || null) || [];
         let query = `{
             assets(ids: [${ids}]) {
@@ -87,7 +86,6 @@ export function RecentDocumentsView() {
             );
         };
         result.data.assets.forEach((document, index) => {
-            console.log('push', document, context.recentDocuments);
             merged.push({
                 remote: document,
                 local: localFileForGraphQLID(index),

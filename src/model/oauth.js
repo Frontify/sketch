@@ -91,7 +91,6 @@ class OAuth {
             url_params.push(`${name}=${value}`);
         }
         const url = `${this.domain}/api/oauth/authorize?${url_params.join('&')}`;
-        console.log('open browser', url);
 
         NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString(url));
     }

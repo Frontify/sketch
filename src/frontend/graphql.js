@@ -15,11 +15,8 @@ export async function queryGraphQLWithAuth({ query, auth }) {
 
                 let result = await response.json();
                 resolve(result);
-            } catch (error) {
-                console.log('ERROR IN FETCH', error);
-            }
+            } catch (error) {}
         } catch (error) {
-            console.log('ERROR NO INTERNET');
             reject(error);
         }
     });

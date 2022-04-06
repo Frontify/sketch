@@ -1,17 +1,49 @@
 import React from 'react';
-import { Button, Flyout, IconCaretDown, IconMore, Text } from '@frontify/arcade';
+import { Button, Flyout, IconCaretDown, IconMore, LoadingCircle, Text } from '@frontify/arcade';
 
 import { SearchField } from './SearchField';
 import { useState, useEffect, useCallback, useContext } from 'react';
 
 import { useTranslation } from 'react-i18next';
 import { UserContext } from '../UserContext';
+import { useSketch } from '../hooks/useSketch';
 
 export function ArtboardsView() {
+    const [loading, setLoading] = useState(false);
     const [open, setOpen] = useState(false);
     const [destinationPickerOpen, setDestinationPickerOpen] = useState(false);
     const [currentSource, setCurrentSource] = useState({});
     const { t } = useTranslation();
+
+    const [artboards, setArtboards] = useState([]);
+
+    useEffect(async () => {
+        let response = await useSketch('getSelectedArtboards');
+
+        setArtboards(response.artboards);
+    }, []);
+
+    /**
+     * Subscription
+     */
+
+    useEffect(() => {
+        let handler = (event) => {
+            let { type, payload } = event.detail.data;
+
+            switch (type) {
+                case 'artboards-changed':
+                    setArtboards(payload.artboards);
+                    break;
+            }
+        };
+
+        window.addEventListener('message-from-sketch', handler);
+
+        return () => {
+            window.removeEventListener('message-from-sketch', handler);
+        };
+    }, []);
 
     const context = useContext(UserContext);
 
@@ -61,24 +93,28 @@ export function ArtboardsView() {
         setCurrentSource(sources[0]);
     }, []);
 
-    let forceEmpty = true;
-    if (forceEmpty) {
+    if (artboards.length) {
         return (
             <custom-v-stack gap="small" padding="small" justify-content="center" align-items="center">
-                <div style={{ width: '100%' }}>
-                    <details>
-                        <summary>View Payload</summary>
-                        <pre>{JSON.stringify(context.currentDocument, null, 2)}</pre>
-                    </details>
-                </div>
-                <Text color="weak">
-                    If artboards were uploaded before the recent plugin improvements you won’t see them here until
-                    they’re next updated. Don't worry, they’re still on Frontify.
-                </Text>
                 <custom-line></custom-line>
-                <Text size="large">No artboards uploaded </Text>
-                <Text>Select some artboards in Sketch and click the button to add them to Frontify.</Text>
-                [remote data goes here]
+                {loading ? <LoadingCircle></LoadingCircle> : ''}
+                {artboards &&
+                    artboards.length &&
+                    artboards.map((artboard) => {
+                        return (
+                            <custom-palette-item
+                                onClick={async () => {
+                                    setLoading(true);
+                                    await useSketch('uploadArtboards', { artboards });
+                                    setLoading(false);
+                                }}
+                                key={artboard.id}
+                            >
+                                {artboard.name}
+                            </custom-palette-item>
+                        );
+                    })}
+
                 <custom-line></custom-line>
                 {selection.length ? (
                     <Button>Upload ({selection.length}) artboards to … </Button>
@@ -106,7 +142,22 @@ export function ArtboardsView() {
                 <div padding="small">
                     <SearchField placeholder="Search Artboards" onChange={() => {}}></SearchField>
                 </div>
+                <div style={{ width: '100%' }}>
+                    <details>
+                        <summary>View Payload</summary>
+                        <pre>{JSON.stringify(context.currentDocument, null, 2)}</pre>
+                    </details>
+                </div>
+                <div padding="small">
+                    <custom-h-stack padding="small" style={{ background: 'rgba(0, 0, 0, 0.1)' }}>
+                        <Text color="weak">
+                            If artboards were uploaded before the recent plugin improvements you won’t see them here
+                            until they’re next updated. Don’t worry, they’re still on Frontify.
+                        </Text>
+                    </custom-h-stack>
+                </div>
                 <custom-line></custom-line>
+                <h2>Upload targets (3)</h2>
                 <custom-scroll-view>
                     {sources.map((source) => {
                         return (
@@ -159,7 +210,6 @@ export function ArtboardsView() {
                                 <Button
                                     style="Secondary"
                                     onClick={() => {
-                                        console.log('click');
                                         setDestinationPickerOpen((destinationPickerOpen) => !destinationPickerOpen);
                                     }}
                                 >

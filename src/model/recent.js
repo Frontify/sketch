@@ -17,7 +17,6 @@ class RecentFiles {
         // Move the entry to the front
         this.recents.unshift({ ...entry, timestamp: new Date().getTime() });
         this.save();
-        console.log('recents saved', this.recents.length);
     }
     save() {
         sketch.Settings.setSettingForKey('com.frontify.sketch.recent', this.recents);

@@ -52,7 +52,6 @@ export function FileBrowser() {
 
                 <UploadDestinationPicker
                     onChange={(value) => {
-                        console.log(value);
                         if (value.type == 'file' && value.file.extension == 'sketch') {
                             checkout({ path: value.path, file: value.file });
                         }

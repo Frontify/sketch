@@ -14,6 +14,14 @@ import createFolder from '../helpers/createFolder';
 import shaFile from '../helpers/shaFile';
 import executeSafely from '../helpers/executeSafely';
 
+/**
+ * Actions that can be called from React via the useSketch() hook.
+ * For information on the parameters, check the implementation of the
+ * function. The parameters are defined using the spread operator.
+ */
+import { getSelectedArtboards } from './actions/getSelectedArtboards';
+import { uploadArtboards } from './actions/uploadArtboards';
+
 import recentFiles from '../model/recent';
 
 import { sendToWebview } from 'sketch-module-web-view/remote';
@@ -139,7 +147,7 @@ export default function (context, view) {
      */
 
     // webview.loadURL(viewData.url);
-    console.log('Sketch, load: ', mainURL);
+
     webview.loadURL(mainURL);
 
     // Show window if ready
@@ -158,7 +166,6 @@ export default function (context, view) {
                 console.log(authData.error);
                 return;
             }
-            console.log('successfully authenticated', authData);
 
             user.login({
                 access_token: authData.accessToken,
@@ -248,7 +255,6 @@ export default function (context, view) {
     });
 
     webview.on('openUrl', function (url, absolute) {
-        console.log('open url');
         if (absolute) {
             NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString(url));
         } else {
@@ -420,6 +426,17 @@ export default function (context, view) {
     webview.off('request', handleRequestFromFrontend);
     webview.on('request', handleRequestFromFrontend);
 
+    /**
+     * Todo: Refactor each case into one action file.
+     * Then, create a map for all functions.
+     * Then, call the function directly and pass all args to it.
+     */
+
+    let actions = {
+        getSelectedArtboards,
+        uploadArtboards,
+    };
+
     async function handleRequestFromFrontend({ type = '', requestUUID = null, args = {} }) {
         let payload = {};
         console.log('request!', new Date().getTime(), type, args);
@@ -483,7 +500,6 @@ export default function (context, view) {
 
                     var progress = NSProgress.progressWithTotalUnitCount(10);
                     progress.setCompletedUnitCount(0);
-                    console.log('start download', args);
 
                     // Base + File Path
 
@@ -501,7 +517,7 @@ export default function (context, view) {
                     }
 
                     let result = await filemanager.downloadFileToPath(args.file.downloadUrl, path, progress);
-                    console.log('Finish download', result);
+
                     payload = { success: true };
 
                     /**
@@ -528,7 +544,6 @@ export default function (context, view) {
                 }
                 break;
             case 'getCurrentDocument':
-                console.log('🔥 GET CURRENT DOCUMENT');
                 /**
                  * The shape of the returned object.
                  * We’ll merge local, remote and meta information.
@@ -564,7 +579,6 @@ export default function (context, view) {
                 }
 
                 let modified = sketch3.Settings.documentSettingForKey(sketch.getDocument(), 'remote_modified');
-                console.log('MODIFIED', modified);
 
                 /**
                  * Refs.
@@ -578,8 +592,6 @@ export default function (context, view) {
                     remote_project_id: sketch3.Settings.documentSettingForKey(openSketchDocument, 'remote_project_id'),
                     remote_graphql_id: sketch3.Settings.documentSettingForKey(openSketchDocument, 'remote_graphql_id'),
                 };
-
-                console.log('refs', currentDocument.refs);
 
                 /**
                  * State.
@@ -597,8 +609,6 @@ export default function (context, view) {
                     let sameDate = local.modified == remote.modified;
                     let ahead = local.modified >= remote.modified ? 'local' : 'remote';
                     let conflict = (document.dirty && !sameFile) || (document.dirty && !sameFile && !sameDate);
-
-                    console.log('conflict?', document, sameFile, conflict);
 
                     if (!saved) return 'unsaved';
                     if (!tracked) return 'untracked';
@@ -629,7 +639,7 @@ export default function (context, view) {
                         currentDocument.refs.remote_project_id,
                         currentDocument.refs.remote_id
                     );
-                    console.log(remoteAsset);
+
                     if (remoteAsset) {
                         currentDocument.remote = remoteAsset;
                     } else {
@@ -651,7 +661,7 @@ export default function (context, view) {
 
                 if (filemanager.isCurrentSaved()) {
                     let filePath = '' + nativeSketchDocument.fileURL().path();
-                    console.log(shaFile(filePath));
+
                     currentDocument.local = {
                         id: openSketchDocument.id,
                         filename: source.getCurrentFilename(),
@@ -696,7 +706,7 @@ export default function (context, view) {
             case 'getRecentFiles':
                 try {
                     let files = recentFiles.get();
-                    console.log('get recent files', files.length);
+
                     payload = { success: true, files };
                 } catch (error) {
                     payload = { success: false, error };
@@ -704,7 +714,6 @@ export default function (context, view) {
                 break;
 
             case 'getProjectsForBrand':
-                console.log('get projects');
                 try {
                     let projects = await project.getProjectsForBrand(args.brand);
                     payload = { success: true, projects };
@@ -721,13 +730,17 @@ export default function (context, view) {
                     payload = { success: false, error };
                 }
                 break;
+            case 'getSelectedArtboards':
+                payload = actions['getSelectedArtboards'](args);
+                break;
+
             case 'getOpenDocuments':
                 var documents = DOM.getDocuments();
                 payload = { documents };
                 break;
             case 'getAuth':
                 let auth = user.getAuthentication();
-                console.log('auth inside sketch -> send crendentials', auth);
+
                 if (auth) {
                     payload = { auth };
                 } else {
@@ -735,7 +748,6 @@ export default function (context, view) {
                 }
                 break;
             case 'getLocalAndRemoteSourceFiles':
-                console.log('getLocalAndRemoteSourceFiles');
                 try {
                     let sources = await source.getLocalAndRemoteSourceFiles();
                     payload = { success: true, sources };
@@ -747,7 +759,6 @@ export default function (context, view) {
                 let url = args.url;
                 let absolute = args.absolute || true;
 
-                console.log('open url', url, absolute);
                 if (absolute) {
                     NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString(url));
                 } else {
@@ -760,7 +771,6 @@ export default function (context, view) {
                 break;
             case 'moveCurrent':
                 try {
-                    console.log('move current file to', args.folder);
                     await filemanager.moveCurrent(args.brand, args.project, args.folder);
                     payload = { success: true };
                 } catch (error) {
@@ -795,9 +805,6 @@ export default function (context, view) {
             case 'pushSource':
                 try {
                     let result = await source.pushSource(args.source, args.target);
-                    console.log(result);
-
-                    console.log('should update date modified', result, result.modified);
 
                     /**
                      * Check if the document has a modified date from a previous fetch request.
@@ -822,10 +829,17 @@ export default function (context, view) {
                         // Mark document as clean, because there are no untracked changes
                         sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'dirty', false);
                     }
-                    console.log('🌟 DONE PUSHING');
+
                     payload = { success: true };
                 } catch (error) {
                     payload = { success: false, error };
+                }
+                break;
+            case 'uploadArtboards':
+                try {
+                    actions['uploadArtboards'](args);
+                } catch (error) {
+                    console.error(error);
                 }
                 break;
         }

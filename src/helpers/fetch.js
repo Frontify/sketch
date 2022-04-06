@@ -13,7 +13,6 @@ export default function (uri, options) {
         access_token,
     };
 
-    console.log(token);
     let defaults = {
         method: 'GET',
         headers: {

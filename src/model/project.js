@@ -8,25 +8,21 @@ class Project {
     getProjectsForBrand(brand) {
         return fetch('/v1/brand/list/?project_limit=999').then((data) => {
             let match = data.brands.find((entry) => entry.name == brand.name);
-            console.log('found', match);
+
             return match.projects;
         });
     }
 
     getProjectFolders(project, folder) {
         return new Promise((resolve, reject) => {
-            console.log('getProjectFolders', project, folder);
             // browse project
             let url = '/v1/project/browse/' + project.id;
             if (folder) {
                 url += '/' + folder;
             }
 
-            console.log('fetch url', url);
-
             fetch(url)
                 .then((result) => {
-                    console.log('result', result);
                     resolve({
                         folder: result.folder,
                         folders: result.folders,

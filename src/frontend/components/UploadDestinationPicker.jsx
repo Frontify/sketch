@@ -33,7 +33,41 @@ export function UploadDestinationPicker({ onChange }) {
     useEffect(async () => {
         if (project && folder) {
             setLoading(true);
-            console.log('folder id', folder.id);
+
+            // Todo: Use workspace query
+
+            /***
+             * 
+             * 
+             * {
+  node(id: "eyJpZGVudGlmaWVyIjoxOTEyNzcsInR5cGUiOiJwcm9qZWN0In0=") {
+    ... on Workspace {
+      id
+      __typename
+      browse {
+        subFolders {
+          items {
+            name
+          }
+        }
+      }
+      assets(
+        query: { inFolder: {id: "eyJpZGVudGlmaWVyIjoxMDQ1NDYsInR5cGUiOiJmb2xkZXIifQ=="}}
+      ) {
+        items {
+          __typename
+          title
+          ... on File {
+            extension
+            modifiedAt
+          }
+        }
+      }
+    }
+  }
+}
+
+             */
             let query = `{
                 node(id: "${folder.id}") {
                   __typename
@@ -41,7 +75,7 @@ export function UploadDestinationPicker({ onChange }) {
                   ...on SubFolder {
                     id
                     name
-                    assets {
+                    assets(page: 2) {
                       items {
                         id
                         title

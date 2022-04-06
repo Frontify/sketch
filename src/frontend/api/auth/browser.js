@@ -5,21 +5,19 @@ import randomBytes from 'randombytes';
 
 export async function browser(domain) {
     let error = '';
-    console.log('browser');
+
     let authData = {
         sessionID: null,
         url: null,
         challengeCode: null,
         verifier: null,
     };
-    console.log(domain);
 
     if (domain) {
         // Sanitize the domain and make sure it has https in it
         let sanitizedDomain = sanitizeURL(domain).trim();
         authData.domain = sanitizedDomain;
         let response = await oauth.session(authData);
-        console.log({ response });
 
         if (response && response.success) {
             // Proof Key for Code Exchange (PKCE)
@@ -34,7 +32,6 @@ export async function browser(domain) {
             const responseType = 'code';
 
             const url = `${sanitizedDomain}/api/oauth/authorize/session?response_type=${responseType}&client_id=${clientID}&scope=${scope}&code_challenge=${challenge}&code_challenge_method=${challengeMethod}&session_id=${sessionID}`;
-            console.log(url);
 
             // Open a browser window
             // window.open(url);
@@ -56,7 +53,6 @@ export async function browser(domain) {
 }
 
 function sanitizeURL(url) {
-    console.log('sanitize', url);
     // protocol
     let pattern = /^(ht)tps?:\/\//i;
     if (!pattern.test(url)) {

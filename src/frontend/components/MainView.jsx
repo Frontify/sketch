@@ -52,7 +52,6 @@ export function MainView() {
 
     return (
         <custom-v-stack overflow="hidden" flex>
-            <custom-line></custom-line>
             <custom-scope-bar-wrapper padding="small">
                 <custom-h-stack gap="x-small">
                     {scopes.map((scope) => (

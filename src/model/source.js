@@ -15,13 +15,11 @@ class Source {
     constructor() {}
 
     getRemoteAssetForProjectIDByAssetID(projectID, assetID) {
-        console.log('getRemoteAssetForProjectIDByAssetID');
         // Ideally, this would be Infinity or we would use the global GraphQL endpoint …
         const depth = 999999999;
         return fetch(
             `/v1/assets/status/${projectID}?include_screen_activity=true&depth=${depth}&ext=sketch&id=${assetID}`
         ).then((result) => {
-            console.log(result);
             if (result.assets != null) {
                 // The API returns {assets} as an Object (?), and we’re interested in the first one
                 // that matches the given ID.
@@ -258,10 +256,10 @@ class Source {
         /**
          * Do we have the GraphQL ID? If not, let’s fetch it first.
          */
-        console.log('id?', refs.remote_graphql_id);
+
         if (!refs.remote_graphql_id) {
             // fetch!
-            console.log('fetch graphql id');
+
             let query = `{
                 asset(id: ${refs.remote_id}) {
                   id
@@ -295,12 +293,10 @@ class Source {
             let response = await fetch(url, options);
             let id = response.data?.asset?.id;
 
-            console.log('fetched id ', id);
             sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'remote_graphql_id', id);
             refs.remote_graphql_id = id;
         }
 
-        console.log(refs);
         recentFiles.push({ uuid: document.id, path, filename: filename[filename.length - 1], refs });
 
         sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'dirty', true);
@@ -309,12 +305,11 @@ class Source {
             if (asset) {
                 let sha = shaFile(asset.localpath);
                 if (sha != asset.sha) {
-                    console.log('🌀 Status Update');
                     let result = await fetch('/v1/screen/activity/' + asset.id, {
                         method: 'POST',
                         body: JSON.stringify({ activity: 'LOCAL_CHANGE' }),
                     });
-                    console.log('updated', result);
+
                     return result;
                 }
             }
@@ -393,13 +388,11 @@ class Source {
     pullSource(source) {
         return this.downloadSource(source).then(
             function (path) {
-                console.log('🎯🎯🎯🎯🎯DOWNLOADED SOURCE');
                 if (
                     path &&
                     source.current == true &&
                     NSDocumentController.sharedDocumentController().currentDocument()
                 ) {
-                    console.log('>>>>>OPEN FILE');
                     NSDocumentController.sharedDocumentController().currentDocument().close();
                     filemanager.openFile(path);
                 }
@@ -464,7 +457,6 @@ class Source {
 
     addSource(source, target) {
         return new Promise((resolve, reject) => {
-            console.log('>>> add source', source, target);
             try {
                 let file = {
                     path: target.path,
@@ -476,8 +468,6 @@ class Source {
                     project: target.project.id,
                     type: 'source',
                 };
-
-                console.log('attempt to upload source to frontify', file);
 
                 var sourceProgress = NSProgress.progressWithTotalUnitCount(100);
 

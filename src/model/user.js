@@ -20,8 +20,6 @@ class User {
         let domain = Settings.settingForKey('domain');
         let token = Settings.settingForKey('token');
 
-        console.log(domain, token);
-
         return domain && token;
     }
 
@@ -41,7 +39,6 @@ class User {
     }
 
     logout() {
-        console.log('LOGOUT IN SKETCH');
         // Previously, the API endpoint "logout" was called but we’ve removed it.
         return new Promise((resolve, reject) => {
             Settings.setSettingForKey('domain', null);

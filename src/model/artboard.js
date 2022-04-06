@@ -141,6 +141,7 @@ class Artboard {
     }
 
     exportArtboard(artboard, doc) {
+        console.log('export artboard', artboard);
         return new Promise(
             function (resolve) {
                 let files = [];
@@ -470,237 +471,233 @@ class Artboard {
         // sequence artboard export and upload
         this.uploadInProgress = true;
 
-        return this.getArtboards()
-            .then(
-                function (data) {
-                    let target = data.target;
+        // return this.getArtboards().then(
+        //     function (data) {
+        //         let target = data.target;
 
-                    // get the current state of the given artboards
-                    artboards = artboards.map(
-                        function (artboard) {
-                            return data.artboards.find(
-                                function (remoteArtboard) {
-                                    return remoteArtboard.id_external == artboard.id_external;
-                                }.bind(this)
-                            );
-                        }.bind(this)
-                    );
+        //         // get the current state of the given artboards
+        //         artboards = artboards.map((artboard) => {
+        //             return data.artboards.find((remoteArtboard) => {
+        //                 return remoteArtboard.id_external == artboard.id_external;
+        //             });
+        //         });
 
-                    let doc = sketch.getDocument();
-                    if (!doc) {
-                        throw new Error('No document found');
-                    } else {
-                        return artboards.reduce(
-                            function (sequence, artboard) {
-                                return sequence
-                                    .then(
-                                        function () {
-                                            return this.exportArtboard(artboard, doc);
-                                        }.bind(this)
-                                    )
-                                    .then(
-                                        function (files) {
-                                            var artboardProgress = NSProgress.progressWithTotalUnitCount(
-                                                10 * files.length + 20
-                                            );
-                                            artboardProgress.setCompletedUnitCount(0);
+        //     }.bind(this)
+        // );
 
-                                            var polling = setInterval(
-                                                function () {
-                                                    this.updateProgress(artboard, artboardProgress);
-                                                }.bind(this),
-                                                100
-                                            );
+        /**
+         * Force Upload
+         *
+         */
 
-                                            let artboardChanged = false;
-                                            return files
-                                                .reduce(
-                                                    function (uploadsequence, file) {
-                                                        return uploadsequence
-                                                            .then(
-                                                                function (assetId) {
-                                                                    if (file.type === 'artboard') {
-                                                                        if (artboard.sha != shaFile(file.path)) {
-                                                                            artboardChanged = true;
-                                                                            return filemanager
-                                                                                .uploadFile(
-                                                                                    {
-                                                                                        path: file.path,
-                                                                                        filename:
-                                                                                            file.name + '.' + file.ext,
-                                                                                        name: file.name,
-                                                                                        id: file.id,
-                                                                                        id_external: file.id_external,
-                                                                                        pixel_ratio: this.pixelRatio,
-                                                                                        folder: target.set.path,
-                                                                                        project: target.project.id,
-                                                                                        type: file.type,
-                                                                                    },
-                                                                                    artboardProgress
-                                                                                )
-                                                                                .then(
-                                                                                    function (data) {
-                                                                                        filemanager.deleteFile(
-                                                                                            file.path
-                                                                                        );
-                                                                                        this.updateProgress(
-                                                                                            artboard,
-                                                                                            artboardProgress
-                                                                                        );
-                                                                                        artboard.sha = data.sha;
-                                                                                        artboard.id = data.id;
-                                                                                        artboard.nochanges = false;
+        let doc = sketch.getDocument();
+        if (!doc) {
+            throw new Error('No document found');
+        } else {
+            // 1. Export each artboard
+            return artboards.reduce(
+                function (sequence, artboard) {
+                    return sequence
+                        .then(
+                            function () {
+                                return this.exportArtboard(artboard, doc);
+                            }.bind(this)
+                        )
+                        .then(
+                            function (files) {
+                                // 2. Compute the upload progress based on the exported files
+                                var artboardProgress = NSProgress.progressWithTotalUnitCount(10 * files.length + 20);
+                                artboardProgress.setCompletedUnitCount(0);
 
-                                                                                        return data.id;
-                                                                                    }.bind(this)
-                                                                                );
-                                                                        } else {
-                                                                            artboardChanged = false;
-                                                                            artboardProgress.setCompletedUnitCount(
-                                                                                artboardProgress.completedUnitCount() +
-                                                                                    10
-                                                                            );
-                                                                            this.updateProgress(
-                                                                                artboard,
-                                                                                artboardProgress
-                                                                            );
-                                                                            filemanager.deleteFile(file.path);
-                                                                            artboard.nochanges = true;
-                                                                            return artboard.id;
-                                                                        }
-                                                                    } else if (file.type === 'attachment') {
-                                                                        let status = this.getRemoteStatusForAttachment(
-                                                                            artboard,
-                                                                            file
-                                                                        );
+                                // 3. Start polling for the upload progress
+                                var polling = setInterval(
+                                    function () {
+                                        this.updateProgress(artboard, artboardProgress);
+                                    }.bind(this),
+                                    100
+                                );
 
-                                                                        if (
-                                                                            artboardChanged ||
-                                                                            status.sha != shaFile(file.path)
-                                                                        ) {
-                                                                            let filename;
-
-                                                                            if (file.ext === 'json') {
-                                                                                filename = file.name + '.' + file.ext;
-                                                                            } else {
-                                                                                // Generate unique filenames for exportables. That prevents same named layers to overwrite each others exportables.
-                                                                                filename =
-                                                                                    file.id_external +
-                                                                                    '-' +
-                                                                                    file.pixel_ratio +
-                                                                                    '.' +
-                                                                                    file.ext;
-                                                                            }
-
-                                                                            return filemanager
-                                                                                .uploadFile(
-                                                                                    {
-                                                                                        path: file.path,
-                                                                                        filename: filename,
-                                                                                        name: file.name,
-                                                                                        id_external: file.id_external,
-                                                                                        type: file.type,
-                                                                                        asset_id: assetId,
-                                                                                        pixel_ratio: file.pixel_ratio,
-                                                                                    },
-                                                                                    artboardProgress
-                                                                                )
-                                                                                .then(
-                                                                                    function (data) {
-                                                                                        filemanager.deleteFile(
-                                                                                            file.path
-                                                                                        );
-                                                                                        this.updateProgress(
-                                                                                            artboard,
-                                                                                            artboardProgress
-                                                                                        );
-                                                                                        status.sha = data.sha;
-                                                                                        return assetId;
-                                                                                    }.bind(this)
-                                                                                );
-                                                                        } else {
-                                                                            filemanager.deleteFile(file.path);
-                                                                            artboardProgress.setCompletedUnitCount(
-                                                                                artboardProgress.completedUnitCount() +
-                                                                                    10
-                                                                            );
-                                                                            this.updateProgress(
-                                                                                artboard,
-                                                                                artboardProgress
-                                                                            );
-                                                                            return assetId;
-                                                                        }
-                                                                    }
-                                                                }.bind(this)
-                                                            )
-                                                            .catch(
-                                                                function (err) {
-                                                                    console.error(err);
-                                                                    throw err;
-                                                                }.bind(this)
-                                                            );
-                                                    }.bind(this),
-                                                    Promise.resolve()
-                                                )
+                                let artboardChanged = false;
+                                return files
+                                    .reduce(
+                                        function (uploadsequence, file) {
+                                            return uploadsequence
                                                 .then(
                                                     function (assetId) {
-                                                        // start import of asset
-                                                        asset.import(assetId); /* calls the import API */
-                                                        artboardProgress.setCompletedUnitCount(
-                                                            artboardProgress.completedUnitCount() + 20
-                                                        );
-                                                        this.updateProgress(artboard, artboardProgress);
-                                                    }.bind(this)
-                                                )
-                                                .then(
-                                                    function (data) {
-                                                        clearInterval(polling);
-                                                        if (isWebviewPresent('frontifymain')) {
-                                                            sendToWebview(
-                                                                'frontifymain',
-                                                                'artboardUploaded(' + JSON.stringify(artboard) + ')'
+                                                        if (file.type === 'artboard') {
+                                                            if (artboard.sha != shaFile(file.path)) {
+                                                                artboardChanged = true;
+                                                                console.log('upload file!', {
+                                                                    path: file.path,
+                                                                    filename: file.name + '.' + file.ext,
+                                                                    name: file.name,
+                                                                    id: file.id,
+                                                                    id_external: file.id_external,
+                                                                    pixel_ratio: this.pixelRatio,
+                                                                    folder: artboard.target.remote_path,
+                                                                    project: artboard.target.remote_project_id,
+                                                                    type: file.type,
+                                                                });
+                                                                console.log('return filemanager');
+                                                                return filemanager
+                                                                    .uploadFile(
+                                                                        {
+                                                                            path: file.path,
+                                                                            filename: file.name + '.' + file.ext,
+                                                                            name: file.name,
+                                                                            id: file.id,
+                                                                            id_external: file.id_external,
+                                                                            pixel_ratio: this.pixelRatio,
+                                                                            folder: artboard.target.remote_path,
+                                                                            project: artboard.target.remote_project_id,
+                                                                            type: file.type,
+                                                                        },
+                                                                        artboardProgress
+                                                                    )
+                                                                    .then(
+                                                                        function (data) {
+                                                                            console.log('uploaded', data);
+                                                                            // 3. Handle the response from the API
+                                                                            filemanager.deleteFile(file.path);
+                                                                            this.updateProgress(
+                                                                                artboard,
+                                                                                artboardProgress
+                                                                            );
+                                                                            artboard.sha = data.sha;
+                                                                            artboard.id = data.id;
+                                                                            artboard.nochanges = false;
+
+                                                                            return data.id;
+                                                                        }.bind(this)
+                                                                    )
+                                                                    .catch((error) => {
+                                                                        console.error(error);
+                                                                    });
+                                                            } else {
+                                                                // Skip upload because the file hasn’t changed
+                                                                // Remove the exported artboard
+                                                                artboardChanged = false;
+                                                                artboardProgress.setCompletedUnitCount(
+                                                                    artboardProgress.completedUnitCount() + 10
+                                                                );
+                                                                this.updateProgress(artboard, artboardProgress);
+                                                                filemanager.deleteFile(file.path);
+                                                                artboard.nochanges = true;
+                                                                return artboard.id;
+                                                            }
+                                                        } else if (file.type === 'attachment') {
+                                                            let status = this.getRemoteStatusForAttachment(
+                                                                artboard,
+                                                                file
                                                             );
+
+                                                            if (artboardChanged || status.sha != shaFile(file.path)) {
+                                                                let filename;
+
+                                                                if (file.ext === 'json') {
+                                                                    filename = file.name + '.' + file.ext;
+                                                                } else {
+                                                                    // Generate unique filenames for exportables. That prevents same named layers to overwrite each others exportables.
+                                                                    filename =
+                                                                        file.id_external +
+                                                                        '-' +
+                                                                        file.pixel_ratio +
+                                                                        '.' +
+                                                                        file.ext;
+                                                                }
+
+                                                                return filemanager
+                                                                    .uploadFile(
+                                                                        {
+                                                                            path: file.path,
+                                                                            filename: filename,
+                                                                            name: file.name,
+                                                                            id_external: file.id_external,
+                                                                            type: file.type,
+                                                                            asset_id: assetId,
+                                                                            pixel_ratio: file.pixel_ratio,
+                                                                        },
+                                                                        artboardProgress
+                                                                    )
+                                                                    .then(
+                                                                        function (data) {
+                                                                            filemanager.deleteFile(file.path);
+                                                                            this.updateProgress(
+                                                                                artboard,
+                                                                                artboardProgress
+                                                                            );
+                                                                            status.sha = data.sha;
+                                                                            return assetId;
+                                                                        }.bind(this)
+                                                                    );
+                                                            } else {
+                                                                filemanager.deleteFile(file.path);
+                                                                artboardProgress.setCompletedUnitCount(
+                                                                    artboardProgress.completedUnitCount() + 10
+                                                                );
+                                                                this.updateProgress(artboard, artboardProgress);
+                                                                return assetId;
+                                                            }
                                                         }
-                                                        return true;
                                                     }.bind(this)
                                                 )
                                                 .catch(
                                                     function (err) {
-                                                        clearInterval(polling);
-                                                        if (isWebviewPresent('frontifymain')) {
-                                                            sendToWebview(
-                                                                'frontifymain',
-                                                                'artboardUploadFailed(' + JSON.stringify(artboard) + ')'
-                                                            );
-                                                        }
+                                                        console.error(err);
                                                         throw err;
                                                     }.bind(this)
                                                 );
+                                        }.bind(this),
+                                        Promise.resolve()
+                                    )
+                                    .then(
+                                        function (assetId) {
+                                            // start import of asset
+                                            asset.import(assetId); /* calls the import API */
+                                            artboardProgress.setCompletedUnitCount(
+                                                artboardProgress.completedUnitCount() + 20
+                                            );
+                                            this.updateProgress(artboard, artboardProgress);
+                                        }.bind(this)
+                                    )
+                                    .then(
+                                        function (data) {
+                                            clearInterval(polling);
+                                            if (isWebviewPresent('frontifymain')) {
+                                                // Todo: Remmeber the Frontify ID
+                                                // Add the ID to the "destinations" map or the artboard itself
+                                                sendToWebview(
+                                                    'frontifymain',
+                                                    'artboardUploaded(' + JSON.stringify(artboard) + ')'
+                                                );
+                                            }
+                                            return true;
                                         }.bind(this)
                                     )
                                     .catch(
                                         function (err) {
-                                            console.error(err);
+                                            clearInterval(polling);
+                                            if (isWebviewPresent('frontifymain')) {
+                                                sendToWebview(
+                                                    'frontifymain',
+                                                    'artboardUploadFailed(' + JSON.stringify(artboard) + ')'
+                                                );
+                                            }
                                             throw err;
                                         }.bind(this)
                                     );
-                            }.bind(this),
-                            Promise.resolve()
+                            }.bind(this)
+                        )
+                        .catch(
+                            function (err) {
+                                console.error(err);
+                                throw err;
+                            }.bind(this)
                         );
-                    }
-                }.bind(this)
-            )
-            .then(
-                function (data) {
-                    this.uploadInProgress = false;
-                }.bind(this)
-            )
-            .catch(
-                function (err) {
-                    this.uploadInProgress = false;
-                    console.error(err);
-                }.bind(this)
+                }.bind(this),
+                Promise.resolve()
             );
+        }
     }
 
     getRemoteStatusForAttachment(artboard, file) {

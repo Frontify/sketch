@@ -64,7 +64,6 @@ class FileManager {
     moveCurrent(brand, project, folder) {
         let base = target.getPathToSyncFolderForBrandAndProject(brand, project);
         let path = `${base}/${folder}/`;
-        console.log('move current', path);
 
         if (createFolder(path)) {
             let doc = sketch.getDocument();
@@ -111,7 +110,7 @@ class FileManager {
     }
 
     uploadFile(info, overallProgress) {
-        console.log({ info });
+        console.log('uploadFile', info);
         // remap slashes in filename to folders
         let filenameParts = info.filename.split('/');
         let filename = filenameParts.pop();
@@ -200,8 +199,6 @@ class FileManager {
             coscript.shouldKeepAround = true;
         }
 
-        console.log('🚀 Upload', data, options);
-
         return new Promise(function (resolve, reject) {
             var url = NSURL.alloc().initWithString(uri);
             var request = NSMutableURLRequest.requestWithURL(url);
@@ -210,9 +207,6 @@ class FileManager {
             Object.keys(options.headers || {}).forEach(function (i) {
                 request.setValue_forHTTPHeaderField(options.headers[i], i);
             });
-
-            console.log('new form data');
-            console.error(options.filepath);
 
             let formData = new FormData();
 
@@ -293,9 +287,8 @@ class FileManager {
         })
             .then(
                 async function (response) {
-                    console.log('🌟 Uploaded', options);
                     let json = await response.json();
-                    console.log(json);
+
                     return response.json();
                 }.bind(this)
             )
@@ -332,9 +325,6 @@ class FileManager {
     }
 
     downloadFileToPath(uri, path, overallProgress) {
-        // get token
-        console.log('downloadFileToPath', uri, path, overallProgress);
-
         /**
          * No access token is required to download a file.
          */

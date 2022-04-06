@@ -47,12 +47,10 @@ export const UserContextProvider = ({ children }) => {
 
             switch (type) {
                 case 'progress':
-                    console.log('progress', payload);
                     switch (payload.state) {
                         case "upload-failed'":
                             break;
                         case "upload-complete'":
-                            console.log('compelte');
                             setTransferMap((state) => {
                                 // Remove the entry from transferMap
                                 delete state[payload.id];
@@ -67,10 +65,8 @@ export const UserContextProvider = ({ children }) => {
 
                     break;
                 case 'current-document.changed':
-                    console.log('yo');
                     break;
                 case 'refresh':
-                    console.log('🌀', payload);
                     actions.refresh(payload);
                     break;
             }
@@ -183,7 +179,6 @@ export const UserContextProvider = ({ children }) => {
      */
     const actions = {
         getProjectFolders(project) {
-            console.log('getProjectFolders');
             return queryGraphQLWithAuth({ query: browseWorkspaceProject(project), auth });
         },
         getFolders(folder) {
@@ -272,7 +267,6 @@ export const UserContextProvider = ({ children }) => {
             return queryGraphQLWithAuth({ query: listQuery(id, libraryType, page, limit), auth });
         },
         openSource(source) {
-            console.log(source);
             setCurrentDocument(source);
         },
 
@@ -309,7 +303,6 @@ export const UserContextProvider = ({ children }) => {
 
             setRefreshing(true);
 
-            console.log('🌀 refresh');
             // let { sources } = await useSketch('getLocalAndRemoteSourceFiles');
 
             // setSources(sources.sources);
@@ -351,7 +344,6 @@ export const UserContextProvider = ({ children }) => {
             setBrands(blueprints.brands);
         },
         async getUser(credentials) {
-            console.log('>>>>getUser');
             return new Promise(async (resolve, reject) => {
                 if (credentials && credentials.domain && credentials.token) {
                     try {

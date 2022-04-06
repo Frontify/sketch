@@ -18,12 +18,8 @@ export async function signIn({ accessToken, domain, forceRefresh }) {
         authData.accessToken = accessToken;
         authData.domain = domain;
 
-        console.log('go');
-
         // get all the data!
         let response = await api.loadUser(authData);
-
-        console.log('response?', response);
 
         if (response) {
             let data = response.data;

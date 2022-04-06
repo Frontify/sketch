@@ -51,7 +51,6 @@ export function MediaLibrariesView({ type }) {
     // Depending on the {newMode}, we’ll load more assets, either by
     // either using {loadMediaLibrary} or {searchMediaLibrary}.
     const loadMore = async (newMode) => {
-        console.log('load more omg', loading, images.length, totalImages);
         let nextPage = page;
         if (newMode != mode) {
             setPage(1);

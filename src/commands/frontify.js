@@ -2,6 +2,7 @@ import main from '../windows/main';
 import executeSafely from '../helpers/executeSafely';
 import source from '../model/source';
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
+import sketch from '../model/sketch';
 const sketch3 = require('sketch');
 
 import { getPluginState } from '../windows/main';
@@ -19,14 +20,12 @@ export function runCommand(context) {
 }
 
 export function openCommand(context) {
-    console.log('document: opened');
     executeSafely(context, function () {
         let interval = setInterval(function () {
             if (context.actionContext.document.documentWindow()) {
                 clearInterval(interval);
                 source.opened().then(function () {
                     refresh();
-                    console.log('called refresh after interval');
                 });
             }
         }, 200);
@@ -34,7 +33,6 @@ export function openCommand(context) {
 }
 
 export function savedCommand(context) {
-    console.log('document: saved');
     executeSafely(context, function () {
         source.saved().then(function () {
             refresh();
@@ -43,7 +41,6 @@ export function savedCommand(context) {
 }
 
 export function closeCommand(context) {
-    console.log('document: closed');
     executeSafely(context, function () {
         source.closed().then(function () {
             refresh();
@@ -58,6 +55,7 @@ export function selectionChangedCommand(context) {
             let oldDocumentID = sketch3.Settings.sessionVariable(key);
 
             let newDocument = sketch3.Document.getSelectedDocument();
+
             if (newDocument) {
                 let newDocumentID = newDocument.id;
                 sketch3.Settings.setSessionVariable(key, newDocumentID);
@@ -67,8 +65,23 @@ export function selectionChangedCommand(context) {
                     refresh();
                 }
             }
+            let payload = {};
+            try {
+                let currentDocument = sketch3.Document.fromNative(sketch.getDocument());
 
-            console.log('Reading session variable…', documentID);
+                let artboards = [];
+                currentDocument.selectedLayers.forEach((layer) => {
+                    if (layer.type == 'Artboard') {
+                        artboards.push(layer);
+                    }
+                });
+                payload = { success: true, artboards };
+            } catch (error) {
+                console.error(error);
+                payload = { success: false };
+            }
+
+            frontend.send('artboards-changed', payload);
         }
     });
 }
@@ -96,7 +109,6 @@ const IDENTIFIER = 'frontifymain';
  */
 const frontend = {
     send(type, payload) {
-        console.log('send to frontend', type, payload);
         sendToWebview(IDENTIFIER, `send(${JSON.stringify({ type, payload })})`);
     },
 };

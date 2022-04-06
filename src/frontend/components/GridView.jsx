@@ -25,11 +25,8 @@ export function GridView({ images, limit = 25, onIntersect, onSelect, thumbWidth
 
         setTimeout(async () => {
             try {
-                console.log('-> applyLibraryAsset');
                 await useSketch('applyLibraryAsset', { asset });
-            } catch (error) {
-                console.log('Could not apply asset', error);
-            }
+            } catch (error) {}
 
             setLoading(false);
         }, 250);
@@ -81,9 +78,7 @@ export function GridView({ images, limit = 25, onIntersect, onSelect, thumbWidth
                                     applyAsset(image);
                                 }
                             }}
-                            onDragEnd={(event) => {
-                                console.log('drop', event);
-                            }}
+                            onDragEnd={(event) => {}}
                             onDragStart={async (event) => {
                                 // By default, images can be drag & dropped into Sketch.
                                 // The problem: they will have the same size as the preview.

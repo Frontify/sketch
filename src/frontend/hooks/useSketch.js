@@ -12,14 +12,13 @@ export async function useSketch(type, args) {
 
     return new Promise(async (resolve, reject) => {
         const requestUUID = UUIDGeneratorBrowser();
-        console.log('request: ', requestUUID);
+
         window.postMessage('request', { type, requestUUID, args });
 
         const handler = (event) => {
             let { type, payload } = event.detail.data;
 
             if (type == 'response' && requestUUID == payload.responseUUID) {
-                console.log('remove listener', requestUUID, payload.responseUUID);
                 window.removeEventListener('message-from-sketch', handler);
                 resolve(payload);
             }
