@@ -150,7 +150,20 @@ export function UploadDestinationPicker({ onChange }) {
     const enterFolder = (folder) => {
         setFolder(folder);
         setBreadcrumbs((state) => state.concat(folder));
-        onChange({ type: 'folder', folder, project });
+        onChange({
+            type: 'folder',
+            folder,
+            project,
+            breadcrumbs,
+            folderPath: []
+                .concat(breadcrumbs.map((breadcrumb) => breadcrumb.name))
+                .concat(folder.name)
+                .join('/'),
+            path: [selection.brand.name, project.name]
+                .concat(breadcrumbs.map((breadcrumb) => breadcrumb.name))
+                .concat(folder.name)
+                .join('/'),
+        });
     };
 
     const pickFile = (file) => {

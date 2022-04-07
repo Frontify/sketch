@@ -105,6 +105,7 @@ function SourceAction({ status, actions, loading }) {
         case 'push':
             return (
                 <Button
+                    style="Positive"
                     hugWidth={false}
                     onClick={() => {
                         actions.pushSource();

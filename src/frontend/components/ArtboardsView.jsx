@@ -1,6 +1,20 @@
 import React from 'react';
-import { Button, Flyout, IconCaretDown, IconMore, LoadingCircle, Text } from '@frontify/arcade';
+import {
+    Badge,
+    Button,
+    Flyout,
+    IconCaretDown,
+    IconMinus,
+    IconImage,
+    IconUploadAlternative,
+    IconMore,
+    IconFolder,
+    IconPlus,
+    LoadingCircle,
+    Text,
+} from '@frontify/arcade';
 
+import { UploadDestinationPicker } from '../components/UploadDestinationPicker';
 import { SearchField } from './SearchField';
 import { useState, useEffect, useCallback, useContext } from 'react';
 
@@ -12,10 +26,25 @@ export function ArtboardsView() {
     const [loading, setLoading] = useState(false);
     const [open, setOpen] = useState(false);
     const [destinationPickerOpen, setDestinationPickerOpen] = useState(false);
+    const [showDestinationPicker, setShowDestinationPicker] = useState(false);
+
+    const [uploadDestination, setUploadDestination] = useState({});
+
     const [currentSource, setCurrentSource] = useState({});
     const { t } = useTranslation();
 
     const [artboards, setArtboards] = useState([]);
+
+    const uploadAll = async () => {
+        setLoading(true);
+        await useSketch('uploadArtboards', { artboards });
+        setLoading(false);
+    };
+
+    const uploadArtboards = async () => {
+        console.log('upload to…', artboards, uploadDestination);
+        hack();
+    };
 
     useEffect(async () => {
         let response = await useSketch('getSelectedArtboards');
@@ -26,6 +55,23 @@ export function ArtboardsView() {
     /**
      * Subscription
      */
+
+    const hack = () => {
+        setArtboards((artboards) => {
+            return artboards.map((artboard) => {
+                return {
+                    ...artboard,
+                    destinations: [
+                        {
+                            remote_project_id: uploadDestination.project.id,
+                            remote_id: null,
+                            remote_path: `/${uploadDestination.folderPath}/`,
+                        },
+                    ],
+                };
+            });
+        });
+    };
 
     useEffect(() => {
         let handler = (event) => {
@@ -49,89 +95,150 @@ export function ArtboardsView() {
 
     const [selection] = useState([]);
 
-    const [sources] = useState([
-        {
-            id: 'S1',
-            title: 'workspace_template-chooser',
-            path: 'Arcade / Inventory / Graphics / Illustrations',
-            artboards: [
-                {
-                    id: 'A1',
-                    title: 'Baby rose - Rosa multiflora',
-                    updated: '2 minutes ago',
-                    updated_by: 'you',
-                },
-                {
-                    id: 'A2',
-                    title: 'Maize - Zea mays',
-                    updated: '2 minutes ago',
-                    updated_by: 'Susanne Müller',
-                },
-                {
-                    id: 'A3',
-                    title: 'Maize - Zea mays',
-                    updated: '2 minutes ago',
-                    updated_by: 'Susanne Müller',
-                },
-                {
-                    id: 'A4',
-                    title: 'Maize - Zea mays',
-                    updated: '2 minutes ago',
-                    updated_by: 'Susanne Müller',
-                },
-                {
-                    id: 'A5',
-                    title: 'Maize - Zea mays',
-                    updated: '2 minutes ago',
-                    updated_by: 'Susanne Müller',
-                },
-            ],
-        },
-    ]);
-
-    useEffect(() => {
-        setCurrentSource(sources[0]);
-    }, []);
-
     if (artboards.length) {
         return (
-            <custom-v-stack gap="small" padding="small" justify-content="center" align-items="center">
-                <custom-line></custom-line>
-                {loading ? <LoadingCircle></LoadingCircle> : ''}
-                {artboards &&
-                    artboards.length &&
-                    artboards.map((artboard) => {
-                        return (
-                            <custom-palette-item
-                                onClick={async () => {
-                                    setLoading(true);
-                                    await useSketch('uploadArtboards', { artboards });
-                                    setLoading(false);
-                                }}
-                                key={artboard.id}
-                            >
-                                {artboard.name}
-                            </custom-palette-item>
-                        );
-                    })}
+            <custom-v-stack gap="small" flex stretch>
+                {/* <custom-scope-bar-wrapper padding="small">
+                    <custom-h-stack align-items="center" gap="x-small">
+                        <custom-scope-button className="tw-round">
+                            <label>
+                                <input type="radio" name="activeView" value="recent" onChange={(event) => {}} />
+                                <Text>Changes (2)</Text>
+                            </label>
+                        </custom-scope-button>
+                        <custom-scope-button
+                            className="tw-round"
+                            active={location.pathname.includes('/sources/remote')}
+                        >
+                            <label>
+                                <input type="radio" name="activeView" value="remote" onChange={(event) => {}} />
+                                <Text size="x-small">Untracked (1)</Text>
+                            </label>
+                        </custom-scope-button>
+                        <custom-spacer></custom-spacer>
+                    </custom-h-stack>
+                </custom-scope-bar-wrapper> */}
 
                 <custom-line></custom-line>
-                {selection.length ? (
-                    <Button>Upload ({selection.length}) artboards to … </Button>
-                ) : (
-                    <Button disabled>No Artboards Selected</Button>
-                )}
-            </custom-v-stack>
-        );
-    }
 
-    if (!sources.length) {
-        return (
-            <custom-v-stack gap="small" padding="small" justify-content="center" align-items="center">
-                <Text size="large" weight="strong">
-                    No artboards uploaded
-                </Text>
-                <Text>Select some artboards in Sketch and click the button to add them to Frontify.</Text>
+                <custom-scroll-view>
+                    <custom-v-stack>
+                        {artboards.map((artboard) => {
+                            return (
+                                <custom-v-stack key={artboard.id}>
+                                    <custom-h-stack gap="small" flex padding="small">
+                                        {/* <custom-artboard-preview></custom-artboard-preview> */}
+                                        <custom-v-stack flex gap="x-small">
+                                            <custom-h-stack align-items="center">
+                                                <custom-v-stack gap="x-small">
+                                                    <Text>
+                                                        <strong>{artboard.name}</strong>
+                                                        <span>.png</span>
+                                                    </Text>
+                                                </custom-v-stack>
+                                            </custom-h-stack>
+
+                                            <custom-h-stack align-items="center" flex gap="x-small">
+                                                {!artboard.destinations.length ? (
+                                                    <Badge style="Progress">NEW</Badge>
+                                                ) : (
+                                                    ''
+                                                )}
+
+                                                {artboard.destinations.map((destination, index) => {
+                                                    return (
+                                                        <custom-h-stack key={index} gap="x-small">
+                                                            {!destination.remote_id ? <Text>NEW</Text> : ''}
+                                                            <Text size="small" color="weak">
+                                                                <IconImage></IconImage>
+                                                                {destination.remote_id} → <IconFolder></IconFolder>/
+                                                                {destination.remote_project_id}
+                                                                {destination.remote_path}
+                                                            </Text>
+                                                            {context.transferMap[destination.remote_id]?.progress ? (
+                                                                <span style={{ fontFeatureSettings: 'tnum' }}>
+                                                                    {Math.floor(
+                                                                        context.transferMap[destination.remote_id]
+                                                                            ?.progress
+                                                                    )}
+                                                                    %
+                                                                </span>
+                                                            ) : (
+                                                                ''
+                                                            )}
+                                                        </custom-h-stack>
+                                                    );
+                                                })}
+                                                <custom-spacer></custom-spacer>
+                                                {/* <Button inverted="true" icon={<IconMinus />}></Button> */}
+                                            </custom-h-stack>
+                                        </custom-v-stack>
+                                    </custom-h-stack>
+                                    <custom-line></custom-line>
+                                </custom-v-stack>
+                            );
+                        })}
+                    </custom-v-stack>
+                </custom-scroll-view>
+
+                <custom-line></custom-line>
+                <custom-v-stack>
+                    <custom-h-stack padding="small" gap="small" align-items="center" justify-content="center">
+                        <Flyout
+                            onCancel={() => setShowDestinationPicker(false)}
+                            isOpen={showDestinationPicker}
+                            onOpenChange={(open) => {
+                                if (open) {
+                                    setShowDestinationPicker(false);
+                                } else {
+                                    setShowDestinationPicker(true);
+                                }
+                            }}
+                            trigger={
+                                <Button
+                                    style="Secondary"
+                                    onClick={() => {
+                                        setShowDestinationPicker(true);
+                                    }}
+                                    icon={<IconFolder />}
+                                >
+                                    Choose folder …
+                                </Button>
+                            }
+                        >
+                            <custom-v-stack padding="small" gap="small">
+                                <h2>Destination</h2>
+                                <Text>
+                                    Choose the folder where you want to publish{' '}
+                                    <strong>{context.currentDocument.local.filename}</strong>
+                                </Text>
+                                <hr />
+                                <UploadDestinationPicker
+                                    onChange={(value) => {
+                                        setUploadDestination(value);
+                                    }}
+                                ></UploadDestinationPicker>
+                                <hr />
+                                <Button
+                                    onClick={() => {
+                                        uploadArtboards(uploadDestination);
+
+                                        setShowDestinationPicker(false);
+                                    }}
+                                >
+                                    Confirm
+                                </Button>
+                            </custom-v-stack>
+                        </Flyout>
+                        <Button style="Primary" onClick={() => uploadAll()} icon={<IconUploadAlternative />}>
+                            Upload ({artboards.length})
+                        </Button>
+                        {loading ? <LoadingCircle></LoadingCircle> : ''}
+                        {/* <Button style="Primary" onClick={() => hack()}>
+                            Hack
+                        </Button> */}
+                    </custom-h-stack>
+                </custom-v-stack>
             </custom-v-stack>
         );
     }
@@ -142,12 +249,7 @@ export function ArtboardsView() {
                 <div padding="small">
                     <SearchField placeholder="Search Artboards" onChange={() => {}}></SearchField>
                 </div>
-                <div style={{ width: '100%' }}>
-                    <details>
-                        <summary>View Payload</summary>
-                        <pre>{JSON.stringify(context.currentDocument, null, 2)}</pre>
-                    </details>
-                </div>
+
                 <div padding="small">
                     <custom-h-stack padding="small" style={{ background: 'rgba(0, 0, 0, 0.1)' }}>
                         <Text color="weak">
@@ -158,48 +260,6 @@ export function ArtboardsView() {
                 </div>
                 <custom-line></custom-line>
                 <h2>Upload targets (3)</h2>
-                <custom-scroll-view>
-                    {sources.map((source) => {
-                        return (
-                            <custom-v-stack key={source.id} gap="medium" padding="small">
-                                <custom-h-stack gap="x-small" align-items="center">
-                                    <IconCaretDown size="Size16"></IconCaretDown>
-                                    <Text size="x-small">{source.path}</Text>
-                                    <custom-spacer></custom-spacer>
-                                    <Flyout
-                                        trigger={
-                                            <Button
-                                                icon={<IconMore />}
-                                                inverted
-                                                onClick={() => setOpen((open) => !open)}
-                                            ></Button>
-                                        }
-                                        isOpen={open}
-                                        onOpenChange={(isOpen) => setOpen(isOpen)}
-                                        legacyFooter={false}
-                                    >
-                                        <div padding="small">Flyout Content</div>
-                                    </Flyout>
-                                </custom-h-stack>
-                                <custom-v-stack gap="small">
-                                    {source.artboards.map((artboard) => {
-                                        return (
-                                            <custom-h-stack gap="small" key={artboard.id}>
-                                                <custom-artboard-preview></custom-artboard-preview>
-                                                <custom-v-stack gap="x-small">
-                                                    <Text>{artboard.title}</Text>
-                                                    <Text size="small" color="weak">
-                                                        {artboard.updated} by {artboard.updated_by}
-                                                    </Text>
-                                                </custom-v-stack>
-                                            </custom-h-stack>
-                                        );
-                                    })}
-                                </custom-v-stack>
-                            </custom-v-stack>
-                        );
-                    })}
-                </custom-scroll-view>
 
                 <custom-v-stack>
                     <custom-line></custom-line>

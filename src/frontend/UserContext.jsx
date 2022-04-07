@@ -47,6 +47,7 @@ export const UserContextProvider = ({ children }) => {
 
             switch (type) {
                 case 'progress':
+                    console.log('porgress event', payload);
                     switch (payload.state) {
                         case "upload-failed'":
                             break;

@@ -5,6 +5,8 @@ import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
 import sketch from '../model/sketch';
 const sketch3 = require('sketch');
 
+import { getSelectedArtboards } from '../windows/actions/getSelectedArtboards';
+
 import { getPluginState } from '../windows/main';
 
 export function runCommand(context) {
@@ -65,21 +67,7 @@ export function selectionChangedCommand(context) {
                     refresh();
                 }
             }
-            let payload = {};
-            try {
-                let currentDocument = sketch3.Document.fromNative(sketch.getDocument());
-
-                let artboards = [];
-                currentDocument.selectedLayers.forEach((layer) => {
-                    if (layer.type == 'Artboard') {
-                        artboards.push(layer);
-                    }
-                });
-                payload = { success: true, artboards };
-            } catch (error) {
-                console.error(error);
-                payload = { success: false };
-            }
+            let payload = getSelectedArtboards();
 
             frontend.send('artboards-changed', payload);
         }

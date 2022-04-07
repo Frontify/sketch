@@ -6,6 +6,7 @@ import target from './target';
 import filemanager from './filemanager';
 import asset from './asset';
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
+import { patchDestinations, setDestinations } from '../windows/actions/getSelectedArtboards';
 
 let API = require('sketch');
 let DOM = require('sketch/dom');
@@ -19,17 +20,19 @@ class Artboard {
     }
 
     updateProgress(options, progress) {
+        console.log('update progress');
         if (isWebviewPresent('frontifymain')) {
-            sendToWebview(
-                'frontifymain',
-                'artboardUploadProgress(' +
-                    JSON.stringify({
-                        id: options.id,
-                        id_external: options.id_external,
-                        progress: progress.fractionCompleted() * 100,
-                    }) +
-                    ')'
-            );
+            frontend.send('progress', { state: 'uploading', progress: progress.fractionCompleted() * 100, ...options });
+            // sendToWebview(
+            //     'frontifymain',
+            //     'artboardUploadProgress(' +
+            //         JSON.stringify({
+            //             id: options.id,
+            //             id_external: options.id_external,
+            //             progress: progress.fractionCompleted() * 100,
+            //         }) +
+            //         ')'
+            // );
         }
     }
 
@@ -221,7 +224,8 @@ class Artboard {
      * Local counterpart to Settings.setLayerSettingsForKey for already exported structures
      * */
     setLayerSettingForKey(layer, key, value) {
-        let settings;
+        console.log(layer, key, value);
+        let settings = {};
         const data = JSON.stringify(value);
 
         if (!layer.hasOwnProperty('userInfo')) {
@@ -527,18 +531,7 @@ class Artboard {
                                                         if (file.type === 'artboard') {
                                                             if (artboard.sha != shaFile(file.path)) {
                                                                 artboardChanged = true;
-                                                                console.log('upload file!', {
-                                                                    path: file.path,
-                                                                    filename: file.name + '.' + file.ext,
-                                                                    name: file.name,
-                                                                    id: file.id,
-                                                                    id_external: file.id_external,
-                                                                    pixel_ratio: this.pixelRatio,
-                                                                    folder: artboard.target.remote_path,
-                                                                    project: artboard.target.remote_project_id,
-                                                                    type: file.type,
-                                                                });
-                                                                console.log('return filemanager');
+
                                                                 return filemanager
                                                                     .uploadFile(
                                                                         {
@@ -556,7 +549,19 @@ class Artboard {
                                                                     )
                                                                     .then(
                                                                         function (data) {
-                                                                            console.log('uploaded', data);
+                                                                            console.log('✅uploaded', data, artboard);
+                                                                            let destination = {
+                                                                                remote_project_id:
+                                                                                    artboard.target.remote_project_id,
+                                                                                remote_id: data.id,
+                                                                                remote_path:
+                                                                                    artboard.target.remote_path,
+                                                                            };
+
+                                                                            patchDestinations(
+                                                                                file.id_external,
+                                                                                destination
+                                                                            );
                                                                             // 3. Handle the response from the API
                                                                             filemanager.deleteFile(file.path);
                                                                             this.updateProgress(
@@ -666,10 +671,10 @@ class Artboard {
                                             if (isWebviewPresent('frontifymain')) {
                                                 // Todo: Remmeber the Frontify ID
                                                 // Add the ID to the "destinations" map or the artboard itself
-                                                sendToWebview(
-                                                    'frontifymain',
-                                                    'artboardUploaded(' + JSON.stringify(artboard) + ')'
-                                                );
+                                                // sendToWebview(
+                                                //     'frontifymain',
+                                                //     'artboardUploaded(' + JSON.stringify(artboard) + ')'
+                                                // );
                                             }
                                             return true;
                                         }.bind(this)
@@ -765,4 +770,15 @@ class Artboard {
     }
 }
 
+// Identifier for the plugin window that we can use for message passing
+const IDENTIFIER = 'frontifymain';
+/**
+ * We can use this helper to make it more convenient to send messages to the webview.
+ */
+const frontend = {
+    send(type, payload) {
+        console.log('send to frontend', type, payload);
+        sendToWebview(IDENTIFIER, `send(${JSON.stringify({ type, payload })})`);
+    },
+};
 export default new Artboard();
