@@ -258,36 +258,6 @@ export function ArtboardsView() {
                         </Text>
                     </custom-h-stack>
                 </div>
-                <custom-line></custom-line>
-                <h2>Upload targets (3)</h2>
-
-                <custom-v-stack>
-                    <custom-line></custom-line>
-
-                    <custom-h-stack padding="small" gap="small" align-items="center" justify-content="center">
-                        <Flyout
-                            trigger={
-                                <Button
-                                    style="Secondary"
-                                    onClick={() => {
-                                        setDestinationPickerOpen((destinationPickerOpen) => !destinationPickerOpen);
-                                    }}
-                                >
-                                    {t('sources.upload_selection')}
-                                </Button>
-                            }
-                            isOpen={destinationPickerOpen}
-                            onOpenChange={(isOpen) => setDestinationPickerOpen(isOpen)}
-                            legacyFooter={false}
-                        >
-                            <custom-v-stack padding="small" gap="small">
-                                <Text>{currentSource.path}</Text>
-                                <Text>Other …</Text>
-                            </custom-v-stack>
-                        </Flyout>
-                        <Button style="Primary">{t('sources.update_artboards')}</Button>
-                    </custom-h-stack>
-                </custom-v-stack>
             </custom-v-stack>
             )
         </custom-scroll-view>
