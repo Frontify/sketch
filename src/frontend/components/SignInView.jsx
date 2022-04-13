@@ -30,7 +30,7 @@ export function SignInView() {
                     type="text"
                     placeholder="https://domain"
                     value={domain}
-                    onInput={(event) => setDomain(event.target.value)}
+                    onChange={(value) => setDomain(value)}
                 />
             </fieldset>
             <div>
