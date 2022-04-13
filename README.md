@@ -21,6 +21,8 @@ Create certificates
 
 # Development
 
+To run the plugin, you need to start (2) processes: One will build the Sketch plugin with Webpack whenever plugin code changes. The other will start the dev server serving the React Frontend. Why two? Originally the plugin used Webpack to build everything but Vite is a lot faster in development. In production, Vite makes the process simpler: the build folder is simply moved to the plugin bundle.
+
 ## 1. Build the plugin
 
 This command will use `skpm` and `webpack` to bundle the plugin. It takes care of creating the .sketchplugin bundle, moves the plugin commands and scripts and more. It does not care about the frontend.
