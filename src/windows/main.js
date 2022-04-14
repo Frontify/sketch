@@ -31,6 +31,8 @@ let sketch3 = require('sketch');
 
 console.log('called main.js');
 
+import State from './State';
+
 export function getPluginState() {
     let payload = {
         currentDocument: null,
@@ -64,16 +66,11 @@ function pathInsidePluginBundle(url) {
  */
 const frontend = {
     send(type, payload) {
-        console.log('send to frontend', type, payload);
         sendToWebview(IDENTIFIER, `send(${JSON.stringify({ type, payload })})`);
     },
 };
 
-export const state = {
-    foo: 'bar',
-};
-
-state.foo = 'yo';
+let state = {};
 
 function refresh() {
     /**
@@ -153,6 +150,11 @@ export default function (context, view) {
     // Show window if ready
     win.once('ready-to-show', () => {
         console.log('👋 Frontify Plugin is now running. NODE_ENV: ', process.env.NODE_ENV);
+
+        console.log('did finish load');
+        state.foo = '123';
+        console.log(state);
+
         win.show();
     });
 
@@ -439,7 +441,7 @@ export default function (context, view) {
 
     async function handleRequestFromFrontend({ type = '', requestUUID = null, args = {} }) {
         let payload = {};
-        console.log('request!', new Date().getTime(), type, args);
+        console.log('request!', new Date().getTime(), type, args, state);
         switch (type) {
             case 'addCurrentFile':
                 try {

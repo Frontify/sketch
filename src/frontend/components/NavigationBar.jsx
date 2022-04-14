@@ -349,8 +349,7 @@ export function NavigationBar() {
                         }}
                     >
                         <custom-h-stack gap="small" align-items="center">
-                            <IconRefresh size="Size20"></IconRefresh>
-                            <span>Refresh</span>
+                            <span>Connect</span>
                         </custom-h-stack>
                     </Button>
                 </div>

@@ -36,7 +36,7 @@ export const UserContextProvider = ({ children }) => {
         textStylePalettes: [],
         user: { name: '', id: null, email: null, avatar: null },
     };
-
+    let [tick, setTick] = useState(0);
     let [transferMap, setTransferMap] = useState(blueprints.transferMap);
 
     let [refreshing, setRefreshing] = useState(false);
@@ -46,8 +46,10 @@ export const UserContextProvider = ({ children }) => {
             let { type, payload } = event.detail.data;
 
             switch (type) {
+                case 'tick':
+                    setTick(payload.value);
+                    break;
                 case 'progress':
-                    console.log('porgress event', payload);
                     switch (payload.state) {
                         case "upload-failed'":
                             break;
@@ -399,6 +401,7 @@ export const UserContextProvider = ({ children }) => {
         selection,
         sources,
         textStylePalettes,
+        tick,
         transferMap,
         user,
     };

@@ -20,19 +20,34 @@ class Artboard {
     }
 
     updateProgress(options, progress) {
-        console.log('update progress');
         if (isWebviewPresent('frontifymain')) {
-            frontend.send('progress', { state: 'uploading', progress: progress.fractionCompleted() * 100, ...options });
-            // sendToWebview(
-            //     'frontifymain',
-            //     'artboardUploadProgress(' +
-            //         JSON.stringify({
-            //             id: options.id,
-            //             id_external: options.id_external,
-            //             progress: progress.fractionCompleted() * 100,
-            //         }) +
-            //         ')'
-            // );
+            frontend.send('progress', {
+                state: 'uploading',
+                status: 'uploading',
+                progress: progress.fractionCompleted() * 100,
+                ...options,
+            });
+        }
+    }
+    finishUpload(options) {
+        if (isWebviewPresent('frontifymain')) {
+            frontend.send('progress', {
+                state: 'upload-complete',
+                status: 'upload-complete',
+                progress: 100,
+                ...options,
+            });
+        }
+    }
+
+    queueUpload(options) {
+        if (isWebviewPresent('frontifymain')) {
+            frontend.send('progress', {
+                state: 'upload-queued',
+                status: 'upload-queued',
+                progress: 0,
+                ...options,
+            });
         }
     }
 
@@ -675,6 +690,7 @@ class Artboard {
                                                 //     'frontifymain',
                                                 //     'artboardUploaded(' + JSON.stringify(artboard) + ')'
                                                 // );
+                                                this.finishUpload(artboard);
                                             }
                                             return true;
                                         }.bind(this)

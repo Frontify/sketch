@@ -40,16 +40,14 @@ export function setDestinations(artboard) {
     Settings.setLayerSettingForKey(layer, DESTINATION_KEY, artboard.destinations);
 }
 export function getDestinations(artboard) {
-    // return [{ remote_project_id: 191277, remote_id: 6448905, remote_path: '/Export Folder/' }];
     return Settings.layerSettingForKey(artboard, DESTINATION_KEY) || [];
 }
 
-export function getSelectedArtboards() {
+export function getSelectedArtboardsFromSelection(selection) {
+    console.log(selection);
+    let artboards = [];
     try {
-        let currentDocument = sketch3.Document.fromNative(sketch.getDocument());
-
-        let artboards = [];
-        currentDocument.selectedLayers.forEach((layer) => {
+        selection.forEach((layer) => {
             if (layer.type == 'Artboard') {
                 // read the metadata
                 artboards.push({
@@ -60,7 +58,22 @@ export function getSelectedArtboards() {
                 });
             }
         });
+
+        artboards = artboards.sort((a, b) => {
+            return a.name > b.name ? 1 : -1;
+        });
         return { success: true, artboards };
+    } catch (error) {
+        console.error(error);
+        return { success: false };
+    }
+}
+
+export function getSelectedArtboards() {
+    try {
+        let currentDocument = sketch3.Document.fromNative(sketch.getDocument());
+
+        return getSelectedArtboardsFromSelection(currentDocument.selectedLayers);
     } catch (error) {
         console.error(error);
         return { success: false };

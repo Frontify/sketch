@@ -5,9 +5,13 @@ import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
 import sketch from '../model/sketch';
 const sketch3 = require('sketch');
 
-import { getSelectedArtboards } from '../windows/actions/getSelectedArtboards';
+import { getSelectedArtboards, getSelectedArtboardsFromSelection } from '../windows/actions/getSelectedArtboards';
 
 import { getPluginState } from '../windows/main';
+
+import State from '../windows/State';
+
+console.log('frontify.js');
 
 export function runCommand(context) {
     let threadDictionary = NSThread.mainThread().threadDictionary();
@@ -50,25 +54,32 @@ export function closeCommand(context) {
     });
 }
 
+function activeDocumentDidChange() {
+    let key = 'com.frontify.sketch.recent.document';
+    let oldDocumentID = sketch3.Settings.sessionVariable(key);
+
+    let newDocument = sketch3.Document.getSelectedDocument();
+
+    if (newDocument) {
+        let newDocumentID = newDocument.id;
+        sketch3.Settings.setSessionVariable(key, newDocumentID);
+
+        if (oldDocumentID != newDocumentID) {
+            // refresh
+            return true;
+        }
+    }
+    return false;
+}
+
 export function selectionChangedCommand(context) {
     executeSafely(context, function () {
         if (isWebviewPresent('frontifymain')) {
-            let key = 'com.frontify.sketch.recent.document';
-            let oldDocumentID = sketch3.Settings.sessionVariable(key);
-
-            let newDocument = sketch3.Document.getSelectedDocument();
-
-            if (newDocument) {
-                let newDocumentID = newDocument.id;
-                sketch3.Settings.setSessionVariable(key, newDocumentID);
-
-                if (oldDocumentID != newDocumentID) {
-                    // refresh
-                    refresh();
-                }
-            }
+            if (activeDocumentDidChange()) refresh();
+            let newSelection = context.actionContext.newSelection;
+            State.selectionChangedCommand(newSelection);
+            State.progressEvent({ artboard: State.getState().artboards[0], data: {} });
             let payload = getSelectedArtboards();
-
             frontend.send('artboards-changed', payload);
         }
     });
@@ -85,6 +96,7 @@ function refresh() {
      */
 
     let payload = getPluginState();
+
     if (isWebviewPresent('frontifymain')) {
         frontend.send('refresh', payload);
     }

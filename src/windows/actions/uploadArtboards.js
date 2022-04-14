@@ -26,8 +26,12 @@ export function uploadArtboards({ artboards }) {
                 modified_localized_ago: null,
             });
         });
+        Artboard.queueUpload(artboard);
     });
-    console.log(queue);
+
+    queue.forEach((entry) => {
+        Artboard.queueUpload(entry);
+    });
 
     try {
         Artboard.uploadArtboards(queue);
