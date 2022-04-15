@@ -544,7 +544,11 @@ class Artboard {
                                                 .then(
                                                     function (assetId) {
                                                         if (file.type === 'artboard') {
-                                                            if (artboard.sha != shaFile(file.path)) {
+                                                            // Todo: Fix comparison
+                                                            // artboard.sha = the sha based on layer.toJSON()
+                                                            // -> should be compared against the sha stored as a layer setting
+                                                            // artboard.target.sha
+                                                            if (artboard.sha != artboard.target.sha) {
                                                                 artboardChanged = true;
 
                                                                 return filemanager
@@ -564,13 +568,15 @@ class Artboard {
                                                                     )
                                                                     .then(
                                                                         function (data) {
-                                                                            console.log('✅uploaded', data, artboard);
+                                                                            // Uploaded
                                                                             let destination = {
                                                                                 remote_project_id:
                                                                                     artboard.target.remote_project_id,
                                                                                 remote_id: data.id,
                                                                                 remote_path:
                                                                                     artboard.target.remote_path,
+                                                                                // This will store the SHA1 of the artboard that has just been uploaded
+                                                                                sha: artboard.sha,
                                                                             };
 
                                                                             patchDestinations(
@@ -583,9 +589,9 @@ class Artboard {
                                                                                 artboard,
                                                                                 artboardProgress
                                                                             );
-                                                                            artboard.sha = data.sha;
-                                                                            artboard.id = data.id;
-                                                                            artboard.nochanges = false;
+                                                                            // artboard.sha = data.sha;
+                                                                            // artboard.id = data.id;
+                                                                            // artboard.nochanges = false;
 
                                                                             return data.id;
                                                                         }.bind(this)
@@ -596,6 +602,7 @@ class Artboard {
                                                             } else {
                                                                 // Skip upload because the file hasn’t changed
                                                                 // Remove the exported artboard
+                                                                console.log('skip');
                                                                 artboardChanged = false;
                                                                 artboardProgress.setCompletedUnitCount(
                                                                     artboardProgress.completedUnitCount() + 10
@@ -610,6 +617,7 @@ class Artboard {
                                                                 artboard,
                                                                 file
                                                             );
+                                                            console.log('attachment status', status);
 
                                                             if (artboardChanged || status.sha != shaFile(file.path)) {
                                                                 let filename;
@@ -743,26 +751,6 @@ class Artboard {
         return status;
     }
 
-    showArtboards(skipRemote) {
-        if (!this.uploadInProgress) {
-            this.getArtboards(skipRemote)
-                .then(
-                    function (data) {
-                        if (isWebviewPresent('frontifymain')) {
-                            sendToWebview('frontifymain', 'showArtboards(' + JSON.stringify(data) + ')');
-                        }
-                    }.bind(this)
-                )
-                .catch(
-                    function (e) {
-                        console.error(e);
-                    }.bind(this)
-                );
-        } else {
-            console.log('upload in progress');
-        }
-    }
-
     /**
      *
      * @param sizeString: e.g. "2x, 100w, 300h"
@@ -793,7 +781,6 @@ const IDENTIFIER = 'frontifymain';
  */
 const frontend = {
     send(type, payload) {
-        console.log('send to frontend', type, payload);
         sendToWebview(IDENTIFIER, `send(${JSON.stringify({ type, payload })})`);
     },
 };

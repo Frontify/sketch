@@ -18,7 +18,7 @@ export function uploadArtboards({ artboards }) {
                 id_external: artboard.id, // Sketch ID
                 name: '' + artboard.name.replace(/\s*\/\s*/g, '/'),
                 ext: 'png',
-                sha: null,
+                sha: artboard.sha,
                 state: 'new',
                 target: destination,
                 modified: null,

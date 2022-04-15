@@ -11,6 +11,7 @@ import {
     IconUploadAlternative,
     LoadingCircle,
     Text,
+    Checkbox,
 } from '@frontify/arcade';
 
 import mockedArtboards from './mocks/artboards';
@@ -166,23 +167,30 @@ function ArtboardGroupItem({ group, uploadArtboards }) {
                             `Uploading (${group.transfer.completed.length + 1} / ${group.children.length}) … ${
                                 group.transfer.progress
                             }%`
-                        ) : (
+                        ) : group.selectionCount ? (
                             <custom-h-stack align-items="center" gap="x-small">
-                                <Badge style="Progress"> {group.children.length} </Badge>
-                                <Text padding="small">Artboards</Text>
+                                <Badge style="Progress"> {group.selectionCount} </Badge>
+                                <Text>Artboard</Text>
                             </custom-h-stack>
+                        ) : (
+                            <Text color="weak">No changes</Text>
                         )}
                     </Text>
                 </custom-v-stack>
                 <custom-spacer></custom-spacer>
                 {group.path ? (
-                    <ArtboardGroupTransferAction
-                        group={group}
-                        uploadArtboards={uploadArtboards}
-                    ></ArtboardGroupTransferAction>
+                    group.selectionCount ? (
+                        <ArtboardGroupTransferAction
+                            group={group}
+                            uploadArtboards={uploadArtboards}
+                        ></ArtboardGroupTransferAction>
+                    ) : (
+                        ''
+                    )
                 ) : (
-                    <IconMore size="Size24"></IconMore>
+                    ''
                 )}
+                <IconMore size="Size24"></IconMore>
             </custom-h-stack>
 
             {open
@@ -227,7 +235,17 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
         <custom-h-stack gap="x-small" style={{ width: '100%' }}>
             {!destination.remote_id ? <Text>NEW</Text> : ''}
             {display == 'artboard' ? (
-                <Text color="weak">{artboard.name}.png</Text>
+                <custom-h-stack gap="x-small">
+                    <Checkbox
+                        state={destination.selected ? 'Checked' : 'Unchecked'}
+                        label={`${artboard.name}.png`}
+                        onChange={() => {
+                            destination.selected = !destination.selected;
+                        }}
+                    >
+                        <Text color={artboard.sha != destination.sha ? 'default' : 'weak'}>{artboard.name}.png</Text>
+                    </Checkbox>
+                </custom-h-stack>
             ) : (
                 <custom-h-stack size="small" color="weak" gap="x-small">
                     <IconFolder></IconFolder>
@@ -349,6 +367,7 @@ export function ArtboardsView() {
                     map['ungrouped'].children.push(artboard);
                     return;
                 }
+                let selectionCount = 0;
                 artboard.destinations.forEach((destination) => {
                     let key = `${destination.remote_project_id}${destination.remote_path}`;
                     if (!map[key]) {
@@ -358,6 +377,7 @@ export function ArtboardsView() {
                             path: destination.remote_path,
                             project_id: destination.remote_project_id,
                             children: [],
+                            selectionCount: 0,
                         };
 
                         groups.push(map[key]);
@@ -383,6 +403,10 @@ export function ArtboardsView() {
                 };
                 group.children.forEach((artboard) => {
                     artboard.destinations.forEach((destination) => {
+                        // Pre-select the item for upload based on the diff
+                        destination.selected = artboard.sha != destination.sha;
+                        if (destination.selected) group.selectionCount++;
+
                         let transferEntry = context.transferMap[destination.remote_id];
                         if (transferEntry) {
                             if (transferEntry.status == 'uploading') {
@@ -472,6 +496,7 @@ export function ArtboardsView() {
     if (artboards && artboards.length) {
         return (
             <custom-v-stack gap="small" flex stretch>
+                <h2>Update Center</h2>
                 <custom-line></custom-line>
 
                 <custom-scroll-view>

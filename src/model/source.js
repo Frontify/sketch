@@ -556,7 +556,6 @@ const IDENTIFIER = 'frontifymain';
  */
 const frontend = {
     send(type, payload) {
-        console.log('send to frontend', type, payload);
         sendToWebview(IDENTIFIER, `send(${JSON.stringify({ type, payload })})`);
     },
 };

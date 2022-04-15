@@ -1,6 +1,7 @@
 import sketch from '../../model/sketch';
 let sketch3 = require('sketch');
 let Settings = require('sketch/settings');
+import { sha1 } from '../../helpers/sha1';
 
 /**
  * Every artboard that are tracked on Frontify should have additonal meta data that
@@ -44,13 +45,16 @@ export function getDestinations(artboard) {
 }
 
 export function getSelectedArtboardsFromSelection(selection) {
-    console.log(selection);
     let artboards = [];
     try {
         selection.forEach((layer) => {
             if (layer.type == 'Artboard') {
                 // read the metadata
                 artboards.push({
+                    // Calculate sha1 of the current state of the artboard.
+                    // After we upload an artboard, we save that sha1 to the destination.
+                    // Later, we can compare changes to an artboard.
+                    sha: sha1(JSON.stringify(layer.toJSON())),
                     type: layer.type,
                     name: layer.name,
                     id: layer.id,

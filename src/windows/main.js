@@ -211,51 +211,6 @@ export default function (context, view) {
         domain = url;
     });
 
-    webview.on('showArtboards', function (skipRemote) {
-        skipRemote = skipRemote || false;
-        view = 'artboards';
-        artboard.showArtboards(skipRemote);
-    });
-
-    webview.on('showSources', function () {
-        view = 'sources';
-        source.showSources();
-    });
-
-    webview.on('uploadArtboard', (data) => {
-        artboard.uploadArtboards([data]);
-    });
-
-    webview.on('uploadArtboards', function (data) {
-        artboard.uploadArtboards(data).then(
-            function () {
-                webview.executeJavaScript('artboardsUploaded()');
-            }.bind(this)
-        );
-    });
-
-    webview.on('switchAssetSourceForType', function (type, assetSourceId) {
-        target.getAssetSourcesForType(type).then(
-            function (data) {
-                if (data && data.sources) {
-                    let selected = data.sources.find(
-                        function (source) {
-                            return source.id == assetSourceId;
-                        }.bind(this)
-                    );
-
-                    if (selected) {
-                        target.switchAssetSourceForType(type, selected).then(
-                            function () {
-                                webview.executeJavaScript('refresh()');
-                            }.bind(this)
-                        );
-                    }
-                }
-            }.bind(this)
-        );
-    });
-
     webview.on('openUrl', function (url, absolute) {
         if (absolute) {
             NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString(url));
@@ -276,39 +231,6 @@ export default function (context, view) {
                 }
             }.bind(this)
         );
-    });
-
-    webview.on('changeProject', function () {
-        return project.showProjectChooser();
-    });
-
-    webview.on('projectSelected', function (data) {
-        target.updateTarget(data).then(
-            function () {
-                target.showTarget();
-                webview.executeJavaScript('refresh()');
-            }.bind(this)
-        );
-    });
-
-    webview.on('changeFolder', function (set) {
-        project.showFolderChooser(set, view);
-    });
-
-    webview.on('folderSelected', function (set) {
-        if (view == 'artboards') {
-            target.updateTarget({ set: set }).then(
-                function () {
-                    artboard.showArtboards();
-                }.bind(this)
-            );
-        } else if (view == 'sources') {
-            target.updateTarget({ set_sources: set }).then(
-                function () {
-                    source.showSources();
-                }.bind(this)
-            );
-        }
     });
 
     webview.on('addFolder', function (name, set) {
