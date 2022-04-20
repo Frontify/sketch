@@ -39,6 +39,16 @@ class Artboard {
             });
         }
     }
+    failUpload(options) {
+        if (isWebviewPresent('frontifymain')) {
+            frontend.send('progress', {
+                state: 'upload-failed',
+                status: 'upload-failed',
+                progress: 0,
+                ...options,
+            });
+        }
+    }
 
     queueUpload(options) {
         if (isWebviewPresent('frontifymain')) {
@@ -707,10 +717,7 @@ class Artboard {
                                         function (err) {
                                             clearInterval(polling);
                                             if (isWebviewPresent('frontifymain')) {
-                                                sendToWebview(
-                                                    'frontifymain',
-                                                    'artboardUploadFailed(' + JSON.stringify(artboard) + ')'
-                                                );
+                                                this.failUpload(artboard);
                                             }
                                             throw err;
                                         }.bind(this)

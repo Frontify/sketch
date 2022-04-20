@@ -36,6 +36,7 @@ export function ArtboardToolbar({
     uploadDestination,
     loading,
     uploadAll,
+    uploadSome,
     uploadArtboards,
 }) {
     const context = useContext(UserContext);
@@ -86,8 +87,8 @@ export function ArtboardToolbar({
                     </Button>
                 </custom-v-stack>
             </Flyout>
-            <Button style="Primary" onClick={() => uploadAll()} icon={<IconUploadAlternative />}>
-                Upload
+            <Button style="Primary" onClick={() => uploadSome()} icon={<IconUploadAlternative />}>
+                Upload Some
             </Button>
         </custom-h-stack>
     );
@@ -157,23 +158,31 @@ function ArtboardGroupItem({ group, uploadArtboards }) {
                 )}
                 <custom-v-stack gap="x-small">
                     <custom-h-stack align-items="center" gap="x-small">
-                        <IconFolder></IconFolder>
+                        {/* <IconFolder></IconFolder> */}
                         <Text padding="small" weight="strong">
                             {group.title}
                         </Text>
                     </custom-h-stack>
-                    <Text padding="small">
+                    <Text padding="small" size="x-small">
                         {group.transfer?.status == 'uploading' ? (
                             `Uploading (${group.transfer.completed.length + 1} / ${group.children.length}) … ${
                                 group.transfer.progress
                             }%`
                         ) : group.selectionCount ? (
                             <custom-h-stack align-items="center" gap="x-small">
-                                <Badge style="Progress"> {group.selectionCount} </Badge>
-                                <Text>Artboards</Text>
+                                <IconUploadAlternative
+                                    size="Size20"
+                                    style={{ color: 'var(--box-selected-strong-color)' }}
+                                />
+                                {/* <Badge style="Progress"> {group.selectionCount} </Badge> */}
+                                <Text size="x-small" style={{ color: 'var(--box-selected-strong-color)' }}>
+                                    Upload changes ({group.selectionCount})
+                                </Text>
                             </custom-h-stack>
                         ) : (
-                            <Text color="weak">No changes</Text>
+                            <Text color="weak" size="x-small">
+                                No changes
+                            </Text>
                         )}
                     </Text>
                 </custom-v-stack>
@@ -237,7 +246,6 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
             {display == 'artboard' ? (
                 <custom-h-stack gap="x-small">
                     <Checkbox
-                        disabled={true}
                         state={destination.selected ? 'Checked' : 'Unchecked'}
                         label={`${artboard.name}.png`}
                         onChange={() => {
@@ -339,17 +347,42 @@ export function ArtboardsView() {
     const [currentSource, setCurrentSource] = useState({});
     const { t } = useTranslation();
 
+    const uploadSome = async () => {
+        let matchedGroups = groupedArtboards.filter((group) => group.selectionCount > 0);
+        console.log(matchedGroups);
+        let someArtboards = [];
+        matchedGroups.forEach((group) => {
+            group.children.forEach((artboard) => {
+                artboard.destinations.forEach((destination) => {
+                    if (destination.sha != artboard.sha) {
+                        someArtboards.push(artboard);
+                    }
+                });
+            });
+        });
+
+        uploadArtboards(someArtboards);
+    };
+
     const uploadAll = async () => {
         setLoading(true);
         await useSketch('uploadArtboards', { artboards });
         setLoading(false);
     };
 
+    const requestArtboards = async () => {
+        console.log('request artboards');
+        let response = await useSketch('getSelectedArtboards');
+
+        setArtboards(response.artboards);
+        // setArtboards(mockedArtboards);
+    };
+
     /**
      * Grouped Artboards
      */
 
-    useEffect(() => {
+    useEffect(async () => {
         let map = {
             ungrouped: {
                 key: 'ungrouped',
@@ -436,6 +469,12 @@ export function ArtboardsView() {
                 group.transfer = transfer;
             });
 
+            groups.forEach((group) => {
+                if (group.transfer == 'done') {
+                    requestArtboards();
+                }
+            });
+
             setGroupedArtboards(groups);
         }
     }, [artboards, context.transferMap]);
@@ -457,23 +496,6 @@ export function ArtboardsView() {
     /**
      * Subscription
      */
-
-    const hack = () => {
-        setArtboards((artboards) => {
-            return artboards.map((artboard) => {
-                return {
-                    ...artboard,
-                    destinations: [
-                        {
-                            remote_project_id: uploadDestination.project.id,
-                            remote_id: null,
-                            remote_path: `/${uploadDestination.folderPath}/`,
-                        },
-                    ],
-                };
-            });
-        });
-    };
 
     useEffect(() => {
         let handler = (event) => {
@@ -520,6 +542,7 @@ export function ArtboardsView() {
                     uploadDestination={uploadDestination}
                     loading={loading}
                     uploadAll={uploadAll}
+                    uploadSome={uploadSome}
                     uploadArtboards={uploadArtboards}
                 ></ArtboardToolbar>
             </custom-v-stack>

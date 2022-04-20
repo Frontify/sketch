@@ -52,6 +52,9 @@ export const UserContextProvider = ({ children }) => {
                 case 'progress':
                     switch (payload.state) {
                         case "upload-failed'":
+                            setTransferMap((state) => {
+                                return { ...state, [payload.id]: payload };
+                            });
                             break;
                         case "upload-complete'":
                             setTransferMap((state) => {
