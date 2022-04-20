@@ -76,6 +76,28 @@ export function getSelectedArtboardsFromSelection(selection) {
 export function getSelectedArtboards() {
     try {
         let currentDocument = sketch3.Document.fromNative(sketch.getDocument());
+        let selection = currentDocument.selectedLayers;
+
+        let allArtboards = [];
+        let selectedArtboards = [];
+
+        // allArtboards
+        currentDocument.pages.forEach((page) => {
+            page.layers.forEach((layer) => {
+                if (layer.type == 'Artboard') allArtboards.push(layer);
+            });
+        });
+        // selectedArtboards
+        selection.forEach((layer) => {
+            if (layer.type == 'Artboard') selectedArtboards.push(layer);
+        });
+
+        // If there is no selection: return all layers of type artboard
+        // If there is a selection, but it doesn’t contain artboards: return all layers of type artboard
+        // Else: return selected artboards
+
+        if (selection.length == 0) return getSelectedArtboardsFromSelection(allArtboards);
+        if (selectedArtboards.length == 0) return getSelectedArtboardsFromSelection(allArtboards);
 
         return getSelectedArtboardsFromSelection(currentDocument.selectedLayers);
     } catch (error) {

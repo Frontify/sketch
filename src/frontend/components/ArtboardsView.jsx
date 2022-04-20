@@ -16,7 +16,7 @@ import {
 
 import mockedArtboards from './mocks/artboards';
 
-import { UploadDestinationPicker } from '../components/UploadDestinationPicker';
+import { UploadDestinationPicker } from './UploadDestinationPicker';
 import { SearchField } from './SearchField';
 import { useState, useEffect, useCallback, useContext } from 'react';
 
@@ -170,7 +170,7 @@ function ArtboardGroupItem({ group, uploadArtboards }) {
                         ) : group.selectionCount ? (
                             <custom-h-stack align-items="center" gap="x-small">
                                 <Badge style="Progress"> {group.selectionCount} </Badge>
-                                <Text>Artboard</Text>
+                                <Text>Artboards</Text>
                             </custom-h-stack>
                         ) : (
                             <Text color="weak">No changes</Text>
@@ -237,6 +237,7 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
             {display == 'artboard' ? (
                 <custom-h-stack gap="x-small">
                     <Checkbox
+                        disabled={true}
                         state={destination.selected ? 'Checked' : 'Unchecked'}
                         label={`${artboard.name}.png`}
                         onChange={() => {
@@ -496,9 +497,6 @@ export function ArtboardsView() {
     if (artboards && artboards.length) {
         return (
             <custom-v-stack gap="small" flex stretch>
-                <h2>Update Center</h2>
-                <custom-line></custom-line>
-
                 <custom-scroll-view>
                     <custom-v-stack>
                         {groupedArtboards.map((group) => {

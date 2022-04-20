@@ -73,16 +73,36 @@ function activeDocumentDidChange() {
 }
 
 export function selectionChangedCommand(context) {
-    executeSafely(context, function () {
-        if (isWebviewPresent('frontifymain')) {
-            if (activeDocumentDidChange()) refresh();
-            let newSelection = context.actionContext.newSelection;
-            State.selectionChangedCommand(newSelection);
-            State.progressEvent({ artboard: State.getState().artboards[0], data: {} });
-            let payload = getSelectedArtboards();
-            frontend.send('artboards-changed', payload);
+    let threshold = 1000;
+
+    let key = 'com.frontify.sketch.recent.selection.uuid';
+    // set uuid
+
+    let contextUUID = '' + NSUUID.UUID().UUIDString();
+    sketch3.Settings.setSessionVariable(key, contextUUID);
+
+    const sendSelection = () => {
+        if (activeDocumentDidChange()) refresh();
+        // let newSelection = context.actionContext.newSelection;
+        // State.selectionChangedCommand(newSelection);
+        // State.progressEvent({ artboard: State.getState().artboards[0], data: {} });
+        let payload = getSelectedArtboards();
+        frontend.send('artboards-changed', payload);
+    };
+
+    setTimeout(() => {
+        let mostRecentUUID = sketch3.Settings.sessionVariable(key);
+        if (mostRecentUUID == contextUUID) {
+            console.log('selection sent');
+            executeSafely(context, function () {
+                if (isWebviewPresent('frontifymain')) {
+                    sendSelection();
+                }
+            });
+        } else {
+            console.log('canceled');
         }
-    });
+    }, threshold);
 }
 
 function refresh() {
