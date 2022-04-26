@@ -38,6 +38,8 @@ import PropTypes from 'prop-types';
  */
 
 ArtboardToolbar.propTypes = {
+    loading: PropTypes.bool,
+    modifiedArtboards: PropTypes.array,
     withDestinationPicker: PropTypes.bool,
     setShowDestinationPicker: PropTypes.func,
     showDestinationPicker: PropTypes.bool,
@@ -48,6 +50,8 @@ ArtboardToolbar.propTypes = {
 };
 
 function ArtboardToolbar({
+    loading,
+    modifiedArtboards = [],
     withDestinationPicker,
     setShowDestinationPicker,
     showDestinationPicker,
@@ -61,6 +65,7 @@ function ArtboardToolbar({
         <custom-h-stack padding="small" gap="small" align-items="center" justify-content="center" separator="top">
             {withDestinationPicker ? (
                 <Flyout
+                    style={{ width: '100%' }}
                     onCancel={() => setShowDestinationPicker(false)}
                     isOpen={showDestinationPicker}
                     onOpenChange={(open) => {
@@ -72,13 +77,14 @@ function ArtboardToolbar({
                     }}
                     trigger={
                         <Button
-                            style="Secondary"
+                            hugWidth={false}
+                            inverted={true}
                             onClick={() => {
                                 setShowDestinationPicker(true);
                             }}
                             icon={<IconFolder />}
                         >
-                            Choose folder …
+                            Upload to …
                         </Button>
                     }
                 >
@@ -105,13 +111,25 @@ function ArtboardToolbar({
                         </Button>
                     </custom-v-stack>
                 </Flyout>
+            ) : !loading ? (
+                <Button
+                    disabled={modifiedArtboards.length == 0}
+                    style="Secondary"
+                    hugWidth={false}
+                    onClick={() => uploadSome()}
+                    icon={
+                        <IconUploadAlternative
+                            style={{
+                                color: modifiedArtboards.length == 0 ? 'inherit' : 'var(--box-selected-strong-color)',
+                            }}
+                        />
+                    }
+                >
+                    Push changes
+                </Button>
             ) : (
-                ''
+                'Uploading …'
             )}
-
-            <Button style="Secondary" hugWidth={false} onClick={() => uploadSome()} icon={<IconUploadAlternative />}>
-                Upload changes
-            </Button>
         </custom-h-stack>
     );
 }
@@ -185,7 +203,7 @@ function ArtboardGroupItem({ group, uploadGroup }) {
                     <IconCaretRight size="Size12" onClick={() => setOpen(true)}></IconCaretRight>
                 )}
                 <custom-v-stack gap="x-small">
-                    <custom-h-stack align-items="center" gap="x-small">
+                    <custom-h-stack gap="x-small">
                         {/* <IconFolder></IconFolder> */}
                         <Text padding="small" weight="strong">
                             {group.title}
@@ -214,7 +232,7 @@ function ArtboardGroupItem({ group, uploadGroup }) {
                     </Text>
                 </custom-v-stack>
                 <custom-spacer></custom-spacer>
-                <custom-h-stack align-items="center">
+                <custom-h-stack>
                     {group.path ? (
                         group.selectionCount ? (
                             <ArtboardGroupTransferAction
@@ -398,6 +416,7 @@ export function ArtboardsView() {
     const [loading, setLoading] = useState(false);
     const [open, setOpen] = useState(false);
     const [destinationPickerOpen, setDestinationPickerOpen] = useState(false);
+    const [modifiedArtboards, setModifiedArtboards] = useState([]);
     const [showDestinationPicker, setShowDestinationPicker] = useState(false);
     const [groupedArtboards, setGroupedArtboards] = useState({});
 
@@ -529,6 +548,7 @@ export function ArtboardsView() {
             });
 
             // Only show groups that include modified artboards
+
             if (view == 'modified') {
                 groups = groups
                     .map((group) => {
@@ -541,6 +561,20 @@ export function ArtboardsView() {
                     })
                     .filter((group) => group.children.length);
             }
+
+            setModifiedArtboards(() => {
+                let result = [];
+                groups.forEach((group) => {
+                    group.children.forEach((artboard) =>
+                        artboard.destinations.forEach((destination) => {
+                            if (destination.selected) {
+                                result.push(artboard);
+                            }
+                        })
+                    );
+                });
+                return result;
+            });
 
             groups.forEach((group) => {
                 if (group.transfer == 'done') {
@@ -622,16 +656,24 @@ export function ArtboardsView() {
                 </custom-h-stack>
                 <custom-scroll-view>
                     <custom-v-stack>
-                        {groupedArtboards.map((group) => {
-                            return (
-                                <custom-v-stack key={group.key} separator="top">
-                                    <ArtboardGroupItem group={group} uploadGroup={uploadGroup}></ArtboardGroupItem>
-                                </custom-v-stack>
-                            );
-                        })}
+                        {groupedArtboards.length ? (
+                            groupedArtboards.map((group) => {
+                                return (
+                                    <custom-v-stack key={group.key} separator="top">
+                                        <ArtboardGroupItem group={group} uploadGroup={uploadGroup}></ArtboardGroupItem>
+                                    </custom-v-stack>
+                                );
+                            })
+                        ) : (
+                            <custom-v-stack padding="small" separator="top">
+                                <Text>No changes</Text>
+                            </custom-v-stack>
+                        )}
                     </custom-v-stack>
                 </custom-scroll-view>
                 <ArtboardToolbar
+                    loading={loading}
+                    modifiedArtboards={modifiedArtboards}
                     withDestinationPicker={hasSelection}
                     setShowDestinationPicker={setShowDestinationPicker}
                     showDestinationPicker={showDestinationPicker}
@@ -664,6 +706,7 @@ export function ArtboardsView() {
                     </custom-v-stack>
                 </custom-scroll-view>
                 <ArtboardToolbar
+                    loading={loading}
                     withDestinationPicker={hasSelection}
                     setShowDestinationPicker={setShowDestinationPicker}
                     showDestinationPicker={showDestinationPicker}
