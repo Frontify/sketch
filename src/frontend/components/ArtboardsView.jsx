@@ -8,10 +8,17 @@ import {
     IconCheck,
     IconFolder,
     IconMore,
+    IconArrowUp,
+    IconCircle,
+    IconPlus,
+    IconPen,
+    IconTriangle,
     IconUploadAlternative,
     LoadingCircle,
     Text,
     Checkbox,
+    IconAddSimple,
+    IconAdd,
 } from '@frontify/arcade';
 
 import mockedArtboards from './mocks/artboards';
@@ -23,76 +30,93 @@ import { useState, useEffect, useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { UserContext } from '../UserContext';
 import { useSketch } from '../hooks/useSketch';
+import PropTypes from 'prop-types';
 
 /**
  * ⚛️ Toolbar
  * ----------------------------------------------------------------------------
  */
-export function ArtboardToolbar({
-    artboards,
+
+ArtboardToolbar.propTypes = {
+    withDestinationPicker: PropTypes.bool,
+    setShowDestinationPicker: PropTypes.func,
+    showDestinationPicker: PropTypes.bool,
+    setUploadDestination: PropTypes.func,
+    uploadDestination: PropTypes.object,
+    uploadSome: PropTypes.func,
+    uploadArtboards: PropTypes.func,
+};
+
+function ArtboardToolbar({
+    withDestinationPicker,
     setShowDestinationPicker,
     showDestinationPicker,
     setUploadDestination,
     uploadDestination,
-    loading,
-    uploadAll,
     uploadSome,
     uploadArtboards,
 }) {
     const context = useContext(UserContext);
     return (
         <custom-h-stack padding="small" gap="small" align-items="center" justify-content="center" separator="top">
-            <Flyout
-                onCancel={() => setShowDestinationPicker(false)}
-                isOpen={showDestinationPicker}
-                onOpenChange={(open) => {
-                    if (open) {
-                        setShowDestinationPicker(false);
-                    } else {
-                        setShowDestinationPicker(true);
-                    }
-                }}
-                trigger={
-                    <Button
-                        style="Secondary"
-                        onClick={() => {
-                            setShowDestinationPicker(true);
-                        }}
-                        icon={<IconFolder />}
-                    >
-                        Choose folder …
-                    </Button>
-                }
-            >
-                <custom-v-stack padding="small" gap="small">
-                    <h2>Destination</h2>
-                    <Text>
-                        Choose the folder where you want to publish{' '}
-                        <strong>{context.currentDocument?.local?.filename}</strong>
-                    </Text>
-                    <hr />
-                    <UploadDestinationPicker
-                        onChange={(value) => {
-                            setUploadDestination(value);
-                        }}
-                    ></UploadDestinationPicker>
-                    <hr />
-                    <Button
-                        onClick={() => {
-                            uploadArtboards(uploadDestination);
+            {withDestinationPicker ? (
+                <Flyout
+                    onCancel={() => setShowDestinationPicker(false)}
+                    isOpen={showDestinationPicker}
+                    onOpenChange={(open) => {
+                        if (open) {
                             setShowDestinationPicker(false);
-                        }}
-                    >
-                        Confirm
-                    </Button>
-                </custom-v-stack>
-            </Flyout>
-            <Button style="Primary" onClick={() => uploadSome()} icon={<IconUploadAlternative />}>
-                Upload Some
+                        } else {
+                            setShowDestinationPicker(true);
+                        }
+                    }}
+                    trigger={
+                        <Button
+                            style="Secondary"
+                            onClick={() => {
+                                setShowDestinationPicker(true);
+                            }}
+                            icon={<IconFolder />}
+                        >
+                            Choose folder …
+                        </Button>
+                    }
+                >
+                    <custom-v-stack padding="small" gap="small">
+                        <h2>Destination</h2>
+                        <Text>
+                            Choose the folder where you want to publish{' '}
+                            <strong>{context.currentDocument?.local?.filename}</strong>
+                        </Text>
+                        <hr />
+                        <UploadDestinationPicker
+                            onChange={(value) => {
+                                setUploadDestination(value);
+                            }}
+                        ></UploadDestinationPicker>
+                        <hr />
+                        <Button
+                            onClick={() => {
+                                uploadArtboards(uploadDestination);
+                                setShowDestinationPicker(false);
+                            }}
+                        >
+                            Confirm
+                        </Button>
+                    </custom-v-stack>
+                </Flyout>
+            ) : (
+                ''
+            )}
+
+            <Button style="Secondary" hugWidth={false} onClick={() => uploadSome()} icon={<IconUploadAlternative />}>
+                Upload changes
             </Button>
         </custom-h-stack>
     );
 }
+
+export { ArtboardToolbar };
 /**
  * ⚛️ Artboard Item
  * ----------------------------------------------------------------------------
@@ -102,9 +126,9 @@ export function ArtboardItem({ artboard, showPath = true }) {
         <custom-v-stack>
             <custom-h-stack gap="small" flex padding="small">
                 {/* <custom-artboard-preview></custom-artboard-preview> */}
-                <custom-v-stack flex gap="x-small">
+                <custom-v-stack flex>
                     <custom-h-stack align-items="center">
-                        <custom-v-stack gap="x-small">
+                        <custom-v-stack>
                             <Text>
                                 <strong>{artboard.name}</strong>
                                 <span>.png</span>
@@ -115,13 +139,17 @@ export function ArtboardItem({ artboard, showPath = true }) {
                     {showPath ? (
                         <custom-h-stack align-items="center" flex gap="x-small">
                             {!artboard.destinations.length ? (
-                                <Badge style="Progress">NEW</Badge>
+                                <custom-h-stack flex>
+                                    <Text color="weak">Untracked</Text>
+                                    <custom-spacer></custom-spacer>
+                                    <Badge style="Progress" icon={<IconAddSimple></IconAddSimple>}></Badge>
+                                </custom-h-stack>
                             ) : (
-                                <custom-v-stack gap="x-small" flex>
+                                <custom-v-stack flex>
                                     {artboard.destinations.map((destination, index) => {
                                         return (
                                             <ArtboardDestinationItem
-                                                display="artboard"
+                                                artboard={artboard}
                                                 destination={destination}
                                                 key={index}
                                             ></ArtboardDestinationItem>
@@ -145,16 +173,16 @@ export function ArtboardItem({ artboard, showPath = true }) {
  * ----------------------------------------------------------------------------
  */
 
-function ArtboardGroupItem({ group, uploadArtboards }) {
-    const [open, setOpen] = useState(false);
+function ArtboardGroupItem({ group, uploadGroup }) {
+    const [open, setOpen] = useState(true);
 
     return (
-        <custom-v-stack>
-            <custom-h-stack gap="small" padding="small">
+        <custom-v-stack padding="x-small" gap="x-small">
+            <custom-h-stack gap="x-small">
                 {open ? (
-                    <IconCaretDown size="Size16" onClick={() => setOpen(false)}></IconCaretDown>
+                    <IconCaretDown size="Size12" onClick={() => setOpen(false)}></IconCaretDown>
                 ) : (
-                    <IconCaretRight size="Size16" onClick={() => setOpen(true)}></IconCaretRight>
+                    <IconCaretRight size="Size12" onClick={() => setOpen(true)}></IconCaretRight>
                 )}
                 <custom-v-stack gap="x-small">
                     <custom-h-stack align-items="center" gap="x-small">
@@ -170,47 +198,48 @@ function ArtboardGroupItem({ group, uploadArtboards }) {
                             }%`
                         ) : group.selectionCount ? (
                             <custom-h-stack align-items="center" gap="x-small">
-                                <IconUploadAlternative
-                                    size="Size20"
-                                    style={{ color: 'var(--box-selected-strong-color)' }}
-                                />
-                                {/* <Badge style="Progress"> {group.selectionCount} </Badge> */}
                                 <Text size="x-small" style={{ color: 'var(--box-selected-strong-color)' }}>
-                                    Upload changes ({group.selectionCount})
+                                    {group.selectionCount} Modified
                                 </Text>
                             </custom-h-stack>
-                        ) : (
+                        ) : group.key != 'ungrouped' ? (
                             <Text color="weak" size="x-small">
                                 No changes
+                            </Text>
+                        ) : (
+                            <Text color="weak" size="x-small">
+                                To upload, select artboards on the canvas first.
                             </Text>
                         )}
                     </Text>
                 </custom-v-stack>
                 <custom-spacer></custom-spacer>
-                {group.path ? (
-                    group.selectionCount ? (
-                        <ArtboardGroupTransferAction
-                            group={group}
-                            uploadArtboards={uploadArtboards}
-                        ></ArtboardGroupTransferAction>
+                <custom-h-stack align-items="center">
+                    {group.path ? (
+                        group.selectionCount ? (
+                            <ArtboardGroupTransferAction
+                                group={group}
+                                uploadGroup={uploadGroup}
+                            ></ArtboardGroupTransferAction>
+                        ) : (
+                            ''
+                        )
                     ) : (
                         ''
-                    )
-                ) : (
-                    ''
-                )}
-                <IconMore size="Size24"></IconMore>
+                    )}
+                    <Button inverted="true" icon={<IconMore />}></Button>
+                </custom-h-stack>
             </custom-h-stack>
 
             {open
                 ? group.children.map((artboard) => {
                       return (
-                          <custom-v-stack
-                              key={artboard.id}
-                              padding="small"
-                              separator="top"
-                              style={{ marginLeft: '28px' }}
-                          >
+                          <custom-v-stack key={artboard.id} style={{ marginLeft: '20px' }}>
+                              {artboard.destinations.length == 0 ? (
+                                  <UntrackedArtboardItem artboard={artboard}></UntrackedArtboardItem>
+                              ) : (
+                                  ''
+                              )}
                               {artboard.destinations.map((destination) => {
                                   return (
                                       <ArtboardDestinationItem
@@ -229,6 +258,17 @@ function ArtboardGroupItem({ group, uploadArtboards }) {
     );
 }
 
+export function UntrackedArtboardItem({ artboard }) {
+    return (
+        <custom-h-stack gap="x-small" style={{ width: '100%' }} align-items="center">
+            <Badge style="Progress" emphasis="Strong">
+                +
+            </Badge>
+            <Text size="x-small">{artboard.name}.png</Text>
+        </custom-h-stack>
+    );
+}
+
 /**
  * ⚛️ Destination Item
  * ----------------------------------------------------------------------------
@@ -242,25 +282,49 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
     }, [context.transferMap]);
     return (
         <custom-h-stack gap="x-small" style={{ width: '100%' }}>
-            {!destination.remote_id ? <Text>NEW</Text> : ''}
             {display == 'artboard' ? (
-                <custom-h-stack gap="x-small">
-                    <Checkbox
-                        state={destination.selected ? 'Checked' : 'Unchecked'}
-                        label={`${artboard.name}.png`}
-                        onChange={() => {
-                            destination.selected = !destination.selected;
-                        }}
-                    >
-                        <Text color={artboard.sha != destination.sha ? 'default' : 'weak'}>{artboard.name}.png</Text>
-                    </Checkbox>
+                <custom-h-stack gap="x-small" align-items="center">
+                    {/* Modified */}
+                    {destination.selected && !transfer ? (
+                        <Badge style="Warning" size="Small" emphasis="Strong" icon={<IconCircle></IconCircle>}></Badge>
+                    ) : (
+                        // <Badge style="Warning" size="s" emphasis="Strong">
+                        //     M
+                        // </Badge>
+                        ''
+                    )}
+
+                    {/* Upload Complete */}
+
+                    {!destination.selected ||
+                    (destination.selected && transfer && transfer.status == 'upload-complete') ? (
+                        <Badge style="Positive" emphasis="Strong" icon={<IconCheck></IconCheck>}></Badge>
+                    ) : (
+                        ''
+                    )}
+
+                    {/* Ready for upload */}
+
+                    {transfer && transfer.status != 'upload-complete' ? (
+                        <Badge
+                            style="Warning"
+                            size="Small"
+                            emphasis="Strong"
+                            icon={<IconArrowUp></IconArrowUp>}
+                        ></Badge>
+                    ) : (
+                        ''
+                    )}
+
+                    <Text size="x-small" weight={destination.selected ? 'strong' : 'default'}>
+                        {artboard.name}.png
+                    </Text>
                 </custom-h-stack>
             ) : (
                 <custom-h-stack size="small" color="weak" gap="x-small">
                     <IconFolder></IconFolder>
                     <Text color="weak">/</Text>
                     <Text color="weak">{destination.remote_project_id}</Text>
-                    <Text color="weak">/</Text>
                     <Text color="weak">{destination.remote_path}</Text>
                 </custom-h-stack>
             )}
@@ -283,28 +347,20 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
                 ''
             )}
 
-            {transfer && transfer.status == 'upload-complete' ? (
-                <custom-h-stack style={{ marginRight: '10px' }}>
-                    <IconCheck size="Size16" classnames="tw-fill-positive-strong"></IconCheck>
-                </custom-h-stack>
-            ) : (
-                ''
-            )}
-
             {transfer && transfer.status == 'upload-queued' ? '' : ''}
         </custom-h-stack>
     );
 }
 
-export function ArtboardGroupTransferAction({ group, uploadArtboards }) {
+export function ArtboardGroupTransferAction({ group, uploadGroup }) {
     switch (group.transfer.status) {
         case 'idle':
             return (
                 <Button
-                    icon={<IconUploadAlternative />}
+                    icon={<IconUploadAlternative style={{ color: 'var(--box-selected-strong-color)' }} />}
                     inverted="true"
                     onClick={() => {
-                        uploadArtboards(group.children);
+                        uploadGroup(group);
                     }}
                 ></Button>
             );
@@ -335,7 +391,10 @@ export function ArtboardsView() {
     const context = useContext(UserContext);
 
     const [artboards, setArtboards] = useState([]);
+    const [view, setView] = useState('modified');
     const [selection] = useState([]);
+    const [total, setTotal] = useState(0);
+    const [hasSelection, setHasSelection] = useState(false);
     const [loading, setLoading] = useState(false);
     const [open, setOpen] = useState(false);
     const [destinationPickerOpen, setDestinationPickerOpen] = useState(false);
@@ -347,9 +406,9 @@ export function ArtboardsView() {
     const [currentSource, setCurrentSource] = useState({});
     const { t } = useTranslation();
 
-    const uploadSome = async () => {
-        let matchedGroups = groupedArtboards.filter((group) => group.selectionCount > 0);
-        console.log(matchedGroups);
+    const uploadSome = async (groups = groupedArtboards) => {
+        let matchedGroups = groups.filter((group) => group.selectionCount > 0);
+
         let someArtboards = [];
         matchedGroups.forEach((group) => {
             group.children.forEach((artboard) => {
@@ -364,17 +423,16 @@ export function ArtboardsView() {
         uploadArtboards(someArtboards);
     };
 
-    const uploadAll = async () => {
-        setLoading(true);
-        await useSketch('uploadArtboards', { artboards });
-        setLoading(false);
+    const uploadGroup = (group) => {
+        uploadSome([group]);
     };
 
     const requestArtboards = async () => {
-        console.log('request artboards');
         let response = await useSketch('getSelectedArtboards');
 
         setArtboards(response.artboards);
+        setTotal(response.total);
+        setHasSelection(response.hasSelection);
         // setArtboards(mockedArtboards);
     };
 
@@ -398,6 +456,7 @@ export function ArtboardsView() {
         if (artboards) {
             artboards.forEach((artboard) => {
                 if (!artboard.destinations || artboard.destinations.length == 0) {
+                    console.log('push untracked', artboard);
                     map['ungrouped'].children.push(artboard);
                     return;
                 }
@@ -469,6 +528,20 @@ export function ArtboardsView() {
                 group.transfer = transfer;
             });
 
+            // Only show groups that include modified artboards
+            if (view == 'modified') {
+                groups = groups
+                    .map((group) => {
+                        return {
+                            ...group,
+                            children: group.children.filter(
+                                (artboard) => artboard.destinations.filter((destination) => destination.selected).length
+                            ),
+                        };
+                    })
+                    .filter((group) => group.children.length);
+            }
+
             groups.forEach((group) => {
                 if (group.transfer == 'done') {
                     requestArtboards();
@@ -477,10 +550,9 @@ export function ArtboardsView() {
 
             setGroupedArtboards(groups);
         }
-    }, [artboards, context.transferMap]);
+    }, [artboards, context.transferMap, view]);
 
     const uploadArtboards = async (artboards) => {
-        console.log('upload artboards', artboards);
         setLoading(true);
         await useSketch('uploadArtboards', { artboards });
         setLoading(false);
@@ -490,7 +562,8 @@ export function ArtboardsView() {
         let response = await useSketch('getSelectedArtboards');
 
         setArtboards(response.artboards);
-        // setArtboards(mockedArtboards);
+        setTotal(response.total);
+        setHasSelection(response.hasSelection);
     }, []);
 
     /**
@@ -504,7 +577,9 @@ export function ArtboardsView() {
             switch (type) {
                 case 'artboards-changed':
                     setArtboards(payload.artboards);
-                    // setArtboards(mockedArtboards);
+                    setTotal(payload.total);
+                    setHasSelection(payload.hasSelection);
+
                     break;
             }
         };
@@ -516,32 +591,84 @@ export function ArtboardsView() {
         };
     }, []);
 
-    if (artboards && artboards.length) {
+    // All Artboards
+    if (artboards && artboards.length && !hasSelection) {
         return (
-            <custom-v-stack gap="small" flex stretch>
+            <custom-v-stack flex stretch overflow="hidden">
+                <custom-h-stack padding="small" gap="small">
+                    {['all', 'modified'].map((item) => {
+                        return view == item ? (
+                            <Badge
+                                emphasis="Strong"
+                                style="Progress"
+                                onClick={() => {
+                                    setView(item);
+                                }}
+                            >
+                                {item}
+                            </Badge>
+                        ) : (
+                            <Badge
+                                emphasis="None"
+                                style="Primary"
+                                onClick={() => {
+                                    setView(item);
+                                }}
+                            >
+                                {item}
+                            </Badge>
+                        );
+                    })}
+                </custom-h-stack>
                 <custom-scroll-view>
                     <custom-v-stack>
                         {groupedArtboards.map((group) => {
                             return (
                                 <custom-v-stack key={group.key} separator="top">
-                                    <ArtboardGroupItem
-                                        group={group}
-                                        uploadArtboards={uploadArtboards}
-                                    ></ArtboardGroupItem>
+                                    <ArtboardGroupItem group={group} uploadGroup={uploadGroup}></ArtboardGroupItem>
                                 </custom-v-stack>
                             );
                         })}
                     </custom-v-stack>
                 </custom-scroll-view>
-
                 <ArtboardToolbar
-                    artboards={artboards}
+                    withDestinationPicker={hasSelection}
                     setShowDestinationPicker={setShowDestinationPicker}
                     showDestinationPicker={showDestinationPicker}
                     setUploadDestination={setUploadDestination}
                     uploadDestination={uploadDestination}
-                    loading={loading}
-                    uploadAll={uploadAll}
+                    uploadSome={uploadSome}
+                    uploadArtboards={uploadArtboards}
+                ></ArtboardToolbar>
+            </custom-v-stack>
+        );
+    }
+
+    if (artboards && artboards.length && hasSelection) {
+        return (
+            <custom-v-stack stretch>
+                <custom-h-stack padding="small" separator="bottom">
+                    <Text color="weak" size="x-small">
+                        Selected Artboards ( {artboards.length} )
+                    </Text>
+                </custom-h-stack>
+                <custom-scroll-view flex>
+                    <custom-v-stack>
+                        {artboards.map((artboard) => {
+                            return (
+                                <custom-v-stack key={artboard.key}>
+                                    <ArtboardItem artboard={artboard} showPath={true}></ArtboardItem>
+                                </custom-v-stack>
+                            );
+                        })}
+                    </custom-v-stack>
+                </custom-scroll-view>
+                <ArtboardToolbar
+                    withDestinationPicker={hasSelection}
+                    setShowDestinationPicker={setShowDestinationPicker}
+                    showDestinationPicker={showDestinationPicker}
+                    setUploadDestination={setUploadDestination}
+                    uploadDestination={uploadDestination}
                     uploadSome={uploadSome}
                     uploadArtboards={uploadArtboards}
                 ></ArtboardToolbar>

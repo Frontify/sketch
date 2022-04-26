@@ -53,6 +53,10 @@ custom-v-stack {
     justify-content: center;
 }
 
+[padding='xx-small'] {
+    padding: var(--space-xxs);
+}
+
 [padding='x-small'] {
     padding: var(--space-xs);
 }

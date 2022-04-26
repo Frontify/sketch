@@ -44,7 +44,7 @@ export function getDestinations(artboard) {
     return Settings.layerSettingForKey(artboard, DESTINATION_KEY) || [];
 }
 
-export function getSelectedArtboardsFromSelection(selection) {
+export function getSelectedArtboardsFromSelection(selection, total, hasSelection) {
     let artboards = [];
     try {
         selection.forEach((layer) => {
@@ -66,7 +66,7 @@ export function getSelectedArtboardsFromSelection(selection) {
         artboards = artboards.sort((a, b) => {
             return a.name > b.name ? 1 : -1;
         });
-        return { success: true, artboards };
+        return { success: true, artboards, total, hasSelection };
     } catch (error) {
         console.error(error);
         return { success: false };
@@ -92,14 +92,17 @@ export function getSelectedArtboards() {
             if (layer.type == 'Artboard') selectedArtboards.push(layer);
         });
 
+        let total = allArtboards.length;
+        let hasSelection = selectedArtboards.length != 0;
+
         // If there is no selection: return all layers of type artboard
         // If there is a selection, but it doesn’t contain artboards: return all layers of type artboard
         // Else: return selected artboards
 
-        if (selection.length == 0) return getSelectedArtboardsFromSelection(allArtboards);
-        if (selectedArtboards.length == 0) return getSelectedArtboardsFromSelection(allArtboards);
+        if (selection.length == 0) return getSelectedArtboardsFromSelection(allArtboards, total, hasSelection);
+        if (selectedArtboards.length == 0) return getSelectedArtboardsFromSelection(allArtboards, total, hasSelection);
 
-        return getSelectedArtboardsFromSelection(currentDocument.selectedLayers);
+        return getSelectedArtboardsFromSelection(currentDocument.selectedLayers, total, hasSelection);
     } catch (error) {
         console.error(error);
         return { success: false };
