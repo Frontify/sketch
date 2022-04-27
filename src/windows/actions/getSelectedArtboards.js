@@ -54,7 +54,7 @@ export function getSelectedArtboardsFromSelection(selection, total, hasSelection
                     // Calculate sha1 of the current state of the artboard.
                     // After we upload an artboard, we save that sha1 to the destination.
                     // Later, we can compare changes to an artboard.
-                    sha: sha1(JSON.stringify(layer.toJSON())),
+                    // sha: sha1(JSON.stringify(layer.toJSON())),
                     type: layer.type,
                     name: layer.name,
                     id: layer.id,

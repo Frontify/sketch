@@ -125,7 +125,7 @@ function ArtboardToolbar({
                         />
                     }
                 >
-                    Push changes
+                    Upload changes
                 </Button>
             ) : (
                 'Uploading …'
@@ -299,7 +299,12 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
         setTransfer(context.transferMap[destination.remote_id]);
     }, [context.transferMap]);
     return (
-        <custom-h-stack gap="x-small" style={{ width: '100%' }}>
+        <custom-h-stack
+            gap="x-small"
+            style={{
+                width: '100%',
+            }}
+        >
             {display == 'artboard' ? (
                 <custom-h-stack gap="x-small" align-items="center">
                     {/* Modified */}
@@ -475,7 +480,6 @@ export function ArtboardsView() {
         if (artboards) {
             artboards.forEach((artboard) => {
                 if (!artboard.destinations || artboard.destinations.length == 0) {
-                    console.log('push untracked', artboard);
                     map['ungrouped'].children.push(artboard);
                     return;
                 }
@@ -610,6 +614,7 @@ export function ArtboardsView() {
 
             switch (type) {
                 case 'artboards-changed':
+                    console.log(payload, payload.performance);
                     setArtboards(payload.artboards);
                     setTotal(payload.total);
                     setHasSelection(payload.hasSelection);
@@ -655,7 +660,7 @@ export function ArtboardsView() {
                     })}
                 </custom-h-stack>
                 <custom-scroll-view>
-                    <custom-v-stack>
+                    <custom-v-stack separator="bottom">
                         {groupedArtboards.length ? (
                             groupedArtboards.map((group) => {
                                 return (

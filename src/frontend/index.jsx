@@ -35,12 +35,12 @@ ReactDOM.render(
  * Messaging
  */
 
-window.refresh = () => {
-    console.warn('Legacy method call: refresh');
-};
-window.selectionChanged = () => {
-    console.warn('Legacy method call: selectionChanged');
-};
+// window.refresh = () => {
+//     console.warn('Legacy method call: refresh');
+// };
+// window.selectionChanged = () => {
+//     console.warn('Legacy method call: selectionChanged');
+// };
 
 window.send = (data) => {
     // create and dispatch the event including the data

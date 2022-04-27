@@ -48,12 +48,12 @@
             }
         },
         {
-            "name": "SelectionChanged",
-            "identifier": "selection-changed",
+            "name": "ArtboardChanged",
+            "identifier": "artboard-changed",
             "script": "./commands/frontify.js",
             "handlers": {
                 "actions": {
-                    "SelectionChanged.finish": "selectionChangedCommand"
+                    "ArtboardChanged": "artboardChangedCommand"
                 }
             }
         },

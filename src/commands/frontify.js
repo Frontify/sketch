@@ -11,8 +11,6 @@ import { getPluginState } from '../windows/main';
 
 import State from '../windows/State';
 
-console.log('frontify.js');
-
 export function runCommand(context) {
     let threadDictionary = NSThread.mainThread().threadDictionary();
 
@@ -72,7 +70,9 @@ function activeDocumentDidChange() {
     return false;
 }
 
-export function selectionChangedCommand(context) {
+export function artboardChangedCommand(context) {
+    console.log('artboardChangedCommand', context);
+    let start = new Date().getTime();
     let threshold = 1000;
 
     let key = 'com.frontify.sketch.recent.selection.uuid';
@@ -87,20 +87,22 @@ export function selectionChangedCommand(context) {
         // State.selectionChangedCommand(newSelection);
         // State.progressEvent({ artboard: State.getState().artboards[0], data: {} });
         let payload = getSelectedArtboards();
+
+        // Dev: Mixin performance information
+        let elapsedTime = new Date().getTime() - start;
+        payload.performance = elapsedTime;
+
         frontend.send('artboards-changed', payload);
     };
 
     setTimeout(() => {
         let mostRecentUUID = sketch3.Settings.sessionVariable(key);
         if (mostRecentUUID == contextUUID) {
-            console.log('selection sent');
             executeSafely(context, function () {
                 if (isWebviewPresent('frontifymain')) {
                     sendSelection();
                 }
             });
-        } else {
-            console.log('canceled');
         }
     }, threshold);
 }
