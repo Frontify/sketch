@@ -53,7 +53,7 @@
             "script": "./commands/frontify.js",
             "handlers": {
                 "actions": {
-                    "ArtboardChanged": "artboardChangedCommand"
+                    "ArtboardChanged.begin": "artboardChangedCommand"
                 }
             }
         },

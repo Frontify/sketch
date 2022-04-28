@@ -1,5 +1,5 @@
 import Artboard from '../../model/artboard';
-import { setDestinations } from './getSelectedArtboards';
+import { computedSHA, setDestinations, setSHA } from './getSelectedArtboards';
 
 /**
  * uploadArtboards
@@ -12,13 +12,18 @@ export function uploadArtboards({ artboards }) {
         if (!artboard.destinations) return;
 
         setDestinations(artboard, artboard.destinations);
+
+        let sha = computedSHA(artboard);
+
+        setSHA(artboard);
+
         artboard.destinations.forEach((destination) => {
             queue.push({
                 id: destination.remote_id, // Frontify ID
                 id_external: artboard.id, // Sketch ID
                 name: '' + artboard.name.replace(/\s*\/\s*/g, '/'),
                 ext: 'png',
-                sha: artboard.sha,
+                sha: sha,
                 state: 'new',
                 target: destination,
                 modified: null,

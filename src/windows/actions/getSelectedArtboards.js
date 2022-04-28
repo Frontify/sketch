@@ -16,6 +16,7 @@ import { sha1 } from '../../helpers/sha1';
  * { remote_project_id: 191277, remote_id: 6448905, remote_path: '/Export Folder/' }
  */
 
+const SHA_KEY = 'com.frontify.artboard.sha';
 const DESTINATION_KEY = 'com.frontify.artboard.destinations';
 
 export function patchDestinations(artboardID, destination) {
@@ -40,8 +41,22 @@ export function setDestinations(artboard) {
     let layer = sketch3.find(`[id="${artboard.id}"]`)[0];
     Settings.setLayerSettingForKey(layer, DESTINATION_KEY, artboard.destinations);
 }
+export function computedSHA(artboard) {
+    let layer = sketch3.find(`[id="${artboard.id}"]`)[0];
+    return sha1(JSON.stringify(layer.toJSON()));
+}
+export function setSHA(artboard) {
+    let layer = sketch3.find(`[id="${artboard.id}"]`)[0];
+
+    let sha = sha1(JSON.stringify(layer.toJSON()));
+    console.log('set SHA', sha);
+    Settings.setLayerSettingForKey(layer, SHA_KEY, sha);
+}
 export function getDestinations(artboard) {
     return Settings.layerSettingForKey(artboard, DESTINATION_KEY) || [];
+}
+export function getSHA(artboard) {
+    return Settings.layerSettingForKey(artboard, SHA_KEY) || [];
 }
 
 export function getSelectedArtboardsFromSelection(selection, total, hasSelection) {
@@ -54,7 +69,7 @@ export function getSelectedArtboardsFromSelection(selection, total, hasSelection
                     // Calculate sha1 of the current state of the artboard.
                     // After we upload an artboard, we save that sha1 to the destination.
                     // Later, we can compare changes to an artboard.
-                    // sha: sha1(JSON.stringify(layer.toJSON())),
+                    sha: getSHA(layer),
                     type: layer.type,
                     name: layer.name,
                     id: layer.id,

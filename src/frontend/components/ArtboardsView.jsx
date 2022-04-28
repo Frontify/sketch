@@ -38,6 +38,7 @@ import PropTypes from 'prop-types';
  */
 
 ArtboardToolbar.propTypes = {
+    artboards: PropTypes.array,
     loading: PropTypes.bool,
     modifiedArtboards: PropTypes.array,
     withDestinationPicker: PropTypes.bool,
@@ -47,18 +48,19 @@ ArtboardToolbar.propTypes = {
     uploadDestination: PropTypes.object,
     uploadSome: PropTypes.func,
     uploadArtboards: PropTypes.func,
+    uploadArtboardsToDestination: PropTypes.func,
 };
 
 function ArtboardToolbar({
+    artboards,
     loading,
     modifiedArtboards = [],
     withDestinationPicker,
     setShowDestinationPicker,
     showDestinationPicker,
     setUploadDestination,
-    uploadDestination,
     uploadSome,
-    uploadArtboards,
+    uploadArtboardsToDestination,
 }) {
     const context = useContext(UserContext);
     return (
@@ -90,10 +92,7 @@ function ArtboardToolbar({
                 >
                     <custom-v-stack padding="small" gap="small">
                         <h2>Destination</h2>
-                        <Text>
-                            Choose the folder where you want to publish{' '}
-                            <strong>{context.currentDocument?.local?.filename}</strong>
-                        </Text>
+                        <Text>Choose the folder where you want to upload your artboards.</Text>
                         <hr />
                         <UploadDestinationPicker
                             onChange={(value) => {
@@ -103,7 +102,7 @@ function ArtboardToolbar({
                         <hr />
                         <Button
                             onClick={() => {
-                                uploadArtboards(uploadDestination);
+                                uploadArtboardsToDestination(artboards);
                                 setShowDestinationPicker(false);
                             }}
                         >
@@ -181,7 +180,6 @@ export function ArtboardItem({ artboard, showPath = true }) {
                     )}
                 </custom-v-stack>
             </custom-h-stack>
-            <custom-line></custom-line>
         </custom-v-stack>
     );
 }
@@ -211,9 +209,7 @@ function ArtboardGroupItem({ group, uploadGroup }) {
                     </custom-h-stack>
                     <Text padding="small" size="x-small">
                         {group.transfer?.status == 'uploading' ? (
-                            `Uploading (${group.transfer.completed.length + 1} / ${group.children.length}) … ${
-                                group.transfer.progress
-                            }%`
+                            `Uploading (${group.transfer.remaining} remaining) `
                         ) : group.selectionCount ? (
                             <custom-h-stack align-items="center" gap="x-small">
                                 <Text size="x-small" style={{ color: 'var(--box-selected-strong-color)' }}>
@@ -287,6 +283,34 @@ export function UntrackedArtboardItem({ artboard }) {
     );
 }
 
+export function ArtboardDestinationStatusIcon({ destination, transfer }) {
+    let isModified = destination.selected;
+    let noChanges = !destination.selected;
+    let isReadyForUpload =
+        (destination.selected && !transfer) ||
+        (destination.selected && transfer && transfer?.status == 'upload-complete');
+    let isUploaded = !destination.selected && transfer?.status == 'upload-complete';
+    let isUploading = transfer && transfer.status != 'upload-complete';
+
+    if (noChanges) {
+        return <Badge style="Positive" emphasis="Strong" icon={<IconCheck></IconCheck>}></Badge>;
+    }
+
+    if (isModified) {
+        if (isReadyForUpload) {
+            return <Badge style="Warning" size="Small" emphasis="Strong" icon={<IconCircle></IconCircle>}></Badge>;
+        }
+
+        if (isUploaded) {
+            return <Badge style="Positive" emphasis="Strong" icon={<IconCheck></IconCheck>}></Badge>;
+        }
+
+        if (isUploading) {
+            return <Badge style="Warning" size="Small" emphasis="Strong" icon={<IconArrowUp></IconArrowUp>}></Badge>;
+        }
+    }
+}
+
 /**
  * ⚛️ Destination Item
  * ----------------------------------------------------------------------------
@@ -308,44 +332,25 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
             {display == 'artboard' ? (
                 <custom-h-stack gap="x-small" align-items="center">
                     {/* Modified */}
-                    {destination.selected && !transfer ? (
-                        <Badge style="Warning" size="Small" emphasis="Strong" icon={<IconCircle></IconCircle>}></Badge>
-                    ) : (
-                        // <Badge style="Warning" size="s" emphasis="Strong">
-                        //     M
-                        // </Badge>
-                        ''
-                    )}
+                    <ArtboardDestinationStatusIcon
+                        destination={destination}
+                        transfer={transfer}
+                    ></ArtboardDestinationStatusIcon>
 
-                    {/* Upload Complete */}
-
-                    {!destination.selected ||
-                    (destination.selected && transfer && transfer.status == 'upload-complete') ? (
-                        <Badge style="Positive" emphasis="Strong" icon={<IconCheck></IconCheck>}></Badge>
-                    ) : (
-                        ''
-                    )}
-
-                    {/* Ready for upload */}
-
-                    {transfer && transfer.status != 'upload-complete' ? (
-                        <Badge
-                            style="Warning"
-                            size="Small"
-                            emphasis="Strong"
-                            icon={<IconArrowUp></IconArrowUp>}
-                        ></Badge>
-                    ) : (
-                        ''
-                    )}
-
-                    <Text size="x-small" weight={destination.selected ? 'strong' : 'default'}>
+                    <Text
+                        size="x-small"
+                        weight={destination.selected && transfer?.status != 'upload-complete' ? 'strong' : 'default'}
+                    >
                         {artboard.name}.png
                     </Text>
                 </custom-h-stack>
             ) : (
                 <custom-h-stack size="small" color="weak" gap="x-small">
-                    <IconFolder></IconFolder>
+                    <ArtboardDestinationStatusIcon
+                        destination={destination}
+                        transfer={transfer}
+                    ></ArtboardDestinationStatusIcon>
+
                     <Text color="weak">/</Text>
                     <Text color="weak">{destination.remote_project_id}</Text>
                     <Text color="weak">{destination.remote_path}</Text>
@@ -414,7 +419,7 @@ export function ArtboardsView() {
     const context = useContext(UserContext);
 
     const [artboards, setArtboards] = useState([]);
-    const [view, setView] = useState('modified');
+    const [view, setView] = useState('all');
     const [selection] = useState([]);
     const [total, setTotal] = useState(0);
     const [hasSelection, setHasSelection] = useState(false);
@@ -483,7 +488,7 @@ export function ArtboardsView() {
                     map['ungrouped'].children.push(artboard);
                     return;
                 }
-                let selectionCount = 0;
+
                 artboard.destinations.forEach((destination) => {
                     let key = `${destination.remote_project_id}${destination.remote_path}`;
                     if (!map[key]) {
@@ -513,9 +518,10 @@ export function ArtboardsView() {
                 let transfer = {
                     status: 'idle',
                     totalProgress: 0,
+                    remaining: 0,
                     total: 0,
                     progress: 0,
-                    completed: [],
+                    completed: 0,
                 };
                 group.children.forEach((artboard) => {
                     artboard.destinations.forEach((destination) => {
@@ -529,23 +535,40 @@ export function ArtboardsView() {
                                 transfer.status = 'uploading';
                             }
                             if (transferEntry.progress == 100) {
-                                transfer.completed.push(transferEntry);
+                                transfer.completed++;
+
+                                // this will mark it with a "check" icon
+                                destination.sha = artboard.sha;
+                                // destination.selected = false;
+                                // group.selectionCount--;
                             }
-                            transfer.totalProgress += context.transferMap[destination.remote_id].progress;
-                            transfer.total += 100;
+                            transfer.totalProgress += transferEntry.progress;
+                            if (destination.selected) {
+                                transfer.total += 100;
+                            } else {
+                                transfer.completed++;
+                            }
+                        } else {
+                            transfer.completed++;
                         }
                     });
                 });
                 transfer.progress = Math.ceil((transfer.totalProgress / transfer.total) * 100);
-                if (transfer.progress > 0 && transfer.progress < 100) {
+                if (transfer.remaining > 0) {
                     transfer.status = 'uploading';
                 }
                 if (transfer.progress == 100) {
-                    transfer.status = 'done';
-                    transfer.progress = 0;
+                    transfer.status = 'upload-complete';
+                    // transfer.progress = 0;
                 }
                 if (transfer.progress == 0) {
                     transfer.status = 'idle';
+                }
+
+                transfer.remaining = group.children.length - transfer.completed;
+
+                if (transfer.remaining > 0) {
+                    transfer.status = 'uploading';
                 }
 
                 group.transfer = transfer;
@@ -590,7 +613,24 @@ export function ArtboardsView() {
         }
     }, [artboards, context.transferMap, view]);
 
+    const uploadArtboardsToDestination = (artboards) => {
+        let patchedArtboards = artboards.map((artboard) => {
+            return {
+                ...artboard,
+                destinations: [
+                    {
+                        remote_project_id: uploadDestination.project.id,
+                        remote_id: null,
+                        remote_path: `/${uploadDestination.folderPath}/`,
+                    },
+                ],
+            };
+        });
+        uploadArtboards(patchedArtboards);
+    };
+
     const uploadArtboards = async (artboards) => {
+        console.log('upload!', artboards);
         setLoading(true);
         await useSketch('uploadArtboards', { artboards });
         setLoading(false);
@@ -614,7 +654,6 @@ export function ArtboardsView() {
 
             switch (type) {
                 case 'artboards-changed':
-                    console.log(payload, payload.performance);
                     setArtboards(payload.artboards);
                     setTotal(payload.total);
                     setHasSelection(payload.hasSelection);
@@ -660,23 +699,37 @@ export function ArtboardsView() {
                     })}
                 </custom-h-stack>
                 <custom-scroll-view>
-                    <custom-v-stack separator="bottom">
-                        {groupedArtboards.length ? (
-                            groupedArtboards.map((group) => {
+                    {groupedArtboards.length ? (
+                        <custom-v-stack flex stretch>
+                            {groupedArtboards.map((group) => {
                                 return (
                                     <custom-v-stack key={group.key} separator="top">
                                         <ArtboardGroupItem group={group} uploadGroup={uploadGroup}></ArtboardGroupItem>
                                     </custom-v-stack>
                                 );
-                            })
-                        ) : (
-                            <custom-v-stack padding="small" separator="top">
-                                <Text>No changes</Text>
+                            })}
+                        </custom-v-stack>
+                    ) : (
+                        <custom-v-stack flex stretch>
+                            <custom-v-stack
+                                gap="small"
+                                padding="small"
+                                separator="top"
+                                flex
+                                stretch
+                                align-items="center"
+                                justify-content="center"
+                            >
+                                <Text size="large">No changes</Text>
+                                <Text color="weak">
+                                    Use this view to update artboards that are already tracked on Frontify.
+                                </Text>
                             </custom-v-stack>
-                        )}
-                    </custom-v-stack>
+                        </custom-v-stack>
+                    )}
                 </custom-scroll-view>
                 <ArtboardToolbar
+                    artboards={artboards}
                     loading={loading}
                     modifiedArtboards={modifiedArtboards}
                     withDestinationPicker={hasSelection}
@@ -686,6 +739,7 @@ export function ArtboardsView() {
                     uploadDestination={uploadDestination}
                     uploadSome={uploadSome}
                     uploadArtboards={uploadArtboards}
+                    uploadArtboardsToDestination={uploadArtboardsToDestination}
                 ></ArtboardToolbar>
             </custom-v-stack>
         );
@@ -704,13 +758,26 @@ export function ArtboardsView() {
                         {artboards.map((artboard) => {
                             return (
                                 <custom-v-stack key={artboard.key}>
-                                    <ArtboardItem artboard={artboard} showPath={true}></ArtboardItem>
+                                    <ArtboardItem artboard={artboard} showPath={false}></ArtboardItem>
+                                    <custom-v-stack style={{ marginLeft: '8px' }}>
+                                        {artboard.destinations.map((destination) => {
+                                            return (
+                                                <ArtboardDestinationItem
+                                                    key={destination.remote_id}
+                                                    artboard={artboard}
+                                                    destination={destination}
+                                                    display="path"
+                                                ></ArtboardDestinationItem>
+                                            );
+                                        })}
+                                    </custom-v-stack>
                                 </custom-v-stack>
                             );
                         })}
                     </custom-v-stack>
                 </custom-scroll-view>
                 <ArtboardToolbar
+                    artboards={artboards}
                     loading={loading}
                     withDestinationPicker={hasSelection}
                     setShowDestinationPicker={setShowDestinationPicker}
@@ -719,6 +786,7 @@ export function ArtboardsView() {
                     uploadDestination={uploadDestination}
                     uploadSome={uploadSome}
                     uploadArtboards={uploadArtboards}
+                    uploadArtboardsToDestination={uploadArtboardsToDestination}
                 ></ArtboardToolbar>
             </custom-v-stack>
         );

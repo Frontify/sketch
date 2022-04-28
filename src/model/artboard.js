@@ -500,20 +500,6 @@ class Artboard {
         // sequence artboard export and upload
         this.uploadInProgress = true;
 
-        // return this.getArtboards().then(
-        //     function (data) {
-        //         let target = data.target;
-
-        //         // get the current state of the given artboards
-        //         artboards = artboards.map((artboard) => {
-        //             return data.artboards.find((remoteArtboard) => {
-        //                 return remoteArtboard.id_external == artboard.id_external;
-        //             });
-        //         });
-
-        //     }.bind(this)
-        // );
-
         /**
          * Force Upload
          *
@@ -558,6 +544,11 @@ class Artboard {
                                                             // artboard.sha = the sha based on layer.toJSON()
                                                             // -> should be compared against the sha stored as a layer setting
                                                             // artboard.target.sha
+                                                            console.log(
+                                                                'upload artboard - SHA should be unequal',
+                                                                artboard.sha,
+                                                                artboard.target.sha
+                                                            );
                                                             if (artboard.sha != artboard.target.sha) {
                                                                 artboardChanged = true;
 
@@ -708,6 +699,7 @@ class Artboard {
                                                 //     'frontifymain',
                                                 //     'artboardUploaded(' + JSON.stringify(artboard) + ')'
                                                 // );
+                                                console.log('finish', artboard);
                                                 this.finishUpload(artboard);
                                             }
                                             return true;

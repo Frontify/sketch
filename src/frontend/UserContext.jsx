@@ -50,13 +50,13 @@ export const UserContextProvider = ({ children }) => {
                     setTick(payload.value);
                     break;
                 case 'progress':
-                    switch (payload.state) {
-                        case "upload-failed'":
+                    switch (payload.status) {
+                        case 'upload-failed':
                             setTransferMap((state) => {
                                 return { ...state, [payload.id]: payload };
                             });
                             break;
-                        case "upload-complete'":
+                        case 'upload-complete':
                             setTransferMap((state) => {
                                 // Remove the entry from transferMap
                                 delete state[payload.id];

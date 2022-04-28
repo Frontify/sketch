@@ -5,7 +5,11 @@ import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
 import sketch from '../model/sketch';
 const sketch3 = require('sketch');
 
-import { getSelectedArtboards, getSelectedArtboardsFromSelection } from '../windows/actions/getSelectedArtboards';
+import {
+    getSelectedArtboards,
+    getSelectedArtboardsFromSelection,
+    setSHA,
+} from '../windows/actions/getSelectedArtboards';
 
 import { getPluginState } from '../windows/main';
 
@@ -71,7 +75,16 @@ function activeDocumentDidChange() {
 }
 
 export function artboardChangedCommand(context) {
-    console.log('artboardChangedCommand', context);
+    let newArtboard = sketch3.fromNative(context.actionContext.newArtboard);
+
+    // Update the SHA of the artboard
+    setSHA(newArtboard);
+
+    // if (!oldArtboard || newArtboard.id == oldArtboard.id) {
+    //     console.log('skip');
+    //     return;
+    // }
+
     let start = new Date().getTime();
     let threshold = 1000;
 

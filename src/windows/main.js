@@ -29,8 +29,6 @@ import { sendToWebview } from 'sketch-module-web-view/remote';
 let DOM = require('sketch/dom');
 let sketch3 = require('sketch');
 
-console.log('called main.js');
-
 import State from './State';
 
 export function getPluginState() {
