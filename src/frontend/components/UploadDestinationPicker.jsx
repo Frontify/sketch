@@ -6,7 +6,7 @@ import { useSketch } from '../hooks/useSketch';
 
 import { queryGraphQLWithAuth } from '../graphql';
 
-export function UploadDestinationPicker({ onChange }) {
+export function UploadDestinationPicker({ onChange, allowfiles = false }) {
     let { actions, selection } = useContext(UserContext);
 
     // Loading
@@ -228,6 +228,11 @@ export function UploadDestinationPicker({ onChange }) {
                     </custom-palette-item>
                 ) : (
                     <custom-v-stack stretch>
+                        {!files.length && !folders.length && (
+                            <custom-v-stack separator="top" stretch align-items="center" justify-content="center">
+                                <Text color="weak">Empty</Text>
+                            </custom-v-stack>
+                        )}
                         {folders.map((folder) => {
                             return (
                                 <custom-palette-item selectable key={folder.id} tabindex="-1">
@@ -246,7 +251,7 @@ export function UploadDestinationPicker({ onChange }) {
                         {files.map((file) => {
                             if (file.extension == 'sketch') {
                                 return (
-                                    <custom-palette-item selectable key={file.id} tabindex="-1">
+                                    <custom-palette-item selectable key={file.id} tabindex="-1" disabled={allowfiles}>
                                         <custom-h-stack
                                             gap="small"
                                             align-items="center"

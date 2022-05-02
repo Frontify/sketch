@@ -24,6 +24,7 @@ import {
 import mockedArtboards from './mocks/artboards';
 
 import { UploadDestinationPicker } from './UploadDestinationPicker';
+import { CustomDialog } from './CustomDialog';
 import { SearchField } from './SearchField';
 import { useState, useEffect, useCallback, useContext } from 'react';
 
@@ -59,57 +60,122 @@ function ArtboardToolbar({
     setShowDestinationPicker,
     showDestinationPicker,
     setUploadDestination,
+    uploadDestination,
+    uploadArtboards,
     uploadSome,
     uploadArtboardsToDestination,
 }) {
+    const [temporaryUploadDestination, setTemporaryUploadDestination] = useState(null);
     const context = useContext(UserContext);
     return (
-        <custom-h-stack padding="small" gap="small" align-items="center" justify-content="center" separator="top">
+        <custom-h-stack padding="small" gap="small" align-items="center" separator="top" style={{ width: '100%' }}>
             {withDestinationPicker ? (
-                <Flyout
-                    style={{ width: '100%' }}
-                    onCancel={() => setShowDestinationPicker(false)}
-                    isOpen={showDestinationPicker}
-                    onOpenChange={(open) => {
-                        if (open) {
-                            setShowDestinationPicker(false);
-                        } else {
-                            setShowDestinationPicker(true);
-                        }
-                    }}
-                    trigger={
-                        <Button
-                            hugWidth={false}
-                            inverted={true}
-                            onClick={() => {
-                                setShowDestinationPicker(true);
-                            }}
-                            icon={<IconFolder />}
-                        >
-                            Upload to …
-                        </Button>
-                    }
-                >
-                    <custom-v-stack padding="small" gap="small">
-                        <h2>Destination</h2>
-                        <Text>Choose the folder where you want to upload your artboards.</Text>
-                        <hr />
-                        <UploadDestinationPicker
-                            onChange={(value) => {
-                                setUploadDestination(value);
-                            }}
-                        ></UploadDestinationPicker>
-                        <hr />
-                        <Button
-                            onClick={() => {
-                                uploadArtboardsToDestination(artboards);
+                <custom-h-stack flex style={{ width: '100%' }} justify-content="space-between">
+                    <Flyout
+                        flex
+                        onCancel={() => setShowDestinationPicker(false)}
+                        isOpen={showDestinationPicker}
+                        onOpenChange={(open) => {
+                            if (open) {
                                 setShowDestinationPicker(false);
-                            }}
-                        >
-                            Confirm
-                        </Button>
-                    </custom-v-stack>
-                </Flyout>
+                            } else {
+                                setShowDestinationPicker(true);
+                            }
+                        }}
+                        trigger={
+                            <Button
+                                style="Secondary"
+                                onClick={() => {
+                                    setShowDestinationPicker(true);
+                                }}
+                                icon={<IconFolder />}
+                            >
+                                <Text size="x-small">
+                                    {uploadDestination?.folderPath ? uploadDestination?.folderPath : 'Choose …'}
+                                </Text>
+                            </Button>
+                        }
+                    >
+                        <h3>Recent</h3>
+                        <ul>
+                            <li>Folder A</li>
+                            <li>Folder B</li>
+                            <li>
+                                <CustomDialog open={showDestinationPicker} trigger={<p>Choose folder …</p>}>
+                                    <custom-v-stack stretch>
+                                        <custom-h-stack padding="small" separator="bottom">
+                                            Export Folder
+                                        </custom-h-stack>
+                                        <UploadDestinationPicker
+                                            allowfiles={false}
+                                            path={uploadDestination}
+                                            onChange={(value) => {
+                                                setTemporaryUploadDestination(value);
+                                            }}
+                                        ></UploadDestinationPicker>
+                                        <custom-h-stack padding="small" gap="small" separator="top">
+                                            <Button style="Secondary">New folder</Button>
+                                            <custom-spacer></custom-spacer>
+                                            <Button
+                                                style="Secondary"
+                                                onClick={() => {
+                                                    setShowDestinationPicker(false);
+                                                }}
+                                            >
+                                                Cancel
+                                            </Button>
+                                            <Button
+                                                disabled={temporaryUploadDestination == null}
+                                                onClick={() => {
+                                                    setShowDestinationPicker(false);
+                                                    setUploadDestination(temporaryUploadDestination);
+                                                }}
+                                            >
+                                                Open
+                                            </Button>
+                                        </custom-h-stack>
+                                    </custom-v-stack>
+                                </CustomDialog>
+                            </li>
+                        </ul>
+                    </Flyout>
+
+                    {/* Upload to existing destinations */}
+                    <Button
+                        style="Secondary"
+                        hugWidth={true}
+                        onClick={() => uploadArtboards(artboards)}
+                        icon={
+                            <IconUploadAlternative
+                                style={{
+                                    color:
+                                        modifiedArtboards.length == 0 ? 'inherit' : 'var(--box-selected-strong-color)',
+                                }}
+                            />
+                        }
+                    >
+                        Upload
+                    </Button>
+
+                    {/* Upload to chosen destination */}
+
+                    <Button
+                        disabled={!uploadDestination.folderPath}
+                        style="Secondary"
+                        hugWidth={true}
+                        onClick={() => uploadArtboardsToDestination(artboards)}
+                        icon={
+                            <IconUploadAlternative
+                                style={{
+                                    color:
+                                        modifiedArtboards.length == 0 ? 'inherit' : 'var(--box-selected-strong-color)',
+                                }}
+                            />
+                        }
+                    >
+                        Upload
+                    </Button>
+                </custom-h-stack>
             ) : !loading ? (
                 <Button
                     disabled={modifiedArtboards.length == 0}
@@ -284,6 +350,7 @@ export function UntrackedArtboardItem({ artboard }) {
 }
 
 export function ArtboardDestinationStatusIcon({ destination, transfer }) {
+    if (!destination) return <Badge style="Progress" emphasis="Strong" icon={<IconAddSimple></IconAddSimple>}></Badge>;
     let isModified = destination.selected;
     let noChanges = !destination.selected;
     let isReadyForUpload =
@@ -320,7 +387,7 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
     const context = useContext(UserContext);
     const [transfer, setTransfer] = useState({});
     useEffect(() => {
-        setTransfer(context.transferMap[destination.remote_id]);
+        if (destination) setTransfer(context.transferMap[destination.remote_id]);
     }, [context.transferMap]);
     return (
         <custom-h-stack
@@ -345,15 +412,29 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
                     </Text>
                 </custom-h-stack>
             ) : (
-                <custom-h-stack size="small" color="weak" gap="x-small">
+                <custom-h-stack size="small" color="weak" gap="x-small" align-items="center">
                     <ArtboardDestinationStatusIcon
                         destination={destination}
                         transfer={transfer}
                     ></ArtboardDestinationStatusIcon>
 
-                    <Text color="weak">/</Text>
-                    <Text color="weak">{destination.remote_project_id}</Text>
-                    <Text color="weak">{destination.remote_path}</Text>
+                    {destination ? (
+                        <custom-h-stack align-items="center">
+                            <Text color="weak" size="x-small">
+                                /
+                            </Text>
+                            <Text color="weak" size="x-small">
+                                {destination.remote_project_id}
+                            </Text>
+                            <Text color="weak" size="x-small">
+                                {destination.remote_path}
+                            </Text>
+                        </custom-h-stack>
+                    ) : (
+                        <Text color="weak" size="x-small">
+                            Choose destination …
+                        </Text>
+                    )}
                 </custom-h-stack>
             )}
 
@@ -627,6 +708,7 @@ export function ArtboardsView() {
             };
         });
         uploadArtboards(patchedArtboards);
+        requestArtboards();
     };
 
     const uploadArtboards = async (artboards) => {
@@ -720,10 +802,10 @@ export function ArtboardsView() {
                                 align-items="center"
                                 justify-content="center"
                             >
-                                <Text size="large">No changes</Text>
-                                <Text color="weak">
+                                <Text color="weak">No changes</Text>
+                                {/* <Text color="weak">
                                     Use this view to update artboards that are already tracked on Frontify.
-                                </Text>
+                                </Text> */}
                             </custom-v-stack>
                         </custom-v-stack>
                     )}
@@ -737,6 +819,7 @@ export function ArtboardsView() {
                     showDestinationPicker={showDestinationPicker}
                     setUploadDestination={setUploadDestination}
                     uploadDestination={uploadDestination}
+                    uploadArtboards={uploadArtboards}
                     uploadSome={uploadSome}
                     uploadArtboards={uploadArtboards}
                     uploadArtboardsToDestination={uploadArtboardsToDestination}
@@ -770,6 +853,16 @@ export function ArtboardsView() {
                                                 ></ArtboardDestinationItem>
                                             );
                                         })}
+
+                                        {artboard.destinations.length == 0 ? (
+                                            <ArtboardDestinationItem
+                                                key={artboard.id}
+                                                artboard={artboard}
+                                                display="path"
+                                            ></ArtboardDestinationItem>
+                                        ) : (
+                                            ''
+                                        )}
                                     </custom-v-stack>
                                 </custom-v-stack>
                             );
@@ -784,8 +877,8 @@ export function ArtboardsView() {
                     showDestinationPicker={showDestinationPicker}
                     setUploadDestination={setUploadDestination}
                     uploadDestination={uploadDestination}
-                    uploadSome={uploadSome}
                     uploadArtboards={uploadArtboards}
+                    uploadSome={uploadSome}
                     uploadArtboardsToDestination={uploadArtboardsToDestination}
                 ></ArtboardToolbar>
             </custom-v-stack>
