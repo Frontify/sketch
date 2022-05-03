@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 export function CustomDialog({ children, trigger, onChange, open }) {
     return (
         <div>
-            <button>{trigger}</button>
+            {trigger}
 
             {open && (
                 <custom-dialog>

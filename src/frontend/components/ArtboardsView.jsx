@@ -10,23 +10,16 @@ import {
     IconMore,
     IconArrowUp,
     IconCircle,
-    IconPlus,
-    IconPen,
-    IconTriangle,
     IconUploadAlternative,
     LoadingCircle,
     Text,
-    Checkbox,
     IconAddSimple,
-    IconAdd,
 } from '@frontify/arcade';
-
-import mockedArtboards from './mocks/artboards';
 
 import { UploadDestinationPicker } from './UploadDestinationPicker';
 import { CustomDialog } from './CustomDialog';
 import { SearchField } from './SearchField';
-import { useState, useEffect, useCallback, useContext } from 'react';
+import { useState, useEffect, useContext } from 'react';
 
 import { useTranslation } from 'react-i18next';
 import { UserContext } from '../UserContext';
@@ -41,6 +34,7 @@ import PropTypes from 'prop-types';
 ArtboardToolbar.propTypes = {
     artboards: PropTypes.array,
     loading: PropTypes.bool,
+    usedFolders: PropTypes.array,
     modifiedArtboards: PropTypes.array,
     withDestinationPicker: PropTypes.bool,
     setShowDestinationPicker: PropTypes.func,
@@ -60,6 +54,7 @@ function ArtboardToolbar({
     setShowDestinationPicker,
     showDestinationPicker,
     setUploadDestination,
+    usedFolders,
     uploadDestination,
     uploadArtboards,
     uploadSome,
@@ -81,6 +76,7 @@ function ArtboardToolbar({
         uploadArtboards(artboards);
     };
     useEffect(() => {
+        setShowDestinationPicker(false);
         setUploadDestination(null);
         setTemporaryUploadDestination(null);
         let union = new Map();
@@ -142,7 +138,7 @@ function ArtboardToolbar({
                                 icon={<IconFolder />}
                             >
                                 <Text size="x-small">
-                                    {!uploadDestination && computedFolderType == 'none' && 'Choose …'}
+                                    {!uploadDestination && computedFolderType == 'none' && 'Choose Folder …'}
                                     {!uploadDestination && computedFolderType == 'mixed' && 'Multiple Folders'}
                                     {!uploadDestination &&
                                         computedFolderType == 'single' &&
@@ -155,17 +151,63 @@ function ArtboardToolbar({
                             </Button>
                         }
                     >
-                        <h3>Used in this document</h3>
+                        <custom-h-stack padding="small">
+                            <Text weight="strong">Used in this document</Text>
+                        </custom-h-stack>
                         <ul>
-                            <custom-palette-item>Folder A</custom-palette-item>
-                            <custom-palette-item>Folder B</custom-palette-item>
-                            <custom-palette-item>Folder C</custom-palette-item>
-                            <custom-palette-item>Folder D</custom-palette-item>
+                            {[...usedFolders.keys()].map((key) => (
+                                <li key={key}>
+                                    <custom-palette-item
+                                        selectable
+                                        tabindex="-1"
+                                        onDoubleClick={() => {
+                                            // TODO:
+                                            // The returned object needs to be re-formatted
+                                            // usedFolders.get(key) -> (remote_id, remote_project_id)
+                                            // -> needs folderPath etc.
 
-                            <li>
+                                            let folder = usedFolders.get(key);
+                                            setUploadDestination({
+                                                project: {
+                                                    id: folder.remote_project_id,
+                                                },
+                                                folderPath: folder.remote_path.substring(
+                                                    1,
+                                                    folder.remote_path.length - 1
+                                                ),
+                                            });
+                                            setShowRecentDestinations(false);
+                                        }}
+                                    >
+                                        <Text size="small">{key}</Text>
+                                    </custom-palette-item>
+                                </li>
+                            ))}
+
+                            {usedFolders.forEach((key, value) => {
+                                return (
+                                    <li key={key}>
+                                        <custom-palette-item
+                                            selectable
+                                            tabindex="-1"
+                                            onDoubleClick={() => {
+                                                setUploadDestination(value);
+                                            }}
+                                        >
+                                            <Text size="small">x{value}</Text>
+                                        </custom-palette-item>
+                                    </li>
+                                );
+                            })}
+
+                            <li padding="small" separator="top">
                                 <CustomDialog
                                     open={showDestinationPicker}
-                                    trigger={<Button onClick={() => setShowDestinationPicker(true)}>Browse …</Button>}
+                                    trigger={
+                                        <Button hugWidth={false} onClick={() => setShowDestinationPicker(true)}>
+                                            Browse …
+                                        </Button>
+                                    }
                                 >
                                     <custom-v-stack stretch>
                                         <custom-h-stack padding="small" separator="bottom">
@@ -442,7 +484,7 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
     const [transfer, setTransfer] = useState({});
     useEffect(() => {
         if (destination) setTransfer(context.transferMap[destination.remote_id]);
-    }, [context.transferMap]);
+    }, [context.transferMap[destination.remote_id]]);
     return (
         <custom-h-stack
             gap="x-small"
@@ -554,16 +596,17 @@ export function ArtboardsView() {
     const context = useContext(UserContext);
 
     const [artboards, setArtboards] = useState([]);
-    const [view, setView] = useState('all');
-    const [selection] = useState([]);
-    const [total, setTotal] = useState(0);
+    const [destinationPickerOpen, setDestinationPickerOpen] = useState(false);
+    const [documentArtboards, setDocumentArtboards] = useState([]);
+    const [groupedArtboards, setGroupedArtboards] = useState({});
     const [hasSelection, setHasSelection] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [open, setOpen] = useState(false);
-    const [destinationPickerOpen, setDestinationPickerOpen] = useState(false);
     const [modifiedArtboards, setModifiedArtboards] = useState([]);
+    const [open, setOpen] = useState(false);
     const [showDestinationPicker, setShowDestinationPicker] = useState(false);
-    const [groupedArtboards, setGroupedArtboards] = useState({});
+    const [total, setTotal] = useState(0);
+    const [usedFolders, setUsedFolders] = useState([]);
+    const [view, setView] = useState('all');
 
     const [uploadDestination, setUploadDestination] = useState({});
 
@@ -595,9 +638,10 @@ export function ArtboardsView() {
         let response = await useSketch('getSelectedArtboards');
 
         setArtboards(response.artboards);
+        setDocumentArtboards(response.documentArtboards);
         setTotal(response.total);
         setHasSelection(response.hasSelection);
-        // setArtboards(mockedArtboards);
+        // setArtboards(mockedArtall);
     };
 
     /**
@@ -748,6 +792,20 @@ export function ArtboardsView() {
         }
     }, [artboards, context.transferMap, view]);
 
+    // Computed used folders
+    useEffect(() => {
+        if (!artboards) return;
+        let usedFolders = new Map();
+        documentArtboards.forEach((artboard) => {
+            if (!artboard.destinations) return;
+            artboard.destinations.forEach((destination) => {
+                usedFolders.set(`${destination.remote_project_id}${destination.remote_path}`, destination);
+            });
+
+            setUsedFolders(usedFolders);
+        });
+    }, [documentArtboards]);
+
     const uploadArtboardsToDestination = (artboards) => {
         let patchedArtboards = artboards.map((artboard) => {
             return {
@@ -776,6 +834,8 @@ export function ArtboardsView() {
         let response = await useSketch('getSelectedArtboards');
 
         setArtboards(response.artboards);
+        setDocumentArtboards(response.documentArtboards);
+
         setTotal(response.total);
         setHasSelection(response.hasSelection);
     }, []);
@@ -791,6 +851,7 @@ export function ArtboardsView() {
             switch (type) {
                 case 'artboards-changed':
                     setArtboards(payload.artboards);
+                    setDocumentArtboards(payload.documentArtboards);
                     setTotal(payload.total);
                     setHasSelection(payload.hasSelection);
 
@@ -869,6 +930,7 @@ export function ArtboardsView() {
                 <ArtboardToolbar
                     artboards={artboards}
                     loading={loading}
+                    usedFolders={usedFolders}
                     modifiedArtboards={modifiedArtboards}
                     withDestinationPicker={hasSelection}
                     setShowDestinationPicker={setShowDestinationPicker}
@@ -886,7 +948,7 @@ export function ArtboardsView() {
 
     if (artboards && artboards.length && hasSelection) {
         return (
-            <custom-v-stack stretch>
+            <custom-v-stack stretch overflow="hidden">
                 <custom-h-stack padding="small" separator="bottom">
                     <Text color="weak" size="x-small">
                         Selected Artboards ( {artboards.length} )
@@ -928,6 +990,7 @@ export function ArtboardsView() {
                 <ArtboardToolbar
                     artboards={artboards}
                     loading={loading}
+                    usedFolders={usedFolders}
                     withDestinationPicker={hasSelection}
                     setShowDestinationPicker={setShowDestinationPicker}
                     showDestinationPicker={showDestinationPicker}

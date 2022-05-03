@@ -114,10 +114,16 @@ export function getSelectedArtboards() {
         // If there is a selection, but it doesn’t contain artboards: return all layers of type artboard
         // Else: return selected artboards
 
-        if (selection.length == 0) return getSelectedArtboardsFromSelection(allArtboards, total, hasSelection);
-        if (selectedArtboards.length == 0) return getSelectedArtboardsFromSelection(allArtboards, total, hasSelection);
+        let all = getSelectedArtboardsFromSelection(allArtboards, total, hasSelection);
+        let documentArtboards = all.artboards;
 
-        return getSelectedArtboardsFromSelection(currentDocument.selectedLayers, total, hasSelection);
+        if (selection.length == 0) return { ...all, documentArtboards };
+        if (selectedArtboards.length == 0) return { ...all, documentArtboards };
+
+        return {
+            ...getSelectedArtboardsFromSelection(currentDocument.selectedLayers, total, hasSelection),
+            documentArtboards,
+        };
     } catch (error) {
         console.error(error);
         return { success: false };
