@@ -65,61 +65,129 @@ function ArtboardToolbar({
     uploadSome,
     uploadArtboardsToDestination,
 }) {
+    const [computedFolders, setComputedFolders] = useState([]);
+    const [computedFolderType, setComputedFolderType] = useState('none');
     const [temporaryUploadDestination, setTemporaryUploadDestination] = useState(null);
     const context = useContext(UserContext);
+
+    // Callback function that starts the upload after pressing the "upload" button in the toolbar
+    const performUpload = () => {
+        // uploadDestination?
+        let overrideDestination = uploadDestination && uploadDestination.folderPath;
+        if (overrideDestination) {
+            uploadArtboardsToDestination(artboards);
+            return;
+        }
+        uploadArtboards(artboards);
+    };
+    useEffect(() => {
+        setUploadDestination(null);
+        setTemporaryUploadDestination(null);
+        let union = new Map();
+        artboards.forEach((artboard) => {
+            if (!artboard.destinations.length) {
+                union.set('no destination', '');
+                return;
+            }
+            artboard.destinations.forEach((destination) => {
+                union.set(`${destination.remote_project_id}${destination.remote_path}`, destination);
+            });
+        });
+        let type = '';
+
+        switch (union.size) {
+            case 1:
+                if (union.has('no destination')) {
+                    type = 'none';
+                } else {
+                    type = 'single';
+                }
+
+                break;
+            case 2:
+                type = 'mixed';
+                break;
+            default:
+                type = 'mixed';
+                break;
+        }
+        setComputedFolderType(type);
+        setComputedFolders(Array.from(union.keys()));
+    }, [artboards]);
+
+    const [showRecentDestinations, setShowRecentDestinations] = useState(false);
     return (
         <custom-h-stack padding="small" gap="small" align-items="center" separator="top" style={{ width: '100%' }}>
             {withDestinationPicker ? (
                 <custom-h-stack flex style={{ width: '100%' }} justify-content="space-between">
                     <Flyout
+                        stretch-children
+                        stretch
                         flex
-                        onCancel={() => setShowDestinationPicker(false)}
-                        isOpen={showDestinationPicker}
+                        onCancel={() => setShowRecentDestinations(false)}
+                        isOpen={showRecentDestinations}
                         onOpenChange={(open) => {
                             if (open) {
-                                setShowDestinationPicker(false);
+                                setShowRecentDestinations(false);
                             } else {
-                                setShowDestinationPicker(true);
+                                setShowRecentDestinations(true);
                             }
                         }}
                         trigger={
                             <Button
                                 style="Secondary"
                                 onClick={() => {
-                                    setShowDestinationPicker(true);
+                                    setShowRecentDestinations(true);
                                 }}
                                 icon={<IconFolder />}
                             >
                                 <Text size="x-small">
-                                    {uploadDestination?.folderPath ? uploadDestination?.folderPath : 'Choose …'}
+                                    {!uploadDestination && computedFolderType == 'none' && 'Choose …'}
+                                    {!uploadDestination && computedFolderType == 'mixed' && 'Multiple Folders'}
+                                    {!uploadDestination &&
+                                        computedFolderType == 'single' &&
+                                        JSON.stringify(computedFolders[0])}
+                                    {uploadDestination && uploadDestination.folderPath
+                                        ? uploadDestination.folderPath
+                                        : ''}
+                                    <IconCaretDown></IconCaretDown>
                                 </Text>
                             </Button>
                         }
                     >
-                        <h3>Recent</h3>
+                        <h3>Used in this document</h3>
                         <ul>
-                            <li>Folder A</li>
-                            <li>Folder B</li>
+                            <custom-palette-item>Folder A</custom-palette-item>
+                            <custom-palette-item>Folder B</custom-palette-item>
+                            <custom-palette-item>Folder C</custom-palette-item>
+                            <custom-palette-item>Folder D</custom-palette-item>
+
                             <li>
-                                <CustomDialog open={showDestinationPicker} trigger={<p>Choose folder …</p>}>
+                                <CustomDialog
+                                    open={showDestinationPicker}
+                                    trigger={<Button onClick={() => setShowDestinationPicker(true)}>Browse …</Button>}
+                                >
                                     <custom-v-stack stretch>
                                         <custom-h-stack padding="small" separator="bottom">
-                                            Export Folder
+                                            Choose folder …
                                         </custom-h-stack>
                                         <UploadDestinationPicker
                                             allowfiles={false}
-                                            path={uploadDestination}
+                                            paths={uploadDestination ? [uploadDestination] : []}
                                             onChange={(value) => {
                                                 setTemporaryUploadDestination(value);
                                             }}
                                         ></UploadDestinationPicker>
                                         <custom-h-stack padding="small" gap="small" separator="top">
-                                            <Button style="Secondary">New folder</Button>
+                                            <Button style="Secondary" disabled={true}>
+                                                New folder
+                                            </Button>
                                             <custom-spacer></custom-spacer>
                                             <Button
                                                 style="Secondary"
                                                 onClick={() => {
                                                     setShowDestinationPicker(false);
+                                                    setShowRecentDestinations(false);
                                                 }}
                                             >
                                                 Cancel
@@ -128,6 +196,7 @@ function ArtboardToolbar({
                                                 disabled={temporaryUploadDestination == null}
                                                 onClick={() => {
                                                     setShowDestinationPicker(false);
+                                                    setShowRecentDestinations(false);
                                                     setUploadDestination(temporaryUploadDestination);
                                                 }}
                                             >
@@ -140,30 +209,15 @@ function ArtboardToolbar({
                         </ul>
                     </Flyout>
 
-                    {/* Upload to existing destinations */}
-                    <Button
-                        style="Secondary"
-                        hugWidth={true}
-                        onClick={() => uploadArtboards(artboards)}
-                        icon={
-                            <IconUploadAlternative
-                                style={{
-                                    color:
-                                        modifiedArtboards.length == 0 ? 'inherit' : 'var(--box-selected-strong-color)',
-                                }}
-                            />
-                        }
-                    >
-                        Upload
-                    </Button>
+                    <custom-spacer></custom-spacer>
 
                     {/* Upload to chosen destination */}
 
                     <Button
-                        disabled={!uploadDestination.folderPath}
+                        disabled={computedFolderType == 'none' && !uploadDestination?.folderPath}
                         style="Secondary"
                         hugWidth={true}
-                        onClick={() => uploadArtboardsToDestination(artboards)}
+                        onClick={() => performUpload(artboards)}
                         icon={
                             <IconUploadAlternative
                                 style={{
@@ -432,7 +486,7 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
                         </custom-h-stack>
                     ) : (
                         <Text color="weak" size="x-small">
-                            Choose destination …
+                            Not yet uploaded
                         </Text>
                     )}
                 </custom-h-stack>
@@ -759,6 +813,7 @@ export function ArtboardsView() {
                     {['all', 'modified'].map((item) => {
                         return view == item ? (
                             <Badge
+                                key={item}
                                 emphasis="Strong"
                                 style="Progress"
                                 onClick={() => {
@@ -769,6 +824,7 @@ export function ArtboardsView() {
                             </Badge>
                         ) : (
                             <Badge
+                                key={item}
                                 emphasis="None"
                                 style="Primary"
                                 onClick={() => {

@@ -6,7 +6,7 @@ import { useSketch } from '../hooks/useSketch';
 
 import { queryGraphQLWithAuth } from '../graphql';
 
-export function UploadDestinationPicker({ onChange, allowfiles = false }) {
+export function UploadDestinationPicker({ onChange, allowfiles = false, paths = [] }) {
     let { actions, selection } = useContext(UserContext);
 
     // Loading
@@ -24,6 +24,25 @@ export function UploadDestinationPicker({ onChange, allowfiles = false }) {
 
     let context = useContext(UserContext);
 
+    useEffect(() => {
+        if (paths && paths.length) {
+            console.log('set path', paths);
+            if (paths.length == 1) {
+                // single
+                let complexPathObject = paths[0];
+                if (!complexPathObject.folder) return;
+
+                setFolder(complexPathObject.folder);
+                setBreadcrumbs(complexPathObject.breadcrumb);
+                setProject(complexPathObject.project);
+            }
+
+            if (paths.length > 1) {
+                // multiple …
+            }
+        }
+    }, [paths]);
+
     // Watch projectID
     useEffect(async () => {
         if (project) fetchProjectFolders(project);
@@ -31,8 +50,9 @@ export function UploadDestinationPicker({ onChange, allowfiles = false }) {
 
     // Watch folderID
     useEffect(async () => {
-        if (project && folder) {
+        if (folder) {
             setLoading(true);
+            console.log('send query', folder.id);
 
             // Todo: Use workspace query
 
@@ -75,7 +95,7 @@ export function UploadDestinationPicker({ onChange, allowfiles = false }) {
                   ...on SubFolder {
                     id
                     name
-                    assets(page: 2) {
+                    assets(page: 1) {
                       items {
                         id
                         title
@@ -90,6 +110,7 @@ export function UploadDestinationPicker({ onChange, allowfiles = false }) {
                     subFolders {
                       items {
                         id
+                        name
                       }
                     }
                     
@@ -102,6 +123,8 @@ export function UploadDestinationPicker({ onChange, allowfiles = false }) {
 
             let files = graphQLresult.data.node.assets.items;
             let folders = graphQLresult.data.node.subFolders.items;
+
+            console.log('gq', graphQLresult, files, folders);
 
             // let { success, folders, folder } = await actions.getProjectFolders(project.id, folder.path);
             setFiles(files);
@@ -134,22 +157,34 @@ export function UploadDestinationPicker({ onChange, allowfiles = false }) {
 
     // Back
     const browseBack = () => {
-        let previous = breadcrumbs[breadcrumbs.length - 2];
         setBreadcrumbs((b) => b.filter((_, i) => i !== b.length - 1));
+        let previous = breadcrumbs[breadcrumbs.length - 1];
 
         if (previous) {
             setFolder(previous);
         }
+
         if (!previous) {
-            setProject(null);
+            // setProject(null);
             setFolder(null);
+            // fetchProjectFolders(project);
+        }
+        if (breadcrumbs.length == 0) {
+            setProject(null);
             fetchProjectFolders(project);
         }
     };
 
     const enterFolder = (folder) => {
+        console.log('enter folder', folder);
         setFolder(folder);
-        setBreadcrumbs((state) => state.concat(folder));
+        setBreadcrumbs((state) => {
+            if (state) {
+                return state.concat(folder);
+            } else {
+                return [];
+            }
+        });
         onChange({
             type: 'folder',
             folder,
@@ -180,7 +215,7 @@ export function UploadDestinationPicker({ onChange, allowfiles = false }) {
 
     if (!projects) return <LoadingCircle></LoadingCircle>;
 
-    if (!project)
+    if (!project && !folder)
         return (
             <custom-scroll-view>
                 {projects.map((project) => {
@@ -201,27 +236,20 @@ export function UploadDestinationPicker({ onChange, allowfiles = false }) {
             </custom-scroll-view>
         );
 
-    if (project && folders) {
+    if (project) {
         return (
             <custom-scroll-view>
+                <pre>{breadcrumbs && JSON.stringify(breadcrumbs.map((breadcrumb) => breadcrumb.name))}</pre>
                 <custom-palette-item
                     onDoubleClick={() => {
                         browseBack();
                     }}
                 >
-                    {breadcrumbs && breadcrumbs.length ? (
-                        <custom-h-stack gap="small">
-                            <IconArrowLeft></IconArrowLeft>
-                            <Text>{breadcrumbs[breadcrumbs.length - 1].name}</Text>
-                        </custom-h-stack>
-                    ) : (
-                        <custom-h-stack gap="small">
-                            <IconArrowLeft></IconArrowLeft>
-                            <Text>{project.name}</Text>
-                        </custom-h-stack>
-                    )}
-                </custom-palette-item>
-
+                    <custom-h-stack gap="small">
+                        <IconArrowLeft></IconArrowLeft>
+                        <Text>Back</Text>
+                    </custom-h-stack>
+                </custom-palette-item>{' '}
                 {loading ? (
                     <custom-palette-item>
                         <LoadingCircle size="Small"></LoadingCircle>
@@ -270,11 +298,7 @@ export function UploadDestinationPicker({ onChange, allowfiles = false }) {
                             if (file.extension != 'sketch') {
                                 return (
                                     <custom-palette-item key={file.id} disabled>
-                                        <custom-h-stack
-                                            gap="small"
-                                            align-items="center"
-                                            onDoubleClick={() => pickFile(file)}
-                                        >
+                                        <custom-h-stack gap="small" align-items="center">
                                             <IconFile></IconFile>
                                             <Text>
                                                 {file.title}
