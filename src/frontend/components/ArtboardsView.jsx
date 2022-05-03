@@ -34,7 +34,7 @@ import PropTypes from 'prop-types';
 ArtboardToolbar.propTypes = {
     artboards: PropTypes.array,
     loading: PropTypes.bool,
-    usedFolders: PropTypes.array,
+    usedFolders: PropTypes.any,
     modifiedArtboards: PropTypes.array,
     withDestinationPicker: PropTypes.bool,
     setShowDestinationPicker: PropTypes.func,
@@ -484,7 +484,7 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
     const [transfer, setTransfer] = useState({});
     useEffect(() => {
         if (destination) setTransfer(context.transferMap[destination.remote_id]);
-    }, [context.transferMap[destination.remote_id]]);
+    }, [context.transferMap]);
     return (
         <custom-h-stack
             gap="x-small"
@@ -605,7 +605,7 @@ export function ArtboardsView() {
     const [open, setOpen] = useState(false);
     const [showDestinationPicker, setShowDestinationPicker] = useState(false);
     const [total, setTotal] = useState(0);
-    const [usedFolders, setUsedFolders] = useState([]);
+    const [usedFolders, setUsedFolders] = useState(new Map());
     const [view, setView] = useState('all');
 
     const [uploadDestination, setUploadDestination] = useState({});
