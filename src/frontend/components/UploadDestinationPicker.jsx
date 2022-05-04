@@ -6,7 +6,7 @@ import { useSketch } from '../hooks/useSketch';
 
 import { queryGraphQLWithAuth } from '../graphql';
 
-export function UploadDestinationPicker({ onChange, allowfiles = false, paths = [] }) {
+export function UploadDestinationPicker({ onChange, onInput, allowfiles = false, paths = [] }) {
     let { actions, selection } = useContext(UserContext);
 
     // Loading
@@ -21,6 +21,8 @@ export function UploadDestinationPicker({ onChange, allowfiles = false, paths = 
     let [files, setFiles] = useState([]);
     let [folder, setFolder] = useState(null);
     let [breadcrumbs, setBreadcrumbs] = useState([]);
+
+    const [projectMap, setProjectMap] = useState({});
 
     let context = useContext(UserContext);
 
@@ -135,6 +137,15 @@ export function UploadDestinationPicker({ onChange, allowfiles = false, paths = 
     }, [folder]);
 
     useEffect(async () => {
+        let map = {};
+        projects.forEach((project) => {
+            map[project.id] = project;
+        });
+
+        setProjectMap(map);
+    }, [projects]);
+
+    useEffect(async () => {
         let { projects } = await useSketch('getProjectsForBrand', { brand: selection.brand });
 
         setProjects(projects);
@@ -151,6 +162,23 @@ export function UploadDestinationPicker({ onChange, allowfiles = false, paths = 
         setFolders(folders);
 
         setLoading(false);
+    };
+
+    const wrappedFolder = (folder) => {
+        return {
+            type: 'folder',
+            folder,
+            project,
+            breadcrumbs,
+            folderPath: []
+                .concat(breadcrumbs.map((breadcrumb) => breadcrumb.name))
+                .concat(folder.name)
+                .join('/'),
+            path: [selection.brand.name, project.name]
+                .concat(breadcrumbs.map((breadcrumb) => breadcrumb.name))
+                .concat(folder.name)
+                .join('/'),
+        };
     };
 
     // Back
@@ -173,8 +201,13 @@ export function UploadDestinationPicker({ onChange, allowfiles = false, paths = 
         }
     };
 
+    const focusFolder = (folder) => {
+        if (onInput) {
+            onInput(wrappedFolder(folder));
+        }
+    };
+
     const enterFolder = (folder) => {
-        console.log('enter folder', folder);
         setFolder(folder);
         setBreadcrumbs((state) => {
             if (state) {
@@ -183,20 +216,7 @@ export function UploadDestinationPicker({ onChange, allowfiles = false, paths = 
                 return [];
             }
         });
-        onChange({
-            type: 'folder',
-            folder,
-            project,
-            breadcrumbs,
-            folderPath: []
-                .concat(breadcrumbs.map((breadcrumb) => breadcrumb.name))
-                .concat(folder.name)
-                .join('/'),
-            path: [selection.brand.name, project.name]
-                .concat(breadcrumbs.map((breadcrumb) => breadcrumb.name))
-                .concat(folder.name)
-                .join('/'),
-        });
+        onChange(wrappedFolder(folder));
     };
 
     const pickFile = (file) => {
@@ -262,7 +282,12 @@ export function UploadDestinationPicker({ onChange, allowfiles = false, paths = 
                         )}
                         {folders.map((folder) => {
                             return (
-                                <custom-palette-item selectable key={folder.id} tabindex="-1">
+                                <custom-palette-item
+                                    selectable
+                                    key={folder.id}
+                                    tabindex="-1"
+                                    onFocus={() => focusFolder(folder)}
+                                >
                                     <custom-h-stack
                                         gap="small"
                                         align-items="center"

@@ -31,6 +31,7 @@ import { UserContext } from '../UserContext';
 import { useSketch } from '../hooks/useSketch';
 import PropTypes from 'prop-types';
 
+import { queryGraphQLWithAuth } from '../graphql';
 /**
  * ⚛️ Toolbar
  * ----------------------------------------------------------------------------
@@ -55,6 +56,8 @@ function ArtboardToolbar({
     artboards,
     loading,
     modifiedArtboards = [],
+    getProject,
+    projectMap,
     withDestinationPicker,
     showRecentDestinations,
     setShowRecentDestinations,
@@ -93,9 +96,10 @@ function ArtboardToolbar({
                 return;
             }
             artboard.destinations.forEach((destination) => {
-                union.set(`${destination.remote_project_id}${destination.remote_path}`, destination);
+                union.set(`${projectMap[destination.remote_project_id]?.name}${destination.remote_path}`, destination);
             });
         });
+
         let type = '';
 
         switch (union.size) {
@@ -115,8 +119,14 @@ function ArtboardToolbar({
                 break;
         }
         setComputedFolderType(type);
-        setComputedFolders(Array.from(union.keys()));
-    }, [artboards]);
+        setComputedFolders(
+            Array.from(union.keys()).map((entry) => {
+                let parts = entry.split('/');
+
+                return { name: parts[parts.length - 2], ...union.get(entry) };
+            })
+        );
+    }, [artboards, projectMap]);
 
     return (
         <custom-h-stack padding="small" gap="small" align-items="center" separator="top" style={{ width: '100%' }}>
@@ -157,6 +167,9 @@ function ArtboardToolbar({
                                         <UploadDestinationPicker
                                             allowfiles={false}
                                             paths={uploadDestination ? [uploadDestination] : []}
+                                            onInput={(value) => {
+                                                setTemporaryUploadDestination(value);
+                                            }}
                                             onChange={(value) => {
                                                 setTemporaryUploadDestination(value);
                                             }}
@@ -239,12 +252,12 @@ function ArtboardToolbar({
                                     gap="x-small"
                                     classNames="tw-w-full"
                                 >
-                                    <Text size="x-small" classNames="tw-w-full">
+                                    <Text size="x-small" classNames="tw-w-full" whitespace="nowrap" overflow="ellipsis">
                                         {!uploadDestination && computedFolderType == 'none' && 'Choose Folder …'}
                                         {!uploadDestination && computedFolderType == 'mixed' && 'Multiple Folders'}
                                         {!uploadDestination &&
                                             computedFolderType == 'single' &&
-                                            JSON.stringify(computedFolders[0])}
+                                            computedFolders[0].name}
                                         {uploadDestination && uploadDestination.folderPath
                                             ? uploadDestination.folderPath
                                             : ''}
@@ -594,7 +607,7 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
                                 /
                             </Text>
                             <Text color="weak" size="x-small">
-                                {destination.remote_project_id}
+                                {destination.remote_project_name}
                             </Text>
                             <Text color="weak" size="x-small">
                                 {destination.remote_path}
@@ -682,6 +695,26 @@ export function ArtboardsView() {
     const [total, setTotal] = useState(0);
     const [usedFolders, setUsedFolders] = useState(new Map());
     const [view, setView] = useState('all');
+
+    const [projectMap, setProjectMap] = useState({});
+
+    useEffect(async () => {
+        let { projects } = await useSketch('getProjectsForBrand', { brand: context.selection.brand });
+
+        console.log(projects);
+
+        let map = {};
+        projects.forEach((project) => {
+            map[project.id] = project;
+        });
+
+        // if (context.selection?.workspaceProjects) {
+        //     context.selection.workspaceProjects.forEach((workspaceProject) => {
+        //         projectMap[workspaceProject.id] = workspaceProject;
+        //     });
+        // }
+        setProjectMap(map);
+    }, []);
 
     const [uploadDestination, setUploadDestination] = useState({});
 
@@ -898,6 +931,17 @@ export function ArtboardsView() {
         requestArtboards();
     };
 
+    useEffect(() => {
+        if (artboards) {
+            artboards.forEach((artboard) => {
+                artboard.destinations.forEach((destination) => {
+                    destination.remote_project_name = projectMap[destination.remote_project_id]?.name;
+                });
+            });
+        }
+        setArtboards(artboards);
+    }, [documentArtboards, projectMap]);
+
     const uploadArtboards = async (artboards) => {
         console.log('upload!', artboards);
         setLoading(true);
@@ -1005,6 +1049,7 @@ export function ArtboardsView() {
                 <ArtboardToolbar
                     artboards={artboards}
                     loading={loading}
+                    projectMap={projectMap}
                     usedFolders={usedFolders}
                     modifiedArtboards={modifiedArtboards}
                     withDestinationPicker={hasSelection}
@@ -1074,6 +1119,7 @@ export function ArtboardsView() {
                 <ArtboardToolbar
                     artboards={artboards}
                     loading={loading}
+                    projectMap={projectMap}
                     usedFolders={usedFolders}
                     withDestinationPicker={hasSelection}
                     showRecentDestinations={showRecentDestinations}
