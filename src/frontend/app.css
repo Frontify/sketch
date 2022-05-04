@@ -140,13 +140,7 @@ custom-toolbar-wrapper {
 
 custom-breadcrumbs {
     display: flex;
-    gap: var(--space-s);
-}
-
-custom-breadcrumbs > * + *:before {
-    content: '/';
-    display: inline-block;
-    margin: 0 var(--space-s);
+    gap: var(--space-xxs);
 }
 
 custom-console {

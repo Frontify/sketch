@@ -452,12 +452,22 @@ function ArtboardGroupItem({ group, uploadGroup }) {
                     <IconCaretRight size="Size12" onClick={() => setOpen(true)}></IconCaretRight>
                 )}
                 <custom-v-stack gap="x-small">
-                    <custom-h-stack gap="x-small">
-                        {/* <IconFolder></IconFolder> */}
-                        <Text padding="small" weight="strong">
-                            {group.title}
-                        </Text>
-                    </custom-h-stack>
+                    <custom-v-stack gap="xx-small">
+                        <custom-breadcrumbs>
+                            {group.breadcrumbs &&
+                                group.breadcrumbs.map((breadcrumb) => (
+                                    <Text color="weak" size="x-small">
+                                        {breadcrumb} /
+                                    </Text>
+                                ))}
+                        </custom-breadcrumbs>
+                        <custom-h-stack gap="x-small">
+                            {group.key != 'ungrouped' && <IconFolder></IconFolder>}
+                            <Text padding="small" weight="strong">
+                                {group.title}
+                            </Text>
+                        </custom-h-stack>
+                    </custom-v-stack>
                     <Text padding="small" size="x-small">
                         {group.transfer?.status == 'uploading' ? (
                             `Uploading (${group.transfer.remaining} remaining) `
@@ -479,7 +489,7 @@ function ArtboardGroupItem({ group, uploadGroup }) {
                     </Text>
                 </custom-v-stack>
                 <custom-spacer></custom-spacer>
-                <custom-h-stack>
+                <custom-h-stack style={{ flex: 0, alignSelf: 'start' }}>
                     {group.path ? (
                         group.selectionCount ? (
                             <ArtboardGroupTransferAction
@@ -495,6 +505,7 @@ function ArtboardGroupItem({ group, uploadGroup }) {
                     <Button inverted="true" icon={<IconMore />}></Button>
                 </custom-h-stack>
             </custom-h-stack>
+            {open && <custom-line style={{ marginLeft: '20px' }}></custom-line>}
 
             {open
                 ? group.children.map((artboard) => {
@@ -589,6 +600,7 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
 
                     <Text
                         size="x-small"
+                        color={destination.selected ? '' : 'weak'}
                         weight={destination.selected && transfer?.status != 'upload-complete' ? 'strong' : 'default'}
                     >
                         {artboard.name}.png
@@ -777,12 +789,17 @@ export function ArtboardsView() {
                 }
 
                 artboard.destinations.forEach((destination) => {
+                    let projectName = projectMap[destination.remote_project_id]?.name;
                     let key = `${destination.remote_project_id}${destination.remote_path}`;
+                    let parts = destination.remote_path.split('/');
+                    let title = parts[parts.length - 2];
                     if (!map[key]) {
                         map[key] = {
                             key: key,
-                            title: key,
+                            title: title,
                             path: destination.remote_path,
+                            breadcrumbs: [projectName, ...parts.splice(1, parts.length - 3)],
+                            fullPath: `${title}${destination.remote_path}`,
                             project_id: destination.remote_project_id,
                             children: [],
                             selectionCount: 0,
@@ -898,7 +915,7 @@ export function ArtboardsView() {
 
             setGroupedArtboards(groups);
         }
-    }, [artboards, context.transferMap, view]);
+    }, [artboards, projectMap, context.transferMap, view]);
 
     // Computed used folders
     useEffect(() => {
