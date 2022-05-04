@@ -118,11 +118,78 @@ function ArtboardToolbar({
             {withDestinationPicker ? (
                 <custom-h-stack flex style={{ width: '100%' }} justify-content="space-between">
                     <Flyout
+                        legacyFooter={false}
                         fixedFooter={
-                            <custom-h-stack>
-                                <Button>Browse …</Button>
+                            <custom-h-stack padding="small" separator="top" gap="small">
+                                <CustomDialog
+                                    open={showDestinationPicker}
+                                    trigger={
+                                        <Button
+                                            style="Secondary"
+                                            hugWidth={false}
+                                            onClick={() => setShowDestinationPicker(true)}
+                                        >
+                                            Browse …
+                                        </Button>
+                                    }
+                                >
+                                    <custom-v-stack stretch>
+                                        <custom-h-stack padding="small" separator="bottom">
+                                            Choose folder …
+                                        </custom-h-stack>
+                                        <UploadDestinationPicker
+                                            allowfiles={false}
+                                            paths={uploadDestination ? [uploadDestination] : []}
+                                            onChange={(value) => {
+                                                setTemporaryUploadDestination(value);
+                                            }}
+                                        ></UploadDestinationPicker>
+                                        <custom-h-stack padding="small" gap="small" separator="top">
+                                            <Button style="Secondary" disabled={true}>
+                                                New folder
+                                            </Button>
+                                            <custom-spacer></custom-spacer>
+                                            <Button
+                                                style="Secondary"
+                                                onClick={() => {
+                                                    setShowDestinationPicker(false);
+                                                    setShowRecentDestinations(false);
+                                                }}
+                                            >
+                                                Cancel
+                                            </Button>
+                                            <Button
+                                                disabled={temporaryUploadDestination == null}
+                                                onClick={() => {
+                                                    setShowDestinationPicker(false);
+                                                    setShowRecentDestinations(false);
+                                                    setUploadDestination(temporaryUploadDestination);
+                                                }}
+                                            >
+                                                Open
+                                            </Button>
+                                        </custom-h-stack>
+                                    </custom-v-stack>
+                                </CustomDialog>
                                 <custom-spacer></custom-spacer>
-                                <Button>Cancel</Button> <Button>Select</Button>
+                                <Button
+                                    style="Secondary"
+                                    onClick={() => {
+                                        setShowRecentDestinations(false);
+                                    }}
+                                >
+                                    Cancel
+                                </Button>{' '}
+                                <Button
+                                    disabled={!temporaryUploadDestination}
+                                    onClick={() => {
+                                        setUploadDestination(temporaryUploadDestination);
+                                        setShowRecentDestinations(false);
+                                        setTemporaryUploadDestination(null);
+                                    }}
+                                >
+                                    Select
+                                </Button>
                             </custom-h-stack>
                         }
                         stretch-children
@@ -199,6 +266,7 @@ function ArtboardToolbar({
                                                 ),
                                             });
                                             setShowRecentDestinations(false);
+                                            setTemporaryUploadDestination(null);
                                         }}
                                     >
                                         <custom-h-stack gap="x-small" align-items="center">
@@ -208,65 +276,6 @@ function ArtboardToolbar({
                                     </custom-palette-item>
                                 </li>
                             ))}
-
-                            <Button
-                                hugWidth={false}
-                                onClick={() => {
-                                    setUploadDestination(temporaryUploadDestination);
-                                    setShowRecentDestinations(false);
-                                }}
-                            >
-                                Select
-                            </Button>
-
-                            <li padding="small" separator="top">
-                                <CustomDialog
-                                    open={showDestinationPicker}
-                                    trigger={
-                                        <Button hugWidth={false} onClick={() => setShowDestinationPicker(true)}>
-                                            Browse …
-                                        </Button>
-                                    }
-                                >
-                                    <custom-v-stack stretch>
-                                        <custom-h-stack padding="small" separator="bottom">
-                                            Choose folder …
-                                        </custom-h-stack>
-                                        <UploadDestinationPicker
-                                            allowfiles={false}
-                                            paths={uploadDestination ? [uploadDestination] : []}
-                                            onChange={(value) => {
-                                                setTemporaryUploadDestination(value);
-                                            }}
-                                        ></UploadDestinationPicker>
-                                        <custom-h-stack padding="small" gap="small" separator="top">
-                                            <Button style="Secondary" disabled={true}>
-                                                New folder
-                                            </Button>
-                                            <custom-spacer></custom-spacer>
-                                            <Button
-                                                style="Secondary"
-                                                onClick={() => {
-                                                    setShowDestinationPicker(false);
-                                                    setShowRecentDestinations(false);
-                                                }}
-                                            >
-                                                Cancel
-                                            </Button>
-                                            <Button
-                                                disabled={temporaryUploadDestination == null}
-                                                onClick={() => {
-                                                    setShowDestinationPicker(false);
-                                                    setShowRecentDestinations(false);
-                                                    setUploadDestination(temporaryUploadDestination);
-                                                }}
-                                            >
-                                                Open
-                                            </Button>
-                                        </custom-h-stack>
-                                    </custom-v-stack>
-                                </CustomDialog>
-                            </li>
                         </ul>
                     </Flyout>
 
@@ -456,14 +465,14 @@ function ArtboardGroupItem({ group, uploadGroup }) {
 export function UntrackedArtboardItem({ artboard }) {
     return (
         <custom-h-stack gap="x-small" style={{ width: '100%' }} align-items="center">
-            <Badge style="Progress" emphasis="Strong" icon={<IconNone />}></Badge>
+            <Badge style="Primary" icon={<IconNone />}></Badge>
             <Text size="x-small">{artboard.name}.png</Text>
         </custom-h-stack>
     );
 }
 
 export function ArtboardDestinationStatusIcon({ destination, transfer }) {
-    if (!destination) return <Badge style="Progress" emphasis="Strong" icon={<IconNone></IconNone>}></Badge>;
+    if (!destination) return <Badge style="Primary" icon={<IconNone></IconNone>}></Badge>;
     let isModified = destination.selected;
     let noChanges = !destination.selected;
     let isReadyForUpload =
