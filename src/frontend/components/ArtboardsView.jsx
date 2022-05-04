@@ -15,6 +15,10 @@ import {
     Text,
     IconAddSimple,
     IconNone,
+    IconRevert,
+    IconInfo,
+    IconFrequentlyUsed,
+    IconUnknownSimple,
 } from '@frontify/arcade';
 
 import { UploadDestinationPicker } from './UploadDestinationPicker';
@@ -52,6 +56,8 @@ function ArtboardToolbar({
     loading,
     modifiedArtboards = [],
     withDestinationPicker,
+    showRecentDestinations,
+    setShowRecentDestinations,
     setShowDestinationPicker,
     showDestinationPicker,
     setUploadDestination,
@@ -112,15 +118,26 @@ function ArtboardToolbar({
         setComputedFolders(Array.from(union.keys()));
     }, [artboards]);
 
-    const [showRecentDestinations, setShowRecentDestinations] = useState(false);
     return (
         <custom-h-stack padding="small" gap="small" align-items="center" separator="top" style={{ width: '100%' }}>
             {withDestinationPicker ? (
-                <custom-h-stack flex style={{ width: '100%' }} justify-content="space-between">
+                <custom-h-stack
+                    flex
+                    style={{ width: '100%' }}
+                    gap="small"
+                    justify-content="space-between"
+                    stretch-children
+                >
                     <Flyout
+                        hug={false}
                         legacyFooter={false}
                         fixedFooter={
-                            <custom-h-stack padding="small" separator="top" gap="small">
+                            <custom-h-stack
+                                padding="small"
+                                separator="top"
+                                gap="small"
+                                style={{ background: 'white', borderRadius: '0 0 4px 4px' }}
+                            >
                                 <CustomDialog
                                     open={showDestinationPicker}
                                     trigger={
@@ -135,7 +152,7 @@ function ArtboardToolbar({
                                 >
                                     <custom-v-stack stretch>
                                         <custom-h-stack padding="small" separator="bottom">
-                                            Choose folder …
+                                            <Text weight="strong">Browse</Text>
                                         </custom-h-stack>
                                         <UploadDestinationPicker
                                             allowfiles={false}
@@ -166,7 +183,7 @@ function ArtboardToolbar({
                                                     setUploadDestination(temporaryUploadDestination);
                                                 }}
                                             >
-                                                Open
+                                                Select
                                             </Button>
                                         </custom-h-stack>
                                     </custom-v-stack>
@@ -206,14 +223,23 @@ function ArtboardToolbar({
                         }}
                         trigger={
                             <Button
+                                classNames="tw-m-0"
+                                hugWidth={false}
                                 style="Secondary"
                                 onClick={() => {
+                                    setTemporaryUploadDestination(null);
                                     setShowRecentDestinations(true);
                                 }}
                                 icon={<IconFolder />}
                             >
-                                <custom-h-stack align-items="center" gap="x-small">
-                                    <Text size="x-small">
+                                <custom-h-stack
+                                    align-items="center"
+                                    justify-content="space-between"
+                                    style={{ width: '100%' }}
+                                    gap="x-small"
+                                    classNames="tw-w-full"
+                                >
+                                    <Text size="x-small" classNames="tw-w-full">
                                         {!uploadDestination && computedFolderType == 'none' && 'Choose Folder …'}
                                         {!uploadDestination && computedFolderType == 'mixed' && 'Multiple Folders'}
                                         {!uploadDestination &&
@@ -223,82 +249,104 @@ function ArtboardToolbar({
                                             ? uploadDestination.folderPath
                                             : ''}
                                     </Text>
-                                    <IconCaretDown></IconCaretDown>
                                 </custom-h-stack>
+                                <IconCaretDown></IconCaretDown>
                             </Button>
                         }
                     >
-                        <custom-h-stack padding="small">
+                        <custom-h-stack padding="small" gap="x-small">
+                            <IconFrequentlyUsed />
                             <Text weight="strong">Used in this document</Text>
                         </custom-h-stack>
-                        <ul>
-                            {[...usedFolders.keys()].map((key) => (
-                                <li key={key}>
-                                    <custom-palette-item
-                                        selectable
-                                        tabindex="-1"
-                                        onFocus={() => {
-                                            let folder = usedFolders.get(key);
-                                            setTemporaryUploadDestination({
-                                                project: {
-                                                    id: folder.remote_project_id,
-                                                },
-                                                folderPath: folder.remote_path.substring(
-                                                    1,
-                                                    folder.remote_path.length - 1
-                                                ),
-                                            });
-                                        }}
-                                        onDoubleClick={() => {
-                                            // TODO:
-                                            // The returned object needs to be re-formatted
-                                            // usedFolders.get(key) -> (remote_id, remote_project_id)
-                                            // -> needs folderPath etc.
+                        {usedFolders.size ? (
+                            <ul>
+                                {[...usedFolders.keys()].map((key) => (
+                                    <li key={key}>
+                                        <custom-palette-item
+                                            selectable
+                                            tabindex="-1"
+                                            onFocus={() => {
+                                                let folder = usedFolders.get(key);
+                                                setTemporaryUploadDestination({
+                                                    project: {
+                                                        id: folder.remote_project_id,
+                                                    },
+                                                    folderPath: folder.remote_path.substring(
+                                                        1,
+                                                        folder.remote_path.length - 1
+                                                    ),
+                                                });
+                                            }}
+                                            onDoubleClick={() => {
+                                                // TODO:
+                                                // The returned object needs to be re-formatted
+                                                // usedFolders.get(key) -> (remote_id, remote_project_id)
+                                                // -> needs folderPath etc.
 
-                                            let folder = usedFolders.get(key);
-                                            setUploadDestination({
-                                                project: {
-                                                    id: folder.remote_project_id,
-                                                },
-                                                folderPath: folder.remote_path.substring(
-                                                    1,
-                                                    folder.remote_path.length - 1
-                                                ),
-                                            });
-                                            setShowRecentDestinations(false);
-                                            setTemporaryUploadDestination(null);
-                                        }}
-                                    >
-                                        <custom-h-stack gap="x-small" align-items="center">
-                                            <IconFolder></IconFolder>
-                                            <Text size="small">{key}</Text>
-                                        </custom-h-stack>
-                                    </custom-palette-item>
-                                </li>
-                            ))}
-                        </ul>
+                                                let folder = usedFolders.get(key);
+                                                setUploadDestination({
+                                                    project: {
+                                                        id: folder.remote_project_id,
+                                                    },
+                                                    folderPath: folder.remote_path.substring(
+                                                        1,
+                                                        folder.remote_path.length - 1
+                                                    ),
+                                                });
+                                                setShowRecentDestinations(false);
+                                                setTemporaryUploadDestination(null);
+                                            }}
+                                        >
+                                            <custom-h-stack gap="x-small" align-items="center">
+                                                <IconFolder></IconFolder>
+                                                <Text size="small">{key}</Text>
+                                            </custom-h-stack>
+                                        </custom-palette-item>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <custom-v-stack padding="small" align-items="center" justify-content="center">
+                                <Text>No previous folders. </Text>
+                            </custom-v-stack>
+                        )}
                     </Flyout>
-
-                    <custom-spacer></custom-spacer>
 
                     {/* Upload to chosen destination */}
 
-                    <Button
-                        disabled={computedFolderType == 'none' && !uploadDestination?.folderPath}
-                        style="Secondary"
-                        hugWidth={true}
-                        onClick={() => performUpload(artboards)}
-                        icon={
-                            <IconUploadAlternative
-                                style={{
-                                    color:
-                                        modifiedArtboards.length == 0 ? 'inherit' : 'var(--box-selected-strong-color)',
-                                }}
-                            />
-                        }
-                    >
-                        Upload
-                    </Button>
+                    {uploadDestination && (
+                        <div style={{ flex: 0 }}>
+                            <Button
+                                style="Secondary"
+                                onClick={() => setUploadDestination(null)}
+                                aria-label="Reset"
+                                title="Reset"
+                            >
+                                <IconRevert></IconRevert>
+                            </Button>
+                        </div>
+                    )}
+
+                    <div style={{ flex: 0 }}>
+                        <Button
+                            disabled={computedFolderType == 'none' && !uploadDestination?.folderPath}
+                            style="Primary"
+                            hugWidth={true}
+                            onClick={() => performUpload(artboards)}
+                            icon={
+                                <IconUploadAlternative
+                                    style={{
+                                        color:
+                                            modifiedArtboards.length == 0
+                                                ? 'inherit'
+                                                : 'var(--box-selected-strong-color)',
+                                    }}
+                                />
+                            }
+                        >
+                            Upload
+                        </Button>
+                    </div>
                 </custom-h-stack>
             ) : !loading ? (
                 <Button
@@ -465,14 +513,14 @@ function ArtboardGroupItem({ group, uploadGroup }) {
 export function UntrackedArtboardItem({ artboard }) {
     return (
         <custom-h-stack gap="x-small" style={{ width: '100%' }} align-items="center">
-            <Badge style="Primary" icon={<IconNone />}></Badge>
+            <Badge style="Primary" icon={<IconUnknownSimple />}></Badge>
             <Text size="x-small">{artboard.name}.png</Text>
         </custom-h-stack>
     );
 }
 
 export function ArtboardDestinationStatusIcon({ destination, transfer }) {
-    if (!destination) return <Badge style="Primary" icon={<IconNone></IconNone>}></Badge>;
+    if (!destination) return <Badge style="Primary" icon={<IconUnknownSimple></IconUnknownSimple>}></Badge>;
     let isModified = destination.selected;
     let noChanges = !destination.selected;
     let isReadyForUpload =
@@ -629,6 +677,7 @@ export function ArtboardsView() {
     const [loading, setLoading] = useState(false);
     const [modifiedArtboards, setModifiedArtboards] = useState([]);
     const [open, setOpen] = useState(false);
+    const [showRecentDestinations, setShowRecentDestinations] = useState(false);
     const [showDestinationPicker, setShowDestinationPicker] = useState(false);
     const [total, setTotal] = useState(0);
     const [usedFolders, setUsedFolders] = useState(new Map());
@@ -959,6 +1008,8 @@ export function ArtboardsView() {
                     usedFolders={usedFolders}
                     modifiedArtboards={modifiedArtboards}
                     withDestinationPicker={hasSelection}
+                    showRecentDestinations={showRecentDestinations}
+                    setShowRecentDestinations={setShowRecentDestinations}
                     setShowDestinationPicker={setShowDestinationPicker}
                     showDestinationPicker={showDestinationPicker}
                     setUploadDestination={setUploadDestination}
@@ -975,6 +1026,13 @@ export function ArtboardsView() {
     if (artboards && artboards.length && hasSelection) {
         return (
             <custom-v-stack stretch overflow="hidden">
+                {showRecentDestinations && !showDestinationPicker && (
+                    <custom-dim
+                        onClick={() => {
+                            setShowRecentDestinations(false);
+                        }}
+                    ></custom-dim>
+                )}
                 <custom-h-stack padding="small" separator="bottom">
                     <Text color="weak" size="x-small">
                         Selected Artboards ( {artboards.length} )
@@ -1018,6 +1076,8 @@ export function ArtboardsView() {
                     loading={loading}
                     usedFolders={usedFolders}
                     withDestinationPicker={hasSelection}
+                    showRecentDestinations={showRecentDestinations}
+                    setShowRecentDestinations={setShowRecentDestinations}
                     setShowDestinationPicker={setShowDestinationPicker}
                     showDestinationPicker={showDestinationPicker}
                     setUploadDestination={setUploadDestination}

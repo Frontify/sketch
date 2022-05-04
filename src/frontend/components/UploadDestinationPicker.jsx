@@ -124,8 +124,6 @@ export function UploadDestinationPicker({ onChange, allowfiles = false, paths = 
             let files = graphQLresult.data.node.assets.items;
             let folders = graphQLresult.data.node.subFolders.items;
 
-            console.log('gq', graphQLresult, files, folders);
-
             // let { success, folders, folder } = await actions.getProjectFolders(project.id, folder.path);
             setFiles(files);
             setFolders(folders);
