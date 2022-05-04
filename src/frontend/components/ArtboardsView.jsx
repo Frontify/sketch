@@ -600,7 +600,7 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
 
                     <Text
                         size="x-small"
-                        color={destination.selected ? '' : 'weak'}
+                        color={destination.selected ? '' : '    '}
                         weight={destination.selected && transfer?.status != 'upload-complete' ? 'strong' : 'default'}
                     >
                         {artboard.name}.png
@@ -813,7 +813,7 @@ export function ArtboardsView() {
             });
             // Sort and filter empty groups
             groups.sort((a, b) => {
-                return a.title > b.title ? 1 : -1;
+                return a.title > b.title && b.title != 'Untracked' ? 1 : -1;
             });
             groups = groups.filter((group) => group.children.length);
             // Include transfer status
