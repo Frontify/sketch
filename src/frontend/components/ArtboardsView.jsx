@@ -312,7 +312,7 @@ function ArtboardToolbar({
                                         >
                                             <custom-h-stack gap="x-small" align-items="center">
                                                 <IconFolder></IconFolder>
-                                                <Text size="small">{key}</Text>
+                                                <Text size="small">{usedFolders.get(key).name}</Text>
                                             </custom-h-stack>
                                         </custom-palette-item>
                                     </li>
@@ -924,7 +924,12 @@ export function ArtboardsView() {
         documentArtboards.forEach((artboard) => {
             if (!artboard.destinations) return;
             artboard.destinations.forEach((destination) => {
-                usedFolders.set(`${destination.remote_project_id}${destination.remote_path}`, destination);
+                let parts = destination.remote_path.split('/');
+                console.log(destination.remote_path, parts);
+                usedFolders.set(`${destination.remote_project_id}${destination.remote_path}`, {
+                    ...destination,
+                    name: parts[parts.length - 2],
+                });
             });
 
             setUsedFolders(usedFolders);
