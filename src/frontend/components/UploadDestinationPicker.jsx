@@ -221,6 +221,8 @@ export function UploadDestinationPicker({ onChange, allowfiles = false, paths = 
                 {projects.map((project) => {
                     return (
                         <custom-palette-item
+                            selectable
+                            tabindex="-1"
                             onDoubleClick={() => {
                                 setProject(project);
                             }}
@@ -239,7 +241,6 @@ export function UploadDestinationPicker({ onChange, allowfiles = false, paths = 
     if (project) {
         return (
             <custom-scroll-view>
-                <pre>{breadcrumbs && JSON.stringify(breadcrumbs.map((breadcrumb) => breadcrumb.name))}</pre>
                 <custom-palette-item
                     onDoubleClick={() => {
                         browseBack();
