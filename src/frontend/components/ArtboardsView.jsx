@@ -20,6 +20,7 @@ import {
     IconRevert,
     IconInfo,
     IconFrequentlyUsed,
+    IconUnknown,
     IconUnknownSimple,
 } from '@frontify/arcade';
 
@@ -445,7 +446,7 @@ export function ArtboardItem({ artboard, showPath = true }) {
 
 function ArtboardGroupItem({ group, uploadGroup, open, onOpen, onClose }) {
     return (
-        <custom-v-stack padding="x-small" gap="x-small">
+        <custom-v-stack padding="x-small" gap="x-small" style={{ paddingBottom: '12px' }}>
             {open}
             <custom-h-stack gap="xx-small">
                 <div>
@@ -466,7 +467,7 @@ function ArtboardGroupItem({ group, uploadGroup, open, onOpen, onClose }) {
                     )}
                 </div>
                 <custom-v-stack gap="x-small">
-                    <custom-v-stack gap="xx-small">
+                    <custom-v-stack gap="xx-small" style={{ paddingTop: group.key == 'ungrouped' ? 'initial' : '4px' }}>
                         <custom-breadcrumbs>
                             {group.breadcrumbs &&
                                 group.breadcrumbs.map((breadcrumb) => (
@@ -476,31 +477,38 @@ function ArtboardGroupItem({ group, uploadGroup, open, onOpen, onClose }) {
                                 ))}
                         </custom-breadcrumbs>
                         <custom-h-stack gap="x-small">
-                            {group.key != 'ungrouped' && <IconFolder></IconFolder>}
+                            {group.key == 'ungrouped' ? <IconUnknown></IconUnknown> : <IconFolder></IconFolder>}
+
                             <Text padding="small" weight="strong">
                                 {group.title}
                             </Text>
                         </custom-h-stack>
                     </custom-v-stack>
-                    <Text padding="small" size="x-small">
-                        {group.transfer?.status == 'uploading' ? (
-                            `Uploading (${group.transfer.remaining} remaining) `
-                        ) : group.selectionCount ? (
-                            <custom-h-stack align-items="center" gap="x-small">
-                                <Text size="x-small" style={{ color: 'var(--box-selected-strong-color)' }}>
-                                    {group.selectionCount} Modified
+                    {group.selectionCount > 0 && (
+                        <Text padding="small" size="x-small">
+                            {group.transfer?.status == 'uploading' ? (
+                                `Uploading (${group.transfer.remaining} remaining) `
+                            ) : group.selectionCount ? (
+                                <custom-h-stack align-items="center" gap="x-small">
+                                    <Text
+                                        size="x-small"
+                                        weight="strong"
+                                        style={{ color: 'var(--box-selected-strong-color)' }}
+                                    >
+                                        {group.selectionCount} Modified
+                                    </Text>
+                                </custom-h-stack>
+                            ) : group.key != 'ungrouped' ? (
+                                <Text color="weak" size="x-small">
+                                    No changes
                                 </Text>
-                            </custom-h-stack>
-                        ) : group.key != 'ungrouped' ? (
-                            <Text color="weak" size="x-small">
-                                No changes
-                            </Text>
-                        ) : (
-                            <Text color="weak" size="x-small">
-                                To upload, select artboards on the canvas first.
-                            </Text>
-                        )}
-                    </Text>
+                            ) : (
+                                <Text color="weak" size="x-small">
+                                    To upload, select artboards on the canvas first.
+                                </Text>
+                            )}
+                        </Text>
+                    )}
                 </custom-v-stack>
                 <custom-spacer></custom-spacer>
                 <custom-h-stack style={{ flex: 0, alignSelf: 'start' }}>
@@ -685,7 +693,7 @@ export function ArtboardGroupTransferAction({ group, uploadGroup }) {
                         uploadGroup(group);
                     }}
                 >
-                    <Text style={{ color: 'red' }}>{group.selectionCount}</Text>
+                    <Text classNames="">{group.selectionCount}</Text>
                 </Button>
             );
 
@@ -727,6 +735,8 @@ export function ArtboardsView() {
     const [total, setTotal] = useState(0);
     const [usedFolders, setUsedFolders] = useState(new Map());
     const [view, setView] = useState('all');
+
+    const [groupsExpansionState, setGroupsExpansionState] = useLocalStorage('cache.groupsExpansionState', 'collapsed');
 
     const [groupsMap, setGroupsMap] = useLocalStorage('cache.groupsMap', {});
 
@@ -790,6 +800,7 @@ export function ArtboardsView() {
     };
 
     const collapseGroups = () => {
+        setGroupsExpansionState('collapsed');
         setGroupsMap((state) => {
             let clone = Object.assign({}, state);
             Object.keys(clone).forEach((key) => {
@@ -799,6 +810,7 @@ export function ArtboardsView() {
         });
     };
     const expandGroups = () => {
+        setGroupsExpansionState('expanded');
         setGroupsMap((state) => {
             let clone = Object.assign({}, state);
             Object.keys(clone).forEach((key) => {
@@ -825,8 +837,9 @@ export function ArtboardsView() {
     useEffect(async () => {
         let map = {
             ungrouped: {
+                breadcrumbs: ['Unknown'],
                 key: 'ungrouped',
-                title: 'Untracked',
+                title: 'No Folder',
                 path: null,
                 project_id: null,
                 children: [],
@@ -868,7 +881,7 @@ export function ArtboardsView() {
             });
             // Sort and filter empty groups
             groups.sort((a, b) => {
-                return a.title > b.title && b.title != 'Untracked' ? 1 : -1;
+                return a.title > b.title && b.title != 'No Folder' ? 1 : -1;
             });
             groups = groups.filter((group) => group.children.length);
             // Include transfer status
@@ -1094,22 +1107,26 @@ export function ArtboardsView() {
                     })}
                     <custom-spacer></custom-spacer>
                     <custom-h-stack>
-                        <Button
-                            inverted={true}
-                            size="Small"
-                            onClick={() => {
-                                collapseGroups();
-                            }}
-                            icon={<IconCollapse size="Size12"></IconCollapse>}
-                        ></Button>
-                        <Button
-                            inverted={true}
-                            size="Small"
-                            onClick={() => {
-                                expandGroups();
-                            }}
-                            icon={<IconExpand size="Size12"></IconExpand>}
-                        ></Button>
+                        {groupsExpansionState == 'expanded' && (
+                            <Button
+                                inverted={true}
+                                size="Small"
+                                onClick={() => {
+                                    collapseGroups();
+                                }}
+                                icon={<IconCollapse size="Size12"></IconCollapse>}
+                            ></Button>
+                        )}
+                        {groupsExpansionState == 'collapsed' && (
+                            <Button
+                                inverted={true}
+                                size="Small"
+                                onClick={() => {
+                                    expandGroups();
+                                }}
+                                icon={<IconExpand size="Size12"></IconExpand>}
+                            ></Button>
+                        )}
                     </custom-h-stack>
                 </custom-h-stack>
                 <custom-line></custom-line>
