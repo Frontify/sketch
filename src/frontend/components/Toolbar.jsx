@@ -15,14 +15,14 @@ export function Toolbar() {
     return (
         <div>
             <custom-toolbar-wrapper>
-                <custom-h-stack gap="small" padding="x-small" align-items="center">
+                <custom-h-stack gap="small" padding="xx-small" align-items="center">
                     <custom-h-stack direction="row" align-items="center">
-                        <Text as="span" color="white" size="medium" weight="medium">
+                        {/* <Text as="span" color="white" size="medium" weight="medium">
                             {context.user.name}
-                        </Text>
+                        </Text> */}
 
                         <Flyout
-                            hug={true}
+                            hug={false}
                             fitContent={true}
                             isOpen={open}
                             onOpenChange={(isOpen) => setOpen(isOpen)}
@@ -62,12 +62,12 @@ export function Toolbar() {
                                 </custom-h-stack>
                                 <custom-line></custom-line>
 
-                                <custom-v-stack gap="small" padding="small">
+                                <custom-v-stack>
                                     {context.brands &&
                                         context.brands.length &&
                                         context.brands.map((brand) => {
                                             return (
-                                                <custom-h-stack
+                                                <custom-palette-item
                                                     key={brand.id}
                                                     gap="small"
                                                     onClick={() => {
@@ -75,12 +75,16 @@ export function Toolbar() {
                                                         setOpen(false);
                                                     }}
                                                 >
-                                                    {context.selection.brand?.id == brand.id && <IconCheck></IconCheck>}
-                                                    {context.selection.brand?.id != brand.id && (
-                                                        <div style={{ width: '16px' }}></div>
-                                                    )}
-                                                    <Text>{brand.name}</Text>
-                                                </custom-h-stack>
+                                                    <custom-h-stack gap="x-small">
+                                                        {context.selection.brand?.id == brand.id && (
+                                                            <IconCheck></IconCheck>
+                                                        )}
+                                                        {context.selection.brand?.id != brand.id && (
+                                                            <div style={{ width: '16px' }}></div>
+                                                        )}
+                                                        <Text size="small">{brand.name}</Text>
+                                                    </custom-h-stack>
+                                                </custom-palette-item>
                                             );
                                         })}
                                 </custom-v-stack>
