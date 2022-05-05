@@ -1090,7 +1090,8 @@ export function ArtboardsView() {
                                     setView(item);
                                 }}
                             >
-                                {item}
+                                <span style={{ textTransform: 'capitalize' }}>{item}</span>{' '}
+                                {item == 'modified' && <span>({modifiedArtboards.length})</span>}
                             </Badge>
                         ) : (
                             <Badge
@@ -1101,7 +1102,8 @@ export function ArtboardsView() {
                                     setView(item);
                                 }}
                             >
-                                {item}
+                                <span style={{ textTransform: 'capitalize' }}>{item}</span>{' '}
+                                {item == 'modified' && <span>({modifiedArtboards.length})</span>}
                             </Badge>
                         );
                     })}
@@ -1109,6 +1111,7 @@ export function ArtboardsView() {
                     <custom-h-stack>
                         {groupsExpansionState == 'expanded' && (
                             <Button
+                                aria-label="Collapse Groups"
                                 inverted={true}
                                 size="Small"
                                 onClick={() => {
@@ -1119,6 +1122,7 @@ export function ArtboardsView() {
                         )}
                         {groupsExpansionState == 'collapsed' && (
                             <Button
+                                aria-label="Expand Groups"
                                 inverted={true}
                                 size="Small"
                                 onClick={() => {
