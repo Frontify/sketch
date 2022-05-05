@@ -374,7 +374,7 @@ custom-dialog {
     background: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
-    padding: 1.5rem;
+    padding: 0.75rem;
     overflow: hidden;
 }
 

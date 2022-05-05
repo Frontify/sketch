@@ -14,6 +14,7 @@ import {
     LoadingCircle,
     Text,
     IconAddSimple,
+    IconSearch,
     IconNone,
     IconCollapse,
     IconExpand,
@@ -22,6 +23,7 @@ import {
     IconFrequentlyUsed,
     IconUnknown,
     IconUnknownSimple,
+    IconAdd,
 } from '@frontify/arcade';
 
 import { UploadDestinationPicker } from './UploadDestinationPicker';
@@ -144,6 +146,7 @@ function ArtboardToolbar({
                 >
                     <Flyout
                         hug={false}
+                        fitContent={true}
                         legacyFooter={false}
                         fixedFooter={
                             <custom-h-stack
@@ -179,7 +182,7 @@ function ArtboardToolbar({
                                             }}
                                         ></UploadDestinationPicker>
                                         <custom-h-stack padding="small" gap="small" separator="top">
-                                            <Button style="Secondary" disabled={true}>
+                                            <Button style="Secondary" disabled={true} icon={<IconAdd></IconAdd>}>
                                                 New folder
                                             </Button>
                                             <custom-spacer></custom-spacer>
@@ -263,7 +266,7 @@ function ArtboardToolbar({
                                             computedFolderType == 'single' &&
                                             computedFolders[0].name}
                                         {uploadDestination && uploadDestination.folderPath
-                                            ? uploadDestination.folderPath
+                                            ? uploadDestination.name
                                             : ''}
                                     </Text>
                                 </custom-h-stack>
@@ -280,6 +283,7 @@ function ArtboardToolbar({
                                 {[...usedFolders.keys()].map((key) => (
                                     <li key={key}>
                                         <custom-palette-item
+                                            title={key}
                                             selectable
                                             tabindex="-1"
                                             onFocus={() => {
@@ -288,6 +292,7 @@ function ArtboardToolbar({
                                                     project: {
                                                         id: folder.remote_project_id,
                                                     },
+                                                    name: folder.name,
                                                     folderPath: folder.remote_path.substring(
                                                         1,
                                                         folder.remote_path.length - 1
@@ -301,10 +306,12 @@ function ArtboardToolbar({
                                                 // -> needs folderPath etc.
 
                                                 let folder = usedFolders.get(key);
+
                                                 setUploadDestination({
                                                     project: {
                                                         id: folder.remote_project_id,
                                                     },
+                                                    name: folder.name,
                                                     folderPath: folder.remote_path.substring(
                                                         1,
                                                         folder.remote_path.length - 1

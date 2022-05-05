@@ -101,6 +101,7 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
                       items {
                         id
                         title
+                        __typename
                         ...on File {
                           filename
                           extension
@@ -169,6 +170,7 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
             type: 'folder',
             folder,
             project,
+            name: folder.name,
             breadcrumbs,
             folderPath: []
                 .concat(breadcrumbs.map((breadcrumb) => breadcrumb.name))
@@ -231,7 +233,12 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
         });
     };
 
-    if (!projects) return <LoadingCircle></LoadingCircle>;
+    if (!projects)
+        return (
+            <custom-v-stack align-items="center" justify-content="center" stretch>
+                <LoadingCircle></LoadingCircle>
+            </custom-v-stack>
+        );
 
     if (!project && !folder)
         return (
@@ -270,14 +277,14 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
                     </custom-h-stack>
                 </custom-palette-item>{' '}
                 {loading ? (
-                    <custom-palette-item>
-                        <LoadingCircle size="Small"></LoadingCircle>
-                    </custom-palette-item>
+                    <custom-v-stack align-items="center" justify-content="center" stretch>
+                        <LoadingCircle></LoadingCircle>
+                    </custom-v-stack>
                 ) : (
                     <custom-v-stack stretch>
                         {!files.length && !folders.length && (
                             <custom-v-stack separator="top" stretch align-items="center" justify-content="center">
-                                <Text color="weak">Empty</Text>
+                                <Text color="weak">”{folder?.name}” is empty</Text>
                             </custom-v-stack>
                         )}
                         {folders.map((folder) => {
@@ -326,7 +333,7 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
                                             <IconFile></IconFile>
                                             <Text>
                                                 {file.title}
-                                                {file.extension ? (
+                                                {file.__typename ? (
                                                     <span style={{ opacity: 0.5 }}>.{file.extension}</span>
                                                 ) : (
                                                     ''

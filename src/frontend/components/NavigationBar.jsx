@@ -385,7 +385,7 @@ export function NavigationBar() {
                                                 {context.currentDocument.local.filename}
                                             </Text>
                                             {context.currentDocument.state == 'same' && !loading ? (
-                                                <Text size="x-small">
+                                                <Text size="x-small" color="weak">
                                                     Last revision by {context.currentDocument.remote.modifier_name}{' '}
                                                     {context.currentDocument.remote.modified_localized_ago}
                                                 </Text>
@@ -393,7 +393,9 @@ export function NavigationBar() {
                                                 ''
                                             )}
                                             {context.currentDocument.state == 'push' && !loading ? (
-                                                <Text size="x-small">Push changes</Text>
+                                                <Text size="x-small" color="weak">
+                                                    Push changes
+                                                </Text>
                                             ) : (
                                                 ''
                                             )}
