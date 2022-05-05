@@ -34,9 +34,13 @@ function SourceAction({ status, actions, loading }) {
 
     if (loading || context.refreshing)
         return (
-            <Button align-items="center" style={{ minWidth: '52px' }}>
+            <custom-v-stack
+                style={{ minWidth: '36px', minHeight: '100%' }}
+                align-items="center"
+                justify-content="center"
+            >
                 <LoadingCircle size="Small"></LoadingCircle>
-            </Button>
+            </custom-v-stack>
         );
 
     switch (status) {
@@ -92,30 +96,24 @@ function SourceAction({ status, actions, loading }) {
             return (
                 <Button
                     style="Secondary"
+                    hugWidth={false}
                     onClick={async () => {
                         await actions.refresh();
                     }}
-                >
-                    <custom-h-stack gap="small" align-items="center">
-                        <IconRefresh size="Size20"></IconRefresh>
-                    </custom-h-stack>
-                </Button>
+                    icon={<IconRefresh />}
+                ></Button>
             );
 
         case 'push':
             return (
                 <Button
-                    style="Positive"
+                    style="Secondary"
                     hugWidth={false}
                     onClick={() => {
                         actions.pushSource();
                     }}
-                >
-                    <custom-h-stack gap="x-small" align-items="center">
-                        <IconUploadAlternative size="Size20" />
-                        {/* <span>Push</span> */}
-                    </custom-h-stack>
-                </Button>
+                    icon={<IconUploadAlternative />}
+                ></Button>
             );
 
         case 'pull':
@@ -369,7 +367,7 @@ export function NavigationBar() {
 
     return (
         <custom-v-stack>
-            <custom-h-stack align-items="center">
+            <custom-h-stack>
                 <custom-palette-item
                     flex
                     separator="right"
@@ -383,7 +381,9 @@ export function NavigationBar() {
                                 {context.currentDocument && context.currentDocument.remote.id ? (
                                     <custom-v-stack gap="small" flex>
                                         <custom-v-stack>
-                                            <Text weight="strong">{context.currentDocument.local.filename}</Text>
+                                            <Text size="x-small" weight="strong">
+                                                {context.currentDocument.local.filename}
+                                            </Text>
                                             {context.currentDocument.state == 'same' && !loading ? (
                                                 <Text size="x-small">
                                                     Last revision by {context.currentDocument.remote.modifier_name}{' '}
@@ -438,36 +438,48 @@ export function NavigationBar() {
                                     </custom-v-stack>
                                 ) : (
                                     <custom-v-stack>
-                                        <Text weight="strong">{context.currentDocument.local.filename}</Text>
+                                        <Text
+                                            size="x-small"
+                                            weight="strong"
+                                            whitespace="nowrap"
+                                            overflow="ellipsis"
+                                            wrap
+                                        >
+                                            {context.currentDocument.local.filename}
+                                        </Text>
                                         <Text>Untracked Document</Text>
                                     </custom-v-stack>
                                 )}
                             </custom-h-stack>
 
-                            <IconAngleDown size="Size24"></IconAngleDown>
+                            <IconAngleDown size="Size16"></IconAngleDown>
                         </custom-h-stack>
                     </Link>
                 </custom-palette-item>
 
-                <custom-h-stack padding="small">
-                    <SourceAction
-                        flex
-                        style={{ flex: 0 }}
-                        status={context.currentDocument.state}
-                        actions={{ pushSource, refresh, publish, pullSource }}
-                        loading={loading}
-                    ></SourceAction>
+                <custom-h-stack padding="small" gap="x-small">
+                    <div>
+                        {' '}
+                        <SourceAction
+                            style={{ flex: 0 }}
+                            status={context.currentDocument.state}
+                            actions={{ pushSource, refresh, publish, pullSource }}
+                            loading={loading}
+                        ></SourceAction>
+                    </div>
 
                     <Flyout
-                        hug={true}
+                        hug={false}
                         fitContent={true}
                         isOpen={open}
                         onOpenChange={(isOpen) => setOpen(isOpen)}
                         legacyFooter={false}
                         trigger={
-                            <Button style="Secondary" onClick={() => setOpen((open) => !open)}>
-                                <IconMore size="Size20"></IconMore>
-                            </Button>
+                            <Button
+                                inverted={true}
+                                icon={<IconMore />}
+                                onClick={() => setOpen((open) => !open)}
+                            ></Button>
                         }
                     >
                         <custom-v-stack>
