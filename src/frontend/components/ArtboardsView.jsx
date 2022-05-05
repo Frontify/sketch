@@ -519,7 +519,7 @@ function ArtboardGroupItem({ group, uploadGroup, open, onOpen, onClose }) {
                         ''
                     )}
                     <div>
-                        <Button inverted="true" size="Small" icon={<IconMore />}></Button>
+                        <Button inverted="true" icon={<IconMore />}></Button>
                     </div>
                 </custom-h-stack>
             </custom-h-stack>
@@ -679,14 +679,13 @@ export function ArtboardGroupTransferAction({ group, uploadGroup }) {
         case 'idle':
             return (
                 <Button
-                    size="Small"
                     icon={<IconUploadAlternative style={{ color: 'var(--box-selected-strong-color)' }} />}
                     inverted="true"
                     onClick={() => {
                         uploadGroup(group);
                     }}
                 >
-                    {group.selectionCount}
+                    <Text style={{ color: 'red' }}>{group.selectionCount}</Text>
                 </Button>
             );
 
