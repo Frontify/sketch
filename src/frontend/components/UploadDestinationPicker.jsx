@@ -28,7 +28,6 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
 
     useEffect(() => {
         if (paths && paths.length) {
-            console.log('set path', paths);
             if (paths.length == 1) {
                 // single
                 let complexPathObject = paths[0];
@@ -51,10 +50,10 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
     }, [project]);
 
     // Watch folderID
-    useEffect(async () => {
+
+    const refreshFolder = async () => {
         if (folder) {
             setLoading(true);
-            console.log('send query', folder.id);
 
             // Todo: Use workspace query
 
@@ -135,6 +134,10 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
             // setFolders(result.data.node.subFolders.items);
             setLoading(false);
         }
+    };
+
+    useEffect(async () => {
+        refreshFolder();
     }, [folder]);
 
     useEffect(async () => {

@@ -61,6 +61,7 @@ ArtboardToolbar.propTypes = {
 function ArtboardToolbar({
     artboards,
     loading,
+    onCreateFolder,
     modifiedArtboards = [],
     getProject,
     projectMap,
@@ -182,7 +183,14 @@ function ArtboardToolbar({
                                             }}
                                         ></UploadDestinationPicker>
                                         <custom-h-stack padding="small" gap="small" separator="top">
-                                            <Button style="Secondary" disabled={true} icon={<IconAdd></IconAdd>}>
+                                            <Button
+                                                style="Secondary"
+                                                disabled={true || !temporaryUploadDestination}
+                                                icon={<IconAdd></IconAdd>}
+                                                onClick={() => {
+                                                    onCreateFolder(temporaryUploadDestination);
+                                                }}
+                                            >
                                                 New folder
                                             </Button>
                                             <custom-spacer></custom-spacer>
@@ -802,6 +810,17 @@ export function ArtboardsView() {
         uploadArtboards(someArtboards);
     };
 
+    const onCreateFolder = async (folder) => {
+        console.log('create folder', folder);
+        let payload = {
+            project: folder.project.id,
+            folder: folder.folderPath,
+            name: 'New Folder',
+        };
+        let response = await useSketch('createFolder', payload);
+        console.log(response);
+    };
+
     const uploadGroup = (group) => {
         uploadSome([group]);
     };
@@ -1181,6 +1200,7 @@ export function ArtboardsView() {
                     loading={loading}
                     projectMap={projectMap}
                     usedFolders={usedFolders}
+                    onCreateFolder={onCreateFolder}
                     modifiedArtboards={modifiedArtboards}
                     withDestinationPicker={hasSelection}
                     showRecentDestinations={showRecentDestinations}
@@ -1251,6 +1271,7 @@ export function ArtboardsView() {
                     loading={loading}
                     projectMap={projectMap}
                     usedFolders={usedFolders}
+                    onCreateFolder={onCreateFolder}
                     withDestinationPicker={hasSelection}
                     showRecentDestinations={showRecentDestinations}
                     setShowRecentDestinations={setShowRecentDestinations}

@@ -635,6 +635,16 @@ export default function (context, view) {
                 }
                 break;
 
+            case 'createFolder':
+                try {
+                    console.log(args);
+                    let response = await project.addFolder2({ ...args });
+                    payload = { success: true, response };
+                } catch (error) {
+                    payload = { success: false, error };
+                }
+                break;
+
             case 'getProjectsForBrand':
                 try {
                     let projects = await project.getProjectsForBrand(args.brand);

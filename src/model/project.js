@@ -81,6 +81,16 @@ class Project {
             }.bind(this)
         );
     }
+    addFolder2({ name, project, folder }) {
+        return fetch('/v1/set/create/' + project, {
+            method: 'POST',
+            body: JSON.stringify({ name: name, parent: folder, color: '#EEEEEE' }),
+        }).then(
+            function (data) {
+                return data.folder;
+            }.bind(this)
+        );
+    }
 }
 
 export default new Project();
