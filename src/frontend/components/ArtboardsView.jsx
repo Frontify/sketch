@@ -15,6 +15,8 @@ import {
     Text,
     IconAddSimple,
     IconNone,
+    IconCollapse,
+    IconExpand,
     IconRevert,
     IconInfo,
     IconFrequentlyUsed,
@@ -32,6 +34,7 @@ import { useSketch } from '../hooks/useSketch';
 import PropTypes from 'prop-types';
 
 import { queryGraphQLWithAuth } from '../graphql';
+import { useLocalStorage } from '../hooks/useLocalStorage';
 /**
  * ⚛️ Toolbar
  * ----------------------------------------------------------------------------
@@ -440,17 +443,28 @@ export function ArtboardItem({ artboard, showPath = true }) {
  * ----------------------------------------------------------------------------
  */
 
-function ArtboardGroupItem({ group, uploadGroup }) {
-    const [open, setOpen] = useState(true);
-
+function ArtboardGroupItem({ group, uploadGroup, open, onOpen, onClose }) {
     return (
         <custom-v-stack padding="x-small" gap="x-small">
-            <custom-h-stack gap="x-small">
-                {open ? (
-                    <IconCaretDown size="Size12" onClick={() => setOpen(false)}></IconCaretDown>
-                ) : (
-                    <IconCaretRight size="Size12" onClick={() => setOpen(true)}></IconCaretRight>
-                )}
+            {open}
+            <custom-h-stack gap="xx-small">
+                <div>
+                    {open ? (
+                        <Button
+                            inverted={true}
+                            size="Small"
+                            icon={<IconCaretDown></IconCaretDown>}
+                            onClick={() => onClose(group.key)}
+                        ></Button>
+                    ) : (
+                        <Button
+                            inverted={true}
+                            size="Small"
+                            icon={<IconCaretRight></IconCaretRight>}
+                            onClick={() => onOpen(group.key)}
+                        ></Button>
+                    )}
+                </div>
                 <custom-v-stack gap="x-small">
                     <custom-v-stack gap="xx-small">
                         <custom-breadcrumbs>
@@ -492,25 +506,29 @@ function ArtboardGroupItem({ group, uploadGroup }) {
                 <custom-h-stack style={{ flex: 0, alignSelf: 'start' }}>
                     {group.path ? (
                         group.selectionCount ? (
-                            <ArtboardGroupTransferAction
-                                group={group}
-                                uploadGroup={uploadGroup}
-                            ></ArtboardGroupTransferAction>
+                            <div>
+                                <ArtboardGroupTransferAction
+                                    group={group}
+                                    uploadGroup={uploadGroup}
+                                ></ArtboardGroupTransferAction>
+                            </div>
                         ) : (
                             ''
                         )
                     ) : (
                         ''
                     )}
-                    <Button inverted="true" icon={<IconMore />}></Button>
+                    <div>
+                        <Button inverted="true" size="Small" icon={<IconMore />}></Button>
+                    </div>
                 </custom-h-stack>
             </custom-h-stack>
-            {open && <custom-line style={{ marginLeft: '20px' }}></custom-line>}
+            {open && <custom-line style={{ marginLeft: '28px' }}></custom-line>}
 
             {open
                 ? group.children.map((artboard) => {
                       return (
-                          <custom-v-stack key={artboard.id} style={{ marginLeft: '20px' }}>
+                          <custom-v-stack key={artboard.id} style={{ marginLeft: '28px' }}>
                               {artboard.destinations.length == 0 ? (
                                   <UntrackedArtboardItem artboard={artboard}></UntrackedArtboardItem>
                               ) : (
@@ -661,12 +679,15 @@ export function ArtboardGroupTransferAction({ group, uploadGroup }) {
         case 'idle':
             return (
                 <Button
+                    size="Small"
                     icon={<IconUploadAlternative style={{ color: 'var(--box-selected-strong-color)' }} />}
                     inverted="true"
                     onClick={() => {
                         uploadGroup(group);
                     }}
-                ></Button>
+                >
+                    {group.selectionCount}
+                </Button>
             );
 
         case 'done':
@@ -708,7 +729,22 @@ export function ArtboardsView() {
     const [usedFolders, setUsedFolders] = useState(new Map());
     const [view, setView] = useState('all');
 
+    const [groupsMap, setGroupsMap] = useLocalStorage('cache.groupsMap', {});
+
     const [projectMap, setProjectMap] = useState({});
+
+    const onOpen = (key) => {
+        let clone = Object.assign({}, groupsMap);
+        if (!clone[key]) clone[key] = {};
+        clone[key].open = true;
+        setGroupsMap(clone);
+    };
+    const onClose = (key) => {
+        let clone = Object.assign({}, groupsMap);
+        if (!clone[key]) clone[key] = {};
+        clone[key].open = false;
+        setGroupsMap(clone);
+    };
 
     useEffect(async () => {
         let { projects } = await useSketch('getProjectsForBrand', { brand: context.selection.brand });
@@ -754,6 +790,25 @@ export function ArtboardsView() {
         uploadSome([group]);
     };
 
+    const collapseGroups = () => {
+        setGroupsMap((state) => {
+            let clone = Object.assign({}, state);
+            Object.keys(clone).forEach((key) => {
+                clone[key].open = false;
+            });
+            return clone;
+        });
+    };
+    const expandGroups = () => {
+        setGroupsMap((state) => {
+            let clone = Object.assign({}, state);
+            Object.keys(clone).forEach((key) => {
+                clone[key].open = true;
+            });
+            return clone;
+        });
+    };
+
     const requestArtboards = async () => {
         let response = await useSketch('getSelectedArtboards');
 
@@ -776,6 +831,7 @@ export function ArtboardsView() {
                 path: null,
                 project_id: null,
                 children: [],
+                open: true,
             },
         };
 
@@ -1037,14 +1093,40 @@ export function ArtboardsView() {
                             </Badge>
                         );
                     })}
+                    <custom-spacer></custom-spacer>
+                    <custom-h-stack>
+                        <Button
+                            inverted={true}
+                            size="Small"
+                            onClick={() => {
+                                collapseGroups();
+                            }}
+                            icon={<IconCollapse size="Size12"></IconCollapse>}
+                        ></Button>
+                        <Button
+                            inverted={true}
+                            size="Small"
+                            onClick={() => {
+                                expandGroups();
+                            }}
+                            icon={<IconExpand size="Size12"></IconExpand>}
+                        ></Button>
+                    </custom-h-stack>
                 </custom-h-stack>
+                <custom-line></custom-line>
                 <custom-scroll-view>
                     {groupedArtboards.length ? (
-                        <custom-v-stack flex stretch>
+                        <custom-v-stack flex stretch separator="between">
                             {groupedArtboards.map((group) => {
                                 return (
-                                    <custom-v-stack key={group.key} separator="top">
-                                        <ArtboardGroupItem group={group} uploadGroup={uploadGroup}></ArtboardGroupItem>
+                                    <custom-v-stack key={group.key}>
+                                        <ArtboardGroupItem
+                                            onOpen={onOpen}
+                                            onClose={onClose}
+                                            open={groupsMap[group.key]?.open}
+                                            group={group}
+                                            uploadGroup={uploadGroup}
+                                        ></ArtboardGroupItem>
                                     </custom-v-stack>
                                 );
                             })}
@@ -1054,7 +1136,6 @@ export function ArtboardsView() {
                             <custom-v-stack
                                 gap="small"
                                 padding="small"
-                                separator="top"
                                 flex
                                 stretch
                                 align-items="center"

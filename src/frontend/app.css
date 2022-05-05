@@ -235,6 +235,9 @@ custom-artboard-preview {
 [separator='left'] {
     border-left: 1px solid rgba(0, 0, 0, 0.08);
 }
+[separator='between'] > * + * {
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
 
 [overflow='hidden'] {
     overflow: hidden;
