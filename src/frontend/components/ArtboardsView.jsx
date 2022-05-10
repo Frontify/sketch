@@ -485,8 +485,8 @@ function ArtboardGroupItem({ group, uploadGroup, open, onOpen, onClose }) {
                     <custom-v-stack gap="xx-small" style={{ paddingTop: group.key == 'ungrouped' ? 'initial' : '4px' }}>
                         <custom-breadcrumbs>
                             {group.breadcrumbs &&
-                                group.breadcrumbs.map((breadcrumb) => (
-                                    <Text color="weak" size="x-small">
+                                group.breadcrumbs.map((breadcrumb, index) => (
+                                    <Text color="weak" size="x-small" key={index}>
                                         {breadcrumb} /
                                     </Text>
                                 ))}
@@ -773,8 +773,6 @@ export function ArtboardsView() {
     useEffect(async () => {
         let { projects } = await useSketch('getProjectsForBrand', { brand: context.selection.brand });
 
-        console.log(projects);
-
         let map = {};
         projects.forEach((project) => {
             map[project.id] = project;
@@ -811,14 +809,12 @@ export function ArtboardsView() {
     };
 
     const onCreateFolder = async (folder) => {
-        console.log('create folder', folder);
         let payload = {
             project: folder.project.id,
             folder: folder.folderPath,
             name: 'New Folder',
         };
         let response = await useSketch('createFolder', payload);
-        console.log(response);
     };
 
     const uploadGroup = (group) => {
@@ -1019,7 +1015,7 @@ export function ArtboardsView() {
             if (!artboard.destinations) return;
             artboard.destinations.forEach((destination) => {
                 let parts = destination.remote_path.split('/');
-                console.log(destination.remote_path, parts);
+
                 usedFolders.set(`${destination.remote_project_id}${destination.remote_path}`, {
                     ...destination,
                     name: parts[parts.length - 2],
@@ -1059,7 +1055,6 @@ export function ArtboardsView() {
     }, [documentArtboards, projectMap]);
 
     const uploadArtboards = async (artboards) => {
-        console.log('upload!', artboards);
         setLoading(true);
         await useSketch('uploadArtboards', { artboards });
         setLoading(false);

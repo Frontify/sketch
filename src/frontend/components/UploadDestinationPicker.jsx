@@ -27,6 +27,7 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
     let context = useContext(UserContext);
 
     useEffect(() => {
+        console.log('use effect with {paths}', paths);
         if (paths && paths.length) {
             if (paths.length == 1) {
                 // single
@@ -42,7 +43,7 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
                 // multiple …
             }
         }
-    }, [paths]);
+    }, []);
 
     // Watch projectID
     useEffect(async () => {
@@ -171,6 +172,7 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
     };
 
     const wrappedFolder = (folder) => {
+        if (!breadcrumbs) breadcrumbs = [];
         return {
             type: 'folder',
             folder,
@@ -190,22 +192,26 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
 
     // Back
     const browseBack = () => {
-        const enterRoot = breadcrumbs.length == 0;
+        const shouldEnterRoot = !breadcrumbs || breadcrumbs.length == 0;
 
-        if (enterRoot) {
+        if (shouldEnterRoot) {
             setProject(null);
             setFolder(null);
         }
 
-        breadcrumbs.pop();
-        let previous = breadcrumbs[breadcrumbs.length - 1];
+        const shouldEnterFolder = breadcrumbs && breadcrumbs.length > 0;
 
-        if (previous) {
-            enterFolder(previous);
-        } else {
-            enterProject(project);
+        if (shouldEnterFolder) {
+            breadcrumbs.pop();
+            let previous = breadcrumbs[breadcrumbs.length - 1];
+
+            if (previous) {
+                enterFolder(previous);
+            } else {
+                enterProject(project);
+            }
+            setBreadcrumbs((breadcrumbs) => breadcrumbs.splice(0, breadcrumbs.length - 1));
         }
-        setBreadcrumbs((breadcrumbs) => breadcrumbs.splice(0, breadcrumbs.length - 1));
     };
 
     const enterProject = (project) => {
@@ -274,7 +280,6 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
     if (project) {
         return (
             <custom-scroll-view>
-                <pre>{JSON.stringify(breadcrumbs, null, 2)}</pre>
                 <custom-palette-item
                     onDoubleClick={() => {
                         browseBack();
