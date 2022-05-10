@@ -141,12 +141,14 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
     }, [folder]);
 
     useEffect(async () => {
-        let map = {};
-        projects.forEach((project) => {
-            map[project.id] = project;
-        });
+        if (projects) {
+            let map = {};
+            projects.forEach((project) => {
+                map[project.id] = project;
+            });
 
-        setProjectMap(map);
+            setProjectMap(map);
+        }
     }, [projects]);
 
     useEffect(async () => {
@@ -188,24 +190,27 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
 
     // Back
     const browseBack = () => {
-        setBreadcrumbs((b) => b.filter((_, i) => i !== b.length - 1));
+        const enterRoot = breadcrumbs.length == 0;
+
+        if (enterRoot) {
+            setProject(null);
+            setFolder(null);
+        }
+
+        breadcrumbs.pop();
         let previous = breadcrumbs[breadcrumbs.length - 1];
 
         if (previous) {
-            setFolder(previous);
+            enterFolder(previous);
+        } else {
+            enterProject(project);
         }
-
-        if (!previous) {
-            // setProject(null);
-            setFolder(null);
-            // fetchProjectFolders(project);
-        }
-        if (breadcrumbs.length == 0) {
-            setProject(null);
-            fetchProjectFolders(project);
-        }
+        setBreadcrumbs((breadcrumbs) => breadcrumbs.splice(0, breadcrumbs.length - 1));
     };
 
+    const enterProject = (project) => {
+        fetchProjectFolders(project);
+    };
     const focusFolder = (folder) => {
         if (onInput) {
             onInput(wrappedFolder(folder));
@@ -269,6 +274,7 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
     if (project) {
         return (
             <custom-scroll-view>
+                <pre>{JSON.stringify(breadcrumbs, null, 2)}</pre>
                 <custom-palette-item
                     onDoubleClick={() => {
                         browseBack();

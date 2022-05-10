@@ -49,7 +49,6 @@ export function setSHA(artboard) {
     let layer = sketch3.find(`[id="${artboard.id}"]`)[0];
 
     let sha = sha1(JSON.stringify(layer.toJSON()));
-    console.log('set SHA', sha);
     Settings.setLayerSettingForKey(layer, SHA_KEY, sha);
 }
 export function getDestinations(artboard) {
