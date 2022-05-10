@@ -79,8 +79,20 @@ function ArtboardToolbar({
 }) {
     const [computedFolders, setComputedFolders] = useState([]);
     const [computedFolderType, setComputedFolderType] = useState('none');
+    const [sortedUsedFolders, setSortedUsedFolders] = useState([]);
     const [temporaryUploadDestination, setTemporaryUploadDestination] = useState(null);
     const context = useContext(UserContext);
+
+    useEffect(() => {
+        setSortedUsedFolders((state) => {
+            return new Map(
+                [...usedFolders.entries()].sort((a, b) => {
+                    console.log(a, b);
+                    return a[1].name > b[1].name ? 1 : -1;
+                })
+            );
+        });
+    }, [usedFolders]);
 
     // Callback function that starts the upload after pressing the "upload" button in the toolbar
     const performUpload = () => {
@@ -286,16 +298,16 @@ function ArtboardToolbar({
                             <IconFrequentlyUsed />
                             <Text weight="strong">Used in this document</Text>
                         </custom-h-stack>
-                        {usedFolders.size ? (
+                        {sortedUsedFolders.size ? (
                             <ul>
-                                {[...usedFolders.keys()].map((key) => (
+                                {[...sortedUsedFolders.keys()].map((key) => (
                                     <li key={key}>
                                         <custom-palette-item
                                             title={key}
                                             selectable
                                             tabindex="-1"
                                             onFocus={() => {
-                                                let folder = usedFolders.get(key);
+                                                let folder = sortedUsedFolders.get(key);
                                                 setTemporaryUploadDestination({
                                                     project: {
                                                         id: folder.remote_project_id,
@@ -313,7 +325,7 @@ function ArtboardToolbar({
                                                 // usedFolders.get(key) -> (remote_id, remote_project_id)
                                                 // -> needs folderPath etc.
 
-                                                let folder = usedFolders.get(key);
+                                                let folder = sortedUsedFolders.get(key);
 
                                                 setUploadDestination({
                                                     project: {
@@ -331,7 +343,7 @@ function ArtboardToolbar({
                                         >
                                             <custom-h-stack gap="x-small" align-items="center">
                                                 <IconFolder></IconFolder>
-                                                <Text size="small">{usedFolders.get(key).name}</Text>
+                                                <Text size="small">{sortedUsedFolders.get(key).name}</Text>
                                             </custom-h-stack>
                                         </custom-palette-item>
                                     </li>
