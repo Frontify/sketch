@@ -1039,6 +1039,7 @@ export function ArtboardsView() {
     }, [documentArtboards]);
 
     const uploadArtboardsToDestination = (artboards) => {
+        console.log('upload artboards to destination', artboards);
         let patchedArtboards = artboards.map((artboard) => {
             return {
                 ...artboard,
@@ -1051,6 +1052,7 @@ export function ArtboardsView() {
                 ],
             };
         });
+        console.log('patched', patchedArtboards);
         uploadArtboards(patchedArtboards);
         requestArtboards();
     };

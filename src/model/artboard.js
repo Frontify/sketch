@@ -546,6 +546,7 @@ class Artboard {
                                                             // artboard.target.sha
                                                             console.log(
                                                                 'upload artboard - SHA should be unequal',
+                                                                artboard,
                                                                 artboard.sha,
                                                                 artboard.target.sha
                                                             );
@@ -569,6 +570,7 @@ class Artboard {
                                                                     )
                                                                     .then(
                                                                         function (data) {
+                                                                            console.log(artboard);
                                                                             // Uploaded
                                                                             let destination = {
                                                                                 remote_project_id:
@@ -578,6 +580,7 @@ class Artboard {
                                                                                     artboard.target.remote_path,
                                                                                 // This will store the SHA1 of the artboard that has just been uploaded
                                                                                 sha: artboard.sha,
+                                                                                for: artboard.id_external,
                                                                             };
 
                                                                             patchDestinations(

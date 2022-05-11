@@ -37,9 +37,22 @@ export function patchDestinations(artboardID, destination) {
     Settings.setLayerSettingForKey(layer, DESTINATION_KEY, patchedDestinations);
 }
 
-export function setDestinations(artboard) {
+export function removeDestinations(artboard) {
     let layer = sketch3.find(`[id="${artboard.id}"]`)[0];
-    Settings.setLayerSettingForKey(layer, DESTINATION_KEY, artboard.destinations);
+    Settings.setLayerSettingForKey(layer, DESTINATION_KEY, []);
+}
+
+export function setDestinations(artboard) {
+    let destinations = artboard.destinations;
+    destinations = destinations.map((destination) => {
+        return {
+            ...destination,
+            for: artboard.id,
+        };
+    });
+
+    let layer = sketch3.find(`[id="${artboard.id}"]`)[0];
+    Settings.setLayerSettingForKey(layer, DESTINATION_KEY, destinations);
 }
 export function computedSHA(artboard) {
     let layer = sketch3.find(`[id="${artboard.id}"]`)[0];
@@ -52,7 +65,14 @@ export function setSHA(artboard) {
     Settings.setLayerSettingForKey(layer, SHA_KEY, sha);
 }
 export function getDestinations(artboard) {
-    return Settings.layerSettingForKey(artboard, DESTINATION_KEY) || [];
+    let destinations = Settings.layerSettingForKey(artboard, DESTINATION_KEY) || [];
+
+    let invalid = destinations.find((destination) => destination.for != artboard.id);
+    if (invalid) {
+        removeDestinations(artboard);
+        return [];
+    }
+    return destinations;
 }
 export function getSHA(artboard) {
     return Settings.layerSettingForKey(artboard, SHA_KEY) || [];

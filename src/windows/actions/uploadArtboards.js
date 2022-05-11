@@ -11,7 +11,7 @@ export function uploadArtboards({ artboards }) {
     artboards.forEach((artboard) => {
         if (!artboard.destinations) return;
 
-        setDestinations(artboard, artboard.destinations);
+        setDestinations(artboard);
 
         let sha = computedSHA(artboard);
 
