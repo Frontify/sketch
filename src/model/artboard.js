@@ -546,7 +546,9 @@ class Artboard {
                                                                 'upload artboard - SHA should be unequal',
                                                                 artboard,
                                                                 artboard.sha,
-                                                                artboard.target.sha
+                                                                artboard.target.sha,
+                                                                assetId,
+                                                                file
                                                             );
                                                             if (artboard.sha != artboard.target.sha) {
                                                                 artboardChanged = true;

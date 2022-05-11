@@ -597,6 +597,7 @@ export function UntrackedArtboardItem({ artboard }) {
 
 export function ArtboardDestinationStatusIcon({ destination, transfer }) {
     if (!destination) return <Badge style="Primary" icon={<IconUnknownSimple></IconUnknownSimple>}></Badge>;
+
     let isModified = destination.selected;
     let noChanges = !destination.selected;
     let isReadyForUpload =
@@ -633,7 +634,7 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
     const context = useContext(UserContext);
     const [transfer, setTransfer] = useState({});
     useEffect(() => {
-        if (destination) setTransfer(context.transferMap[destination.remote_id]);
+        if (destination) setTransfer(context.transferMap[destination.remote_id || artboard.id]);
     }, [context.transferMap]);
     return (
         <custom-h-stack
@@ -931,10 +932,11 @@ export function ArtboardsView() {
                 group.children.forEach((artboard) => {
                     artboard.destinations.forEach((destination) => {
                         // Pre-select the item for upload based on the diff
+
                         destination.selected = artboard.sha != destination.sha;
                         if (destination.selected) group.selectionCount++;
 
-                        let transferEntry = context.transferMap[destination.remote_id];
+                        let transferEntry = context.transferMap[destination.remote_id || artboard.id];
                         if (transferEntry) {
                             if (transferEntry.status == 'uploading') {
                                 transfer.status = 'uploading';

@@ -45,6 +45,11 @@ export const UserContextProvider = ({ children }) => {
         let handler = (event) => {
             let { type, payload } = event.detail.data;
 
+            // We’re using the remote_id for identifying the upload item
+            // But we might not know the id until the file is uploaded
+            // So we might need to use the Sketch artboard ID instead and combine it with the upload folder id?
+            let id = payload.id || payload.id_external;
+
             switch (type) {
                 case 'tick':
                     setTick(payload.value);
@@ -53,19 +58,19 @@ export const UserContextProvider = ({ children }) => {
                     switch (payload.status) {
                         case 'upload-failed':
                             setTransferMap((state) => {
-                                return { ...state, [payload.id]: payload };
+                                return { ...state, [id]: payload };
                             });
                             break;
                         case 'upload-complete':
                             setTransferMap((state) => {
                                 // Remove the entry from transferMap
-                                delete state[payload.id];
+                                delete state[id];
                                 return { ...state };
                             });
                             break;
                         default:
                             setTransferMap((state) => {
-                                return { ...state, [payload.id]: payload };
+                                return { ...state, [id]: payload };
                             });
                     }
 
