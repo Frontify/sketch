@@ -148,11 +148,7 @@ export default function (context, view) {
     // Show window if ready
     win.once('ready-to-show', () => {
         console.log('👋 Frontify Plugin is now running. NODE_ENV: ', process.env.NODE_ENV);
-
-        console.log('did finish load');
         state.foo = '123';
-        console.log(state);
-
         win.show();
     });
 
@@ -466,6 +462,7 @@ export default function (context, view) {
                 }
                 break;
             case 'getCurrentDocument':
+                console.log('>>> getCurrentDocument');
                 /**
                  * The shape of the returned object.
                  * We’ll merge local, remote and meta information.
@@ -554,7 +551,7 @@ export default function (context, view) {
 
                     return 'unknown';
                 }
-
+                console.log(currentDocument);
                 if (currentDocument.refs.remote_id && currentDocument.refs.remote_project_id) {
                     // MARK: Hardcoded project id
                     let remoteAsset = await source.getRemoteAssetForProjectIDByAssetID(
@@ -604,17 +601,13 @@ export default function (context, view) {
                  * after opening a file.
                  */
 
-                if (!modified || currentDocument.remote.sha == currentDocument.local.sha) {
+                if (!modified || currentDocument.remote?.sha == currentDocument.local?.sha) {
                     sketch3.Settings.setDocumentSettingForKey(
                         sketch.getDocument(),
                         'remote_modified',
                         currentDocument.remote.modified
                     );
                 }
-
-                console.log('💥 local & remote state gathered');
-
-                console.log({ payload });
 
                 // Dirty
                 currentDocument.dirty = sketch3.Settings.documentSettingForKey(sketch.getDocument(), 'dirty');
@@ -769,7 +762,6 @@ export default function (context, view) {
                 break;
             case 'uploadArtboards':
                 try {
-                    console.log('args', args);
                     actions['uploadArtboards'](args);
                 } catch (error) {
                     console.error(error);
