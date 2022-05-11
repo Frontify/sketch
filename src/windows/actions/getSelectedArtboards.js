@@ -42,12 +42,13 @@ export function removeDestinations(artboard) {
     Settings.setLayerSettingForKey(layer, DESTINATION_KEY, []);
 }
 
-export function setDestinations(artboard) {
+export function setDestinations(artboard, brand) {
     let destinations = artboard.destinations;
     destinations = destinations.map((destination) => {
         return {
             ...destination,
             for: artboard.id,
+            brand,
         };
     });
 
@@ -64,21 +65,24 @@ export function setSHA(artboard) {
     let sha = sha1(JSON.stringify(layer.toJSON()));
     Settings.setLayerSettingForKey(layer, SHA_KEY, sha);
 }
-export function getDestinations(artboard) {
+export function getDestinations(artboard, brand) {
     let destinations = Settings.layerSettingForKey(artboard, DESTINATION_KEY) || [];
 
-    let invalid = destinations.find((destination) => destination.for != artboard.id);
+    const invalid = destinations.find((destination) => destination.for != artboard.id);
     if (invalid) {
         removeDestinations(artboard);
         return [];
     }
-    return destinations;
+
+    const destinationsForBrand = destinations.filter((destination) => brand && destination.brand?.id == brand?.id);
+
+    return destinationsForBrand;
 }
 export function getSHA(artboard) {
     return Settings.layerSettingForKey(artboard, SHA_KEY) || [];
 }
 
-export function getSelectedArtboardsFromSelection(selection, total, hasSelection) {
+export function getSelectedArtboardsFromSelection(brand, selection, total, hasSelection) {
     let artboards = [];
     try {
         selection.forEach((layer) => {
@@ -92,7 +96,7 @@ export function getSelectedArtboardsFromSelection(selection, total, hasSelection
                     type: layer.type,
                     name: layer.name,
                     id: layer.id,
-                    destinations: getDestinations(layer),
+                    destinations: getDestinations(layer, brand),
                 });
             }
         });
@@ -107,7 +111,13 @@ export function getSelectedArtboardsFromSelection(selection, total, hasSelection
     }
 }
 
-export function getSelectedArtboards() {
+export function getSelectedArtboards(brand) {
+    // remember the brand
+
+    if (brand) {
+        let recentBrand = 'com.frontify.sketch.recent.brand.id';
+        Settings.setSessionVariable(recentBrand, brand);
+    }
     try {
         let currentDocument = sketch3.Document.fromNative(sketch.getDocument());
         let selection = currentDocument.selectedLayers;
@@ -133,14 +143,14 @@ export function getSelectedArtboards() {
         // If there is a selection, but it doesn’t contain artboards: return all layers of type artboard
         // Else: return selected artboards
 
-        let all = getSelectedArtboardsFromSelection(allArtboards, total, hasSelection);
+        let all = getSelectedArtboardsFromSelection(brand, allArtboards, total, hasSelection);
         let documentArtboards = all.artboards;
 
         if (selection.length == 0) return { ...all, documentArtboards };
         if (selectedArtboards.length == 0) return { ...all, documentArtboards };
 
         return {
-            ...getSelectedArtboardsFromSelection(currentDocument.selectedLayers, total, hasSelection),
+            ...getSelectedArtboardsFromSelection(brand, currentDocument.selectedLayers, total, hasSelection),
             documentArtboards,
         };
     } catch (error) {

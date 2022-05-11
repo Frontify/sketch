@@ -769,6 +769,7 @@ export default function (context, view) {
                 break;
             case 'uploadArtboards':
                 try {
+                    console.log('args', args);
                     actions['uploadArtboards'](args);
                 } catch (error) {
                     console.error(error);

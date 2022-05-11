@@ -494,7 +494,8 @@ class Artboard {
         return files;
     }
 
-    uploadArtboards(artboards) {
+    uploadArtboards(artboards, brand) {
+        console.log('brand', brand);
         // sequence artboard export and upload
         this.uploadInProgress = true;
 
@@ -569,6 +570,12 @@ class Artboard {
                                                                     .then(
                                                                         function (data) {
                                                                             // Uploaded
+                                                                            console.log(
+                                                                                'before patch',
+                                                                                data,
+                                                                                artboard,
+                                                                                brand
+                                                                            );
                                                                             let destination = {
                                                                                 remote_project_id:
                                                                                     artboard.target.remote_project_id,
@@ -578,6 +585,7 @@ class Artboard {
                                                                                 // This will store the SHA1 of the artboard that has just been uploaded
                                                                                 sha: artboard.sha,
                                                                                 for: artboard.id_external,
+                                                                                brand: brand,
                                                                             };
 
                                                                             patchDestinations(

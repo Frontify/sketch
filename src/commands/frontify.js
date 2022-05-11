@@ -88,18 +88,19 @@ export function artboardChangedCommand(context) {
     let start = new Date().getTime();
     let threshold = 1000;
 
-    let key = 'com.frontify.sketch.recent.selection.uuid';
+    let recentSelection = 'com.frontify.sketch.recent.selection.uuid';
+    let recentBrand = 'com.frontify.sketch.recent.brand.id';
     // set uuid
 
     let contextUUID = '' + NSUUID.UUID().UUIDString();
-    sketch3.Settings.setSessionVariable(key, contextUUID);
+    sketch3.Settings.setSessionVariable(recentSelection, contextUUID);
 
-    const sendSelection = () => {
+    const sendSelection = (brand) => {
         if (activeDocumentDidChange()) refresh();
         // let newSelection = context.actionContext.newSelection;
         // State.selectionChangedCommand(newSelection);
         // State.progressEvent({ artboard: State.getState().artboards[0], data: {} });
-        let payload = getSelectedArtboards();
+        let payload = getSelectedArtboards(brand);
 
         // Dev: Mixin performance information
         let elapsedTime = new Date().getTime() - start;
@@ -109,11 +110,12 @@ export function artboardChangedCommand(context) {
     };
 
     setTimeout(() => {
-        let mostRecentUUID = sketch3.Settings.sessionVariable(key);
+        let mostRecentUUID = sketch3.Settings.sessionVariable(recentSelection);
+        let mostRecentBrand = sketch3.Settings.sessionVariable(recentBrand);
         if (mostRecentUUID == contextUUID) {
             executeSafely(context, function () {
                 if (isWebviewPresent('frontifymain')) {
-                    sendSelection();
+                    sendSelection(mostRecentBrand);
                 }
             });
         }

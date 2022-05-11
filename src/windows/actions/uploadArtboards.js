@@ -5,13 +5,13 @@ import { computedSHA, setDestinations, setSHA } from './getSelectedArtboards';
  * uploadArtboards
  * @param {Array} artboards
  */
-export function uploadArtboards({ artboards }) {
+export function uploadArtboards({ artboards, brand }) {
     let queue = [];
 
     artboards.forEach((artboard) => {
         if (!artboard.destinations) return;
 
-        setDestinations(artboard);
+        setDestinations(artboard, brand);
 
         let sha = computedSHA(artboard);
 
@@ -39,7 +39,7 @@ export function uploadArtboards({ artboards }) {
     });
 
     try {
-        Artboard.uploadArtboards(queue);
+        Artboard.uploadArtboards(queue, brand);
     } catch (error) {
         console.error(error);
     }
