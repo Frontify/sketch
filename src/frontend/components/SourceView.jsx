@@ -21,7 +21,6 @@ export function SourceView() {
     let [activeScope, setActiveScope] = useLocalStorage('cache.activeScope', 'colors');
 
     useEffect(() => {
-        console.log('set active view', location.pathname);
         setActiveView(location.pathname);
     }, [location]);
 

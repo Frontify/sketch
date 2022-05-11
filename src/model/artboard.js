@@ -169,7 +169,6 @@ class Artboard {
     }
 
     exportArtboard(artboard, doc) {
-        console.log('export artboard', artboard);
         return new Promise(
             function (resolve) {
                 let files = [];
@@ -249,7 +248,6 @@ class Artboard {
      * Local counterpart to Settings.setLayerSettingsForKey for already exported structures
      * */
     setLayerSettingForKey(layer, key, value) {
-        console.log(layer, key, value);
         let settings = {};
         const data = JSON.stringify(value);
 
@@ -570,7 +568,6 @@ class Artboard {
                                                                     )
                                                                     .then(
                                                                         function (data) {
-                                                                            console.log(artboard);
                                                                             // Uploaded
                                                                             let destination = {
                                                                                 remote_project_id:
@@ -606,7 +603,7 @@ class Artboard {
                                                             } else {
                                                                 // Skip upload because the file hasn’t changed
                                                                 // Remove the exported artboard
-                                                                console.log('skip');
+
                                                                 artboardChanged = false;
                                                                 artboardProgress.setCompletedUnitCount(
                                                                     artboardProgress.completedUnitCount() + 10
@@ -621,7 +618,6 @@ class Artboard {
                                                                 artboard,
                                                                 file
                                                             );
-                                                            console.log('attachment status', status);
 
                                                             if (artboardChanged || status.sha != shaFile(file.path)) {
                                                                 let filename;
@@ -702,7 +698,7 @@ class Artboard {
                                                 //     'frontifymain',
                                                 //     'artboardUploaded(' + JSON.stringify(artboard) + ')'
                                                 // );
-                                                console.log('finish', artboard);
+
                                                 this.finishUpload(artboard);
                                             }
                                             return true;

@@ -87,7 +87,6 @@ function ArtboardToolbar({
         setSortedUsedFolders((state) => {
             return new Map(
                 [...usedFolders.entries()].sort((a, b) => {
-                    console.log(a, b);
                     return a[1].name > b[1].name ? 1 : -1;
                 })
             );
@@ -1039,7 +1038,6 @@ export function ArtboardsView() {
     }, [documentArtboards]);
 
     const uploadArtboardsToDestination = (artboards) => {
-        console.log('upload artboards to destination', artboards);
         let patchedArtboards = artboards.map((artboard) => {
             return {
                 ...artboard,
@@ -1052,7 +1050,7 @@ export function ArtboardsView() {
                 ],
             };
         });
-        console.log('patched', patchedArtboards);
+
         uploadArtboards(patchedArtboards);
         requestArtboards();
     };
