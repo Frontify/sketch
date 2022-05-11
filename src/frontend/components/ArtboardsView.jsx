@@ -854,7 +854,7 @@ export function ArtboardsView() {
     };
 
     const requestArtboards = async () => {
-        let response = await useSketch('getSelectedArtboards', context.selection.brand);
+        let response = await useSketch('getSelectedArtboards', context.selection.brand.id);
 
         setArtboards(response.artboards);
         setDocumentArtboards(response.documentArtboards);
@@ -1068,12 +1068,12 @@ export function ArtboardsView() {
 
     const uploadArtboards = async (artboards) => {
         setLoading(true);
-        await useSketch('uploadArtboards', { artboards, brand: context.selection.brand });
+        await useSketch('uploadArtboards', { artboards, brandID: context.selection.brand.id });
         setLoading(false);
     };
 
     useEffect(async () => {
-        let response = await useSketch('getSelectedArtboards', context.selection.brand);
+        let response = await useSketch('getSelectedArtboards', context.selection.brand.id);
 
         setArtboards(response.artboards);
         setDocumentArtboards(response.documentArtboards);

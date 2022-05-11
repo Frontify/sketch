@@ -95,12 +95,12 @@ export function artboardChangedCommand(context) {
     let contextUUID = '' + NSUUID.UUID().UUIDString();
     sketch3.Settings.setSessionVariable(recentSelection, contextUUID);
 
-    const sendSelection = (brand) => {
+    const sendSelection = (brandID) => {
         if (activeDocumentDidChange()) refresh();
         // let newSelection = context.actionContext.newSelection;
         // State.selectionChangedCommand(newSelection);
         // State.progressEvent({ artboard: State.getState().artboards[0], data: {} });
-        let payload = getSelectedArtboards(brand);
+        let payload = getSelectedArtboards(brandID);
 
         // Dev: Mixin performance information
         let elapsedTime = new Date().getTime() - start;
@@ -111,11 +111,11 @@ export function artboardChangedCommand(context) {
 
     setTimeout(() => {
         let mostRecentUUID = sketch3.Settings.sessionVariable(recentSelection);
-        let mostRecentBrand = sketch3.Settings.sessionVariable(recentBrand);
+        let mostRecentBrandID = sketch3.Settings.sessionVariable(recentBrand);
         if (mostRecentUUID == contextUUID) {
             executeSafely(context, function () {
                 if (isWebviewPresent('frontifymain')) {
-                    sendSelection(mostRecentBrand);
+                    sendSelection(mostRecentBrandID);
                 }
             });
         }

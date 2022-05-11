@@ -5,13 +5,13 @@ import { computedSHA, setDestinations, setSHA } from './getSelectedArtboards';
  * uploadArtboards
  * @param {Array} artboards
  */
-export function uploadArtboards({ artboards, brand }) {
+export function uploadArtboards({ artboards, brandID }) {
     let queue = [];
 
     artboards.forEach((artboard) => {
         if (!artboard.destinations) return;
 
-        setDestinations(artboard, brand);
+        setDestinations(artboard, brandID);
 
         let sha = computedSHA(artboard);
 
@@ -34,12 +34,14 @@ export function uploadArtboards({ artboards, brand }) {
         Artboard.queueUpload(artboard);
     });
 
+    console.log('potential patch');
+
     queue.forEach((entry) => {
         Artboard.queueUpload(entry);
     });
 
     try {
-        Artboard.uploadArtboards(queue, brand);
+        Artboard.uploadArtboards(queue, brandID);
     } catch (error) {
         console.error(error);
     }

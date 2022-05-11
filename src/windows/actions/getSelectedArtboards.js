@@ -28,8 +28,10 @@ export function patchDestinations(artboardID, destination) {
             original.remote_path == destination.remote_path
         ) {
             // Patch
+            console.log('patched');
             return destination;
         } else {
+            console.log('return original');
             return original;
         }
     });
@@ -42,30 +44,46 @@ export function removeDestinations(artboard) {
     Settings.setLayerSettingForKey(layer, DESTINATION_KEY, []);
 }
 
-export function setDestinations(artboard, brand) {
+export function setDestinations(artboard, brandID) {
     let destinations = artboard.destinations;
     destinations = destinations.map((destination) => {
         return {
             ...destination,
             for: artboard.id,
-            brand,
+            remote_brand_id: brandID,
         };
     });
 
     let layer = sketch3.find(`[id="${artboard.id}"]`)[0];
     Settings.setLayerSettingForKey(layer, DESTINATION_KEY, destinations);
 }
-export function computedSHA(artboard) {
+
+function shaForArtboard(artboard) {
     let layer = sketch3.find(`[id="${artboard.id}"]`)[0];
-    return sha1(JSON.stringify(layer.toJSON()));
+
+    return shaForLayer(layer);
+}
+
+function shaForLayer(layer) {
+    // Set the "selected" property to false, so that the SHA is computed consistently
+    // Otherwise, the SHA would be different for a selected / unselected artboard…
+    let json = layer.toJSON();
+    json.selected = false;
+
+    return sha1(JSON.stringify(json));
+}
+
+export function computedSHA(artboard) {
+    return shaForArtboard(artboard);
 }
 export function setSHA(artboard) {
     let layer = sketch3.find(`[id="${artboard.id}"]`)[0];
 
-    let sha = sha1(JSON.stringify(layer.toJSON()));
+    let sha = shaForLayer(layer);
+
     Settings.setLayerSettingForKey(layer, SHA_KEY, sha);
 }
-export function getDestinations(artboard, brand) {
+export function getDestinations(artboard, brandID) {
     let destinations = Settings.layerSettingForKey(artboard, DESTINATION_KEY) || [];
 
     const invalid = destinations.find((destination) => destination.for != artboard.id);
@@ -74,7 +92,9 @@ export function getDestinations(artboard, brand) {
         return [];
     }
 
-    const destinationsForBrand = destinations.filter((destination) => brand && destination.brand?.id == brand?.id);
+    const destinationsForBrand = destinations.filter(
+        (destination) => brandID && destination.remote_brand_id == brandID
+    );
 
     return destinationsForBrand;
 }
@@ -82,7 +102,7 @@ export function getSHA(artboard) {
     return Settings.layerSettingForKey(artboard, SHA_KEY) || [];
 }
 
-export function getSelectedArtboardsFromSelection(brand, selection, total, hasSelection) {
+export function getSelectedArtboardsFromSelection(brandID, selection, total, hasSelection) {
     let artboards = [];
     try {
         selection.forEach((layer) => {
@@ -96,7 +116,7 @@ export function getSelectedArtboardsFromSelection(brand, selection, total, hasSe
                     type: layer.type,
                     name: layer.name,
                     id: layer.id,
-                    destinations: getDestinations(layer, brand),
+                    destinations: getDestinations(layer, brandID),
                 });
             }
         });
@@ -111,12 +131,12 @@ export function getSelectedArtboardsFromSelection(brand, selection, total, hasSe
     }
 }
 
-export function getSelectedArtboards(brand) {
+export function getSelectedArtboards(brandID) {
+    console.log('getSelectedArtboards', brandID);
     // remember the brand
 
-    if (brand) {
-        let recentBrand = 'com.frontify.sketch.recent.brand.id';
-        Settings.setSessionVariable(recentBrand, brand);
+    if (brandID) {
+        Settings.setSessionVariable('com.frontify.sketch.recent.brand.id', brandID);
     }
     try {
         let currentDocument = sketch3.Document.fromNative(sketch.getDocument());
@@ -143,14 +163,14 @@ export function getSelectedArtboards(brand) {
         // If there is a selection, but it doesn’t contain artboards: return all layers of type artboard
         // Else: return selected artboards
 
-        let all = getSelectedArtboardsFromSelection(brand, allArtboards, total, hasSelection);
+        let all = getSelectedArtboardsFromSelection(brandID, allArtboards, total, hasSelection);
         let documentArtboards = all.artboards;
 
         if (selection.length == 0) return { ...all, documentArtboards };
         if (selectedArtboards.length == 0) return { ...all, documentArtboards };
 
         return {
-            ...getSelectedArtboardsFromSelection(brand, currentDocument.selectedLayers, total, hasSelection),
+            ...getSelectedArtboardsFromSelection(brandID, currentDocument.selectedLayers, total, hasSelection),
             documentArtboards,
         };
     } catch (error) {

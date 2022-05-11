@@ -494,8 +494,7 @@ class Artboard {
         return files;
     }
 
-    uploadArtboards(artboards, brand) {
-        console.log('brand', brand);
+    uploadArtboards(artboards, brandID) {
         // sequence artboard export and upload
         this.uploadInProgress = true;
 
@@ -574,9 +573,10 @@ class Artboard {
                                                                                 'before patch',
                                                                                 data,
                                                                                 artboard,
-                                                                                brand
+                                                                                brandID
                                                                             );
                                                                             let destination = {
+                                                                                remote_brand_id: brandID,
                                                                                 remote_project_id:
                                                                                     artboard.target.remote_project_id,
                                                                                 remote_id: data.id,
@@ -585,7 +585,6 @@ class Artboard {
                                                                                 // This will store the SHA1 of the artboard that has just been uploaded
                                                                                 sha: artboard.sha,
                                                                                 for: artboard.id_external,
-                                                                                brand: brand,
                                                                             };
 
                                                                             patchDestinations(
