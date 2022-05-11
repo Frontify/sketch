@@ -676,6 +676,7 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
                             <Text color="weak" size="x-small">
                                 {destination.remote_path}
                             </Text>
+                            {JSON.stringify(destination.remote_brand_id)}
                         </custom-h-stack>
                     ) : (
                         <Text color="weak" size="x-small">

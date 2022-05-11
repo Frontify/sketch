@@ -320,6 +320,7 @@ export const UserContextProvider = ({ children }) => {
             setSelection((state) => {
                 return { ...state, brand };
             });
+            window.postMessage('reload');
         },
         setGuidelinesForBrand(guidelines, brand) {
             setSelection((state) => {

@@ -50,7 +50,7 @@ export function setDestinations(artboard, brandID) {
         return {
             ...destination,
             for: artboard.id,
-            remote_brand_id: brandID,
+            remote_brand_id: destination.remote_brand_id ? destination.remote_brand_id : brandID,
         };
     });
 
