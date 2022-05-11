@@ -473,7 +473,6 @@ export function ArtboardItem({ artboard, showPath = true }) {
 function ArtboardGroupItem({ group, uploadGroup, open, onOpen, onClose }) {
     return (
         <custom-v-stack padding="x-small" gap="x-small" style={{ paddingBottom: '12px' }}>
-            {open}
             <custom-h-stack gap="xx-small">
                 <div>
                     {open ? (

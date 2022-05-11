@@ -51,6 +51,7 @@ export function FileBrowser() {
                 <Text>Choose a remote file that you want to checkout.</Text>
 
                 <UploadDestinationPicker
+                    allowfiles={true}
                     onChange={(value) => {
                         if (value.type == 'file' && value.file.extension == 'sketch') {
                             checkout({ path: value.path, file: value.file });

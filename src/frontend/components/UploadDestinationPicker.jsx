@@ -324,7 +324,7 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
                         {files.map((file) => {
                             if (file.extension == 'sketch') {
                                 return (
-                                    <custom-palette-item selectable key={file.id} tabindex="-1" disabled={allowfiles}>
+                                    <custom-palette-item selectable key={file.id} tabindex="-1" disabled={!allowfiles}>
                                         <custom-h-stack
                                             gap="small"
                                             align-items="center"
@@ -342,7 +342,7 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
 
                             if (file.extension != 'sketch') {
                                 return (
-                                    <custom-palette-item key={file.id} disabled>
+                                    <custom-palette-item key={file.id} disabled={!allowfiles}>
                                         <custom-h-stack gap="small" align-items="center">
                                             <IconFile></IconFile>
                                             <Text>

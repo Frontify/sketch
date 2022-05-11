@@ -265,7 +265,7 @@ custom-palette-item:hover {
 custom-palette-item:active {
     background: rgba(0, 0, 0, 0.12);
 }
-custom-palette-item[disabled] {
+custom-palette-item[disabled='true'] {
     opacity: 0.5;
     pointer-events: none;
 }

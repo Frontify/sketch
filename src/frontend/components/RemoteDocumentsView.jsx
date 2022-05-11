@@ -30,6 +30,7 @@ export function RemoteDocumentsView() {
 
             <custom-v-stack style={{ border: ' 1px solid rgba(0, 0, 0, 0.08)', height: ' 100%', borderRadius: '8px' }}>
                 <UploadDestinationPicker
+                    allowfiles={true}
                     stretch
                     onChange={(value) => {
                         if (value.type == 'file' && value.file.extension == 'sketch') {
