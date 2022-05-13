@@ -1,6 +1,15 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { UserContext } from '../UserContext';
-import { IconFolder, IconSketch, IconProjects, Text, IconArrowLeft, LoadingCircle, IconFile } from '@frontify/arcade';
+import {
+    Button,
+    IconFolder,
+    IconSketch,
+    IconProjects,
+    Text,
+    IconArrowLeft,
+    LoadingCircle,
+    IconFile,
+} from '@frontify/arcade';
 
 import { useSketch } from '../hooks/useSketch';
 
@@ -215,6 +224,7 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
     };
 
     const enterProject = (project) => {
+        setFolder(null);
         fetchProjectFolders(project);
     };
     const focusFolder = (folder) => {
@@ -233,6 +243,18 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
             }
         });
         onChange(wrappedFolder(folder));
+    };
+
+    const focusFile = (file) => {
+        onInput({
+            type: 'file',
+            file,
+            project,
+            breadcrumbs,
+            path: [selection.brand.name, project.name]
+                .concat(breadcrumbs.map((breadcrumb) => breadcrumb.name))
+                .join('/'),
+        });
     };
 
     const pickFile = (file) => {
@@ -284,18 +306,25 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
     if (project) {
         return (
             <custom-v-stack stretch overflow="hidden">
-                <custom-palette-item
+                <custom-h-stack
+                    gap="small"
                     separator="bottom"
                     padding="small"
-                    onClick={() => {
-                        browseBack();
-                    }}
+                    align-items="center"
+                    justify-content="space-between"
                 >
-                    <custom-h-stack gap="small">
-                        <IconArrowLeft></IconArrowLeft>
-                        <Text>Back</Text>
-                    </custom-h-stack>
-                </custom-palette-item>
+                    <Button
+                        icon={<IconArrowLeft></IconArrowLeft>}
+                        size="Small"
+                        style="Secondary"
+                        onClick={() => {
+                            browseBack();
+                        }}
+                    ></Button>
+
+                    <Text weight="strong">{folder?.name}</Text>
+                </custom-h-stack>
+
                 <custom-scroll-view>
                     {loading ? (
                         <custom-v-stack align-items="center" justify-content="center" stretch>
@@ -336,6 +365,7 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
                                             key={file.id}
                                             tabindex="-1"
                                             disabled={!allowfiles}
+                                            onFocus={() => focusFile(file)}
                                         >
                                             <custom-h-stack
                                                 gap="small"
@@ -354,7 +384,7 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
 
                                 if (file.extension != 'sketch') {
                                     return (
-                                        <custom-palette-item key={file.id} disabled={!allowfiles}>
+                                        <custom-palette-item key={file.id} disabled>
                                             <custom-h-stack gap="small" align-items="center">
                                                 <IconFile></IconFile>
                                                 <Text>

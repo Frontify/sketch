@@ -32,7 +32,7 @@ ArtboardToolbar.propTypes = {
     setShowRecentDestinations: PropTypes.func,
     setUploadDestination: PropTypes.func,
     showDestinationPicker: PropTypes.bool,
-    showRecentDestinations: PropTypes.func,
+    showRecentDestinations: PropTypes.bool,
     uploadArtboards: PropTypes.func,
     uploadArtboardsToDestination: PropTypes.func,
     uploadDestination: PropTypes.object,

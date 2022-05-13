@@ -23,6 +23,7 @@ export function SourcesView() {
         return (
             <custom-v-stack stretch style={{ background: 'rgba(0, 0, 0, 0.5)' }}>
                 <Toolbar></Toolbar>
+
                 <custom-v-stack
                     style={{
                         borderRadius: '16px',
