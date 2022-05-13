@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState } from 'react';
-import { Button, Flyout, IconFolder, IconUploadAlternative, Text } from '@frontify/arcade';
+import { Button, Flyout, IconFolder, Text } from '@frontify/arcade';
 import { UploadDestinationPicker } from '../components/UploadDestinationPicker';
 import { useNavigate } from 'react-router-dom';
 import { useLocalStorage } from '../hooks/useLocalStorage';

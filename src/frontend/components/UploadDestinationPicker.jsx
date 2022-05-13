@@ -257,6 +257,10 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
     if (!project && !folder)
         return (
             <custom-scroll-view>
+                <custom-h-stack padding="small" separator="bottom">
+                    <Text weight="strong">Projects</Text>
+                </custom-h-stack>
+
                 {projects.map((project) => {
                     return (
                         <custom-palette-item
@@ -279,9 +283,11 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
 
     if (project) {
         return (
-            <custom-scroll-view>
+            <custom-v-stack stretch overflow="hidden">
                 <custom-palette-item
-                    onDoubleClick={() => {
+                    separator="bottom"
+                    padding="small"
+                    onClick={() => {
                         browseBack();
                     }}
                 >
@@ -289,78 +295,85 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
                         <IconArrowLeft></IconArrowLeft>
                         <Text>Back</Text>
                     </custom-h-stack>
-                </custom-palette-item>{' '}
-                {loading ? (
-                    <custom-v-stack align-items="center" justify-content="center" stretch>
-                        <LoadingCircle></LoadingCircle>
-                    </custom-v-stack>
-                ) : (
-                    <custom-v-stack stretch>
-                        {!files.length && !folders.length && (
-                            <custom-v-stack separator="top" stretch align-items="center" justify-content="center">
-                                <Text color="weak">”{folder?.name}” is empty</Text>
-                            </custom-v-stack>
-                        )}
-                        {folders.map((folder) => {
-                            return (
-                                <custom-palette-item
-                                    selectable
-                                    key={folder.id}
-                                    tabindex="-1"
-                                    onFocus={() => focusFolder(folder)}
-                                >
-                                    <custom-h-stack
-                                        gap="small"
-                                        align-items="center"
-                                        onDoubleClick={() => enterFolder(folder)}
-                                    >
-                                        <IconFolder></IconFolder>
-                                        <Text>{folder.name}</Text>
-                                    </custom-h-stack>
-                                </custom-palette-item>
-                            );
-                        })}
-
-                        {files.map((file) => {
-                            if (file.extension == 'sketch') {
+                </custom-palette-item>
+                <custom-scroll-view>
+                    {loading ? (
+                        <custom-v-stack align-items="center" justify-content="center" stretch>
+                            <LoadingCircle></LoadingCircle>
+                        </custom-v-stack>
+                    ) : (
+                        <custom-v-stack stretch>
+                            {!files.length && !folders.length && (
+                                <custom-v-stack separator="top" stretch align-items="center" justify-content="center">
+                                    <Text color="weak">”{folder?.name}” is empty</Text>
+                                </custom-v-stack>
+                            )}
+                            {folders.map((folder) => {
                                 return (
-                                    <custom-palette-item selectable key={file.id} tabindex="-1" disabled={!allowfiles}>
+                                    <custom-palette-item
+                                        selectable
+                                        key={folder.id}
+                                        tabindex="-1"
+                                        onFocus={() => focusFolder(folder)}
+                                    >
                                         <custom-h-stack
                                             gap="small"
                                             align-items="center"
-                                            onDoubleClick={() => pickFile(file)}
+                                            onDoubleClick={() => enterFolder(folder)}
                                         >
-                                            <IconSketch></IconSketch>
-                                            <Text>
-                                                {file.title}
-                                                <span style={{ opacity: 0.5 }}>.{file.extension}</span>
-                                            </Text>
+                                            <IconFolder></IconFolder>
+                                            <Text>{folder.name}</Text>
                                         </custom-h-stack>
                                     </custom-palette-item>
                                 );
-                            }
+                            })}
 
-                            if (file.extension != 'sketch') {
-                                return (
-                                    <custom-palette-item key={file.id} disabled={!allowfiles}>
-                                        <custom-h-stack gap="small" align-items="center">
-                                            <IconFile></IconFile>
-                                            <Text>
-                                                {file.title}
-                                                {file.__typename ? (
+                            {files.map((file) => {
+                                if (file.extension == 'sketch') {
+                                    return (
+                                        <custom-palette-item
+                                            selectable
+                                            key={file.id}
+                                            tabindex="-1"
+                                            disabled={!allowfiles}
+                                        >
+                                            <custom-h-stack
+                                                gap="small"
+                                                align-items="center"
+                                                onDoubleClick={() => pickFile(file)}
+                                            >
+                                                <IconSketch></IconSketch>
+                                                <Text>
+                                                    {file.title}
                                                     <span style={{ opacity: 0.5 }}>.{file.extension}</span>
-                                                ) : (
-                                                    ''
-                                                )}
-                                            </Text>
-                                        </custom-h-stack>
-                                    </custom-palette-item>
-                                );
-                            }
-                        })}
-                    </custom-v-stack>
-                )}
-            </custom-scroll-view>
+                                                </Text>
+                                            </custom-h-stack>
+                                        </custom-palette-item>
+                                    );
+                                }
+
+                                if (file.extension != 'sketch') {
+                                    return (
+                                        <custom-palette-item key={file.id} disabled={!allowfiles}>
+                                            <custom-h-stack gap="small" align-items="center">
+                                                <IconFile></IconFile>
+                                                <Text>
+                                                    {file.title}
+                                                    {file.__typename ? (
+                                                        <span style={{ opacity: 0.5 }}>.{file.extension}</span>
+                                                    ) : (
+                                                        ''
+                                                    )}
+                                                </Text>
+                                            </custom-h-stack>
+                                        </custom-palette-item>
+                                    );
+                                }
+                            })}
+                        </custom-v-stack>
+                    )}
+                </custom-scroll-view>
+            </custom-v-stack>
         );
     }
     return <LoadingCircle></LoadingCircle>;

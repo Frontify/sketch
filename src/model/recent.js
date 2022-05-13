@@ -11,6 +11,7 @@ class RecentFiles {
         return this.recents;
     }
     push(entry = {}) {
+        console.log('push to recent files', entry);
         // Remove any existing items with the given ID
         this.recents = this.recents.filter((item) => item.uuid != entry.uuid);
 

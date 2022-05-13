@@ -336,6 +336,9 @@ export function NavigationBar() {
                     <custom-v-stack>
                         <Text weight="strong">No Sketch Document</Text>
                         <Text size="x-small">Open a document and refresh.</Text>
+                        <Link to={`/sources/recent`} style={{ width: '100%' }}>
+                            Open …
+                        </Link>
                     </custom-v-stack>
                 </custom-h-stack>
                 <custom-spacer></custom-spacer>

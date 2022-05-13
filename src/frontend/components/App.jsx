@@ -9,14 +9,15 @@ import { PalettesView } from './PalettesView';
 import { TypographyView } from './TypographyView';
 
 import { OpenDocumentsView } from './OpenDocumentsView';
-import { RecentDocumentsView } from './RecentDocumentsView';
-import { RemoteDocumentsView } from './RemoteDocumentsView';
+import { RecentDocumentsView } from './Sources/RecentDocumentsView';
+import { RemoteDocumentsView } from './Sources/RemoteDocumentsView';
 import { RequireAuth } from './RequireAuth';
 
 import { SignInView } from './SignInView';
 import { SignInPendingView } from './SignInPendingView';
-import { SourceView } from './SourceView';
-import { SourcesView } from './SourcesView';
+
+import { SourceView } from './Sources/SourceView';
+import { SourcesView } from './Sources/SourcesView';
 
 // Context
 import { useContext, useEffect } from 'react';

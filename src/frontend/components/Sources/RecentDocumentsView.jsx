@@ -2,27 +2,17 @@ import React from 'react';
 import { useContext, useEffect, useState } from 'react';
 
 import { Link, useNavigate } from 'react-router-dom';
-import { SearchField } from './SearchField';
+import { SearchField } from '../SearchField';
 
-import {
-    Button,
-    Breadcrumbs,
-    Flyout,
-    IconSketch,
-    Text,
-    LoadingCircle,
-    IconUploadAlternative,
-    IconPen,
-    IconOpenLockFilled,
-} from '@frontify/arcade';
-import { useLocalStorage } from '../hooks/useLocalStorage';
+import { Button, IconSketch, Text, LoadingCircle } from '@frontify/arcade';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { useTranslation } from 'react-i18next';
 
-import { UserContext } from '../UserContext';
-import { useSketch } from '../hooks/useSketch';
+import { UserContext } from '../../UserContext';
+import { useSketch } from '../../hooks/useSketch';
 
-import { queryGraphQLWithAuth } from '../graphql';
-import { FileBrowser } from '../components/FileBrowser';
+import { queryGraphQLWithAuth } from '../../graphql';
+import { FileBrowser } from '../FileBrowser';
 
 export function RecentDocumentsView() {
     let [activeScope] = useLocalStorage('cache.activeScope', 'colors');
@@ -91,6 +81,8 @@ export function RecentDocumentsView() {
                 local: localFileForGraphQLID(index),
             });
         });
+
+        merged = merged.sort((a, b) => (a.local.timestamp < b.local.timestamp ? 1 : -1));
         setMergedDocuments(merged);
     }, [context.recentDocuments]);
 
@@ -103,7 +95,7 @@ export function RecentDocumentsView() {
     }
 
     return (
-        <custom-v-stack stretch overflow="hidden">
+        <custom-v-stack stretcson overflow="hidden">
             <div padding="small">
                 <SearchField></SearchField>
             </div>
@@ -114,7 +106,9 @@ export function RecentDocumentsView() {
                 {mergedDocuments.map((document) => {
                     return (
                         <custom-palette-item
-                            key={document.remote.id}
+                            selectable
+                            tabindex="0"
+                            key={document.local.uuid}
                             separator="bottom"
                             padding="small"
                             onDoubleClick={async () => {
@@ -128,8 +122,10 @@ export function RecentDocumentsView() {
                                 </div>
 
                                 <custom-v-stack>
+                                    <pre>{new Date(document.local.timestamp).toLocaleString()}</pre>
                                     <Text size="small">{document.local.path}</Text>
-                                    <div>{document.remote.title}</div>
+                                    <div>{document.local.filename}</div>
+
                                     <Text size="small">
                                         <custom-h-stack gap="x-small">
                                             <span>{document.remote.creator.name}</span>

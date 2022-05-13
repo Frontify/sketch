@@ -227,6 +227,7 @@ class Source {
 
     opened() {
         // Todo: Don’t rely on fetching data here but instead just open the file and resolve it
+        this.pushRecent();
         sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'dirty', false);
         return this.getCurrentAsset().then(function (asset) {
             if (asset) {
@@ -240,7 +241,44 @@ class Source {
         });
     }
 
-    async saved() {
+    async getGraphQLIDForLegacyAssetID(assetID) {
+        // fetch!
+
+        let query = `{
+        asset(id: ${assetID}) {
+          id
+          title
+          createdAt
+          creator {
+            name
+            email
+          }
+          modifiedAt
+          modifier {
+              name
+              email
+          }
+          ...on File {
+            downloadUrl
+          }
+          
+        }
+      }`;
+        let url = `/graphql`;
+        const options = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                query: query.replace(/(\r\n|\n|\r)/gm, ''),
+            }),
+        };
+        let response = await fetch(url, options);
+        return response.data?.asset?.id;
+    }
+    pushRecent() {
+        console.log('@@@ Push Recent');
         let document = sketch3.Document.fromNative(sketch.getDocument());
         let nativeSketchDocument = sketch.getDocument();
 
@@ -250,55 +288,26 @@ class Source {
             remote_graphql_id: sketch3.Settings.documentSettingForKey(sketch.getDocument(), 'remote_graphql_id'),
         };
 
-        let path = '' + nativeSketchDocument.fileURL().path();
-        let filename = path.split('/');
-
         /**
          * Do we have the GraphQL ID? If not, let’s fetch it first.
          */
 
         if (!refs.remote_graphql_id) {
-            // fetch!
-
-            let query = `{
-                asset(id: ${refs.remote_id}) {
-                  id
-                  title
-                  createdAt
-                  creator {
-                    name
-                    email
-                  }
-                  modifiedAt
-                  modifier {
-                      name
-                      email
-                  }
-                  ...on File {
-                    downloadUrl
-                  }
-                  
-                }
-              }`;
-            let url = `/graphql`;
-            const options = {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    query: query.replace(/(\r\n|\n|\r)/gm, ''),
-                }),
-            };
-            let response = await fetch(url, options);
-            let id = response.data?.asset?.id;
+            let id = this.getGraphQLIDForLegacyAssetID(refs.remote_id);
 
             sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'remote_graphql_id', id);
             refs.remote_graphql_id = id;
         }
 
-        recentFiles.push({ uuid: document.id, path, filename: filename[filename.length - 1], refs });
+        let path = '' + nativeSketchDocument.fileURL().path();
+        let filename = path.split('/');
 
+        recentFiles.push({ uuid: document.id, path, filename: filename[filename.length - 1], refs });
+    }
+    async saved() {
+        this.pushRecent();
+
+        // Mark as dirty, so that it can be pushed
         sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'dirty', true);
 
         return this.getCurrentAsset().then(async (asset) => {

@@ -1,11 +1,11 @@
 import React from 'react';
 import { useState } from 'react';
 import { Button } from '@frontify/arcade';
-import { UploadDestinationPicker } from '../components/UploadDestinationPicker';
+import { UploadDestinationPicker } from '../UploadDestinationPicker';
 import { useNavigate } from 'react-router-dom';
-import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { useTranslation } from 'react-i18next';
-import { useSketch } from '../hooks/useSketch';
+import { useSketch } from '../../hooks/useSketch';
 
 export function RemoteDocumentsView() {
     let [showDestinationPicker, setShowDestinationPicker] = useState(false);
