@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { CustomDialog } from '../CustomDialog';
 import { UploadDestinationPicker } from '../UploadDestinationPicker';
 import { Button, Flyout, IconCaretDown, IconAdd, IconFrequentlyUsed, IconFolder, Text } from '@frontify/arcade';
+
+import { RecentDocumentsView } from './RecentDocumentsView';
 
 export function SourcePicker({ children }) {
     // Boolean
@@ -11,22 +13,6 @@ export function SourcePicker({ children }) {
     // Destinations
     const [uploadDestination, setUploadDestination] = useState(null);
     const [temporaryUploadDestination, setTemporaryUploadDestination] = useState(null);
-
-    // Folders
-    const [sortedUsedFolders, setSortedUsedFolders] = useState([]);
-
-    const [usedFolders, setUsedFolders] = useState(new Map());
-
-    // useEffect that sorts the folders
-    useEffect(() => {
-        setSortedUsedFolders(() => {
-            return new Map(
-                [...usedFolders.entries()].sort((a, b) => {
-                    return a[1].name > b[1].name ? 1 : -1;
-                })
-            );
-        });
-    }, [usedFolders]);
 
     return (
         <div stretch-height>
@@ -110,7 +96,7 @@ export function SourcePicker({ children }) {
                                             setUploadDestination(temporaryUploadDestination);
                                         }}
                                     >
-                                        Select
+                                        Open
                                     </Button>
                                 </custom-h-stack>
                             </custom-v-stack>
@@ -132,7 +118,7 @@ export function SourcePicker({ children }) {
                                 setTemporaryUploadDestination(null);
                             }}
                         >
-                            Select
+                            Open
                         </Button>
                     </custom-h-stack>
                 }
@@ -161,58 +147,13 @@ export function SourcePicker({ children }) {
                     </custom-palette-item>
                 }
             >
-                <custom-h-stack padding="small" gap="x-small">
-                    <IconFrequentlyUsed />
-                    <Text weight="strong">Recent</Text>
-                </custom-h-stack>
-                {sortedUsedFolders.size ? (
-                    <ul>
-                        {[...sortedUsedFolders.keys()].map((key) => (
-                            <li key={key}>
-                                <custom-palette-item
-                                    title={key}
-                                    selectable
-                                    tabindex="-1"
-                                    onFocus={() => {
-                                        let folder = sortedUsedFolders.get(key);
-                                        setTemporaryUploadDestination({
-                                            project: {
-                                                id: folder.remote_project_id,
-                                            },
-                                            name: folder.name,
-                                            folderPath: folder.remote_path.substring(1, folder.remote_path.length - 1),
-                                        });
-                                    }}
-                                    onDoubleClick={() => {
-                                        // TODO:
-                                        // The returned object needs to be re-formatted
-                                        // usedFolders.get(key) -> (remote_id, remote_project_id)
-                                        // -> needs folderPath etc.
-                                        let folder = sortedUsedFolders.get(key);
-                                        setUploadDestination({
-                                            project: {
-                                                id: folder.remote_project_id,
-                                            },
-                                            name: folder.name,
-                                            folderPath: folder.remote_path.substring(1, folder.remote_path.length - 1),
-                                        });
-                                        setShowRecentDestinations(false);
-                                        setTemporaryUploadDestination(null);
-                                    }}
-                                >
-                                    <custom-h-stack gap="x-small" align-items="center">
-                                        <IconFolder></IconFolder>
-                                        <Text size="small">{sortedUsedFolders.get(key).name}</Text>
-                                    </custom-h-stack>
-                                </custom-palette-item>
-                            </li>
-                        ))}
-                    </ul>
-                ) : (
-                    <custom-v-stack padding="small" align-items="center" justify-content="center">
-                        <Text>No recent files.</Text>
-                    </custom-v-stack>
-                )}
+                <custom-v-stack overflow="hidden">
+                    <custom-h-stack padding="small" gap="x-small" separator="bottom">
+                        <IconFrequentlyUsed />
+                        <Text weight="strong">Recent</Text>
+                    </custom-h-stack>
+                    <RecentDocumentsView></RecentDocumentsView>
+                </custom-v-stack>
             </Flyout>
         </div>
     );

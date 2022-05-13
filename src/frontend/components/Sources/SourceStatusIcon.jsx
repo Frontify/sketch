@@ -27,7 +27,7 @@ export function SourceStatusIcon({ state, status, loading }) {
                 );
             case 'FETCHING':
                 return (
-                    <Badge style="Primary" size="Small" emphasis="Strong" icon={<IconRefresh></IconRefresh>}></Badge>
+                    <Badge style="Progress" size="Small" emphasis="Strong" icon={<IconRefresh></IconRefresh>}></Badge>
                 );
         }
     }

@@ -14,6 +14,8 @@ import { useSketch } from '../../hooks/useSketch';
 import { queryGraphQLWithAuth } from '../../graphql';
 import { FileBrowser } from '../FileBrowser';
 
+import { SourceStatusIcon } from './SourceStatusIcon';
+
 export function RecentDocumentsView() {
     let [activeScope] = useLocalStorage('cache.activeScope', 'colors');
     let [remoteDocuments, setRemoteDocuments] = useState([]);
@@ -95,58 +97,45 @@ export function RecentDocumentsView() {
     }
 
     return (
-        <custom-v-stack stretcson overflow="hidden">
-            <div padding="small">
-                <SearchField></SearchField>
-            </div>
-            <custom-line></custom-line>
+        <custom-v-stack separator="between">
+            {/* Recent Documents */}
+            {mergedDocuments.map((document) => {
+                return (
+                    <custom-palette-item
+                        overflow="hidden"
+                        selectable
+                        tabindex="0"
+                        key={document.local.uuid}
+                        padding="small"
+                        onDoubleClick={async () => {
+                            await openSource(document);
+                            redirectToDocument(document);
+                        }}
+                    >
+                        <custom-h-stack gap="medium" align-items="start">
+                            <div>
+                                <SourceStatusIcon state="'push'"></SourceStatusIcon>
+                            </div>
 
-            <custom-scroll-view stretch style={{ overflowX: 'hidden', width: '100%' }}>
-                {/* Recent Documents */}
-                {mergedDocuments.map((document) => {
-                    return (
-                        <custom-palette-item
-                            selectable
-                            tabindex="0"
-                            key={document.local.uuid}
-                            separator="bottom"
-                            padding="small"
-                            onDoubleClick={async () => {
-                                await openSource(document);
-                                redirectToDocument(document);
-                            }}
-                        >
-                            <custom-h-stack gap="medium" align-items="start">
-                                <div>
-                                    <IconSketch size="Size24"></IconSketch>
-                                </div>
+                            <custom-v-stack gap="xx-small">
+                                {/* <pre>{new Date(document.local.timestamp).toLocaleString()}</pre> */}
+                                {/* <Text size="small" overflow="truncate">
+                                    {document.local.path}
+                                </Text> */}
+                                <Text size="small">{document.local.filename.replace('.sketch', '')}</Text>
 
-                                <custom-v-stack>
-                                    <pre>{new Date(document.local.timestamp).toLocaleString()}</pre>
-                                    <Text size="small">{document.local.path}</Text>
-                                    <div>{document.local.filename}</div>
-
-                                    <Text size="small">
-                                        <custom-h-stack gap="x-small">
-                                            <span>{document.remote.creator.name}</span>
-                                            <span>•</span>
-                                            <span>{new Date(document.remote.modifiedAt).toLocaleString()}</span>
-                                        </custom-h-stack>
-                                    </Text>
-                                </custom-v-stack>
-                            </custom-h-stack>
-                        </custom-palette-item>
-                    );
-                })}
-            </custom-scroll-view>
-
-            <custom-v-stack>
-                <custom-line></custom-line>
-
-                <custom-h-stack padding="small" gap="small" align-items="center" justify-content="center">
-                    <Button style="Primary">{t('sources.sync_all')}</Button>
-                </custom-h-stack>
-            </custom-v-stack>
+                                <Text size="small" color="weak">
+                                    <custom-h-stack gap="x-small">
+                                        <span>{document.remote.creator.name}</span>
+                                        <span>•</span>
+                                        <span>{new Date(document.remote.modifiedAt).toLocaleString()}</span>
+                                    </custom-h-stack>
+                                </Text>
+                            </custom-v-stack>
+                        </custom-h-stack>
+                    </custom-palette-item>
+                );
+            })}
         </custom-v-stack>
     );
 }

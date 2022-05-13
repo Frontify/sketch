@@ -913,12 +913,8 @@ export function ArtboardsView() {
     return (
         <custom-scroll-view stretch>
             <custom-v-stack stretch>
-                <div padding="small">
-                    <SearchField placeholder="Search Artboards" onChange={() => {}}></SearchField>
-                </div>
-
-                <div padding="small">
-                    <custom-h-stack padding="small" style={{ background: 'rgba(0, 0, 0, 0.1)' }}>
+                <div padding="small" stretch align-items="center" justify-content="center">
+                    <custom-h-stack padding="small">
                         <Text color="weak">
                             If artboards were uploaded before the recent plugin improvements you won’t see them here
                             until they’re next updated. Don’t worry, they’re still on Frontify.
