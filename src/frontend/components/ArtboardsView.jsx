@@ -862,7 +862,7 @@ export function ArtboardsView() {
                             return (
                                 <custom-v-stack key={artboard.key}>
                                     <ArtboardItem artboard={artboard} showPath={false}></ArtboardItem>
-                                    <custom-v-stack style={{ marginLeft: '8px' }}>
+                                    <custom-v-stack style={{ marginLeft: '12px' }}>
                                         {artboard.destinations.map((destination) => {
                                             return (
                                                 <ArtboardDestinationItem

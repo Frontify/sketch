@@ -92,9 +92,9 @@ export function Toolbar() {
                         </Flyout>
                     </custom-h-stack>
                     <custom-spacer></custom-spacer>
-                    <button>
+                    {/* <button>
                         <IconNotifications icon="Notifications" size="Size20" />
-                    </button>
+                    </button> */}
 
                     <button
                         onClick={() => {

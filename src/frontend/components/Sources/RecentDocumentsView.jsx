@@ -16,19 +16,26 @@ import { FileBrowser } from '../FileBrowser';
 
 import { SourceStatusIcon } from './SourceStatusIcon';
 
-export function RecentDocumentsView() {
+export function RecentDocumentsView({ onInput, onChange }) {
     let [activeScope] = useLocalStorage('cache.activeScope', 'colors');
     let [remoteDocuments, setRemoteDocuments] = useState([]);
     let [mergedDocuments, setMergedDocuments] = useState([]);
     let context = useContext(UserContext);
     let navigate = useNavigate();
 
+    let [loading, setLoading] = useState('');
+
     let { sources } = useContext(UserContext);
 
     const { t } = useTranslation();
 
+    const focusSource = (document) => {
+        onInput(document);
+    };
     const openSource = async (document) => {
-        await useSketch('openSource', { path: document.local.path });
+        setLoading(document.local.uuid);
+        onChange(document);
+        // await useSketch('openSource', { path: document.local.path });
     };
 
     const redirectToDocument = (document) => {
@@ -107,12 +114,15 @@ export function RecentDocumentsView() {
                         tabindex="0"
                         key={document.local.uuid}
                         padding="small"
+                        onFocus={() => {
+                            focusSource(document);
+                        }}
                         onDoubleClick={async () => {
                             await openSource(document);
                             redirectToDocument(document);
                         }}
                     >
-                        <custom-h-stack gap="medium" align-items="start">
+                        <custom-h-stack gap="medium" align-items="center">
                             <div>
                                 <SourceStatusIcon state="'push'"></SourceStatusIcon>
                             </div>
@@ -132,6 +142,12 @@ export function RecentDocumentsView() {
                                     </custom-h-stack>
                                 </Text>
                             </custom-v-stack>
+                            <custom-spacer></custom-spacer>
+                            <div style={{ minWidth: '24px' }}>
+                                {loading == document.local.uuid && (
+                                    <LoadingCircle style="Positive" size="Small"></LoadingCircle>
+                                )}
+                            </div>
                         </custom-h-stack>
                     </custom-palette-item>
                 );

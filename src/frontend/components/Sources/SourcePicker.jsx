@@ -5,6 +5,8 @@ import { Button, Flyout, IconCaretDown, IconAdd, IconFrequentlyUsed, IconFolder,
 
 import { RecentDocumentsView } from './RecentDocumentsView';
 
+import { useSketch } from '../../hooks/useSketch';
+
 export function SourcePicker({ children }) {
     // Boolean
     const [showDestinationPicker, setShowDestinationPicker] = useState(false);
@@ -13,6 +15,15 @@ export function SourcePicker({ children }) {
     // Destinations
     const [uploadDestination, setUploadDestination] = useState(null);
     const [temporaryUploadDestination, setTemporaryUploadDestination] = useState(null);
+
+    const [loading, setLoading] = useState(false);
+
+    const openSource = async (document) => {
+        setLoading(true);
+        await useSketch('openSource', { path: document.local.path });
+        setLoading(false);
+        setShowRecentDestinations(false);
+    };
 
     return (
         <div stretch-height>
@@ -23,6 +34,7 @@ export function SourcePicker({ children }) {
                     }}
                 ></custom-dim>
             )}
+
             <Flyout
                 stretch-height
                 hug={false}
@@ -111,11 +123,12 @@ export function SourcePicker({ children }) {
                             Cancel
                         </Button>{' '}
                         <Button
-                            disabled={!temporaryUploadDestination || temporaryUploadDestination.type == 'folder'}
+                            disabled={!temporaryUploadDestination}
                             onClick={() => {
                                 setUploadDestination(temporaryUploadDestination);
                                 setShowRecentDestinations(false);
                                 setTemporaryUploadDestination(null);
+                                openSource(temporaryUploadDestination);
                             }}
                         >
                             Open
@@ -152,7 +165,18 @@ export function SourcePicker({ children }) {
                         <IconFrequentlyUsed />
                         <Text weight="strong">Recent</Text>
                     </custom-h-stack>
-                    <RecentDocumentsView></RecentDocumentsView>
+                    <RecentDocumentsView
+                        onInput={(value) => {
+                            setTemporaryUploadDestination(value);
+                        }}
+                        onChange={(value) => {
+                            setUploadDestination(value);
+
+                            // setShowRecentDestinations(false);
+                            setTemporaryUploadDestination(null);
+                            openSource(value);
+                        }}
+                    ></RecentDocumentsView>
                 </custom-v-stack>
             </Flyout>
         </div>
