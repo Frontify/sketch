@@ -521,12 +521,13 @@ export default function (context, view) {
 
                 function getState(document) {
                     let { remote, local } = document;
+                    if (!document.remote) return 'untracked';
 
                     let saved = local.id;
-                    let tracked = remote.id;
-                    let sameFile = local.sha == remote.sha;
-                    let sameDate = local.modified == remote.modified;
-                    let ahead = local.modified >= remote.modified ? 'local' : 'remote';
+                    let tracked = remote?.id;
+                    let sameFile = local.sha == remote?.sha;
+                    let sameDate = local.modified == remote?.modified;
+                    let ahead = local.modified >= remote?.modified ? 'local' : 'remote';
                     let conflict = (document.dirty && !sameFile) || (document.dirty && !sameFile && !sameDate);
 
                     if (!saved) return 'unsaved';
@@ -551,7 +552,7 @@ export default function (context, view) {
 
                     return 'unknown';
                 }
-                console.log(currentDocument);
+
                 if (currentDocument.refs.remote_id && currentDocument.refs.remote_project_id) {
                     // MARK: Hardcoded project id
                     let remoteAsset = await source.getRemoteAssetForProjectIDByAssetID(
