@@ -31,6 +31,8 @@ import { useTranslation } from 'react-i18next';
 export function App() {
     let context = useContext(UserContext);
     let { t } = useTranslation();
+
+    // Initial refresh will load the user, brand, etc.
     useEffect(() => {
         context.actions.refresh();
     }, []);
