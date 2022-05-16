@@ -20,6 +20,11 @@ export function RecentDocumentsView({ onInput, onChange }) {
     let [activeScope] = useLocalStorage('cache.activeScope', 'colors');
     let [remoteDocuments, setRemoteDocuments] = useState([]);
     let [mergedDocuments, setMergedDocuments] = useState([]);
+
+    // The recent documents are a global list, including documents across all brands.
+    // These are only the recent documents for the current brand only.
+    let [recentDocumentsForBrand, setRecentDocumentsForBrand] = useState([]);
+
     let context = useContext(UserContext);
     let navigate = useNavigate();
 
@@ -46,10 +51,17 @@ export function RecentDocumentsView({ onInput, onChange }) {
         useSketch('requestUpdate');
     }, []);
 
+    useEffect(() => {
+        setRecentDocumentsForBrand(() => {
+            return context.recentDocuments.filter((doc) => doc.refs?.remote_brand_id == context.selection.brand.id);
+        });
+    }, [context.recentDocuments]);
+
     useEffect(async () => {
         // Query GraphQL
+        setLoading(true);
 
-        let ids = context.recentDocuments.map((document) => document.refs?.remote_id || null) || [];
+        let ids = recentDocumentsForBrand.map((document) => document.refs?.remote_id || null) || [];
         let query = `{
             assets(ids: [${ids}]) {
               id
@@ -73,6 +85,15 @@ export function RecentDocumentsView({ onInput, onChange }) {
 
         let result = await queryGraphQLWithAuth({ query, auth: context.auth });
 
+        /**
+         * Here we might get errors:
+         *
+         * >>> message: "policy 'assets style guide' not fulfilled"
+         *
+         * This can happen when we try to request assets that don’t belong to this brand.
+         */
+        console.log('result from graphql', result);
+
         setRemoteDocuments(result.data.assets);
 
         let merged = [];
@@ -81,7 +102,7 @@ export function RecentDocumentsView({ onInput, onChange }) {
         const localFileForGraphQLID = (id) => {
             // Todo: ID is an index, but we should find an ID if we have it.
             return (
-                context.recentDocuments.find((doc) => doc.refs.remote_graphql_id == id) || context.recentDocuments[id]
+                recentDocumentsForBrand.find((doc) => doc.refs.remote_graphql_id == id) || recentDocumentsForBrand[id]
             );
         };
         if (result.data?.assets) {
@@ -95,7 +116,8 @@ export function RecentDocumentsView({ onInput, onChange }) {
 
         merged = merged.sort((a, b) => (a.local.timestamp < b.local.timestamp ? 1 : -1));
         setMergedDocuments(merged);
-    }, [context.recentDocuments]);
+        setLoading(false);
+    }, [recentDocumentsForBrand]);
 
     if (!mergedDocuments) {
         return (
@@ -107,7 +129,8 @@ export function RecentDocumentsView({ onInput, onChange }) {
     if (mergedDocuments.length == 0) {
         return (
             <custom-v-stack flex padding="small" align-items="center" justify-content="center">
-                <Text>No Recent Documents</Text>
+                {loading && <LoadingCircle size="Small"></LoadingCircle>}
+                {!loading && <Text>No Recent Documents</Text>}
             </custom-v-stack>
         );
     }
