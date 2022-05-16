@@ -39,6 +39,8 @@ export function SourceStatusIcon({ state, status, loading }) {
             return (
                 <Badge style="Warning" size="Small" emphasis="Strong" icon={<IconArrowDown></IconArrowDown>}></Badge>
             );
+        case 'untracked':
+            return <Badge style="Primary" icon={<IconUnknownSimple></IconUnknownSimple>}></Badge>;
         case 'same':
         default:
             return <Badge style="Positive" emphasis="Strong" icon={<IconCheck></IconCheck>}></Badge>;
