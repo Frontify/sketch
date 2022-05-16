@@ -11,6 +11,7 @@ import {
     IconDownloadAlternative,
     IconMore,
     IconQuestion,
+    IconFolderUp,
     IconRefresh,
     IconSketch,
     IconUploadAlternative,
@@ -28,6 +29,7 @@ import { useSketch } from '../hooks/useSketch';
 import { UploadDestinationPicker } from './UploadDestinationPicker';
 import { SourcePicker } from './Sources/SourcePicker';
 import { SourceStatusIcon } from './Sources/SourceStatusIcon';
+import { CustomDialog } from './CustomDialog';
 
 import { queryGraphQLWithAuth } from '../graphql';
 
@@ -35,6 +37,8 @@ function SourceAction({ status, actions, loading }) {
     let context = useContext(UserContext);
     let [showDestinationPicker, setShowDestinationPicker] = useState(false);
     let [destination, setDestination] = useState(null);
+    let [temporaryUploadDestination, setTemporaryUploadDestination] = useState(null);
+    let [uploadDestination, setUploadDestination] = useState(null);
 
     if (loading || context.refreshing)
         return (
@@ -50,51 +54,63 @@ function SourceAction({ status, actions, loading }) {
     switch (status) {
         case 'untracked':
             return (
-                <Flyout
-                    onCancel={() => setShowDestinationPicker(false)}
-                    isOpen={showDestinationPicker}
-                    onOpenChange={(open) => {
-                        if (open) {
-                            setShowDestinationPicker(false);
-                        } else {
-                            setShowDestinationPicker(true);
-                        }
-                    }}
+                <CustomDialog
+                    open={showDestinationPicker}
                     trigger={
                         <Button
-                            onClick={() => {
-                                setShowDestinationPicker(true);
-                            }}
-                            icon={<IconUploadAlternative />}
+                            style="Secondary"
+                            hugWidth={false}
+                            onClick={() => setShowDestinationPicker(true)}
+                            icon={<IconFolderUp />}
                         >
-                            Publish …
+                            {/* <Text whitespace="nowrap">Publish …</Text> */}
                         </Button>
                     }
                 >
-                    <custom-v-stack padding="small" gap="small">
-                        <h2>Destination</h2>
-                        <Text>
-                            Choose the folder where you want to publish{' '}
-                            <strong>{context.currentDocument.local.filename}</strong>
-                        </Text>
-                        <hr />
+                    <custom-v-stack stretch>
+                        <custom-h-stack padding="small" separator="bottom">
+                            <Text weight="strong">Publish on Frontify</Text>
+                        </custom-h-stack>
                         <UploadDestinationPicker
-                            onChange={(value) => {
-                                setDestination(value);
+                            allowfiles={false}
+                            paths={uploadDestination ? [uploadDestination] : []}
+                            onInput={(value) => {
+                                setTemporaryUploadDestination(value);
                             }}
                         ></UploadDestinationPicker>
-                        <hr />
-                        <Button
-                            onClick={() => {
-                                actions.publish(destination);
-
-                                setShowDestinationPicker(false);
-                            }}
-                        >
-                            Confirm
-                        </Button>
+                        <custom-h-stack padding="small" gap="small" separator="top">
+                            <Button
+                                style="Secondary"
+                                disabled={true || !temporaryUploadDestination}
+                                icon={<IconAdd></IconAdd>}
+                                onClick={() => {
+                                    onCreateFolder(temporaryUploadDestination);
+                                }}
+                            >
+                                New folder
+                            </Button>
+                            <custom-spacer></custom-spacer>
+                            <Button
+                                style="Secondary"
+                                onClick={() => {
+                                    setShowDestinationPicker(false);
+                                }}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                disabled={temporaryUploadDestination == null}
+                                onClick={() => {
+                                    setShowDestinationPicker(false);
+                                    setUploadDestination(temporaryUploadDestination);
+                                    actions.publish(temporaryUploadDestination);
+                                }}
+                            >
+                                Publish
+                            </Button>
+                        </custom-h-stack>
                     </custom-v-stack>
-                </Flyout>
+                </CustomDialog>
             );
         case 'same':
             return (
@@ -334,15 +350,14 @@ export function NavigationBar() {
     if (!context.currentDocument.local)
         return (
             <custom-h-stack align-items="center">
-                <custom-h-stack gap="small" padding="small">
-                    <IconQuestion size="Size24"></IconQuestion>
-
+                <custom-h-stack gap="small" padding="small" align-items="center">
                     <custom-v-stack>
-                        <Text weight="strong">No Sketch Document</Text>
-                        <Text size="x-small">Open a document and refresh.</Text>
-                        <Link to={`/sources/recent`} style={{ width: '100%' }}>
-                            Open …
-                        </Link>
+                        <Text weight="strong" size="x-small">
+                            No Sketch Document
+                        </Text>
+                        <Text size="x-small" color="weak">
+                            Open a document and refresh.
+                        </Text>
                     </custom-v-stack>
                 </custom-h-stack>
                 <custom-spacer></custom-spacer>
@@ -350,7 +365,7 @@ export function NavigationBar() {
                     <Button
                         style="Secondary"
                         onClick={async () => {
-                            await refresh();
+                            await context.actions.getCurrentDocument(true);
                         }}
                     >
                         <custom-h-stack gap="small" align-items="center">
@@ -373,30 +388,49 @@ export function NavigationBar() {
         );
 
     return (
-        <custom-h-stack stretch-children align-items="center">
-            <div>
-                <SourcePicker>
-                    <custom-h-stack flex style={{ height: '100%' }} align-items="center" stretch-children-height>
-                        <custom-h-stack gap="small" align-items="center" style={{ height: '100%', width: '100%' }}>
+        <custom-h-stack stretch-children="true" align-items="center" style={{ width: '100%' }}>
+            <div style={{ height: '100%', overflow: 'hidden', flex: 1 }}>
+                <SourcePicker style={{ height: '100%', overflow: 'hidden' }}>
+                    <custom-h-stack flex style={{ height: '100%' }} align-items="center" stretch-children-height="true">
+                        <custom-h-stack
+                            gap="small"
+                            align-items="center"
+                            style={{ height: '100%', overflow: 'hidden', width: '100%' }}
+                        >
                             {/* <IconSketch size="Size24"></IconSketch> */}
+
                             <SourceStatusIcon
                                 status={status}
                                 state={context.currentDocument.state}
                                 loading={loading}
                             ></SourceStatusIcon>
-                            <custom-h-stack gap="xx-small" flex align-items="center" style={{ width: '100%' }}>
-                                {context.currentDocument && context.currentDocument.remote.id ? (
-                                    <custom-v-stack gap="small" flex style={{ width: '100%' }}>
-                                        <custom-v-stack style={{ width: '100%' }}>
+                            <custom-h-stack
+                                gap="xx-small"
+                                align-items="center"
+                                style={{ overflow: 'hidden', width: '100%' }}
+                            >
+                                {context.currentDocument && context.currentDocument.remote?.id ? (
+                                    <custom-v-stack gap="small" style={{ overflow: 'hidden' }}>
+                                        <custom-v-stack style={{ overflow: 'hidden' }}>
                                             <custom-h-stack align-items="center">
-                                                <Text size="x-small" weight="strong">
+                                                <Text
+                                                    size="x-small"
+                                                    weight="strong"
+                                                    whitespace="nowrap"
+                                                    overflow="ellipsis"
+                                                >
                                                     {context.currentDocument.local.filename}
                                                 </Text>
                                             </custom-h-stack>
                                             {context.currentDocument.state == 'same' && !loading ? (
-                                                <Text size="x-small" color="weak">
-                                                    Last revision by {context.currentDocument.remote.modifier_name}{' '}
-                                                    {context.currentDocument.remote.modified_localized_ago}
+                                                <Text
+                                                    size="x-small"
+                                                    color="weak"
+                                                    whitespace="nowrap"
+                                                    overflow="ellipsis"
+                                                >
+                                                    Last revision by {context.currentDocument.remote?.modifier_name}{' '}
+                                                    {context.currentDocument.remote?.modified_localized_ago}
                                                 </Text>
                                             ) : (
                                                 ''
@@ -414,12 +448,12 @@ export function NavigationBar() {
                                                 status == 'PUSHING' ? (
                                                     <Text size="x-small" color="weak">
                                                         Pushing …{' '}
-                                                        {context.transferMap[context.currentDocument.remote.id]
+                                                        {context.transferMap[context.currentDocument.remote?.id]
                                                             ?.progress ? (
                                                             <span style={{ fontFeatureSettings: 'tnum' }}>
                                                                 {Math.floor(
                                                                     context.transferMap[
-                                                                        context.currentDocument.remote.id
+                                                                        context.currentDocument.remote?.id
                                                                     ]?.progress
                                                                 )}
                                                                 %
@@ -462,19 +496,23 @@ export function NavigationBar() {
                                         >
                                             {context.currentDocument.local.filename}
                                         </Text>
-                                        <Text>Untracked Document</Text>
+                                        <Text size="x-small" color="weak">
+                                            Untracked Document
+                                        </Text>
                                     </custom-v-stack>
                                 )}
-                                <IconCaretDown></IconCaretDown>
+                                <custom-spacer></custom-spacer>
+                                <div style={{ flex: 0 }}>
+                                    <IconCaretDown></IconCaretDown>
+                                </div>
                             </custom-h-stack>
                         </custom-h-stack>
                     </custom-h-stack>
                 </SourcePicker>
             </div>
 
-            <custom-h-stack padding="small" gap="x-small" separator="left" style={{ flex: 0 }}>
-                <div>
-                    {' '}
+            <custom-h-stack padding="small" gap="xx-small" separator="left" style={{ flex: 0 }}>
+                <div style={{ flex: 0 }}>
                     <SourceAction
                         style={{ flex: 0 }}
                         status={context.currentDocument.state}
@@ -483,39 +521,46 @@ export function NavigationBar() {
                     ></SourceAction>
                 </div>
 
-                <Flyout
-                    hug={false}
-                    fitContent={true}
-                    isOpen={open}
-                    onOpenChange={(isOpen) => setOpen(isOpen)}
-                    legacyFooter={false}
-                    trigger={
-                        <Button inverted={true} icon={<IconMore />} onClick={() => setOpen((open) => !open)}></Button>
-                    }
-                >
-                    <custom-v-stack>
-                        <MenuItem
-                            title="View on Frontify"
-                            onClick={() => {
-                                openExternal(context.currentDocument.refs.remote_id);
-                                setOpen(false);
-                            }}
+                {context.currentDocument.state != 'untracked' && (
+                    <div style={{ flex: 0 }}>
+                        <Flyout
+                            hug={false}
+                            fitContent={true}
+                            isOpen={open}
+                            onOpenChange={(isOpen) => setOpen(isOpen)}
+                            legacyFooter={false}
+                            trigger={
+                                <Button
+                                    inverted={true}
+                                    icon={<IconMore />}
+                                    onClick={() => setOpen((open) => !open)}
+                                ></Button>
+                            }
                         >
-                            View on Frontify
-                        </MenuItem>
-                        <div padding="small">
-                            {' '}
-                            <Button
-                                onClick={() => {
-                                    openExternal(context.currentDocument.refs.remote_id);
-                                    setOpen(false);
-                                }}
-                            >
-                                View on Frontify
-                            </Button>
-                        </div>
-                    </custom-v-stack>
-                </Flyout>
+                            <custom-v-stack>
+                                <MenuItem
+                                    title="View on Frontify"
+                                    onClick={() => {
+                                        openExternal(context.currentDocument.refs.remote_id);
+                                        setOpen(false);
+                                    }}
+                                >
+                                    View on Frontify
+                                </MenuItem>
+                                <div padding="small">
+                                    <Button
+                                        onClick={() => {
+                                            openExternal(context.currentDocument.refs.remote_id);
+                                            setOpen(false);
+                                        }}
+                                    >
+                                        View on Frontify
+                                    </Button>
+                                </div>
+                            </custom-v-stack>
+                        </Flyout>
+                    </div>
+                )}
             </custom-h-stack>
         </custom-h-stack>
     );
