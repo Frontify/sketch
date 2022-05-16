@@ -18,7 +18,17 @@ export function SourcePicker({ children }) {
 
     const [loading, setLoading] = useState(false);
 
+    const checkoutSource = async ({ path, file }) => {
+        setLoading(true);
+        let { success } = await useSketch('checkout', { path, file });
+        if (success) {
+            setLoading(false);
+            setShowRecentDestinations(false);
+            setShowDestinationPicker(false);
+        }
+    };
     const openSource = async (document) => {
+        console.log('open source', document);
         setLoading(true);
         await useSketch('openSource', { path: document.local.path });
         setLoading(false);
@@ -70,7 +80,9 @@ export function SourcePicker({ children }) {
                                         setTemporaryUploadDestination(value);
                                     }}
                                     onChange={(value) => {
-                                        setTemporaryUploadDestination(value);
+                                        if (value.type == 'file' && value.file.extension == 'sketch') {
+                                            checkoutSource({ path: value.path, file: value.file });
+                                        }
                                     }}
                                 ></UploadDestinationPicker>
                                 <custom-h-stack padding="small" gap="small" separator="top">
@@ -125,9 +137,6 @@ export function SourcePicker({ children }) {
                         <Button
                             disabled={!temporaryUploadDestination}
                             onClick={() => {
-                                setUploadDestination(temporaryUploadDestination);
-                                setShowRecentDestinations(false);
-                                setTemporaryUploadDestination(null);
                                 openSource(temporaryUploadDestination);
                             }}
                         >
@@ -160,7 +169,7 @@ export function SourcePicker({ children }) {
                     </custom-palette-item>
                 }
             >
-                <custom-v-stack overflow="hidden">
+                <custom-v-stack overflow="hidden" style={{ minWidth: 'calc(100vw - 1.5rem)' }}>
                     <custom-h-stack padding="small" gap="x-small" separator="bottom">
                         <IconFrequentlyUsed />
                         <Text weight="strong">Recent</Text>
