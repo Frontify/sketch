@@ -41,10 +41,10 @@ custom-h-stack {
     align-items: center;
 }
 
-custom-h-stack[stretch-children] > * {
+custom-h-stack[stretch-children='true'] > * {
     width: 100%;
 }
-[stretch-height] > * {
+[stretch-height='true'] > * {
     height: 100% !important;
 }
 
@@ -209,7 +209,7 @@ custom-scroll-view {
     flex: 1;
 }
 
-[stretch] {
+[stretch='true'] {
     height: 100%;
 }
 custom-artboard-preview {
