@@ -27,7 +27,7 @@ export function SignInPendingView() {
                 // await context.user.getUser(credentials);
 
                 // redirect
-                navigate('/sources');
+                navigate('/source/artboards');
             }
         });
     }, []);
