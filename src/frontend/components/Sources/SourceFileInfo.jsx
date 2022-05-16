@@ -12,13 +12,14 @@ export function SourceFileInfo({ status, source, transferMap, loading }) {
                 {/* <IconSketch size="Size24"></IconSketch> */}
 
                 <SourceStatusIcon status={status} state={source.state} loading={loading}></SourceStatusIcon>
+
                 <custom-h-stack gap="xx-small" align-items="center" style={{ overflow: 'hidden', width: '100%' }}>
                     {source && source.remote?.id ? (
                         <custom-v-stack gap="small" style={{ overflow: 'hidden' }}>
                             <custom-v-stack style={{ overflow: 'hidden' }}>
                                 <custom-h-stack align-items="center">
                                     <Text size="x-small" weight="strong" whitespace="nowrap" overflow="ellipsis">
-                                        {source.local.filename}
+                                        {source.local.filename.replace('.sketch', '')}
                                     </Text>
                                 </custom-h-stack>
                                 {source.state == 'same' && !loading ? (
@@ -68,7 +69,7 @@ export function SourceFileInfo({ status, source, transferMap, loading }) {
                     ) : source.local.filename ? (
                         <custom-v-stack>
                             <Text size="x-small" weight="strong" whitespace="nowrap" overflow="ellipsis" wrap>
-                                {source.local.filename}
+                                {source.local.filename.replace('.sketch', '')}
                             </Text>
                             <Text size="x-small" color="weak">
                                 Untracked Document
