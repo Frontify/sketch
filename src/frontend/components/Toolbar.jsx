@@ -44,9 +44,11 @@ export function Toolbar() {
                         >
                             <custom-v-stack>
                                 <custom-h-stack direction="row" gap="small" align-items="center" padding="small">
-                                    <custom-avatar>
-                                        <img src={context.user.avatar} alt={context.user.name} />
-                                    </custom-avatar>
+                                    {context.user.avatar && (
+                                        <custom-avatar>
+                                            <img src={context.user.avatar} alt={context.user.name} />
+                                        </custom-avatar>
+                                    )}
 
                                     <Text as="span" color="white" size="medium" weight="medium">
                                         {context.user.name}
@@ -63,6 +65,10 @@ export function Toolbar() {
                                 <custom-line></custom-line>
 
                                 <custom-v-stack>
+                                    <custom-h-stack padding="x-small">
+                                        <Text weight="strong">Brands</Text>
+                                    </custom-h-stack>
+                                    {context.brands.length == 0 && <Text>No brands</Text>}
                                     {context.brands &&
                                         context.brands.length &&
                                         context.brands.map((brand) => {
