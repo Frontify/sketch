@@ -28,18 +28,14 @@ export function Toolbar() {
                             onOpenChange={(isOpen) => setOpen(isOpen)}
                             legacyFooter={false}
                             trigger={
-                                <Text onClick={() => setOpen((open) => !open)} color="white">
-                                    <custom-h-stack gap="x-small">
-                                        <button>
-                                            <Text as="span" color="white" size="medium" weight="strong">
-                                                {context.brands &&
-                                                    context.selection.brand &&
-                                                    context.selection.brand.name}
-                                            </Text>
-                                        </button>
+                                <Button onClick={() => setOpen((open) => !open)} size="Small">
+                                    <custom-h-stack gap="small">
+                                        <Text as="span" color="white" size="medium" weight="strong">
+                                            {context.brands && context.selection.brand && context.selection.brand.name}
+                                        </Text>
                                         <IconCaretDown></IconCaretDown>
                                     </custom-h-stack>
-                                </Text>
+                                </Button>
                             }
                         >
                             <custom-v-stack>
