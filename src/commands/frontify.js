@@ -75,6 +75,14 @@ function activeDocumentDidChange() {
     return false;
 }
 
+export function onDocumentChanged(context) {
+    // mark documnt as dirty?
+}
+
+export function selectionChangedCommand(context) {
+    if (activeDocumentDidChange()) refresh();
+}
+
 export function artboardChangedCommand(context) {
     let newArtboard = sketch3.fromNative(context.actionContext.newArtboard);
 
@@ -133,7 +141,6 @@ function refresh() {
      *
      */
 
-    console.log('refresh');
     let payload = getPluginState();
 
     if (isWebviewPresent('frontifymain')) {
