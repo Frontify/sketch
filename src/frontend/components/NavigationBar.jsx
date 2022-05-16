@@ -185,6 +185,16 @@ export function NavigationBar() {
     let [status, setStatus] = useState('PENDING');
     let [open, setOpen] = useState(false);
 
+    let [documentURL, setDocumentURL] = useState('');
+
+    useEffect(() => {
+        if (context.currentDocument) {
+            setDocumentURL(() => {
+                return `${context.auth.domain}/screens/${context.currentDocument?.remote?.id}`;
+            });
+        }
+    }, [context.currentDocument]);
+
     let target = {
         brand: context.selection.brand,
         project: { id: 190741 },
@@ -200,8 +210,8 @@ export function NavigationBar() {
         target_changed: false,
     };
 
-    const openExternal = (id) => {
-        useSketch('openUrl', { url: 'https://company-136571.frontify.com/screens/' + id });
+    const openExternal = (url) => {
+        useSketch('openUrl', { url });
     };
 
     const publish = async (destination) => {
@@ -210,6 +220,7 @@ export function NavigationBar() {
         target.project = destination.project;
         target.path = context.currentDocument.local.path;
         target.set.path = destination.folder.name;
+
         /**
          * This is the legacy data model "target" that was used to cache
          * the destination for *any* source/artboard related action.
@@ -430,19 +441,19 @@ export function NavigationBar() {
                             }
                         >
                             <custom-v-stack>
-                                <MenuItem
+                                {/* <MenuItem
                                     title="View on Frontify"
                                     onClick={() => {
-                                        openExternal(context.currentDocument.refs.remote_id);
+                                        openExternal(documentURL);
                                         setOpen(false);
                                     }}
                                 >
                                     View on Frontify
-                                </MenuItem>
+                                </MenuItem> */}
                                 <div padding="small">
                                     <Button
                                         onClick={() => {
-                                            openExternal(context.currentDocument.refs.remote_id);
+                                            openExternal(documentURL);
                                             setOpen(false);
                                         }}
                                     >
