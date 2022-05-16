@@ -291,6 +291,7 @@ class Source {
             remote_id: sketch3.Settings.documentSettingForKey(sketch.getDocument(), 'remote_id'),
             remote_project_id: sketch3.Settings.documentSettingForKey(sketch.getDocument(), 'remote_project_id'),
             remote_graphql_id: sketch3.Settings.documentSettingForKey(sketch.getDocument(), 'remote_graphql_id'),
+            remote_brand_id: sketch3.Settings.documentSettingForKey(sketch.getDocument(), 'remote_brand_id'),
         };
 
         /**
@@ -306,6 +307,7 @@ class Source {
 
         let path = '' + nativeSketchDocument.fileURL().path();
         let filename = path.split('/');
+        console.log('>> push');
 
         recentFiles.push({ uuid: document.id, path, filename: filename[filename.length - 1], refs });
     }
