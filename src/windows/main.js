@@ -370,7 +370,7 @@ export default function (context, view) {
             case 'addSource':
                 try {
                     let response = await source.addSource(args.source, args.target);
-                    console.log('add source >>', response);
+                    console.log('add source >>', args, response);
                     if (response.id) {
                         // Set Asset ID, saved inside the Sketch File
                         sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'remote_id', response.id);
@@ -380,6 +380,13 @@ export default function (context, view) {
                             sketch.getDocument(),
                             'remote_project_id',
                             args.target.project.id
+                        );
+
+                        // Set Brand ID, saved inside the Sketch File
+                        sketch3.Settings.setDocumentSettingForKey(
+                            sketch.getDocument(),
+                            'remote_brand_id',
+                            args.target.brand.id
                         );
                     }
                     payload = { success: true, response };
