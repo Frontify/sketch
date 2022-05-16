@@ -28,7 +28,8 @@ import { UserContext } from '../UserContext';
 import { useSketch } from '../hooks/useSketch';
 import { UploadDestinationPicker } from './UploadDestinationPicker';
 import { SourcePicker } from './Sources/SourcePicker';
-import { SourceStatusIcon } from './Sources/SourceStatusIcon';
+import { SourceFileInfo } from './Sources/SourceFileInfo';
+
 import { CustomDialog } from './CustomDialog';
 
 import { queryGraphQLWithAuth } from '../graphql';
@@ -171,7 +172,7 @@ function SourceAction({ status, actions, loading }) {
                 </custom-h-stack>
             );
     }
-    return <div>{JSON.stringify(status)}</div>;
+    return <div></div>;
 }
 
 export function NavigationBar() {
@@ -376,152 +377,43 @@ export function NavigationBar() {
             </custom-h-stack>
         );
 
-    if (context.currentDocument.state == 'unsaved')
-        return (
-            <custom-v-stack padding="medium">
-                <Text weight="strong">Unsaved document</Text>
-                <Text>To start tracking this file on Frontify, save it first to your computer.</Text>
-                <Link to={`/sources/${activeSourceScope}`}>
-                    <IconArrowLeft size="Size16"></IconArrowLeft>
-                </Link>
-            </custom-v-stack>
-        );
+    // if (context.currentDocument.state == 'unsaved')
+    //     return (
+    //         <custom-v-stack padding="medium">
+    //             <Text weight="strong">Unsaved document</Text>
+    //             <Text>To start tracking this file on Frontify, save it first to your computer.</Text>
+    //             <Link to={`/sources/${activeSourceScope}`}>
+    //                 <IconArrowLeft size="Size16"></IconArrowLeft>
+    //             </Link>
+    //         </custom-v-stack>
+    //     );
 
     return (
         <custom-h-stack stretch-children="true" align-items="center" style={{ width: '100%' }}>
             <div style={{ height: '100%', overflow: 'hidden', flex: 1 }}>
                 <SourcePicker style={{ height: '100%', overflow: 'hidden' }}>
-                    <custom-h-stack flex style={{ height: '100%' }} align-items="center" stretch-children-height="true">
-                        <custom-h-stack
-                            gap="small"
-                            align-items="center"
-                            style={{ height: '100%', overflow: 'hidden', width: '100%' }}
-                        >
-                            {/* <IconSketch size="Size24"></IconSketch> */}
-
-                            <SourceStatusIcon
-                                status={status}
-                                state={context.currentDocument.state}
-                                loading={loading}
-                            ></SourceStatusIcon>
-                            <custom-h-stack
-                                gap="xx-small"
-                                align-items="center"
-                                style={{ overflow: 'hidden', width: '100%' }}
-                            >
-                                {context.currentDocument && context.currentDocument.remote?.id ? (
-                                    <custom-v-stack gap="small" style={{ overflow: 'hidden' }}>
-                                        <custom-v-stack style={{ overflow: 'hidden' }}>
-                                            <custom-h-stack align-items="center">
-                                                <Text
-                                                    size="x-small"
-                                                    weight="strong"
-                                                    whitespace="nowrap"
-                                                    overflow="ellipsis"
-                                                >
-                                                    {context.currentDocument.local.filename}
-                                                </Text>
-                                            </custom-h-stack>
-                                            {context.currentDocument.state == 'same' && !loading ? (
-                                                <Text
-                                                    size="x-small"
-                                                    color="weak"
-                                                    whitespace="nowrap"
-                                                    overflow="ellipsis"
-                                                >
-                                                    Last revision by {context.currentDocument.remote?.modifier_name}{' '}
-                                                    {context.currentDocument.remote?.modified_localized_ago}
-                                                </Text>
-                                            ) : (
-                                                ''
-                                            )}
-                                            {context.currentDocument.state == 'push' && !loading ? (
-                                                <custom-h-stack align-items="center" gap="xx-small">
-                                                    <Text size="x-small" color="weak">
-                                                        Push changes
-                                                    </Text>
-                                                </custom-h-stack>
-                                            ) : (
-                                                ''
-                                            )}
-                                            {loading ? (
-                                                status == 'PUSHING' ? (
-                                                    <Text size="x-small" color="weak">
-                                                        Pushing …{' '}
-                                                        {context.transferMap[context.currentDocument.remote?.id]
-                                                            ?.progress ? (
-                                                            <span style={{ fontFeatureSettings: 'tnum' }}>
-                                                                {Math.floor(
-                                                                    context.transferMap[
-                                                                        context.currentDocument.remote?.id
-                                                                    ]?.progress
-                                                                )}
-                                                                %
-                                                            </span>
-                                                        ) : (
-                                                            ''
-                                                        )}
-                                                    </Text>
-                                                ) : '' || status == 'FETCHING' ? (
-                                                    <Text size="x-small" color="weak">
-                                                        Fetching …
-                                                    </Text>
-                                                ) : (
-                                                    ''
-                                                )
-                                            ) : (
-                                                ''
-                                                // <Text size="x-small" color="weak">
-                                                //     Last fetched {relativeLastFetched}
-                                                // </Text>
-                                            )}
-                                        </custom-v-stack>
-                                        {/* <custom-h-stack flex>
-                                            <SourceAction
-                                                flex
-                                                status={context.currentDocument.state}
-                                                actions={{ pushSource, refresh, publish, pullSource }}
-                                                loading={loading}
-                                            ></SourceAction>
-                                        </custom-h-stack> */}
-                                    </custom-v-stack>
-                                ) : (
-                                    <custom-v-stack>
-                                        <Text
-                                            size="x-small"
-                                            weight="strong"
-                                            whitespace="nowrap"
-                                            overflow="ellipsis"
-                                            wrap
-                                        >
-                                            {context.currentDocument.local.filename}
-                                        </Text>
-                                        <Text size="x-small" color="weak">
-                                            Untracked Document
-                                        </Text>
-                                    </custom-v-stack>
-                                )}
-                                <custom-spacer></custom-spacer>
-                                <div style={{ flex: 0 }}>
-                                    <IconCaretDown></IconCaretDown>
-                                </div>
-                            </custom-h-stack>
-                        </custom-h-stack>
-                    </custom-h-stack>
+                    <SourceFileInfo
+                        source={context.currentDocument}
+                        status={status}
+                        loading={loading}
+                        transferMap={context.transferMap}
+                    ></SourceFileInfo>
                 </SourcePicker>
             </div>
 
             <custom-h-stack padding="small" gap="xx-small" separator="left" style={{ flex: 0 }}>
-                <div style={{ flex: 0 }}>
+                {context.currentDocument.state != 'unsaved' && (
                     <SourceAction
                         style={{ flex: 0 }}
                         status={context.currentDocument.state}
                         actions={{ pushSource, refresh, publish, pullSource }}
                         loading={loading}
                     ></SourceAction>
-                </div>
+                )}
 
-                {context.currentDocument.state != 'untracked' && (
+                {context.currentDocument.state == 'same' ||
+                context.currentDocument.state == 'push' ||
+                context.currentDocument.state == 'pull' ? (
                     <div style={{ flex: 0 }}>
                         <Flyout
                             hug={false}
@@ -557,6 +449,27 @@ export function NavigationBar() {
                                         View on Frontify
                                     </Button>
                                 </div>
+                            </custom-v-stack>
+                        </Flyout>
+                    </div>
+                ) : (
+                    <div style={{ flex: 0 }}>
+                        <Flyout
+                            hug={false}
+                            fitContent={true}
+                            isOpen={open}
+                            onOpenChange={(isOpen) => setOpen(isOpen)}
+                            legacyFooter={false}
+                            trigger={
+                                <Button
+                                    inverted={true}
+                                    icon={<IconMore />}
+                                    onClick={() => setOpen((open) => !open)}
+                                ></Button>
+                            }
+                        >
+                            <custom-v-stack>
+                                <MenuItem title="No actions available">No actions</MenuItem>
                             </custom-v-stack>
                         </Flyout>
                     </div>

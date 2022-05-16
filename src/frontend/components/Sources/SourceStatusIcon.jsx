@@ -32,6 +32,8 @@ export function SourceStatusIcon({ state, status, loading }) {
         }
     }
     switch (state) {
+        case 'unsaved':
+            return <Badge style="Primary" icon={<IconUnknownSimple></IconUnknownSimple>}></Badge>;
         case 'push':
             return <Badge style="Warning" size="Small" emphasis="Strong" icon={<IconCircle></IconCircle>}></Badge>;
 
