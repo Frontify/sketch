@@ -147,6 +147,10 @@ class Source {
         return target.getTarget('sources').then(
             function (target) {
                 console.log('🎯 getRemoteSourceFiles', { target });
+                if (!target) {
+                    console.warn('No target');
+                    return;
+                }
                 return fetch(
                     '/v1/assets/status/' +
                         target.project.id +
@@ -511,9 +515,7 @@ class Source {
                 }
             }
         } else {
-            if (isWebviewPresent('frontifymain')) {
-                sendToWebview('frontifymain', 'showSourcesHowTo()');
-            }
+            console.log('Hmm… can’t add current file because it isn’t saved.');
         }
     }
 
@@ -529,6 +531,7 @@ class Source {
         let currentFilename = this.getCurrentFilename();
         return this.getRemoteSourceFiles().then(
             function (assets) {
+                if (!assets) return null;
                 return assets.find(function (asset) {
                     console.log('matching', asset);
                     return asset.filename == currentFilename;

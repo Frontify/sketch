@@ -149,7 +149,7 @@ export function SourcePicker({ children }) {
                 }}
                 trigger={
                     <custom-palette-item
-                        style={{ height: '100%', borderRadius: 'var(--radius)' }}
+                        style={{ height: '100%' }}
                         classNames="tw-m-0"
                         onClick={() => {
                             setTemporaryUploadDestination(null);

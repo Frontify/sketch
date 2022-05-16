@@ -41,6 +41,7 @@ export function openCommand(context) {
 }
 
 export function savedCommand(context) {
+    console.log('saved!');
     executeSafely(context, function () {
         source.saved().then(function () {
             refresh();
@@ -132,6 +133,7 @@ function refresh() {
      *
      */
 
+    console.log('refresh');
     let payload = getPluginState();
 
     if (isWebviewPresent('frontifymain')) {
