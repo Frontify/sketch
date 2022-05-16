@@ -84,21 +84,30 @@ export function RecentDocumentsView({ onInput, onChange }) {
                 context.recentDocuments.find((doc) => doc.refs.remote_graphql_id == id) || context.recentDocuments[id]
             );
         };
-        result.data.assets.forEach((document, index) => {
-            merged.push({
-                remote: document,
-                local: localFileForGraphQLID(index),
+        if (result.data?.assets) {
+            result.data.assets.forEach((document, index) => {
+                merged.push({
+                    remote: document,
+                    local: localFileForGraphQLID(index),
+                });
             });
-        });
+        }
 
         merged = merged.sort((a, b) => (a.local.timestamp < b.local.timestamp ? 1 : -1));
         setMergedDocuments(merged);
     }, [context.recentDocuments]);
 
-    if (!mergedDocuments.length) {
+    if (!mergedDocuments) {
         return (
             <custom-v-stack flex padding="small" align-items="center" justify-content="center">
                 <LoadingCircle></LoadingCircle>
+            </custom-v-stack>
+        );
+    }
+    if (mergedDocuments.length == 0) {
+        return (
+            <custom-v-stack flex padding="small" align-items="center" justify-content="center">
+                <Text>No Recent Documents</Text>
             </custom-v-stack>
         );
     }

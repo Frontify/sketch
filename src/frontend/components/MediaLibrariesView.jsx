@@ -144,7 +144,12 @@ export function MediaLibrariesView({ type }) {
         setSelectedLibrary(libraries[0]);
     }, [type]);
 
-    if (!libraries.length) return <div>No Libraries</div>;
+    if (!libraries.length)
+        return (
+            <custom-v-stack stretch="true" align-items="center" justify-content="center">
+                <Text color="weak">No Libraries</Text>
+            </custom-v-stack>
+        );
 
     return (
         <custom-v-stack overflow="hidden" flex>

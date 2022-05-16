@@ -276,6 +276,13 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
             </custom-v-stack>
         );
 
+    if (projects.length == 0)
+        return (
+            <custom-v-stack align-items="center" justify-content="center" stretch>
+                <Text>No Projects</Text>
+            </custom-v-stack>
+        );
+
     if (!project && !folder)
         return (
             <custom-scroll-view>
@@ -333,8 +340,12 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
                     ) : (
                         <custom-v-stack stretch>
                             {!files.length && !folders.length && (
-                                <custom-v-stack separator="top" stretch align-items="center" justify-content="center">
-                                    <Text color="weak">”{folder?.name}” is empty</Text>
+                                <custom-v-stack stretch align-items="center" justify-content="center">
+                                    {!folder && <Text color="weak">This project has no folders</Text>}
+                                    {folder && !folder.name && <Text color="weak">This folder is empty</Text>}
+                                    {folders.length == 0 && files.length == 0 && (
+                                        <Text color="weak">This folder has no files.</Text>
+                                    )}
                                 </custom-v-stack>
                             )}
                             {folders.map((folder) => {
