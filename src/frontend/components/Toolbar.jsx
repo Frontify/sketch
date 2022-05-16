@@ -21,6 +21,12 @@ export function Toolbar() {
                             {context.user.name}
                         </Text> */}
 
+                        {/* 
+                            This element steals the focus so that the next real element gets the focus after a first "tab" key press. 
+                            This is for aesthetic reasons only because the focus state of the following "Flyout / Button" doesn’t look very nice. 
+                        */}
+                        <custom-focus-trap tabindex="0"></custom-focus-trap>
+
                         <Flyout
                             hug={false}
                             fitContent={true}
