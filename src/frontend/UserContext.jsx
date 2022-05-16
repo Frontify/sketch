@@ -282,8 +282,8 @@ export const UserContextProvider = ({ children }) => {
         },
 
         // todo: Isn’t getCurrentDocument() == refresh() ?
-        async getCurrentDocument() {
-            if (refreshing) {
+        async getCurrentDocument(force = false) {
+            if (refreshing && !force) {
                 console.warn('Still refreshing…');
                 return;
             }
