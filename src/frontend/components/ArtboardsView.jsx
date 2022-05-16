@@ -912,15 +912,8 @@ export function ArtboardsView() {
 
     return (
         <custom-scroll-view stretch>
-            <custom-v-stack stretch>
-                <div padding="small" stretch="true" align-items="center" justify-content="center">
-                    <custom-h-stack padding="small">
-                        <Text color="weak">
-                            If artboards were uploaded before the recent plugin improvements you won’t see them here
-                            until they’re next updated. Don’t worry, they’re still on Frontify.
-                        </Text>
-                    </custom-h-stack>
-                </div>
+            <custom-v-stack stretch align-items="center" justify-content="center">
+                <Text color="weak">No Artboards</Text>
             </custom-v-stack>
             )
         </custom-scroll-view>
