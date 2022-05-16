@@ -231,10 +231,11 @@ class Source {
 
     opened() {
         // Todo: Don’t rely on fetching data here but instead just open the file and resolve it
-        this.pushRecent();
+
         sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'dirty', false);
         return this.getCurrentAsset().then(function (asset) {
             if (asset) {
+                this.pushRecent();
                 return fetch('/v1/screen/activity/' + asset.id, {
                     method: 'POST',
                     body: JSON.stringify({ activity: 'OPEN' }),
