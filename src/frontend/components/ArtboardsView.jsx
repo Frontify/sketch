@@ -727,7 +727,7 @@ export function ArtboardsView() {
     // All Artboards
     if (artboards && artboards.length && !hasSelection) {
         return (
-            <custom-v-stack flex stretch overflow="hidden">
+            <custom-v-stack flex stretch="true" overflow="hidden">
                 <custom-h-stack padding="small" gap="small">
                     {['all', 'modified'].map((item) => {
                         return view == item ? (
@@ -785,7 +785,7 @@ export function ArtboardsView() {
                 <custom-line></custom-line>
                 <custom-scroll-view>
                     {groupedArtboards.length ? (
-                        <custom-v-stack flex stretch separator="between">
+                        <custom-v-stack flex stretch="true" separator="between">
                             {groupedArtboards.map((group) => {
                                 return (
                                     <custom-v-stack key={group.key}>
@@ -801,12 +801,12 @@ export function ArtboardsView() {
                             })}
                         </custom-v-stack>
                     ) : (
-                        <custom-v-stack flex stretch>
+                        <custom-v-stack flex stretch="true">
                             <custom-v-stack
                                 gap="small"
                                 padding="small"
                                 flex
-                                stretch
+                                stretch="true"
                                 align-items="center"
                                 justify-content="center"
                             >
@@ -913,7 +913,7 @@ export function ArtboardsView() {
     return (
         <custom-scroll-view stretch>
             <custom-v-stack stretch>
-                <div padding="small" stretch align-items="center" justify-content="center">
+                <div padding="small" stretch="true" align-items="center" justify-content="center">
                     <custom-h-stack padding="small">
                         <Text color="weak">
                             If artboards were uploaded before the recent plugin improvements you won’t see them here

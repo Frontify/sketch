@@ -26,7 +26,7 @@ export function SourcePicker({ children }) {
     };
 
     return (
-        <div stretch-height>
+        <div stretch-height="true" style={{ height: '100%' }}>
             {showRecentDestinations && !showDestinationPicker && (
                 <custom-dim
                     onClick={() => {
@@ -36,7 +36,7 @@ export function SourcePicker({ children }) {
             )}
 
             <Flyout
-                stretch-height
+                stretch-height="true"
                 hug={false}
                 fitContent={true}
                 legacyFooter={false}
