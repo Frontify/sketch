@@ -83,18 +83,22 @@ export function selectionChangedCommand(context) {
     if (activeDocumentDidChange()) refresh();
 }
 
+function sendSelection(brandID) {
+    if (activeDocumentDidChange()) refresh();
+    // let newSelection = context.actionContext.newSelection;
+    // State.selectionChangedCommand(newSelection);
+    // State.progressEvent({ artboard: State.getState().artboards[0], data: {} });
+    let payload = getSelectedArtboards(brandID);
+
+    frontend.send('artboards-changed', payload);
+}
+
 export function artboardChangedCommand(context) {
     let newArtboard = sketch3.fromNative(context.actionContext.newArtboard);
 
     // Update the SHA of the artboard
     setSHA(newArtboard);
 
-    // if (!oldArtboard || newArtboard.id == oldArtboard.id) {
-    //     console.log('skip');
-    //     return;
-    // }
-
-    let start = new Date().getTime();
     let threshold = 1000;
 
     let recentSelection = 'com.frontify.sketch.recent.selection.uuid';
@@ -103,20 +107,6 @@ export function artboardChangedCommand(context) {
 
     let contextUUID = '' + NSUUID.UUID().UUIDString();
     sketch3.Settings.setSessionVariable(recentSelection, contextUUID);
-
-    const sendSelection = (brandID) => {
-        if (activeDocumentDidChange()) refresh();
-        // let newSelection = context.actionContext.newSelection;
-        // State.selectionChangedCommand(newSelection);
-        // State.progressEvent({ artboard: State.getState().artboards[0], data: {} });
-        let payload = getSelectedArtboards(brandID);
-
-        // Dev: Mixin performance information
-        let elapsedTime = new Date().getTime() - start;
-        payload.performance = elapsedTime;
-
-        frontend.send('artboards-changed', payload);
-    };
 
     setTimeout(() => {
         let mostRecentUUID = sketch3.Settings.sessionVariable(recentSelection);
@@ -146,6 +136,10 @@ function refresh() {
     if (isWebviewPresent('frontifymain')) {
         frontend.send('refresh', payload);
     }
+    // Send artboard information
+    let recentBrand = 'com.frontify.sketch.recent.brand.id';
+    let mostRecentBrandID = sketch3.Settings.sessionVariable(recentBrand);
+    sendSelection(mostRecentBrandID);
 }
 
 // Identifier for the plugin window that we can use for message passing
