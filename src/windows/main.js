@@ -768,6 +768,15 @@ export default function (context, view) {
                     payload = { success: false, error };
                 }
                 break;
+            case 'reveal':
+                if (createFolder(args.path)) {
+                    try {
+                        NSWorkspace.sharedWorkspace().openFile(args.path);
+                    } catch (error) {
+                        console.log(error);
+                    }
+                }
+                break;
             case 'uploadArtboards':
                 try {
                     actions['uploadArtboards'](args);

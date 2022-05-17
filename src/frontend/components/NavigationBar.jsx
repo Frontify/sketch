@@ -17,8 +17,12 @@ import {
     IconUploadAlternative,
     LoadingCircle,
     MenuItem,
+    IconFolder,
+    IconView,
     Stack,
     Text,
+    IconShare,
+    IconExternalLink,
 } from '@frontify/arcade';
 import React from 'react';
 import { useContext, useEffect, useState } from 'react';
@@ -441,24 +445,41 @@ export function NavigationBar() {
                             }
                         >
                             <custom-v-stack>
-                                {/* <MenuItem
-                                    title="View on Frontify"
+                                <div
+                                    tabIndex={0}
+                                    role="menuitem"
+                                    aria-label={`Reveal in Finder`}
+                                    onClick={() => {
+                                        // We only have access to the full path including the filename.
+                                        // But macOS Finder can only reveal folders. So we need to strip
+                                        // the filename and only send the folder to the handler on the
+                                        // Sketch side of things.
+                                        useSketch('reveal', {
+                                            path: context.currentDocument.local.path.replace(
+                                                `/${context.currentDocument.local.filename}`,
+                                                ''
+                                            ),
+                                        });
+                                        // Close the Flyout
+                                        setOpen(false);
+                                    }}
+                                >
+                                    <MenuItem decorator={<IconView />} title={'Reveal in Finder'}>
+                                        Reveal in Finder
+                                    </MenuItem>
+                                </div>
+                                <div
+                                    tabIndex={0}
+                                    role="menuitem"
+                                    aria-label={`View on Frontify`}
                                     onClick={() => {
                                         openExternal(documentURL);
                                         setOpen(false);
                                     }}
                                 >
-                                    View on Frontify
-                                </MenuItem> */}
-                                <div padding="small">
-                                    <Button
-                                        onClick={() => {
-                                            openExternal(documentURL);
-                                            setOpen(false);
-                                        }}
-                                    >
+                                    <MenuItem decorator={<IconExternalLink />} title={'View on Frontify'}>
                                         View on Frontify
-                                    </Button>
+                                    </MenuItem>
                                 </div>
                             </custom-v-stack>
                         </Flyout>
