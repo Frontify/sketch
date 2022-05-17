@@ -138,8 +138,17 @@ export function getSelectedArtboards(brandID) {
     if (brandID) {
         Settings.setSessionVariable('com.frontify.sketch.recent.brand.id', brandID);
     }
+
     try {
         let currentDocument = sketch3.Document.fromNative(sketch.getDocument());
+        if (!currentDocument)
+            return {
+                artboards: [],
+                total: 0,
+                selection: [],
+                success: true,
+                documentArtboards: [],
+            };
         let selection = currentDocument.selectedLayers;
 
         let allArtboards = [];

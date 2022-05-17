@@ -13,6 +13,7 @@ import {
     IconQuestion,
     IconFolderUp,
     IconRefresh,
+    IconUnknownSimple,
     IconSketch,
     IconUploadAlternative,
     LoadingCircle,
@@ -23,6 +24,8 @@ import {
     Text,
     IconShare,
     IconExternalLink,
+    IconInfo,
+    TooltipIcon,
 } from '@frontify/arcade';
 import React from 'react';
 import { useContext, useEffect, useState } from 'react';
@@ -366,42 +369,41 @@ export function NavigationBar() {
     if (!context.currentDocument.local)
         return (
             <custom-h-stack align-items="center">
-                <custom-h-stack gap="small" padding="small" align-items="center">
-                    <custom-v-stack>
-                        <Text weight="strong" size="x-small">
-                            No Sketch Document
-                        </Text>
-                        <Text size="x-small" color="weak">
-                            Open a document and refresh.
-                        </Text>
-                    </custom-v-stack>
+                <custom-h-stack stretch-children="true" align-items="center" style={{ width: '100%', height: '100%' }}>
+                    <div style={{ height: '100%', overflow: 'hidden', flex: 1 }}>
+                        <SourcePicker style={{ height: '100%', overflow: 'hidden' }}>
+                            <custom-h-stack
+                                align-items="center"
+                                style={{ height: '100%', minHeight: '44px', overflow: 'hidden', width: '100%' }}
+                            >
+                                <custom-v-stack>
+                                    <Text weight="strong" size="x-small">
+                                        No Sketch Document
+                                    </Text>
+                                    <Text size="x-small" color="weak">
+                                        Open a document or refresh.
+                                    </Text>
+                                </custom-v-stack>
+                                <custom-spacer></custom-spacer>
+                                <div style={{ flex: 0 }}>
+                                    <IconCaretDown></IconCaretDown>
+                                </div>
+                            </custom-h-stack>
+                        </SourcePicker>
+                    </div>
                 </custom-h-stack>
-                <custom-spacer></custom-spacer>
-                <div padding="small">
-                    <Button
-                        style="Secondary"
-                        onClick={async () => {
-                            await context.actions.getCurrentDocument(true);
+                {/* 
+                <custom-h-stack padding="small" gap="xx-small" separator="left" style={{ flex: 0, height: '100%' }}>
+                    <TooltipIcon
+                        iconSize="Size20"
+                        tooltip={{
+                            content: 'Lorem ipsum dolor sit amet.',
                         }}
-                    >
-                        <custom-h-stack gap="small" align-items="center">
-                            <span>Connect</span>
-                        </custom-h-stack>
-                    </Button>
-                </div>
+                        triggerStyle="Primary"
+                    />
+                </custom-h-stack> */}
             </custom-h-stack>
         );
-
-    // if (context.currentDocument.state == 'unsaved')
-    //     return (
-    //         <custom-v-stack padding="medium">
-    //             <Text weight="strong">Unsaved document</Text>
-    //             <Text>To start tracking this file on Frontify, save it first to your computer.</Text>
-    //             <Link to={`/sources/${activeSourceScope}`}>
-    //                 <IconArrowLeft size="Size16"></IconArrowLeft>
-    //             </Link>
-    //         </custom-v-stack>
-    //     );
 
     return (
         <custom-h-stack stretch-children="true" align-items="center" style={{ width: '100%' }}>

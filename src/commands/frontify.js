@@ -13,8 +13,6 @@ import {
 
 import { getPluginState } from '../windows/main';
 
-import State from '../windows/State';
-
 export function runCommand(context) {
     let threadDictionary = NSThread.mainThread().threadDictionary();
 
@@ -51,9 +49,13 @@ export function savedCommand(context) {
 
 export function closeCommand(context) {
     executeSafely(context, function () {
-        source.closed().then(function () {
-            refresh();
-        });
+        let interval = setInterval(function () {
+            clearInterval(interval);
+            source.closed().then(function () {
+                console.log('close and refresh');
+                refresh();
+            });
+        }, 200);
     });
 }
 
@@ -85,6 +87,7 @@ export function selectionChangedCommand(context) {
 
 function sendSelection(brandID) {
     if (activeDocumentDidChange()) refresh();
+
     // let newSelection = context.actionContext.newSelection;
     // State.selectionChangedCommand(newSelection);
     // State.progressEvent({ artboard: State.getState().artboards[0], data: {} });
@@ -133,10 +136,14 @@ function refresh() {
 
     let payload = getPluginState();
 
+    console.log('refresh!!!', getPluginState());
+
     if (isWebviewPresent('frontifymain')) {
         frontend.send('refresh', payload);
     }
-    // Send artboard information
+    // Send artboard information, if there is a document
+    // If no document is open, then do nothing.
+
     let recentBrand = 'com.frontify.sketch.recent.brand.id';
     let mostRecentBrandID = sketch3.Settings.sessionVariable(recentBrand);
     sendSelection(mostRecentBrandID);

@@ -497,6 +497,14 @@ export default function (context, view) {
 
                 let nativeSketchDocument = sketch.getDocument();
 
+                if (!nativeSketchDocument) {
+                    // Flag the payload, so that React knows that there’s no open file
+                    currentDocument.state = 'unsaved';
+                    currentDocument.local = null;
+                    payload = { currentDocument };
+                    break;
+                }
+
                 let openSketchDocument;
                 try {
                     openSketchDocument = sketch3.Document.fromNative(nativeSketchDocument);
@@ -623,6 +631,7 @@ export default function (context, view) {
                 // Sync State
                 currentDocument.state = getState(currentDocument);
 
+                console.log({ payload });
                 payload = { currentDocument };
                 break;
 
