@@ -392,16 +392,38 @@ export function NavigationBar() {
                         </SourcePicker>
                     </div>
                 </custom-h-stack>
-                {/* 
-                <custom-h-stack padding="small" gap="xx-small" separator="left" style={{ flex: 0, height: '100%' }}>
-                    <TooltipIcon
-                        iconSize="Size20"
-                        tooltip={{
-                            content: 'Lorem ipsum dolor sit amet.',
-                        }}
-                        triggerStyle="Primary"
-                    />
-                </custom-h-stack> */}
+                <custom-h-stack padding="small" gap="xx-small" separator="left" style={{ flex: 0 }}>
+                    <div style={{ flex: 0 }}>
+                        <Flyout
+                            hug={false}
+                            fitContent={true}
+                            isOpen={open}
+                            onOpenChange={(isOpen) => setOpen(isOpen)}
+                            legacyFooter={false}
+                            trigger={
+                                <Button
+                                    inverted={true}
+                                    icon={<IconMore />}
+                                    onClick={() => setOpen((open) => !open)}
+                                ></Button>
+                            }
+                        >
+                            <div
+                                tabIndex={0}
+                                role="menuitem"
+                                aria-label={`Learn more …`}
+                                onClick={() => {
+                                    setOpen(false);
+                                    openExternal('https://www.frontify.com/de/support/');
+                                }}
+                            >
+                                <MenuItem decorator={<IconExternalLink />} title={'Get Help'}>
+                                    Learn more …
+                                </MenuItem>
+                            </div>
+                        </Flyout>
+                    </div>
+                </custom-h-stack>
             </custom-h-stack>
         );
 
@@ -502,9 +524,19 @@ export function NavigationBar() {
                                 ></Button>
                             }
                         >
-                            <custom-v-stack>
-                                <MenuItem title="No actions available">No actions</MenuItem>
-                            </custom-v-stack>
+                            <div
+                                tabIndex={0}
+                                role="menuitem"
+                                aria-label={`Learn more …`}
+                                onClick={() => {
+                                    setOpen(false);
+                                    openExternal('https://www.frontify.com/de/support/');
+                                }}
+                            >
+                                <MenuItem decorator={<IconExternalLink />} title={'Get Help'}>
+                                    Learn more …
+                                </MenuItem>
+                            </div>
                         </Flyout>
                     </div>
                 )}
