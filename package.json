@@ -1,7 +1,7 @@
 {
     "name": "frontify-plugin",
-    "description": "Connecting your brand and design worlds",
-    "version": "2.3.12",
+    "description": "Where Brands Live",
+    "version": "3.0.0",
     "repository": {
         "type": "git",
         "url": "https://github.com/Frontify/sketch.git"
