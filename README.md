@@ -20,7 +20,7 @@ Points of Interest:
 **Sketch:**
 
 -   `src/main.js`
--   `commands/frontify.js
+-   `commands/frontify.js`
 
 # Frontend
 
