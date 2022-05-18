@@ -150,7 +150,6 @@ class Source {
     getRemoteSourceFiles() {
         return target.getTarget('sources').then(
             function (target) {
-                console.log('🎯 getRemoteSourceFiles', { target });
                 if (!target) {
                     console.warn('No target');
                     return;
@@ -173,7 +172,6 @@ class Source {
 
                         this.assets = assets;
 
-                        console.log('remote source files', assets);
                         return assets;
                     }.bind(this)
                 );
@@ -430,7 +428,6 @@ class Source {
             project: target.project.id,
             type: 'source',
         };
-        console.log('PUSH SOURCE', file, target);
 
         var sourceProgress = NSProgress.progressWithTotalUnitCount(10);
         sourceProgress.setCompletedUnitCount(0);
@@ -539,7 +536,6 @@ class Source {
             function (assets) {
                 if (!assets) return null;
                 return assets.find(function (asset) {
-                    console.log('matching', asset);
                     return asset.filename == currentFilename;
                 });
             }.bind(this)

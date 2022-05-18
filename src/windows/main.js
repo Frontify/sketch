@@ -30,8 +30,6 @@ import recentFiles from '../model/recent';
 let DOM = require('sketch/dom');
 let sketch3 = require('sketch');
 
-import State from './State';
-
 export function getPluginState() {
     let payload = {
         currentDocument: null,
@@ -77,36 +75,12 @@ function refresh() {
     frontend.send('refresh', payload);
 }
 
-/**
- * Setup notification when the current document window changes
- */
-
-// var fiber = require('sketch/async').createFiber();
-
-// let center = NSNotificationCenter.defaultCenter();
-// let block = __mocha__.createBlock_function('v16@?0@"NSNotification"8', function (notification) {
-//     sketch3.UI.message('changed focus');
-//     let currentDocument = Document.fromNative(sketch.getDocument());
-//     if (currentDocument) {
-//         frontend.send('current-document.changed', { currentDocument });
-//     }
-//     fiber.cleanup();
-// });
-// center.addObserverForName_object_queue_usingBlock('NSWindowDidBecomeKeyNotification', null, null, block);
-
-// setTimeout(function () {
-//     sketch3.UI.message('timed out');
-//     fiber.cleanup();
-// }, 3000);
-
 export default function (context, view) {
     let viewData = sketch.getViewData();
 
     // viewData.url -> depending on the authorization state, returns "/" or "/signin"
     let baseURL = isDev ? 'http://localhost:3000' : pathInsidePluginBundle('index.html');
     let mainURL = `${baseURL}${viewData.url}`;
-
-    let domain = '';
 
     // create window and webview
     let win = new BrowserWindow({
@@ -140,7 +114,7 @@ export default function (context, view) {
     // Show window if ready
     win.once('ready-to-show', () => {
         console.log('👋 Frontify Plugin is now running. NODE_ENV: ', process.env.NODE_ENV);
-        state.foo = '123';
+
         win.show();
     });
 
@@ -308,25 +282,11 @@ export default function (context, view) {
         webview.executeJavaScript('switchTab("' + view + '")');
     });
 
+    /**
+     * Used to hard-refresh using the "refresh" icon in the toolbar of the plugin
+     */
     webview.on('reload', function () {
         webview.reload();
-    });
-    // Images, Logos and Icons
-    webview.on('showLibrary', function (type) {
-        view = type;
-        target.getAssetSourcesForType(type).then(
-            function (assetSources) {
-                if (assetSources && assetSources.selected) {
-                    webview.executeJavaScript('showAssetSources(' + JSON.stringify(assetSources) + ')');
-                    webview.executeJavaScript('showLibrarySearch("' + type + '")');
-                    asset.search(type, '');
-                }
-            }.bind(this)
-        );
-    });
-
-    webview.on('searchLibraryAssets', function (type, query) {
-        asset.search(type, query);
     });
 
     /**
