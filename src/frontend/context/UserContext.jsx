@@ -17,6 +17,10 @@ import { useSketch } from '../hooks/useSketch';
 export const UserContext = React.createContext();
 
 export const UserContextProvider = ({ children }) => {
+    /**
+     * This is an overview of available fields.
+     * Poorman’s TypeScript replacement. Sorry!
+     */
     const blueprints = {
         auth: {
             domain: '',
@@ -28,7 +32,6 @@ export const UserContextProvider = ({ children }) => {
         currentDocument: {},
         guidelines: [],
         lastFetched: null,
-        transferMap: {},
         recentDocuments: [],
         sources: [],
         selection: {
@@ -38,6 +41,7 @@ export const UserContextProvider = ({ children }) => {
             guidelines: {},
         },
         textStylePalettes: [],
+        transferMap: {},
         user: { name: '', id: null, email: null, avatar: null },
     };
     let [tick, setTick] = useState(0);

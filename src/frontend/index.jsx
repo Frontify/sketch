@@ -12,6 +12,17 @@ import i18next from 'i18next';
 import common_de from './translations/de.json';
 import common_en from './translations/en.json';
 
+/**
+ * i18n:
+ * ----------------------------------------------------------------------------
+ * Todo:
+ *
+ * 1. Make sure that everything is translated.
+ * 2. Automatically detect the user language and use it as a default.
+ * 3. Implement a language switcher (?)
+ *
+ */
+
 i18next.init({
     interpolation: { escapeValue: false }, // React already does escaping
     lng: 'en', // language to use
@@ -31,7 +42,17 @@ ReactDOM.render(
 );
 
 /**
- * Messaging
+ * Communication with the Sketch backend:
+ * ----------------------------------------------------------------------------
+ *
+ * Usually, this low level method is not called directly.
+ *
+ * Instead, there’s a React hook "useSketch()" that can be used instead.
+ *
+ * The advantage of the hook is that is also provides a callback/reply
+ * mechanism. With it, you can not only send messages to Sketch, but
+ * rather request information.
+ *
  */
 
 window.send = (data) => {
