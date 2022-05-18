@@ -28,10 +28,9 @@ export function patchDestinations(artboardID, destination) {
             original.remote_path == destination.remote_path
         ) {
             // Patch
-            console.log('patched');
+
             return destination;
         } else {
-            console.log('return original');
             return original;
         }
     });
@@ -132,7 +131,6 @@ export function getSelectedArtboardsFromSelection(brandID, selection, total, has
 }
 
 export function getSelectedArtboards(brandID) {
-    console.log('getSelectedArtboards', brandID);
     // remember the brand
 
     if (brandID) {

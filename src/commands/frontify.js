@@ -136,8 +136,6 @@ function refresh() {
 
     let payload = getPluginState();
 
-    console.log('refresh!!!', getPluginState());
-
     if (isWebviewPresent('frontifymain')) {
         frontend.send('refresh', payload);
     }
