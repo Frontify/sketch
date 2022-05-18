@@ -1,11 +1,18 @@
 # Frontify for Sketch
 
-A [Sketch] plugin that provides integration with Frontify. Get it @ [Frontify Sketch Plugin]
+A [Sketch](http://sketch.com) plugin that provides integration with Frontify. Get it @ [Frontify Sketch Plugin](https://frontify.com/integrations/sketch/)
 
 This README.md is primarily for developers. The latest plugin version,
-documentation etc. are hosted at [https://frontify.com/integrations/sketch/].
+documentation etc. are hosted at [https://frontify.com/integrations/sketch/](https://frontify.com/integrations/sketch/).
 
 Contributions are welcome!
+
+# Build
+Make sure to update `package.json` with a new version number. The version will be used for the auto-update mechanism of the plugin. Also make sure to review the information about the plugin inside `manifest.json` which will be displayed inside the plugin manager.
+
+1. `npm run build` 
+2. Wait
+3. Use or install `frontify.sketchplugin`
 
 # What’s where?
 
@@ -13,30 +20,20 @@ Points of Interest:
 
 **React:**
 
--   frontend/index.jsx
--   frontend/components/Window.jsx
--   frontend/context/UserContext.jsx
+-   `frontend/index.jsx`
+-   `frontend/components/Window.jsx`
+-   `frontend/context/UserContext.jsx`
 
 **Sketch:**
 
--   src/main.js
--   commands/frontify.js
-
-# CSS
-
-Most of the interface is based on `@frontify/arcade` components.
-
-In cases where there were no fitting components, “pseudo custom elements” have been created. These are custom HTML tags that are prefixed with `custom-` and are meant to be replaced with Arcade components when available.
-
-The styling for these custom tags can be found in `css/custom.css`
-
-There’s another file `utilities.css` with custom attributes that are mainly used for layout and spacing. With newer versions of @frontify/arcade, these could all be replaced with the `Stack` component which now supports more props.
+-   `src/main.js`
+-   `commands/frontify.js`
 
 # Frontend
 
 The frontend is built using React, @frontify/arcade components and the Frontify API. The code is written in JavaScript, not TypeScript (sorry!).
 
-**Entry:** index.jsx → Window.jsx
+**Entry:** `index.jsx → Window.jsx` 
 
 ## Window.jsx:
 
@@ -46,24 +43,39 @@ The frontend is built using React, @frontify/arcade components and the Frontify 
 
 ## UserContext.jsx
 
--   Global State: Auth, User, Brand, Documents, Selections, Cache
--   Background uploads
--   Methods of shared interest
+-   **Global State:** Auth, User, Brand, Documents, Selections, Cache, …
+-   **Async background uploads:**, upload progress handling, …
+-   **Shared methods:** Methods that any component can access, e.g. login, logout, refresh, …
 
 ## useSketch.js
 
 This hook can be used to communicate with Sketch.
-Available message types can be found in "main.js" -> webview.on('request', ...)
+Available message types can be found in `main.js -> webview.on('request', ...)`
 
 **Usage:**
 
-`let { documents } = await useSketch("getOpenDocuments")`
+Ideally used with async/await and destructuring:
 
-With parameters:
+```js
+// Request without parameters:
+let { documents } = await useSketch("getOpenDocuments")
 
-```
+// Request with parameters:
 let { projects } = await useSketch('getProjectsForBrand', { brand: selection.brand });
 ```
+
+# Interface, Components, CSS
+
+**Frontify Arcade**
+Most of the interface is based on `@frontify/arcade` components.
+
+**Pseudo Custom Elements**
+In cases where there were no fitting components, “pseudo custom elements” have been created. These are custom HTML tags that are prefixed with `custom-` and are meant to be replaced with Arcade components when available.
+
+The styling for these custom tags can be found in `css/custom.css`
+
+**Utilities and Custom Attributes**
+There’s another file `utilities.css` with custom attributes that are mainly used for layout and spacing. With newer versions of @frontify/arcade, these could all be replaced with the `Stack` component which now supports more props.
 
 ---
 
@@ -82,12 +94,40 @@ let { projects } = await useSketch('getProjectsForBrand', { brand: selection.bra
 -   Notify React about the new artboards
 -   Updates are throttled (1000 ms) so that excessive selections don’t cause too much blocking of the application
 
-## Session Variables
+## Storage 
+Data is persisted using the Sketch API. 
 
--   **Recent Document:** com.frontify.sketch.recent.document
--   **Recent Action:** com.frontify.sketch.recent.action.uuid
--   **Recent Brand:** com.frontify.sketch.recent.brand.id
+- **Document metadata:** Some meta data about the document and the Frontify API is stored inside the Sketch Document itself. 
+- **Artboard metadata:** Some data is stored directly on layers (artboards). 
+- **Session data**: Used for sharing data between plugin commands
+
+### Session Variables
+
+-   **The Recent Document:** com.frontify.sketch.recent.document
+-   **The Recent Action:** com.frontify.sketch.recent.action.uuid
+-   **The Recent Brand:** com.frontify.sketch.recent.brand.id
 -   **State**: "state"
+
+### Global Sketch Settings
+- **All Recent Document(s):** com.frontify.sketch.recent.documents
+- **Domain:** domain
+- **Token:** token
+
+### Document Settings
+Relevant data about a file that is uploaded to Frontify via the API. What brand does it belong to? What project? What are the ids to identify it? 
+
+- `remote_id`: Asset ID (legacy format)
+- `remote_graphql_id`: Asset ID (new format)
+- `remote_project_id`: Project ID
+- `remote_brand_id`: Brand ID
+- `remote_modified`: The timestamp from the API that can be used to figure out if local changes have been made.
+- `dirty`: Has this file been saved, but not yet uploaded?
+
+**TODO:** Storing this information inside the Sketch file works pretty well, but there are potential edge cases that have not been tested or implemented:
+
+- **Deleted remote files**: What happens if a file is deleted remotely? The plugin doesn’t check this. The plugin will attempt to upload the file using an ID that doesn’t exist anymore. The API might still create a new asset, but the plugin most likely doesn’t update the ID. This leads to inconsistencies.
+- **Renamed local files:** What happens if a file is renamed? The API doesn’t seem to handle this case at the moment. While the file is uploaded, it is not renamed on Frontify. Files are only identified by ID. Seeing different filenames between local and remote might be confusing for users.
+
 
 # Frontify API
 
@@ -95,7 +135,7 @@ The plugins uses a mix of `v1` and `GraphQL` endpoints. This is not ideal, but a
 
 ## v1
 
-Exclusively used with Sketch.
+Exclusively used with **Sketch**.
 
 -   OAuth (including legacy polling)
 -   Guidelines (Typography, Colors)
@@ -104,19 +144,19 @@ Exclusively used with Sketch.
 
 ## GraphQL
 
-Primarily used with React.
+Primarily used with **React**.
 
 -   Media Libraries, List, Search
 -   Files, Folders, Subfolders
 -   User, Brands
 -   WorkspaceProjects
 
-There’s one exception, where the Sketch backend uses GraphQL: `source.js → getGraphQLIDForLegacyAssetID`
+**There’s one exception, where the Sketch backend uses GraphQL:** `source.js → getGraphQLIDForLegacyAssetID`
 
 This is necessary to find the GraphQL ID for assets that have just been uploaded. Because the upload uses
 `v1` the uploads will return a legacy ID format. But for matching individual source files with lists of files from GraphQL, we need a shared ID.
 
-Better solutions would be:
+**Better solutions would be:**
 
 -   A) Uploads via GraphQL
 -   B) GraphQL also returns legacy ids for assets
@@ -142,11 +182,13 @@ Setup mkcert on your machine (creates a CA)
 Create certificates
 `npm run cert`
 
-# Development
+# Installation
 
 _This plugin was created using `skpm`. For a detailed explanation on how things work, checkout the [skpm Readme](https://github.com/skpm/skpm/blob/master/README.md)._
 
 To run the plugin, you need to start (2) processes: One will build the Sketch plugin with Webpack whenever plugin code changes. The other will start the dev server serving the React Frontend. Why two? Originally the plugin used Webpack to build everything but Vite is a lot faster in development. In production, Vite makes the process simpler: the build folder is simply moved to the plugin bundle.
+
+**Note:** `skpm` will create a symlink for the plugin so that it is automatically available in Sketch.
 
 ## Install the dependencies
 
@@ -157,6 +199,7 @@ npm install
 ## 1. Build the plugin
 
 This command will use `skpm` and `webpack` to bundle the plugin. It takes care of creating the .sketchplugin bundle, moves the plugin commands and scripts and more. It does not care about the frontend.
+
 `npm run watch`
 
 ## 2. Start the dev server
