@@ -26,7 +26,7 @@ Points of Interest:
 
 The frontend is built using React, @frontify/arcade components and the Frontify API. The code is written in JavaScript, not TypeScript (sorry!).
 
-**Entry:** index.jsx → Window.jsx
+**Entry:** `index.jsx → Window.jsx
 
 ## Window.jsx:
 
@@ -36,9 +36,9 @@ The frontend is built using React, @frontify/arcade components and the Frontify 
 
 ## UserContext.jsx
 
--   Global State: Auth, User, Brand, Documents, Selections, Cache
--   Background uploads
--   Methods of shared interest
+-   Global State: Auth, User, Brand, Documents, Selections, Cache, …
+-   Background uploads, upload progress handling, …
+-   Methods that any component can access
 
 ## useSketch.js
 
