@@ -308,7 +308,7 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
             {transfer && transfer.status == 'uploading' ? (
                 <custom-h-stack gap="small" align-items="center" style={{ marginRight: '8px' }}>
                     <Text size="small">
-                        <span style={{ fontSize: '12px' }} style={{ fontFeatureSettings: 'tnum' }}>
+                        <span style={{ fontSize: '12px', fontFeatureSettings: 'tnum' }}>
                             {Math.floor(transfer.progress)}%
                         </span>
                     </Text>
@@ -834,7 +834,6 @@ export function ArtboardsView() {
                     uploadDestination={uploadDestination}
                     uploadArtboards={uploadArtboards}
                     uploadSome={uploadSome}
-                    uploadArtboards={uploadArtboards}
                     uploadArtboardsToDestination={uploadArtboardsToDestination}
                 ></ArtboardToolbar>
             </custom-v-stack>
