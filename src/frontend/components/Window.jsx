@@ -1,34 +1,35 @@
 import React from 'react';
 
-import { ArtboardsView } from './ArtboardsView';
+import { ArtboardsView } from './Artboards/ArtboardsView';
 
-import { MediaLibrariesView } from './MediaLibrariesView';
+// Brand
+import { BrandView } from './Brand/BrandView';
+import { MediaLibrariesView } from './Brand/MediaLibrariesView';
+import { PalettesView } from './Brand/PalettesView';
+import { TypographyView } from './Brand/TypographyView';
 
-import { MainView } from './MainView';
-import { PalettesView } from './PalettesView';
-import { TypographyView } from './TypographyView';
+// Sign In
+import { RequireAuth } from './SignIn/RequireAuth';
+import { SignInView } from './SignIn/SignInView';
+import { SignInPendingView } from './SignIn/SignInPendingView';
 
-import { OpenDocumentsView } from './OpenDocumentsView';
-import { RecentDocumentsView } from './Sources/RecentDocumentsView';
-import { RemoteDocumentsView } from './Sources/RemoteDocumentsView';
-import { RequireAuth } from './RequireAuth';
-
-import { SignInView } from './SignInView';
-import { SignInPendingView } from './SignInPendingView';
-
+// Sources
 import { SourceView } from './Sources/SourceView';
 import { SourcesView } from './Sources/SourcesView';
+import { OpenDocumentsView } from './Sources/OpenDocumentsView';
+import { RecentDocumentsView } from './Sources/RecentDocumentsView';
+import { RemoteDocumentsView } from './Sources/RemoteDocumentsView';
 
 // Context
 import { useContext, useEffect } from 'react';
-import { UserContext, UserContextProvider } from '../UserContext';
+import { UserContext } from '../context/UserContext';
 
 // Router
 import { BrowserRouter } from 'react-router-dom';
-import { Routes, Route, Link, useLocation } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-export function App() {
+export function Window() {
     let context = useContext(UserContext);
     let { t } = useTranslation();
 
@@ -62,7 +63,7 @@ export function App() {
                     }
                 >
                     <Route path="artboards" element={<ArtboardsView />}></Route>
-                    <Route path="brand/*" element={<MainView />}>
+                    <Route path="brand/*" element={<BrandView />}>
                         <Route
                             path="colors"
                             element={

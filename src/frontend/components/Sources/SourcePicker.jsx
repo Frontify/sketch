@@ -1,10 +1,13 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { CustomDialog } from '../CustomDialog';
-import { UploadDestinationPicker } from '../UploadDestinationPicker';
-import { Button, Flyout, IconCaretDown, IconAdd, IconFrequentlyUsed, IconFolder, Text } from '@frontify/arcade';
+import React, { useState } from 'react';
 
+// Components
+import { Button, Flyout, IconAdd, IconFrequentlyUsed, Text } from '@frontify/arcade';
+
+import { CustomDialog } from '../Core/CustomDialog';
 import { RecentDocumentsView } from './RecentDocumentsView';
+import { UploadDestinationPicker } from '../Core/UploadDestinationPicker';
 
+// Hooks
 import { useSketch } from '../../hooks/useSketch';
 
 export function SourcePicker({ children }) {

@@ -11,8 +11,8 @@ import {
     IconAdd,
 } from '@frontify/arcade';
 
-import { UploadDestinationPicker } from './UploadDestinationPicker';
-import { CustomDialog } from './CustomDialog';
+import { UploadDestinationPicker } from '../Core/UploadDestinationPicker';
+import { CustomDialog } from '../Core/CustomDialog';
 import { useState, useEffect } from 'react';
 
 import PropTypes from 'prop-types';

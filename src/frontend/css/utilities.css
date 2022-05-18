@@ -1,0 +1,83 @@
+/* Flex Alignment Utilties */
+
+[align-items='center'] {
+    align-items: center;
+}
+
+[justify-content='center'] {
+    justify-content: center;
+}
+
+/* Sizing utility to pierce into some unreachable React wrapper elements */
+
+[stretch-height='true'] > * {
+    height: 100% !important;
+}
+
+/* Padding Utilities */
+
+[padding='xx-small'] {
+    padding: var(--space-xxs);
+}
+[padding='x-small'] {
+    padding: var(--space-xs);
+}
+[padding='small'] {
+    padding: var(--space-s);
+}
+[padding='medium'] {
+    padding: var(--space-m);
+}
+[padding='large'] {
+    padding: var(--space-l);
+}
+
+/* Gap Utilities */
+
+[gap='xx-small'] {
+    gap: var(--space-xxs);
+}
+[gap='x-small'] {
+    gap: var(--space-xs);
+}
+[gap='small'] {
+    gap: var(--space-s);
+}
+[gap='medium'] {
+    gap: var(--space-m);
+}
+[gap='large'] {
+    gap: var(--space-l);
+}
+
+/* Misc Utilities */
+
+[stretch='true'] {
+    height: 100%;
+}
+
+[overflow='hidden'] {
+    overflow: hidden;
+}
+
+[flex] {
+    flex: 1;
+}
+
+/* These Tailwind classes were missing in Arcade */
+
+.tw-gap-small {
+    gap: 0.5rem;
+}
+
+.tw-gap-medium {
+    gap: 1rem;
+}
+
+.tw-gap-large {
+    gap: 1.5rem;
+}
+
+.tw-gap-xx-large {
+    gap: 2rem;
+}

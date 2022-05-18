@@ -1,20 +1,19 @@
-import React from 'react';
-import { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
-import { Link, useNavigate } from 'react-router-dom';
-import { SearchField } from '../SearchField';
+// Components
+import { IconSketch, Text, LoadingCircle } from '@frontify/arcade';
 
-import { Button, IconSketch, Text, LoadingCircle } from '@frontify/arcade';
+// Context
+import { UserContext } from '../../context/UserContext';
+
+// Hooks
+import { useSketch } from '../../hooks/useSketch';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
-import { UserContext } from '../../UserContext';
-import { useSketch } from '../../hooks/useSketch';
-
-import { queryGraphQLWithAuth } from '../../graphql';
-import { FileBrowser } from '../FileBrowser';
-
-import { SourceStatusIcon } from './SourceStatusIcon';
+// GraphQL
+import { queryGraphQLWithAuth } from '../../graphql/graphql';
 
 export function RecentDocumentsView({ onInput, onChange }) {
     let [activeScope] = useLocalStorage('cache.activeScope', 'colors');

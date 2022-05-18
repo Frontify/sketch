@@ -13,7 +13,7 @@ import { useState } from 'react';
 
 // i18n
 
-import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 // Library scopes
 const libraryScopes = [
@@ -40,7 +40,7 @@ const libraryScopes = [
     },
 ];
 
-export function MainView() {
+export function BrandView() {
     let [activeScope, setActiveScope] = useLocalStorage('cache.activeScope', 'colors');
 
     const navigate = useNavigate();

@@ -1,23 +1,23 @@
-import React from 'react';
-import { useState, useEffect, useContext } from 'react';
-import { useSketch } from '../hooks/useSketch';
-import { UserContext } from '../UserContext';
+import React, { useState, useEffect, useContext } from 'react';
 
+// Hooks
+import { useSketch } from '../../hooks/useSketch';
+
+// Context
+import { UserContext } from '../../context/UserContext';
+
+// Components
 import { Button, IconCaretDown, Flyout, Text, IconMore } from '@frontify/arcade';
 
+import { GuidelineSwitcher } from './GuidelineSwitcher';
+import { SearchField } from '../Core/SearchField';
 import { Swatch } from './Swatch';
-import { Switcher } from './Switcher';
-import { SearchField } from './SearchField';
 
 export function TypographyView({ guidelines, palettes }) {
     const { actions, colorMap, selection } = useContext(UserContext);
     const [query, setQuery] = useState('');
     const [filteredPalettes, setFilteredPalettes] = useState(palettes);
     const [openFlyout, setOpenFlyout] = useState(null);
-
-    const sendColor = async (color) => {
-        window.postMessage('applyColor', color);
-    };
 
     useEffect(() => {
         if (!palettes) return;
@@ -61,13 +61,13 @@ export function TypographyView({ guidelines, palettes }) {
                 ></SearchField>
                 <div style={{ flex: 0 }}>
                     {guidelines.length ? (
-                        <Switcher
+                        <GuidelineSwitcher
                             guidelines={guidelines}
                             selection={selection.guidelines[selection.brand.id]}
                             onChange={(changedGuidelines) => {
                                 actions.setGuidelinesForBrand(changedGuidelines, selection.brand);
                             }}
-                        ></Switcher>
+                        ></GuidelineSwitcher>
                     ) : (
                         ''
                     )}

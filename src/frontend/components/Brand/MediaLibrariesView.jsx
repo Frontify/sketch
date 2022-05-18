@@ -1,13 +1,13 @@
-import React from 'react';
-import { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 
-import { Text } from '@frontify/arcade';
-import { LoadingIndicator } from './LoadingIndicator';
-import { SearchField } from './SearchField';
+// Components
+import { Dropdown, LoadingCircle, Text } from '@frontify/arcade';
 
-import { UserContext } from '../UserContext';
 import { GridView } from './GridView';
-import { Dropdown, LoadingCircle } from '@frontify/arcade';
+import { SearchField } from '../Core/SearchField';
+
+// Context
+import { UserContext } from '../../context/UserContext';
 
 export function MediaLibrariesView({ type }) {
     const context = useContext(UserContext);

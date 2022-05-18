@@ -1,9 +1,12 @@
-import React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
+
+// Components
 import { Button } from '@frontify/arcade';
-import { UploadDestinationPicker } from '../UploadDestinationPicker';
+
+import { UploadDestinationPicker } from '../Core/UploadDestinationPicker';
+
+// Hooks
 import { useNavigate } from 'react-router-dom';
-import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { useTranslation } from 'react-i18next';
 import { useSketch } from '../../hooks/useSketch';
 
@@ -25,9 +28,6 @@ export function RemoteDocumentsView() {
 
     return (
         <custom-v-stack padding="small" gap="small" stretch overflow="hidden">
-            {/* <h2>Checkout a file</h2>
-            <Text>Choose a remote file that you want to checkout.</Text> */}
-
             <custom-v-stack style={{ border: ' 1px solid rgba(0, 0, 0, 0.08)', height: ' 100%', borderRadius: '8px' }}>
                 <UploadDestinationPicker
                     allowfiles={true}

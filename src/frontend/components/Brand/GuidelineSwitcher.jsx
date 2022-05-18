@@ -2,7 +2,7 @@ import React from 'react';
 import { useState } from 'react';
 import { Switch, Flyout, IconSettings, Button, IconGuidelines, Text } from '@frontify/arcade';
 
-export function Switcher({ guidelines, selection, onChange }) {
+export function GuidelineSwitcher({ guidelines, selection, onChange }) {
     const [open, setOpen] = useState(false);
 
     return (

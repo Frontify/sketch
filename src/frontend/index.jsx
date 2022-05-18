@@ -1,10 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { App } from './components/App';
+import { Window } from './components/Window';
 
 // Context
-import { useContext } from 'react';
-import { UserContext, UserContextProvider } from './UserContext';
+import { UserContextProvider } from './context/UserContext';
 
 // i18n
 import { I18nextProvider } from 'react-i18next';
@@ -25,7 +24,7 @@ i18next.init({
 ReactDOM.render(
     <I18nextProvider i18n={i18next}>
         <UserContextProvider>
-            <App />
+            <Window />
         </UserContextProvider>
     </I18nextProvider>,
     document.getElementById('root')

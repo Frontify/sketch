@@ -1,3 +1,6 @@
+import React, { useContext, useState, useEffect } from 'react';
+
+// Components
 import {
     Button,
     Breadcrumbs,
@@ -8,14 +11,14 @@ import {
     LoadingCircle,
     Text,
 } from '@frontify/arcade';
+
+// Hooks
 import { useNavigate } from 'react-router-dom';
-import React from 'react';
-
-import { useSketch } from '../hooks/useSketch';
-
-import { useContext, useState, useEffect } from 'react';
+import { useSketch } from '../../hooks/useSketch';
 import { useTranslation } from 'react-i18next';
-import { UserContext } from '../UserContext';
+
+// Context
+import { UserContext } from '../../context/UserContext';
 
 export function OpenDocumentsView() {
     let context = useContext(UserContext);

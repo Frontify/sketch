@@ -1,45 +1,39 @@
+import React, { useContext, useEffect, useState } from 'react';
+
+// Components
+
 import {
-    Badge,
-    Breadcrumbs,
     Button,
     Flyout,
     IconAdd,
     IconAlert,
-    IconAngleDown,
-    IconArrowLeft,
     IconCaretDown,
     IconDownloadAlternative,
-    IconMore,
-    IconQuestion,
+    IconExternalLink,
     IconFolderUp,
+    IconMore,
     IconRefresh,
-    IconUnknownSimple,
-    IconSketch,
     IconUploadAlternative,
+    IconView,
     LoadingCircle,
     MenuItem,
-    IconFolder,
-    IconView,
-    Stack,
     Text,
-    IconShare,
-    IconExternalLink,
-    IconInfo,
-    TooltipIcon,
 } from '@frontify/arcade';
-import React from 'react';
-import { useContext, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useLocalStorage } from '../hooks/useLocalStorage';
-import { UserContext } from '../UserContext';
-import { useSketch } from '../hooks/useSketch';
-import { UploadDestinationPicker } from './UploadDestinationPicker';
-import { SourcePicker } from './Sources/SourcePicker';
-import { SourceFileInfo } from './Sources/SourceFileInfo';
 
-import { CustomDialog } from './CustomDialog';
+import { CustomDialog } from '../Core/CustomDialog';
+import { SourceFileInfo } from '../Sources/SourceFileInfo';
+import { SourcePicker } from '../Sources/SourcePicker';
+import { UploadDestinationPicker } from '../Core/UploadDestinationPicker';
 
-import { queryGraphQLWithAuth } from '../graphql';
+// Hooks
+import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { useSketch } from '../../hooks/useSketch';
+
+// Context
+import { UserContext } from '../../context/UserContext';
+
+// GraphQL
+import { queryGraphQLWithAuth } from '../../graphql/graphql';
 
 function SourceAction({ status, actions, loading }) {
     let context = useContext(UserContext);

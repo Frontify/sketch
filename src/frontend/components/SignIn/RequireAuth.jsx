@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect, useContext } from 'react';
 
+// Router
 import { Navigate } from 'react-router-dom';
 
-import { useEffect, useState, useContext } from 'react';
-import { UserContext } from '../UserContext';
+// Context
+import { UserContext } from '../../context/UserContext';
 
 export function RequireAuth({ children }) {
     const context = useContext(UserContext);

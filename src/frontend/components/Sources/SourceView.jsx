@@ -1,16 +1,19 @@
-import React from 'react';
-import { useContext, useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 
-import { UserContext } from '../../UserContext';
-
+// Router
 import { Link, Outlet, useLocation } from 'react-router-dom';
 
+// Hooks
 import { useLocalStorage } from '../../hooks/useLocalStorage';
-import { NavigationBar } from '../NavigationBar';
-import { Toolbar } from '../Toolbar';
 
+// Context
+import { UserContext } from '../../context/UserContext';
+
+// Components
 import { Text } from '@frontify/arcade';
-import { LoadingIndicator } from '../LoadingIndicator';
+import { LoadingIndicator } from '../Core/LoadingIndicator';
+import { NavigationBar } from '../App/NavigationBar';
+import { Toolbar } from '../App/Toolbar';
 
 export function SourceView() {
     const context = useContext(UserContext);

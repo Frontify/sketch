@@ -1,15 +1,14 @@
 import React from 'react';
-import { useState, useContext, useEffect } from 'react';
+import { useContext } from 'react';
 
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { SearchField } from '../SearchField';
-import { Toolbar } from '../Toolbar';
-import { Badge, Button, Flyout, IconSketch, Stack, Text } from '@frontify/arcade';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Toolbar } from '../App/Toolbar';
+import { Badge, Button } from '@frontify/arcade';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { useTranslation } from 'react-i18next';
 
-import { UserContext } from '../../UserContext';
-import { LoadingIndicator } from '../LoadingIndicator';
+import { UserContext } from '../../context/UserContext';
+import { LoadingIndicator } from '../Core/LoadingIndicator';
 
 export function SourcesView() {
     let [activeSourceScope, setActiveSourceScope] = useLocalStorage('cache.activeSourceScope', 'open');

@@ -1,13 +1,18 @@
-import React from 'react';
-import { useState, useEffect, useContext } from 'react';
-import { Text } from '@frontify/arcade';
+import React, { useState, useEffect, useContext } from 'react';
+
+// Components
+import { IconCaretDown, Text } from '@frontify/arcade';
+
+import { GuidelineSwitcher } from './GuidelineSwitcher';
+import { LoadingIndicator } from '../Core/LoadingIndicator';
+import { SearchField } from '../Core/SearchField';
 import { Swatch } from './Swatch';
-import { UserContext } from '../UserContext';
-import { useSketch } from '../hooks/useSketch';
-import { SearchField } from './SearchField';
-import { Switcher } from './Switcher';
-import { IconCaretDown } from '@frontify/arcade';
-import { LoadingIndicator } from './LoadingIndicator';
+
+// Context
+import { UserContext } from '../../context/UserContext';
+
+// Hooks
+import { useSketch } from '../../hooks/useSketch';
 
 export function PalettesView({ palettes, guidelines }) {
     const { actions, selection } = useContext(UserContext);
@@ -60,13 +65,13 @@ export function PalettesView({ palettes, guidelines }) {
                 ></SearchField>
                 <div style={{ flex: 0 }}>
                     {guidelines.length ? (
-                        <Switcher
+                        <GuidelineSwitcher
                             guidelines={guidelines}
                             selection={selection.guidelines[selection.brand?.id] || []}
                             onChange={(changedGuidelines) => {
                                 actions.setGuidelinesForBrand(changedGuidelines, selection.brand);
                             }}
-                        ></Switcher>
+                        ></GuidelineSwitcher>
                     ) : (
                         ''
                     )}

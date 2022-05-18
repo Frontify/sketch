@@ -1,16 +1,20 @@
 import React from 'react';
-import { useState, useEffect, useMemo } from 'react';
-import { queryGraphQLWithAuth } from './graphql';
-import { browseWorkspaceProject } from './browse.graphql';
-import { foldersQuery } from './folders.graphql';
-import { listQuery } from './list.graphql';
-import { searchQuery } from './search.graphql';
-import { userQuery } from './user.graphql';
-import { useLocalStorage } from './hooks/useLocalStorage';
+import { useState, useEffect } from 'react';
 
+// GraphQL
+import { queryGraphQLWithAuth } from '../graphql/graphql';
+import { browseWorkspaceProject } from '../graphql/browse.graphql';
+import { foldersQuery } from '../graphql/folders.graphql';
+import { listQuery } from '../graphql/list.graphql';
+import { searchQuery } from '../graphql/search.graphql';
+import { userQuery } from '../graphql/user.graphql';
+
+// Hooks
+import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useSketch } from '../hooks/useSketch';
+
+// Context
 export const UserContext = React.createContext();
-
-import { useSketch } from './hooks/useSketch';
 
 export const UserContextProvider = ({ children }) => {
     const blueprints = {

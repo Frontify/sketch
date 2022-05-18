@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+
+// Components
 import {
     Badge,
     Button,
@@ -19,16 +21,15 @@ import {
     IconUnknownSimple,
 } from '@frontify/arcade';
 
-import { SearchField } from './SearchField';
-import { useState, useEffect, useContext } from 'react';
-
-import { useTranslation } from 'react-i18next';
-import { UserContext } from '../UserContext';
-import { useSketch } from '../hooks/useSketch';
-
-import { useLocalStorage } from '../hooks/useLocalStorage';
-
 import { ArtboardToolbar } from './ArtboardToolbar';
+
+// Hooks
+import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { useSketch } from '../../hooks/useSketch';
+import { useTranslation } from 'react-i18next';
+
+// Context
+import { UserContext } from '../../context/UserContext';
 
 /**
  * ⚛️ Artboard Item
@@ -38,7 +39,6 @@ export function ArtboardItem({ artboard, showPath = true }) {
     return (
         <custom-v-stack>
             <custom-h-stack gap="small" flex padding="small">
-                {/* <custom-artboard-preview></custom-artboard-preview> */}
                 <custom-v-stack flex>
                     <custom-h-stack align-items="center">
                         <custom-v-stack>

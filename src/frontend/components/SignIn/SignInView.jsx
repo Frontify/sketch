@@ -1,11 +1,17 @@
-import React from 'react';
-import { Button, TextInput, Text } from '@frontify/arcade';
-import { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+
+// Components
+import { Button, Heading, TextInput, Text } from '@frontify/arcade';
+import { Logo } from '../Core/Logo';
+
+// Hooks
 import { useTranslation } from 'react-i18next';
-import { Logo } from './Logo';
-import { UserContext } from '../UserContext';
 import { useNavigate } from 'react-router-dom';
 
+// Context
+import { UserContext } from '../../context/UserContext';
+
+// Validation
 function urlStartsWithProtocol(url) {
     return url.indexOf('http') == 0;
 }
@@ -72,7 +78,7 @@ export function SignInView() {
         <custom-v-stack gap="small" padding="small">
             <Logo size="120"></Logo>
             <custom-spacer></custom-spacer>
-            <h2>{t('signin.title')}</h2>
+            <Heading size="xx-large">{t('signin.title')}</Heading>
             <Text>{t('signin.your_frontify_domain')}</Text>
             <fieldset>
                 <TextInput

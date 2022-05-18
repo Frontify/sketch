@@ -1,5 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { UserContext } from '../UserContext';
+
+// Components
 import {
     Button,
     IconFolder,
@@ -11,9 +12,14 @@ import {
     IconFile,
 } from '@frontify/arcade';
 
-import { useSketch } from '../hooks/useSketch';
+// Context
+import { UserContext } from '../../context/UserContext';
 
-import { queryGraphQLWithAuth } from '../graphql';
+// Hooks
+import { useSketch } from '../../hooks/useSketch';
+
+// GraphQL
+import { queryGraphQLWithAuth } from '../../graphql/graphql';
 
 export function UploadDestinationPicker({ onChange, onInput, allowfiles = false, paths = [] }) {
     let { actions, selection } = useContext(UserContext);
