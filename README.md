@@ -1,9 +1,9 @@
 # Frontify for Sketch
 
-A [Sketch] plugin that provides integration with Frontify. Get it @ [Frontify Sketch Plugin]
+A [Sketch](http://sketch.com) plugin that provides integration with Frontify. Get it @ [Frontify Sketch Plugin](https://frontify.com/integrations/sketch/)
 
 This README.md is primarily for developers. The latest plugin version,
-documentation etc. are hosted at [https://frontify.com/integrations/sketch/].
+documentation etc. are hosted at [https://frontify.com/integrations/sketch/](https://frontify.com/integrations/sketch/).
 
 Contributions are welcome!
 
