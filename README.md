@@ -1,4 +1,127 @@
-# TODO: Update README for the React version of the plugin
+# Frontify for Sketch
+
+A [Sketch] plugin that provides integration with Frontify. Get it @ [Frontify Sketch Plugin]
+
+This README.md is primarily for developers. The latest plugin version,
+documentation etc. are hosted at [https://frontify.com/integrations/sketch/].
+
+Contributions are welcome!
+
+# What’s where?
+
+Points of Interest:
+
+**React:**
+
+-   frontend/index.jsx
+-   frontend/components/Window.jsx
+-   frontend/context/UserContext.jsx
+
+**Sketch:**
+
+-   src/main.js
+-   commands/frontify.js
+
+# CSS
+
+Most of the interface is based on `@frontify/arcade` components.
+
+In cases where there were no fitting components, “pseudo custom elements” have been created. These are custom HTML tags that are prefixed with `custom-` and are meant to be replaced with Arcade components when available.
+
+The styling for these custom tags can be found in `css/custom.css`
+
+There’s another file `utilities.css` with custom attributes that are mainly used for layout and spacing. With newer versions of @frontify/arcade, these could all be replaced with the `Stack` component which now supports more props.
+
+# Frontend
+
+The frontend is built using React, @frontify/arcade components and the Frontify API. The code is written in JavaScript, not TypeScript (sorry!).
+
+**Entry:** index.jsx → Window.jsx
+
+## Window.jsx:
+
+-   **Routing:** Navigation between tabs and views is implemented with React Router.
+-   **Context:** Global state about auth, user, brand and more is stored inside the context and made available to all routes.
+-   **Authentication:** A guard that decides whether to show the requested route (given a API token) or fall back to the sign in view.
+
+## UserContext.jsx
+
+-   Global State: Auth, User, Brand, Documents, Selections, Cache
+-   Background uploads
+-   Methods of shared interest
+
+## useSketch.js
+
+This hook can be used to communicate with Sketch.
+Available message types can be found in "main.js" -> webview.on('request', ...)
+
+**Usage:**
+
+`let { documents } = await useSketch("getOpenDocuments")`
+
+With parameters:
+
+```
+let { projects } = await useSketch('getProjectsForBrand', { brand: selection.brand });
+```
+
+---
+
+# Sketch Backend
+
+## Actions:
+
+**open, close, save:**
+
+-   Notify React about the new active document
+-   Notify React about the new artboards
+-   Push the active document to the list of "Recent Documents"
+
+**artboard changed**
+
+-   Notify React about the new artboards
+-   Updates are throttled (1000 ms) so that excessive selections don’t cause too much blocking of the application
+
+## Session Variables
+
+-   **Recent Document:** com.frontify.sketch.recent.document
+-   **Recent Action:** com.frontify.sketch.recent.action.uuid
+-   **Recent Brand:** com.frontify.sketch.recent.brand.id
+-   **State**: "state"
+
+# Frontify API
+
+The plugins uses a mix of `v1` and `GraphQL` endpoints. This is not ideal, but at the time of writing the plugin, was necessary because not every feature was supported by the GraphQL API.
+
+## v1
+
+Exclusively used with Sketch.
+
+-   OAuth (including legacy polling)
+-   Guidelines (Typography, Colors)
+-   Uploads (Sketch files, Artboards, …)
+-   Downloads (Sketch files)
+
+## GraphQL
+
+Primarily used with React.
+
+-   Media Libraries, List, Search
+-   Files, Folders, Subfolders
+-   User, Brands
+-   WorkspaceProjects
+
+There’s one exception, where the Sketch backend uses GraphQL: `source.js → getGraphQLIDForLegacyAssetID`
+
+This is necessary to find the GraphQL ID for assets that have just been uploaded. Because the upload uses
+`v1` the uploads will return a legacy ID format. But for matching individual source files with lists of files from GraphQL, we need a shared ID.
+
+Better solutions would be:
+
+-   A) Uploads via GraphQL
+-   B) GraphQL also returns legacy ids for assets
+
+# Getting Started
 
 # SSL Certificate for Development
 
@@ -21,7 +144,15 @@ Create certificates
 
 # Development
 
+_This plugin was created using `skpm`. For a detailed explanation on how things work, checkout the [skpm Readme](https://github.com/skpm/skpm/blob/master/README.md)._
+
 To run the plugin, you need to start (2) processes: One will build the Sketch plugin with Webpack whenever plugin code changes. The other will start the dev server serving the React Frontend. Why two? Originally the plugin used Webpack to build everything but Vite is a lot faster in development. In production, Vite makes the process simpler: the build folder is simply moved to the plugin bundle.
+
+## Install the dependencies
+
+```bash
+npm install
+```
 
 ## 1. Build the plugin
 
@@ -41,76 +172,12 @@ This command will first build the plugin using `skpm`. Then, it builds the front
 
 ---
 
-# Frontify for Sketch
-
-A [Sketch] plugin that provides integration with Frontify. Get it @ [Frontify Sketch Plugin]
-
-This README.md is primarily for developers. The latest plugin version,
-documentation etc. are hosted at [https://frontify.com/integrations/sketch/].
-
-Contributions are welcome!
-
-## Development
-
-_This plugin was created using `skpm`. For a detailed explanation on how things work, checkout the [skpm Readme](https://github.com/skpm/skpm/blob/master/README.md)._
-
-## Usage
-
-Install the dependencies
-
-```bash
-npm install
-```
-
-Once the installation is done, you can run some commands inside the project folder:
-
-```bash
-npm run build
-```
-
-To watch for changes:
-
-```bash
-npm run watch
-```
-
-Additionally, if you wish to run the plugin every time it is built:
-
-```bash
-npm run start
-```
+## Misc
 
 This defaults prevents you from to many Sketch restarts
 
 ```bash
 defaults write com.bohemiancoding.sketch3 AlwaysReloadScript -bool YES
-```
-
-## Custom Configuration
-
-### Babel
-
-To customize Babel, you have two options:
-
--   You may create a [`.babelrc`](https://babeljs.io/docs/usage/babelrc) file in your project's root directory. Any settings you define here will overwrite matching config-keys within skpm preset. For example, if you pass a "presets" object, it will replace & reset all Babel presets that skpm defaults to.
-
--   If you'd like to modify or add to the existing Babel config, you must use a `webpack.config.js` file. Visit the [Webpack](#webpack) section for more info.
-
-### Webpack
-
-To customize webpack create `webpack.config.js` file which exports function that will change webpack's config.
-
-```js
-/**
- * Function that mutates original webpack config.
- * Supports asynchronous changes when promise is returned.
- *
- * @param {object} config - original webpack config.
- * @param {boolean} isPluginCommand - wether the config is for a plugin command or a resource
- **/
-module.exports = function (config, isPluginCommand) {
-    /** you can change config here **/
-};
 ```
 
 ## Debugging
@@ -128,19 +195,3 @@ skpm log
 ```
 
 The `-f` option causes `skpm log` to not stop when the end of logs is reached, but rather to wait for additional data to be appended to the input
-
-## Frontend
-
-To make working on the Frontend independent from Sketch make the `sketch` folder the document root of your webserver. Note: This works best in Google Chrome.
-
-To start a web server using Python on macOS:
-
-```bash
-> cd /path/to/frontify-sketch
-> python3 -m http.server 1337
-```
-
-The views are accessible by using: local-sketch.frontify.com/src/assets/views/…
-
-[sketch]: https://sketchapp.com/
-[frontify sketch plugin]: https://frontify.com/integrations/sketch/
