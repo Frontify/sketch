@@ -29,7 +29,7 @@ import { useContext, useEffect } from 'react';
 import { UserContext } from '../context/UserContext';
 
 // Router
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, HashRouter } from 'react-router-dom';
 import { Routes, Route } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -43,7 +43,7 @@ export function Window() {
     }, []);
 
     return (
-        <BrowserRouter>
+        <HashRouter>
             <Routes>
                 <Route
                     path="/sources"
@@ -106,6 +106,6 @@ export function Window() {
                 <Route path="/signin" element={<SignInView />} />
                 <Route path="/signin-pending" element={<SignInPendingView />} />
             </Routes>
-        </BrowserRouter>
+        </HashRouter>
     );
 }
