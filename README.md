@@ -47,11 +47,13 @@ Available message types can be found in "main.js" -> webview.on('request', ...)
 
 **Usage:**
 
-`let { documents } = await useSketch("getOpenDocuments")`
-
-With parameters:
+Ideally used with async/await and destructuring:
 
 ```
+// Request without parameters:
+let { documents } = await useSketch("getOpenDocuments")
+
+// Request with parameters:
 let { projects } = await useSketch('getProjectsForBrand', { brand: selection.brand });
 ```
 
