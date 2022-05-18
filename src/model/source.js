@@ -14,25 +14,26 @@ let sketch3 = require('sketch');
 class Source {
     constructor() {}
 
-    getRemoteAssetForProjectIDByAssetID(projectID, assetID) {
+    async getRemoteAssetForProjectIDByAssetID(projectID, assetID) {
         // Ideally, this would be Infinity or we would use the global GraphQL endpoint …
         const depth = 999999999;
-        return fetch(
+        let result = await fetch(
             `/v1/assets/status/${projectID}?include_screen_activity=true&depth=${depth}&ext=sketch&id=${assetID}`
-        ).then((result) => {
-            if (result.assets != null) {
-                // The API returns {assets} as an Object (?), and we’re interested in the first one
-                // that matches the given ID.
+        );
 
-                // TODO: It would be much better if we could query the API with a specific ID …
-                let key = Object.keys(result.assets).find((key) => {
-                    return result.assets[key].id == assetID;
-                });
-                return result.assets[key];
-            } else {
-                return false;
-            }
-        });
+        if (result.assets != null) {
+            // The API returns {assets} as an Object (?), and we’re interested in the first one
+            // that matches the given ID.
+
+            // TODO: It would be much better if we could query the API with a specific ID …
+            let key = Object.keys(result.assets).find((key) => {
+                return result.assets[key].id == assetID;
+            });
+
+            return result.assets[key];
+        } else {
+            return false;
+        }
     }
 
     getLocalAndRemoteSourceFiles() {
@@ -233,9 +234,9 @@ class Source {
         // Todo: Don’t rely on fetching data here but instead just open the file and resolve it
 
         sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'dirty', false);
+        this.pushRecent();
         return this.getCurrentAsset().then(function (asset) {
             if (asset) {
-                this.pushRecent();
                 return fetch('/v1/screen/activity/' + asset.id, {
                     method: 'POST',
                     body: JSON.stringify({ activity: 'OPEN' }),
@@ -282,8 +283,8 @@ class Source {
         let response = await fetch(url, options);
         return response.data?.asset?.id;
     }
-    pushRecent() {
-        console.log('@@@ Push Recent');
+    async pushRecent() {
+        console.log('🚀 Push Recent');
         let document = sketch3.Document.fromNative(sketch.getDocument());
         let nativeSketchDocument = sketch.getDocument();
 
@@ -298,8 +299,8 @@ class Source {
          * Do we have the GraphQL ID? If not, let’s fetch it first.
          */
 
-        if (!refs.remote_graphql_id) {
-            let id = this.getGraphQLIDForLegacyAssetID(refs.remote_id);
+        if (!refs.remote_graphql_id || typeof refs.remote_graphql_id != 'string') {
+            let id = await this.getGraphQLIDForLegacyAssetID(refs.remote_id);
 
             sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'remote_graphql_id', id);
             refs.remote_graphql_id = id;
@@ -307,7 +308,6 @@ class Source {
 
         let path = '' + nativeSketchDocument.fileURL().path();
         let filename = path.split('/');
-        console.log('>> push');
 
         recentFiles.push({ uuid: document.id, path, filename: filename[filename.length - 1], refs });
     }

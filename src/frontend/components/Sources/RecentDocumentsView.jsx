@@ -156,7 +156,8 @@ export function RecentDocumentsView({ onInput, onChange }) {
                     >
                         <custom-h-stack gap="medium" align-items="center">
                             <div>
-                                <SourceStatusIcon state="'push'"></SourceStatusIcon>
+                                {/* <SourceStatusIcon state="'push'"></SourceStatusIcon> */}
+                                <IconSketch size="Size24"></IconSketch>
                             </div>
 
                             <custom-v-stack gap="xx-small">

@@ -357,7 +357,7 @@ export default function (context, view) {
 
     async function handleRequestFromFrontend({ type = '', requestUUID = null, args = {} }) {
         let payload = {};
-        console.log('request!', new Date().getTime(), type, args, state);
+        // console.log('request!', new Date().getTime(), type, args, state);
         switch (type) {
             case 'addCurrentFile':
                 try {
@@ -423,6 +423,8 @@ export default function (context, view) {
                      * Step 1: Download the file to the Sync Folder.
                      */
 
+                    console.log('🎈 Checking out a file…', args);
+
                     var progress = NSProgress.progressWithTotalUnitCount(10);
                     progress.setCompletedUnitCount(0);
 
@@ -450,7 +452,7 @@ export default function (context, view) {
                      */
                     // Close file first?
                     // Todo: Only close the document if it’s the same one that has been checked out (pull / checkout override)
-                    NSDocumentController.sharedDocumentController().currentDocument().close();
+                    if (sketch.getDocument()) NSDocumentController.sharedDocumentController().currentDocument().close();
 
                     source.openSourceAtPath(path);
 
@@ -469,7 +471,6 @@ export default function (context, view) {
                 }
                 break;
             case 'getCurrentDocument':
-                console.log('>>> getCurrentDocument');
                 /**
                  * The shape of the returned object.
                  * We’ll merge local, remote and meta information.
@@ -536,6 +537,7 @@ export default function (context, view) {
 
                 function getState(document) {
                     let { remote, local } = document;
+
                     if (!document.remote) return 'untracked';
 
                     let saved = local.id;
@@ -569,6 +571,7 @@ export default function (context, view) {
                 }
 
                 if (currentDocument.refs.remote_id && currentDocument.refs.remote_project_id) {
+                    console.log('fetching…', currentDocument);
                     // MARK: Hardcoded project id
                     let remoteAsset = await source.getRemoteAssetForProjectIDByAssetID(
                         currentDocument.refs.remote_project_id,
