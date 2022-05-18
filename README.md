@@ -7,6 +7,11 @@ documentation etc. are hosted at [https://frontify.com/integrations/sketch/](htt
 
 Contributions are welcome!
 
+# Build
+1. `npm run build` 
+2. Wait
+3. Use or install `frontify.sketchplugin`
+
 # What’s where?
 
 Points of Interest:
