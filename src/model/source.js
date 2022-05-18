@@ -5,6 +5,9 @@ import target from './target';
 import sketch from './sketch';
 import filemanager from './filemanager';
 
+// Message helper
+import { frontend } from '../helpers/ipc';
+
 import recentFiles from '../model/recent';
 
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
@@ -563,16 +566,5 @@ class Source {
         return currentFilename;
     }
 }
-
-// Identifier for the plugin window that we can use for message passing
-const IDENTIFIER = 'frontifymain';
-/**
- * We can use this helper to make it more convenient to send messages to the webview.
- */
-const frontend = {
-    send(type, payload) {
-        sendToWebview(IDENTIFIER, `send(${JSON.stringify({ type, payload })})`);
-    },
-};
 
 export default new Source();

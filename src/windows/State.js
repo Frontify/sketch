@@ -1,18 +1,8 @@
 import { getSelectedArtboards } from './actions/getSelectedArtboards';
 import { Settings } from 'sketch';
-import { sendToWebview } from 'sketch-module-web-view/remote';
 
-// Identifier for the plugin window that we can use for message passing
-const IDENTIFIER = 'frontifymain';
-
-/**
- * We can use this helper to make it more convenient to send messages to the webview.
- */
-const frontend = {
-    send(type, payload) {
-        sendToWebview(IDENTIFIER, `send(${JSON.stringify({ type, payload })})`);
-    },
-};
+// Message helper
+import { frontend } from '../helpers/ipc';
 
 class State {
     constructor() {

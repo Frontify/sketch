@@ -14,6 +14,9 @@ import createFolder from '../helpers/createFolder';
 import shaFile from '../helpers/shaFile';
 import executeSafely from '../helpers/executeSafely';
 
+// Message helper
+import { frontend } from '../helpers/ipc';
+
 /**
  * Actions that can be called from React via the useSketch() hook.
  * For information on the parameters, check the implementation of the
@@ -23,8 +26,6 @@ import { getSelectedArtboards } from './actions/getSelectedArtboards';
 import { uploadArtboards } from './actions/uploadArtboards';
 
 import recentFiles from '../model/recent';
-
-import { sendToWebview } from 'sketch-module-web-view/remote';
 
 let DOM = require('sketch/dom');
 let sketch3 = require('sketch');
@@ -58,15 +59,6 @@ function pathInsidePluginBundle(url) {
         context.scriptPath.split('.sketchplugin/Contents/Sketch')[0]
     }.sketchplugin/Contents/Resources/${url}`;
 }
-
-/**
- * We can use this helper to make it more convenient to send messages to the webview.
- */
-const frontend = {
-    send(type, payload) {
-        sendToWebview(IDENTIFIER, `send(${JSON.stringify({ type, payload })})`);
-    },
-};
 
 let state = {};
 

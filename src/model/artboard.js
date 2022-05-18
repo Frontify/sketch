@@ -5,8 +5,9 @@ import sketch from './sketch';
 import target from './target';
 import filemanager from './filemanager';
 import asset from './asset';
-import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
+import { isWebviewPresent } from 'sketch-module-web-view/remote';
 import { patchDestinations, setDestinations } from '../windows/actions/getSelectedArtboards';
+import { frontend } from '../helpers/ipc';
 
 let API = require('sketch');
 let DOM = require('sketch/dom');
@@ -781,14 +782,4 @@ class Artboard {
     }
 }
 
-// Identifier for the plugin window that we can use for message passing
-const IDENTIFIER = 'frontifymain';
-/**
- * We can use this helper to make it more convenient to send messages to the webview.
- */
-const frontend = {
-    send(type, payload) {
-        sendToWebview(IDENTIFIER, `send(${JSON.stringify({ type, payload })})`);
-    },
-};
 export default new Artboard();
