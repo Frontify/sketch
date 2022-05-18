@@ -188,7 +188,7 @@ _This plugin was created using `skpm`. For a detailed explanation on how things 
 
 To run the plugin, you need to start (2) processes: One will build the Sketch plugin with Webpack whenever plugin code changes. The other will start the dev server serving the React Frontend. Why two? Originally the plugin used Webpack to build everything but Vite is a lot faster in development. In production, Vite makes the process simpler: the build folder is simply moved to the plugin bundle.
 
-**Note:** `skpm` will create an alias for the plugin so that it is automatically available in Sketch.
+**Note:** `skpm` will create a symlink for the plugin so that it is automatically available in Sketch.
 
 ## Install the dependencies
 
