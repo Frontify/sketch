@@ -1,17 +1,19 @@
 import main from '../windows/main';
 import executeSafely from '../helpers/executeSafely';
 import source from '../model/source';
-import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
-import sketch from '../model/sketch';
+import { isWebviewPresent } from 'sketch-module-web-view/remote';
 const sketch3 = require('sketch');
 
-import {
-    getSelectedArtboards,
-    getSelectedArtboardsFromSelection,
-    setSHA,
-} from '../windows/actions/getSelectedArtboards';
+import { frontend } from '../helpers/ipc';
+
+import { getSelectedArtboards, setSHA } from '../windows/actions/getSelectedArtboards';
 
 import { getPluginState } from '../windows/main';
+
+/**
+ * Run
+ * ----------------------------------------------------------------------------
+ */
 
 export function runCommand(context) {
     let threadDictionary = NSThread.mainThread().threadDictionary();
@@ -24,6 +26,11 @@ export function runCommand(context) {
         }
     });
 }
+
+/**
+ * Open
+ * ----------------------------------------------------------------------------
+ */
 
 export function openCommand(context) {
     executeSafely(context, function () {
@@ -38,8 +45,12 @@ export function openCommand(context) {
     });
 }
 
+/**
+ * Save
+ * ----------------------------------------------------------------------------
+ */
+
 export function savedCommand(context) {
-    console.log('saved!');
     executeSafely(context, function () {
         source.saved().then(function () {
             refresh();
@@ -47,17 +58,26 @@ export function savedCommand(context) {
     });
 }
 
+/**
+ * Close
+ * ----------------------------------------------------------------------------
+ */
+
 export function closeCommand(context) {
     executeSafely(context, function () {
         let interval = setInterval(function () {
             clearInterval(interval);
             source.closed().then(function () {
-                console.log('close and refresh');
                 refresh();
             });
         }, 200);
     });
 }
+
+/**
+ * Open
+ * ----------------------------------------------------------------------------
+ */
 
 function activeDocumentDidChange() {
     let key = 'com.frontify.sketch.recent.document';
@@ -77,24 +97,28 @@ function activeDocumentDidChange() {
     return false;
 }
 
+/**
+ * Document changed
+ * ----------------------------------------------------------------------------
+ */
+
 export function onDocumentChanged(context) {
     // mark documnt as dirty?
 }
+
+/**
+ * Selection changed
+ * ----------------------------------------------------------------------------
+ */
 
 export function selectionChangedCommand(context) {
     if (activeDocumentDidChange()) refresh();
 }
 
-function sendSelection(brandID) {
-    if (activeDocumentDidChange()) refresh();
-
-    // let newSelection = context.actionContext.newSelection;
-    // State.selectionChangedCommand(newSelection);
-    // State.progressEvent({ artboard: State.getState().artboards[0], data: {} });
-    let payload = getSelectedArtboards(brandID);
-
-    frontend.send('artboards-changed', payload);
-}
+/**
+ * Artboard changed
+ * ----------------------------------------------------------------------------
+ */
 
 export function artboardChangedCommand(context) {
     let newArtboard = sketch3.fromNative(context.actionContext.newArtboard);
@@ -104,17 +128,37 @@ export function artboardChangedCommand(context) {
 
     let threshold = 1000;
 
-    let recentSelection = 'com.frontify.sketch.recent.selection.uuid';
+    /**
+     * We’re throttling this action to improve performance. Otherwise, quickly selecting artboards over
+     * and over again could slow down the application.
+     *
+     * # Problem: clearTimeout() not available…
+     *
+     * There’s not really a way (or is it?) to cancel timeouts in Sketch because the previous JavaScript
+     * context is lost when a command runs. That means, we do not have a reference to the timeout anymore.
+     *
+     * That means that the callback of the timeout will in fact always fire.
+     * To prevent the effects of the timeout to run (expensive!), we check if it is the most recent callback
+     * and only then execute the callback and do the expensive calculations.
+     *
+     * # Implementation using UUIDs for every action run
+     *
+     * We’re generating a UUID every time this action runs. We then store it as a session variable.
+     * After the timeout, we can then compare the UUID of the callback with the UUID of the most recent action
+     * that is stored as a session variable.
+     *
+     */
+    let keyForMostRecentAction = 'com.frontify.sketch.recent.action.uuid';
     let recentBrand = 'com.frontify.sketch.recent.brand.id';
-    // set uuid
 
-    let contextUUID = '' + NSUUID.UUID().UUIDString();
-    sketch3.Settings.setSessionVariable(recentSelection, contextUUID);
+    // set uuid
+    let actionUUID = '' + NSUUID.UUID().UUIDString();
+    sketch3.Settings.setSessionVariable(keyForMostRecentAction, actionUUID);
 
     setTimeout(() => {
-        let mostRecentUUID = sketch3.Settings.sessionVariable(recentSelection);
+        let mostRecentUUID = sketch3.Settings.sessionVariable(keyForMostRecentAction);
         let mostRecentBrandID = sketch3.Settings.sessionVariable(recentBrand);
-        if (mostRecentUUID == contextUUID) {
+        if (mostRecentUUID == actionUUID) {
             executeSafely(context, function () {
                 if (isWebviewPresent('frontifymain')) {
                     sendSelection(mostRecentBrandID);
@@ -123,6 +167,11 @@ export function artboardChangedCommand(context) {
         }
     }, threshold);
 }
+
+/**
+ * Function: Refresh
+ * ----------------------------------------------------------------------------
+ */
 
 function refresh() {
     /**
@@ -147,13 +196,15 @@ function refresh() {
     sendSelection(mostRecentBrandID);
 }
 
-// Identifier for the plugin window that we can use for message passing
-const IDENTIFIER = 'frontifymain';
 /**
- * We can use this helper to make it more convenient to send messages to the webview.
+ * Function: Send Selection
+ * ----------------------------------------------------------------------------
  */
-const frontend = {
-    send(type, payload) {
-        sendToWebview(IDENTIFIER, `send(${JSON.stringify({ type, payload })})`);
-    },
-};
+
+function sendSelection(brandID) {
+    if (activeDocumentDidChange()) refresh();
+
+    let payload = getSelectedArtboards(brandID);
+
+    frontend.send('artboards-changed', payload);
+}
