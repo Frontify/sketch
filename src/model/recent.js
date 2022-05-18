@@ -5,10 +5,10 @@ class RecentFiles {
         this.recents = this.get();
     }
     clear() {
-        sketch.Settings.setSettingForKey('com.frontify.sketch.recent', []);
+        sketch.Settings.setSettingForKey('com.frontify.sketch.recent.documents', []);
     }
     get() {
-        return sketch.Settings.settingForKey('com.frontify.sketch.recent') || [];
+        return sketch.Settings.settingForKey('com.frontify.sketch.recent.documents') || [];
     }
     push(entry = {}) {
         // Remove any existing items with the given ID
@@ -19,7 +19,7 @@ class RecentFiles {
         this.save();
     }
     save() {
-        sketch.Settings.setSettingForKey('com.frontify.sketch.recent', this.recents);
+        sketch.Settings.setSettingForKey('com.frontify.sketch.recent.documents', this.recents);
     }
 }
 export default new RecentFiles();
