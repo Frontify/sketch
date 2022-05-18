@@ -43,7 +43,7 @@ The frontend is built using React, @frontify/arcade components and the Frontify 
 ## useSketch.js
 
 This hook can be used to communicate with Sketch.
-Available message types can be found in "main.js" -> webview.on('request', ...)
+Available message types can be found in `main.js -> webview.on('request', ...)`
 
 **Usage:**
 
