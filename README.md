@@ -13,14 +13,14 @@ Points of Interest:
 
 **React:**
 
--   frontend/index.jsx
--   frontend/components/Window.jsx
--   frontend/context/UserContext.jsx
+-   `frontend/index.jsx`
+-   `frontend/components/Window.jsx`
+-   `frontend/context/UserContext.jsx`
 
 **Sketch:**
 
--   src/main.js
--   commands/frontify.js
+-   `src/main.js`
+-   `commands/frontify.js
 
 # Frontend
 
