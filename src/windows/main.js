@@ -143,10 +143,12 @@ export default function (context, view) {
     });
 
     // Load tab if webview ready
-    webview.on('did-finish-load', () => {});
+    webview.on('did-finish-load', () => {
+        console.log('did-finish-load');
+    });
 
-    webview.on('did-fail-load', () => {
-        console.log('did-fail-load', err);
+    webview.on('did-fail-load', (error) => {
+        console.log('did-fail-load', { isDev, baseURL, mainURL }, error);
     });
 
     webview.on('nativeLog', function (s) {
@@ -158,6 +160,7 @@ export default function (context, view) {
     win.on(
         'close',
         function () {
+            console.log('close');
             threadDictionary.removeObjectForKey('frontifywindow');
         }.bind(this)
     );
@@ -322,7 +325,7 @@ export default function (context, view) {
             case 'addSource':
                 try {
                     let response = await source.addSource(args.source, args.target);
-                    console.log('add source >>', args, response);
+
                     if (response.id) {
                         // Set Asset ID, saved inside the Sketch File
                         sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'remote_id', response.id);
