@@ -22,16 +22,6 @@ Points of Interest:
 -   src/main.js
 -   commands/frontify.js
 
-# CSS
-
-Most of the interface is based on `@frontify/arcade` components.
-
-In cases where there were no fitting components, “pseudo custom elements” have been created. These are custom HTML tags that are prefixed with `custom-` and are meant to be replaced with Arcade components when available.
-
-The styling for these custom tags can be found in `css/custom.css`
-
-There’s another file `utilities.css` with custom attributes that are mainly used for layout and spacing. With newer versions of @frontify/arcade, these could all be replaced with the `Stack` component which now supports more props.
-
 # Frontend
 
 The frontend is built using React, @frontify/arcade components and the Frontify API. The code is written in JavaScript, not TypeScript (sorry!).
@@ -64,6 +54,16 @@ With parameters:
 ```
 let { projects } = await useSketch('getProjectsForBrand', { brand: selection.brand });
 ```
+
+# CSS
+
+Most of the interface is based on `@frontify/arcade` components.
+
+In cases where there were no fitting components, “pseudo custom elements” have been created. These are custom HTML tags that are prefixed with `custom-` and are meant to be replaced with Arcade components when available.
+
+The styling for these custom tags can be found in `css/custom.css`
+
+There’s another file `utilities.css` with custom attributes that are mainly used for layout and spacing. With newer versions of @frontify/arcade, these could all be replaced with the `Stack` component which now supports more props.
 
 ---
 
