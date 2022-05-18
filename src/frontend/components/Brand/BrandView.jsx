@@ -1,7 +1,7 @@
 import React from 'react';
 
 // Components
-import { Badge, Text } from '@frontify/arcade';
+import { Badge } from '@frontify/arcade';
 
 // Router
 import { useNavigate, Outlet } from 'react-router-dom';
