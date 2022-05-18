@@ -4,21 +4,27 @@ class Sketch {
     constructor() {}
 
     getViewData() {
-        let data = {};
         // Note: Here we used to switch the entry of the frontend based on the authentication state.
         // With the React setup and router, we will always load the same entry, thus we need to make the switch on the
         // frontend instead.
-        if (user.isAuthenticated()) {
-            data.url = '/source/artboards';
-            data.width = 480;
-            data.height = 600;
-        } else {
-            data.url = '/source';
-            data.width = 360;
-            data.height = 530;
-        }
 
-        return data;
+        // let data = {};
+        // if (user.isAuthenticated()) {
+        //     // data.url = '/source/artboards';
+        //     data.url = '';
+        //     data.width = 480;
+        //     data.height = 600;
+        // } else {
+        //     data.url = '/source';
+        //     data.width = 360;
+        //     data.height = 530;
+        // }
+
+        return {
+            url: '',
+            width: 480,
+            height: 600,
+        };
     }
 
     resize(win) {
