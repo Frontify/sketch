@@ -57,14 +57,17 @@ let { documents } = await useSketch("getOpenDocuments")
 let { projects } = await useSketch('getProjectsForBrand', { brand: selection.brand });
 ```
 
-# CSS
+# Interface, Components, CSS
 
+**Frontify Arcade**
 Most of the interface is based on `@frontify/arcade` components.
 
+**Pseudo Custom Elements**
 In cases where there were no fitting components, “pseudo custom elements” have been created. These are custom HTML tags that are prefixed with `custom-` and are meant to be replaced with Arcade components when available.
 
 The styling for these custom tags can be found in `css/custom.css`
 
+**Utilities and Custom Attributes**
 There’s another file `utilities.css` with custom attributes that are mainly used for layout and spacing. With newer versions of @frontify/arcade, these could all be replaced with the `Stack` component which now supports more props.
 
 ---
@@ -84,12 +87,40 @@ There’s another file `utilities.css` with custom attributes that are mainly us
 -   Notify React about the new artboards
 -   Updates are throttled (1000 ms) so that excessive selections don’t cause too much blocking of the application
 
-## Session Variables
+## Storage 
+Data is persisted using the Sketch API. 
 
--   **Recent Document:** com.frontify.sketch.recent.document
--   **Recent Action:** com.frontify.sketch.recent.action.uuid
--   **Recent Brand:** com.frontify.sketch.recent.brand.id
+- **Document metadata:** Some meta data about the document and the Frontify API is stored inside the Sketch Document itself. 
+- **Artboard metadata:** Some data is stored directly on layers (artboards). 
+- **Session data**: Used for sharing data between plugin commands
+
+### Session Variables
+
+-   **The Recent Document:** com.frontify.sketch.recent.document
+-   **The Recent Action:** com.frontify.sketch.recent.action.uuid
+-   **The Recent Brand:** com.frontify.sketch.recent.brand.id
 -   **State**: "state"
+
+### Global Sketch Settings
+- **All Recent Document(s):** com.frontify.sketch.recent.documents
+- **Domain:** domain
+- **Token:** token
+
+### Document Settings
+Relevant data about a file that is uploaded to Frontify via the API. What brand does it belong to? What project? What are the ids to identify it? 
+
+- `remote_id`: Asset ID (legacy format)
+- `remote_graphql_id`: Asset ID (new format)
+- `remote_project_id`: Project ID
+- `remote_brand_id`: Brand ID
+- `remote_modified`: The timestamp from the API that can be used to figure out if local changes have been made.
+- `dirty`: Has this file been saved, but not yet uploaded?
+
+**TODO:** Storing this information inside the Sketch file works pretty well, but there are potential edge cases that have not been tested or implemented:
+
+- **Deleted remote files**: What happens if a file is deleted remotely? The plugin doesn’t check this. The plugin will attempt to upload the file using an ID that doesn’t exist anymore. The API might still create a new asset, but the plugin most likely doesn’t update the ID. This leads to inconsistencies.
+- **Renamed local files:** What happens if a file is renamed? The API doesn’t seem to handle this case at the moment. While the file is uploaded, it is not renamed on Frontify. Files are only identified by ID. Seeing different filenames between local and remote might be confusing for users.
+
 
 # Frontify API
 
