@@ -128,7 +128,7 @@ The plugins uses a mix of `v1` and `GraphQL` endpoints. This is not ideal, but a
 
 ## v1
 
-Exclusively used with Sketch.
+Exclusively used with **Sketch**.
 
 -   OAuth (including legacy polling)
 -   Guidelines (Typography, Colors)
@@ -137,19 +137,19 @@ Exclusively used with Sketch.
 
 ## GraphQL
 
-Primarily used with React.
+Primarily used with **React**.
 
 -   Media Libraries, List, Search
 -   Files, Folders, Subfolders
 -   User, Brands
 -   WorkspaceProjects
 
-There’s one exception, where the Sketch backend uses GraphQL: `source.js → getGraphQLIDForLegacyAssetID`
+**There’s one exception, where the Sketch backend uses GraphQL:** `source.js → getGraphQLIDForLegacyAssetID`
 
 This is necessary to find the GraphQL ID for assets that have just been uploaded. Because the upload uses
 `v1` the uploads will return a legacy ID format. But for matching individual source files with lists of files from GraphQL, we need a shared ID.
 
-Better solutions would be:
+**Better solutions would be:**
 
 -   A) Uploads via GraphQL
 -   B) GraphQL also returns legacy ids for assets
