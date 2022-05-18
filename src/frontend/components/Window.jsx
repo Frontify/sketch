@@ -1,5 +1,9 @@
 import React from 'react';
 
+// Import Styles
+import '@frontify/arcade/style';
+
+// Artboards
 import { ArtboardsView } from './Artboards/ArtboardsView';
 
 // Brand
