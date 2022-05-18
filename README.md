@@ -49,7 +49,7 @@ Available message types can be found in `main.js -> webview.on('request', ...)`
 
 Ideally used with async/await and destructuring:
 
-```
+```js
 // Request without parameters:
 let { documents } = await useSketch("getOpenDocuments")
 
