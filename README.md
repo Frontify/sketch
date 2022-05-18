@@ -8,6 +8,8 @@ documentation etc. are hosted at [https://frontify.com/integrations/sketch/](htt
 Contributions are welcome!
 
 # Build
+Make sure to update `package.json` with a new version number. The version will be used for the auto-update mechanism of the plugin. Also make sure to review the information about the plugin inside `manifest.json` which will be displayed inside the plugin manager.
+
 1. `npm run build` 
 2. Wait
 3. Use or install `frontify.sketchplugin`
