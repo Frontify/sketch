@@ -52,7 +52,7 @@ export function TypographyView({ guidelines, palettes }) {
         let response = await useSketch('applyFontStyleWithColor', { textStyle, color });
     };
     return (
-        <custom-v-stack overflow="hidden">
+        <custom-v-stack overflow="hidden" stretch="true">
             <custom-h-stack stretch-children padding="small" separator="bottom">
                 <SearchField
                     onInput={(value) => {
@@ -74,6 +74,13 @@ export function TypographyView({ guidelines, palettes }) {
                 </div>
             </custom-h-stack>
             <custom-scroll-view>
+                {!filteredPalettes.length ? (
+                    <custom-v-stack padding="small" stretch="true" align-items="center" justify-content="center">
+                        <Text>No Text Styles</Text>
+                    </custom-v-stack>
+                ) : (
+                    ''
+                )}
                 {filteredPalettes &&
                     filteredPalettes.map((palette) => {
                         return (

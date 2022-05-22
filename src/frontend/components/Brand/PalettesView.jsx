@@ -56,7 +56,7 @@ export function PalettesView({ palettes, guidelines }) {
     return !filteredPalettes ? (
         <LoadingIndicator></LoadingIndicator>
     ) : (
-        <custom-v-stack overflow="hidden">
+        <custom-v-stack overflow="hidden" stretch="true">
             <custom-h-stack stretch-children padding="small" separator="bottom">
                 <SearchField
                     onInput={(value) => {
@@ -78,7 +78,13 @@ export function PalettesView({ palettes, guidelines }) {
                 </div>
             </custom-h-stack>
             <custom-scroll-view>
-                {!filteredPalettes.length ? <custom-v-stack padding="small">No palettes</custom-v-stack> : ''}
+                {!filteredPalettes.length ? (
+                    <custom-v-stack padding="small" stretch="true" align-items="center" justify-content="center">
+                        <Text>No Colors</Text>
+                    </custom-v-stack>
+                ) : (
+                    ''
+                )}
                 {filteredPalettes.map((palette) => {
                     if (query == '' || palette.colors.length) {
                         return (

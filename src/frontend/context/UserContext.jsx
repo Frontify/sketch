@@ -333,7 +333,7 @@ export const UserContextProvider = ({ children }) => {
             setSelection((state) => {
                 return { ...state, brand };
             });
-            window.postMessage('reload');
+            // window.postMessage('reload');
         },
         setGuidelinesForBrand(guidelines, brand) {
             setSelection((state) => {
@@ -374,9 +374,8 @@ export const UserContextProvider = ({ children }) => {
                                 'Could not load user data from GraphQL, because errors were returned',
                                 errors
                             );
+                            reject();
                         }
-
-                        reject();
 
                         setUser((state) => {
                             return { ...state, ...data.currentUser };

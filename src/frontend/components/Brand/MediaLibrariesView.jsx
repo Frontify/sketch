@@ -105,6 +105,13 @@ export function MediaLibrariesView({ type }) {
         }
 
         let library = result.data.project;
+        if (!library?.assets) {
+            // No assets?
+            setLoading(false);
+            setTotalImages(0);
+            // Early return
+            return;
+        }
         let { items, total } = library.assets;
 
         setImages((state) => {
