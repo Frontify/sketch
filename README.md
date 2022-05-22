@@ -8,9 +8,10 @@ documentation etc. are hosted at [https://frontify.com/integrations/sketch/](htt
 Contributions are welcome!
 
 # Build
+
 Make sure to update `package.json` with a new version number. The version will be used for the auto-update mechanism of the plugin. Also make sure to review the information about the plugin inside `manifest.json` which will be displayed inside the plugin manager.
 
-1. `npm run build` 
+1. `npm run build`
 2. Wait
 3. Use or install `frontify.sketchplugin`
 
@@ -31,9 +32,9 @@ Points of Interest:
 
 # Frontend
 
-The frontend is built using React, @frontify/arcade components and the Frontify API. The code is written in JavaScript, not TypeScript (sorry!).
+The frontend is built using React, @frontify/fondue components and the Frontify API. The code is written in JavaScript, not TypeScript (sorry!).
 
-**Entry:** `index.jsx → Window.jsx` 
+**Entry:** `index.jsx → Window.jsx`
 
 ## Window.jsx:
 
@@ -58,7 +59,7 @@ Ideally used with async/await and destructuring:
 
 ```js
 // Request without parameters:
-let { documents } = await useSketch("getOpenDocuments")
+let { documents } = await useSketch('getOpenDocuments');
 
 // Request with parameters:
 let { projects } = await useSketch('getProjectsForBrand', { brand: selection.brand });
@@ -66,16 +67,16 @@ let { projects } = await useSketch('getProjectsForBrand', { brand: selection.bra
 
 # Interface, Components, CSS
 
-**Frontify Arcade**
-Most of the interface is based on `@frontify/arcade` components.
+**Frontify Fondue**
+Most of the interface is based on `@frontify/fondue` components.
 
 **Pseudo Custom Elements**
-In cases where there were no fitting components, “pseudo custom elements” have been created. These are custom HTML tags that are prefixed with `custom-` and are meant to be replaced with Arcade components when available.
+In cases where there were no fitting components, “pseudo custom elements” have been created. These are custom HTML tags that are prefixed with `custom-` and are meant to be replaced with Fondue components when available.
 
 The styling for these custom tags can be found in `css/custom.css`
 
 **Utilities and Custom Attributes**
-There’s another file `utilities.css` with custom attributes that are mainly used for layout and spacing. With newer versions of @frontify/arcade, these could all be replaced with the `Stack` component which now supports more props.
+There’s another file `utilities.css` with custom attributes that are mainly used for layout and spacing. With newer versions of @frontify/fondue, these could all be replaced with the `Stack` component which now supports more props.
 
 ---
 
@@ -94,12 +95,13 @@ There’s another file `utilities.css` with custom attributes that are mainly us
 -   Notify React about the new artboards
 -   Updates are throttled (1000 ms) so that excessive selections don’t cause too much blocking of the application
 
-## Storage 
-Data is persisted using the Sketch API. 
+## Storage
 
-- **Document metadata:** Some meta data about the document and the Frontify API is stored inside the Sketch Document itself. 
-- **Artboard metadata:** Some data is stored directly on layers (artboards). 
-- **Session data**: Used for sharing data between plugin commands
+Data is persisted using the Sketch API.
+
+-   **Document metadata:** Some meta data about the document and the Frontify API is stored inside the Sketch Document itself.
+-   **Artboard metadata:** Some data is stored directly on layers (artboards).
+-   **Session data**: Used for sharing data between plugin commands
 
 ### Session Variables
 
@@ -109,25 +111,26 @@ Data is persisted using the Sketch API.
 -   **State**: "state"
 
 ### Global Sketch Settings
-- **All Recent Document(s):** com.frontify.sketch.recent.documents
-- **Domain:** domain
-- **Token:** token
+
+-   **All Recent Document(s):** com.frontify.sketch.recent.documents
+-   **Domain:** domain
+-   **Token:** token
 
 ### Document Settings
-Relevant data about a file that is uploaded to Frontify via the API. What brand does it belong to? What project? What are the ids to identify it? 
 
-- `remote_id`: Asset ID (legacy format)
-- `remote_graphql_id`: Asset ID (new format)
-- `remote_project_id`: Project ID
-- `remote_brand_id`: Brand ID
-- `remote_modified`: The timestamp from the API that can be used to figure out if local changes have been made.
-- `dirty`: Has this file been saved, but not yet uploaded?
+Relevant data about a file that is uploaded to Frontify via the API. What brand does it belong to? What project? What are the ids to identify it?
+
+-   `remote_id`: Asset ID (legacy format)
+-   `remote_graphql_id`: Asset ID (new format)
+-   `remote_project_id`: Project ID
+-   `remote_brand_id`: Brand ID
+-   `remote_modified`: The timestamp from the API that can be used to figure out if local changes have been made.
+-   `dirty`: Has this file been saved, but not yet uploaded?
 
 **TODO:** Storing this information inside the Sketch file works pretty well, but there are potential edge cases that have not been tested or implemented:
 
-- **Deleted remote files**: What happens if a file is deleted remotely? The plugin doesn’t check this. The plugin will attempt to upload the file using an ID that doesn’t exist anymore. The API might still create a new asset, but the plugin most likely doesn’t update the ID. This leads to inconsistencies.
-- **Renamed local files:** What happens if a file is renamed? The API doesn’t seem to handle this case at the moment. While the file is uploaded, it is not renamed on Frontify. Files are only identified by ID. Seeing different filenames between local and remote might be confusing for users.
-
+-   **Deleted remote files**: What happens if a file is deleted remotely? The plugin doesn’t check this. The plugin will attempt to upload the file using an ID that doesn’t exist anymore. The API might still create a new asset, but the plugin most likely doesn’t update the ID. This leads to inconsistencies.
+-   **Renamed local files:** What happens if a file is renamed? The API doesn’t seem to handle this case at the moment. While the file is uploaded, it is not renamed on Frontify. Files are only identified by ID. Seeing different filenames between local and remote might be confusing for users.
 
 # Frontify API
 
