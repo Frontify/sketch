@@ -80,7 +80,7 @@ export function PalettesView({ palettes, guidelines }) {
             <custom-scroll-view>
                 {!filteredPalettes.length ? (
                     <custom-v-stack padding="small" stretch="true" align-items="center" justify-content="center">
-                        <Text>No Colors</Text>
+                        <Text color="weak">No Colors</Text>
                     </custom-v-stack>
                 ) : (
                     ''

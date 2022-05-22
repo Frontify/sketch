@@ -76,7 +76,7 @@ export function TypographyView({ guidelines, palettes }) {
             <custom-scroll-view>
                 {!filteredPalettes.length ? (
                     <custom-v-stack padding="small" stretch="true" align-items="center" justify-content="center">
-                        <Text>No Text Styles</Text>
+                        <Text color="weak">No Text Styles</Text>
                     </custom-v-stack>
                 ) : (
                     ''
