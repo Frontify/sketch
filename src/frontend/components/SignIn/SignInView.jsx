@@ -87,7 +87,6 @@ export function SignInView() {
                     <fieldset>
                         <TextInput
                             onEnterPressed={(event) => {
-                                console.log(event.target.value);
                                 setDomain(event.target.value);
                                 handleSignIn(event.target.value);
                             }}
