@@ -337,6 +337,12 @@ class Artboard {
         return detachedGroupExport;
     }
 
+    layerIsDetachableSymbolInstance(layer) {
+        // SymbolInstance with empty layer.symbolId is used if symbol overrides
+        // are defined and override property is set to 'no symbol' (Sketch 88)
+        return layer.type === 'SymbolInstance' && !!layer.symbolId;
+    }
+
     /**
      * The recursion is done manually, so we can add meta to separated symbols before we detach them.
      * In this way, we can later determine that it was a symbol.
@@ -353,8 +359,7 @@ class Artboard {
             });
 
             return;
-        } else if (layer.type !== 'SymbolInstance') {
-            /* if it's not a symbol, there's nothing to do */
+        } else if (this.layerIsDetachableSymbolInstance(layer) === false) {
             return;
         }
 
