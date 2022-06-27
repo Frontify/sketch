@@ -12,6 +12,7 @@ export function RequireAuth({ children }) {
     let isAuthenticated = context?.auth?.token;
 
     useEffect(async () => {
+        console.log('require auth');
         if (!context.user?.name) {
             await context.actions.getUser(context.auth);
         }
