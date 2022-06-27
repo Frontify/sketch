@@ -20,7 +20,12 @@
             "get_access_token": "We could not sign you in. Did you grant access too long ago?",
             "poll_access_token": "We could not sign you in. Did you already grant access in your browser?"
         },
+        "artboards": {
+            "no_selection_title": "Select some artboards.",
+            "no_selection_description": "You haven’t uploaded any artboards from this file yet. Try selecting some artboards in Sketch."
+        },
         "general": {
+            "artboards": "Artboards",
             "apply_fill": "Apply Color to Fill",
             "apply_border": "Apply Color to Border",
             "brand": "Brand",
@@ -51,10 +56,12 @@
             "browse": "Browse",
             "browse_all": "Browse all …",
             "current_document": "Current Document",
+            "no_open_document": "No Sketch Document",
             "local": "Local",
             "open": "Open",
             "recent": "Recent",
             "remote": "Remote",
+            "untracked": "Untracked",
             "sync_all": "Sync all Sketch Documents",
             "update_artboards": "Update Artboards",
             "upload_selection": "Upload selected to …"

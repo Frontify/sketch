@@ -32,6 +32,9 @@ import { useSketch } from '../../hooks/useSketch';
 // Context
 import { UserContext } from '../../context/UserContext';
 
+// i18n
+import { useTranslation } from 'react-i18next';
+
 // GraphQL
 import { queryGraphQLWithAuth } from '../../graphql/graphql';
 
@@ -185,6 +188,9 @@ export function NavigationBar() {
     let [relativeLastFetched, setRelativeLastFetched] = useState('just now');
     let [status, setStatus] = useState('PENDING');
     let [open, setOpen] = useState(false);
+
+    // i18n
+    const { t, i18n } = useTranslation();
 
     let [documentURL, setDocumentURL] = useState('');
 
@@ -372,7 +378,7 @@ export function NavigationBar() {
                             >
                                 <custom-v-stack>
                                     <Text weight="strong" size="x-small">
-                                        No Sketch Document
+                                        {t('sources.no_open_document')}
                                     </Text>
                                     <Text size="x-small" color="weak">
                                         Open a document or refresh.

@@ -1,17 +1,32 @@
 import React from 'react';
-import { IconCaretDown, Text } from '@frontify/fondue';
+
+// Components
+import { IconArrowLeft, IconCaretDown, Text } from '@frontify/fondue';
 import { SourceStatusIcon } from './SourceStatusIcon';
+
+// Router
+import { useNavigate, Link, Outlet, useLocation } from 'react-router-dom';
+
+// i18n
+import { useTranslation } from 'react-i18next';
+
 export function SourceFileInfo({ status, source, transferMap, loading }) {
+    const { t } = useTranslation();
+
     return (
         <custom-h-stack flex style={{ height: '100%' }} align-items="center" stretch-children-height="true">
             <custom-h-stack
-                gap="small"
+                gap="medium"
                 align-items="center"
                 style={{ height: '100%', overflow: 'hidden', width: '100%' }}
             >
                 {/* <IconSketch size="Size24"></IconSketch> */}
 
-                <SourceStatusIcon status={status} state={source.state} loading={loading}></SourceStatusIcon>
+                {/* <SourceStatusIcon status={status} state={source.state} loading={loading}></SourceStatusIcon> */}
+
+                <Link to="/sources">
+                    <IconArrowLeft size="Size24"></IconArrowLeft>
+                </Link>
 
                 <custom-h-stack gap="xx-small" align-items="center" style={{ overflow: 'hidden', width: '100%' }}>
                     {source && source.remote?.id ? (
@@ -68,11 +83,11 @@ export function SourceFileInfo({ status, source, transferMap, loading }) {
                         </custom-v-stack>
                     ) : source.local.filename ? (
                         <custom-v-stack>
-                            <Text size="x-small" weight="strong" whitespace="nowrap" overflow="ellipsis" wrap>
-                                {source.local.filename.replace('.sketch', '')}
-                            </Text>
                             <Text size="x-small" color="weak">
-                                Untracked Document
+                                {t('sources.untracked')}
+                            </Text>
+                            <Text size="small" weight="strong" whitespace="nowrap" overflow="ellipsis" wrap>
+                                {source.local.filename.replace('.sketch', '')}
                             </Text>
                         </custom-v-stack>
                     ) : (

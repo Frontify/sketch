@@ -22,6 +22,7 @@ import {
 } from '@frontify/fondue';
 
 import { ArtboardToolbar } from './ArtboardToolbar';
+import { EmptyState } from './EmptyState';
 
 // Hooks
 import { useLocalStorage } from '../../hooks/useLocalStorage';
@@ -911,10 +912,10 @@ export function ArtboardsView() {
 
     return (
         <custom-scroll-view stretch>
-            <custom-v-stack stretch align-items="center" justify-content="center">
-                <Text color="weak">No Artboards</Text>
-            </custom-v-stack>
-            )
+            <EmptyState
+                title={t('artboards.no_selection_title')}
+                description={t('artboards.no_selection_description')}
+            ></EmptyState>
         </custom-scroll-view>
     );
 }

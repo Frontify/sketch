@@ -76,11 +76,8 @@ function refresh() {
 }
 
 export default function (context, view) {
-    let viewData = sketch.getViewData();
-
-    // viewData.url -> depending on the authorization state, returns "/" or "/signin"
     let baseURL = isDev ? 'http://localhost:3000' : pathInsidePluginBundle('index.html');
-    let mainURL = `${baseURL}${viewData.url}`;
+    let mainURL = `${baseURL}`;
 
     // create window and webview
     let win = new BrowserWindow({

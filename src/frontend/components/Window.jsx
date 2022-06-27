@@ -29,7 +29,7 @@ import { useContext, useEffect } from 'react';
 import { UserContext } from '../context/UserContext';
 
 // Router
-import { BrowserRouter, HashRouter } from 'react-router-dom';
+import { HashRouter } from 'react-router-dom';
 import { Routes, Route } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 

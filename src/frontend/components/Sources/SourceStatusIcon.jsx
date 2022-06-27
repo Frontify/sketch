@@ -9,6 +9,8 @@ import {
     IconRefresh,
 } from '@frontify/fondue';
 
+// i18n
+
 export function SourceStatusIcon({ state, status, loading }) {
     if (loading) {
         switch (status) {
