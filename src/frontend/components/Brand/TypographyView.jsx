@@ -7,7 +7,7 @@ import { useSketch } from '../../hooks/useSketch';
 import { UserContext } from '../../context/UserContext';
 
 // Components
-import { Button, IconCaretDown, Flyout, Text, IconMore } from '@frontify/arcade';
+import { Button, IconCaretDown, Flyout, Text, IconMore } from '@frontify/fondue';
 
 import { GuidelineSwitcher } from './GuidelineSwitcher';
 import { SearchField } from '../Core/SearchField';

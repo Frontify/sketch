@@ -19,7 +19,7 @@ import {
     IconExpand,
     IconUnknown,
     IconUnknownSimple,
-} from '@frontify/arcade';
+} from '@frontify/fondue';
 
 import { ArtboardToolbar } from './ArtboardToolbar';
 

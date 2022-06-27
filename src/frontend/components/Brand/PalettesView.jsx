@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 
 // Components
-import { IconCaretDown, Text } from '@frontify/arcade';
+import { IconCaretDown, Text } from '@frontify/fondue';
 
 import { GuidelineSwitcher } from './GuidelineSwitcher';
 import { LoadingIndicator } from '../Core/LoadingIndicator';

@@ -2,8 +2,8 @@ import React, { useEffect, useReducer } from 'react';
 import { useContext, useState } from 'react';
 import { UserContext } from '../../context/UserContext';
 
-import { Text } from '@frontify/arcade';
-import { Button, Flyout, IconCaretDown, IconCheck, IconRefresh } from '@frontify/arcade';
+import { Text } from '@frontify/fondue';
+import { Button, Flyout, IconCaretDown, IconCheck, IconRefresh } from '@frontify/fondue';
 
 export function Toolbar() {
     const context = useContext(UserContext);

@@ -7,7 +7,7 @@ import {
     IconArrowDown,
     IconUnknownSimple,
     IconRefresh,
-} from '@frontify/arcade';
+} from '@frontify/fondue';
 
 export function SourceStatusIcon({ state, status, loading }) {
     if (loading) {

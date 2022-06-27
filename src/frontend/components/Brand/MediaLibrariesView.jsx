@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 
 // Components
-import { Dropdown, LoadingCircle, Text } from '@frontify/arcade';
+import { Dropdown, LoadingCircle, Text } from '@frontify/fondue';
 
 import { GridView } from './GridView';
 import { SearchField } from '../Core/SearchField';

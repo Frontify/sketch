@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 
 // Components
-import { IconSketch, Text, LoadingCircle } from '@frontify/arcade';
+import { IconSketch, Text, LoadingCircle } from '@frontify/fondue';
 
 // Context
 import { UserContext } from '../../context/UserContext';

@@ -10,7 +10,7 @@ import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { UserContext } from '../../context/UserContext';
 
 // Components
-import { Text } from '@frontify/arcade';
+import { Text } from '@frontify/fondue';
 import { LoadingIndicator } from '../Core/LoadingIndicator';
 import { NavigationBar } from '../App/NavigationBar';
 import { Toolbar } from '../App/Toolbar';

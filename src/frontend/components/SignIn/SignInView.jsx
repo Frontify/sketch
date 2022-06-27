@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 
 // Components
-import { Button, FrontifyPattern, Heading, TextInput, Text } from '@frontify/arcade';
+import { Button, FrontifyPattern, Heading, TextInput, Text } from '@frontify/fondue';
 import { Logo } from '../Core/Logo';
 
 // Hooks

@@ -10,7 +10,7 @@ import {
     IconUploadAlternative,
     LoadingCircle,
     Text,
-} from '@frontify/arcade';
+} from '@frontify/fondue';
 
 // Hooks
 import { useNavigate } from 'react-router-dom';

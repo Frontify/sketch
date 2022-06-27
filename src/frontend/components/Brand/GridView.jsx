@@ -1,4 +1,4 @@
-import { LoadingCircle } from '@frontify/arcade';
+import { LoadingCircle } from '@frontify/fondue';
 import React, { useEffect, useState, useRef } from 'react';
 import { useSketch } from '../../hooks/useSketch';
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useContext } from 'react';
 
 // Components
-import { Button, FrontifyPattern, Heading, Text } from '@frontify/arcade';
+import { Button, FrontifyPattern, Heading, Text } from '@frontify/fondue';
 import { Logo } from '../Core/Logo';
 
 // Context

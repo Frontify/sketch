@@ -1,5 +1,5 @@
 import React from 'react';
-import { IconCaretDown, Text } from '@frontify/arcade';
+import { IconCaretDown, Text } from '@frontify/fondue';
 import { SourceStatusIcon } from './SourceStatusIcon';
 export function SourceFileInfo({ status, source, transferMap, loading }) {
     return (

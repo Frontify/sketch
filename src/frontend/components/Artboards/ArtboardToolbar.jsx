@@ -9,7 +9,7 @@ import {
     IconRevert,
     IconFrequentlyUsed,
     IconAdd,
-} from '@frontify/arcade';
+} from '@frontify/fondue';
 
 import { UploadDestinationPicker } from '../Core/UploadDestinationPicker';
 import { CustomDialog } from '../Core/CustomDialog';

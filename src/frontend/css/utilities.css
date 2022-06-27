@@ -64,7 +64,7 @@
     flex: 1;
 }
 
-/* These Tailwind classes were missing in Arcade */
+/* These Tailwind classes were missing in @frontify/fondue */
 
 .tw-gap-small {
     gap: 0.5rem;

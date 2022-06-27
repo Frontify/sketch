@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 // Components
-import { Button } from '@frontify/arcade';
+import { Button } from '@frontify/fondue';
 
 import { UploadDestinationPicker } from '../Core/UploadDestinationPicker';
 

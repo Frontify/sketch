@@ -18,7 +18,7 @@ import {
     LoadingCircle,
     MenuItem,
     Text,
-} from '@frontify/arcade';
+} from '@frontify/fondue';
 
 import { CustomDialog } from '../Core/CustomDialog';
 import { SourceFileInfo } from '../Sources/SourceFileInfo';

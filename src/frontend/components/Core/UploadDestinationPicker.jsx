@@ -10,7 +10,7 @@ import {
     IconArrowLeft,
     LoadingCircle,
     IconFile,
-} from '@frontify/arcade';
+} from '@frontify/fondue';
 
 // Context
 import { UserContext } from '../../context/UserContext';

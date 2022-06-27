@@ -1,7 +1,7 @@
 import React from 'react';
 
 // Import Styles
-import '@frontify/arcade/style';
+import '@frontify/fondue/style';
 
 // Artboards
 import { ArtboardsView } from './Artboards/ArtboardsView';

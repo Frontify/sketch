@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 // Components
-import { Button, Flyout, IconAdd, IconFrequentlyUsed, Text } from '@frontify/arcade';
+import { Button, Flyout, IconAdd, IconFrequentlyUsed, Text } from '@frontify/fondue';
 
 import { CustomDialog } from '../Core/CustomDialog';
 import { RecentDocumentsView } from './RecentDocumentsView';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState } from 'react';
-import { TextInput, IconSearch } from '@frontify/arcade';
+import { TextInput, IconSearch } from '@frontify/fondue';
 
 import { useTranslation } from 'react-i18next';
 

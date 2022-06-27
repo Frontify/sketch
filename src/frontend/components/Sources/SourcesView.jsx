@@ -3,7 +3,7 @@ import { useContext } from 'react';
 
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Toolbar } from '../App/Toolbar';
-import { Badge, Button } from '@frontify/arcade';
+import { Badge, Button } from '@frontify/fondue';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { useTranslation } from 'react-i18next';
 
