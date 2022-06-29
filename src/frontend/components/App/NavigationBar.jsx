@@ -7,10 +7,9 @@ import {
     Flyout,
     IconAdd,
     IconAlert,
-    IconCaretDown,
+    IconArrowLeft,
     IconDownloadAlternative,
     IconExternalLink,
-    IconFolderUp,
     IconMore,
     IconRefresh,
     IconUploadAlternative,
@@ -37,6 +36,9 @@ import { useTranslation } from 'react-i18next';
 
 // GraphQL
 import { queryGraphQLWithAuth } from '../../graphql/graphql';
+
+// Router
+import { Link } from 'react-router-dom';
 
 function SourceAction({ status, actions, loading }) {
     let context = useContext(UserContext);
@@ -372,6 +374,9 @@ export function NavigationBar() {
             <custom-h-stack align-items="center">
                 <custom-h-stack stretch-children="true" align-items="center" style={{ width: '100%', height: '100%' }}>
                     <div style={{ height: '100%', overflow: 'hidden', flex: 1 }}>
+                        <Link to="/sources">
+                            <Button inverted="true" icon={<IconArrowLeft size="Size24"></IconArrowLeft>}></Button>
+                        </Link>
                         <SourcePicker style={{ height: '100%', overflow: 'hidden' }}>
                             <custom-h-stack
                                 align-items="center"

@@ -83,7 +83,7 @@ export default function (context, view) {
     let win = new BrowserWindow({
         alwaysOnTop: true,
         fullscreenable: false,
-        hidesOnDeactivate: false,
+        hidesOnDeactivate: true,
         identifier: IDENTIFIER,
         maximizable: false,
         minHeight: 500,

@@ -105,6 +105,7 @@ export function Toolbar() {
                     </button> */}
 
                     <button
+                        padding-x="small"
                         onClick={() => {
                             window.postMessage('reload');
                         }}

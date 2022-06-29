@@ -10,6 +10,54 @@ import { useNavigate, Link, Outlet, useLocation } from 'react-router-dom';
 // i18n
 import { useTranslation } from 'react-i18next';
 
+function SourceStateInfo({ source, loading, transferMap }) {
+    return (
+        <div>
+            {source.state == 'same' && !loading ? (
+                <Text size="x-small" color="weak" whitespace="nowrap" overflow="ellipsis">
+                    Last revision by {source.remote?.modifier_name} {source.remote?.modified_localized_ago}
+                </Text>
+            ) : (
+                ''
+            )}
+            {source.state == 'push' && !loading ? (
+                <custom-h-stack align-items="center" gap="xx-small">
+                    <Text size="x-small" color="weak">
+                        Push changes
+                    </Text>
+                </custom-h-stack>
+            ) : (
+                ''
+            )}
+            {loading ? (
+                status == 'PUSHING' ? (
+                    <Text size="x-small" color="weak">
+                        Pushing …{' '}
+                        {transferMap[source.remote?.id]?.progress ? (
+                            <span style={{ fontFeatureSettings: 'tnum' }}>
+                                {Math.floor(transferMap[source.remote?.id]?.progress)}%
+                            </span>
+                        ) : (
+                            ''
+                        )}
+                    </Text>
+                ) : '' || status == 'FETCHING' ? (
+                    <Text size="x-small" color="weak">
+                        Fetching …
+                    </Text>
+                ) : (
+                    ''
+                )
+            ) : (
+                ''
+                // <Text size="x-small" color="weak">
+                //     Last fetched {relativeLastFetched}
+                // </Text>
+            )}
+        </div>
+    );
+}
+
 export function SourceFileInfo({ status, source, transferMap, loading }) {
     const { t } = useTranslation();
 
@@ -33,53 +81,22 @@ export function SourceFileInfo({ status, source, transferMap, loading }) {
                     {source && source.remote?.id ? (
                         <custom-v-stack gap="small" style={{ overflow: 'hidden' }}>
                             <custom-v-stack style={{ overflow: 'hidden' }}>
+                                <Text color="weak" size="small">
+                                    {source.remote?.path}
+                                </Text>
                                 <custom-h-stack align-items="center">
-                                    <Text size="x-small" weight="strong" whitespace="nowrap" overflow="ellipsis">
+                                    <Text weight="strong" whitespace="nowrap" overflow="ellipsis">
                                         {source.local.filename.replace('.sketch', '')}
                                     </Text>
                                 </custom-h-stack>
-                                {source.state == 'same' && !loading ? (
-                                    <Text size="x-small" color="weak" whitespace="nowrap" overflow="ellipsis">
-                                        Last revision by {source.remote?.modifier_name}{' '}
-                                        {source.remote?.modified_localized_ago}
-                                    </Text>
-                                ) : (
-                                    ''
-                                )}
-                                {source.state == 'push' && !loading ? (
-                                    <custom-h-stack align-items="center" gap="xx-small">
-                                        <Text size="x-small" color="weak">
-                                            Push changes
-                                        </Text>
-                                    </custom-h-stack>
-                                ) : (
-                                    ''
-                                )}
-                                {loading ? (
-                                    status == 'PUSHING' ? (
-                                        <Text size="x-small" color="weak">
-                                            Pushing …{' '}
-                                            {transferMap[source.remote?.id]?.progress ? (
-                                                <span style={{ fontFeatureSettings: 'tnum' }}>
-                                                    {Math.floor(transferMap[source.remote?.id]?.progress)}%
-                                                </span>
-                                            ) : (
-                                                ''
-                                            )}
-                                        </Text>
-                                    ) : '' || status == 'FETCHING' ? (
-                                        <Text size="x-small" color="weak">
-                                            Fetching …
-                                        </Text>
-                                    ) : (
-                                        ''
-                                    )
-                                ) : (
-                                    ''
-                                    // <Text size="x-small" color="weak">
-                                    //     Last fetched {relativeLastFetched}
-                                    // </Text>
-                                )}
+
+                                {/* Legacy: Not part of the design anymore but kept for reference */}
+
+                                {/* <SourceStateInfo
+                                    source={source}
+                                    loading={loading}
+                                    transferMap={transferMap}
+                                ></SourceStateInfo> */}
                             </custom-v-stack>
                         </custom-v-stack>
                     ) : source.local.filename ? (

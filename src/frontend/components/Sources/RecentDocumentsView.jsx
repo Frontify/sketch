@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 
 // Components
 import { IconSketch, Text, LoadingCircle } from '@frontify/fondue';
+import { SourceFileEntry } from './SourceFileEntry';
 
 // Context
 import { UserContext } from '../../context/UserContext';
@@ -61,7 +62,10 @@ export function RecentDocumentsView({ onInput, onChange }) {
         setLoading(true);
 
         let ids = recentDocumentsForBrand.map((document) => document.refs?.remote_id || null) || [];
-        let query = `{
+
+        if (ids && ids.length) {
+            console.log('send query', ids);
+            let query = `{
             assets(ids: [${ids}]) {
               id
               title
@@ -82,39 +86,42 @@ export function RecentDocumentsView({ onInput, onChange }) {
             }
           }`;
 
-        let result = await queryGraphQLWithAuth({ query, auth: context.auth });
+            let result = await queryGraphQLWithAuth({ query, auth: context.auth });
 
-        /**
-         * Here we might get errors:
-         *
-         * >>> message: "policy 'assets style guide' not fulfilled"
-         *
-         * This can happen when we try to request assets that don’t belong to this brand.
-         */
-        console.log('result from graphql', result);
+            /**
+             * Here we might get errors:
+             *
+             * >>> message: "policy 'assets style guide' not fulfilled"
+             *
+             * This can happen when we try to request assets that don’t belong to this brand.
+             */
+            console.log('result from graphql', result);
 
-        setRemoteDocuments(result.data.assets);
+            setRemoteDocuments(result.data.assets);
 
-        let merged = [];
+            let merged = [];
 
-        // Todo: This doesn’t work. Local files don’t know the GraphQL ID...
-        const localFileForGraphQLID = (id) => {
-            // Todo: ID is an index, but we should find an ID if we have it.
-            return (
-                recentDocumentsForBrand.find((doc) => doc.refs.remote_graphql_id == id) || recentDocumentsForBrand[id]
-            );
-        };
-        if (result.data?.assets) {
-            result.data.assets.forEach((document, index) => {
-                merged.push({
-                    remote: document,
-                    local: localFileForGraphQLID(index),
+            // Todo: This doesn’t work. Local files don’t know the GraphQL ID...
+            const localFileForGraphQLID = (id) => {
+                // Todo: ID is an index, but we should find an ID if we have it.
+                return (
+                    recentDocumentsForBrand.find((doc) => doc.refs.remote_graphql_id == id) ||
+                    recentDocumentsForBrand[id]
+                );
+            };
+            if (result.data?.assets) {
+                result.data.assets.forEach((document, index) => {
+                    merged.push({
+                        remote: document,
+                        local: localFileForGraphQLID(index),
+                    });
                 });
-            });
+            }
+
+            merged = merged.sort((a, b) => (a.local.timestamp < b.local.timestamp ? 1 : -1));
+            setMergedDocuments(merged);
         }
 
-        merged = merged.sort((a, b) => (a.local.timestamp < b.local.timestamp ? 1 : -1));
-        setMergedDocuments(merged);
         setLoading(false);
     }, [recentDocumentsForBrand]);
 
@@ -126,16 +133,23 @@ export function RecentDocumentsView({ onInput, onChange }) {
         );
     }
     if (mergedDocuments.length == 0) {
-        return (
-            <custom-v-stack flex padding="small" align-items="center" justify-content="center">
-                {loading && <LoadingCircle size="Small"></LoadingCircle>}
-                {!loading && <Text>No Recent Documents</Text>}
-            </custom-v-stack>
-        );
+        if (loading) {
+            return (
+                <custom-v-stack flex align-items="center" justify-content="center" padding-y="medium" padding-x="large">
+                    <LoadingCircle size="Small"></LoadingCircle>
+                </custom-v-stack>
+            );
+        } else {
+            return (
+                <custom-v-stack flex padding-y="medium" padding-x="large">
+                    <Text color="weak">{t('sources.no_recent_documents')}</Text>
+                </custom-v-stack>
+            );
+        }
     }
 
     return (
-        <custom-v-stack separator="between">
+        <custom-v-stack>
             {/* Recent Documents */}
             {mergedDocuments.map((document) => {
                 return (
