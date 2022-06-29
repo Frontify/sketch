@@ -63,10 +63,11 @@ function SourceAction({ status, actions, loading }) {
                     open={showDestinationPicker}
                     trigger={
                         <Button
-                            style="Secondary"
+                            style="Primary"
+                            inverted="true"
                             hugWidth={false}
                             onClick={() => setShowDestinationPicker(true)}
-                            icon={<IconFolderUp />}
+                            icon={<IconUploadAlternative size="Size24" />}
                         >
                             {/* <Text whitespace="nowrap">Publish …</Text> */}
                         </Button>
@@ -384,15 +385,19 @@ export function NavigationBar() {
                                         Open a document or refresh.
                                     </Text>
                                 </custom-v-stack>
-                                <custom-spacer></custom-spacer>
-                                <div style={{ flex: 0 }}>
-                                    <IconCaretDown></IconCaretDown>
-                                </div>
                             </custom-h-stack>
                         </SourcePicker>
                     </div>
                 </custom-h-stack>
-                <custom-h-stack padding="small" gap="xx-small" separator="left" style={{ flex: 0 }}>
+                <custom-h-stack padding="small" gap="xx-small" style={{ flex: 0 }}>
+                    <button
+                        onClick={() => {
+                            window.postMessage('reload');
+                        }}
+                    >
+                        <IconRefresh icon="Refresh" size="Size20" />
+                    </button>
+
                     <div style={{ flex: 0 }}>
                         <Flyout
                             hug={false}
@@ -430,17 +435,15 @@ export function NavigationBar() {
     return (
         <custom-h-stack stretch-children="true" align-items="center" style={{ width: '100%' }}>
             <div style={{ height: '100%', overflow: 'hidden', flex: 1 }}>
-                <SourcePicker style={{ height: '100%', overflow: 'hidden' }}>
-                    <SourceFileInfo
-                        source={context.currentDocument}
-                        status={status}
-                        loading={loading}
-                        transferMap={context.transferMap}
-                    ></SourceFileInfo>
-                </SourcePicker>
+                <SourceFileInfo
+                    source={context.currentDocument}
+                    status={status}
+                    loading={loading}
+                    transferMap={context.transferMap}
+                ></SourceFileInfo>
             </div>
 
-            <custom-h-stack padding="small" gap="xx-small" separator="left" style={{ flex: 0 }}>
+            <custom-h-stack padding="small" gap="xx-small" style={{ flex: 0 }}>
                 {context.currentDocument.state != 'unsaved' && (
                     <SourceAction
                         style={{ flex: 0 }}

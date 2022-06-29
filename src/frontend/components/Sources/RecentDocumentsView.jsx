@@ -144,7 +144,8 @@ export function RecentDocumentsView({ onInput, onChange }) {
                         selectable
                         tabindex="0"
                         key={document.local.uuid}
-                        padding="small"
+                        padding-y="medium"
+                        padding-x="large"
                         onFocus={() => {
                             focusSource(document);
                         }}
@@ -154,25 +155,21 @@ export function RecentDocumentsView({ onInput, onChange }) {
                         }}
                     >
                         <custom-h-stack gap="medium" align-items="center">
-                            <div>
-                                {/* <SourceStatusIcon state="'push'"></SourceStatusIcon> */}
-                                <IconSketch size="Size24"></IconSketch>
-                            </div>
-
-                            <custom-v-stack gap="xx-small">
+                            <custom-v-stack gap="xx-small" overflow="hidden">
                                 {/* <pre>{new Date(document.local.timestamp).toLocaleString()}</pre> */}
-                                {/* <Text size="small" overflow="truncate">
+                                <Text color="weak" overflow="truncate">
                                     {document.local.path}
-                                </Text> */}
-                                <Text size="small">{document.local.filename.replace('.sketch', '')}</Text>
+                                </Text>
 
-                                <Text size="small" color="weak">
+                                <Text weight="strong">{document.local.filename.replace('.sketch', '')}</Text>
+
+                                {/* <Text size="small" color="weak">
                                     <custom-h-stack gap="x-small">
                                         <span>{document.remote.creator.name}</span>
                                         <span>•</span>
                                         <span>{new Date(document.remote.modifiedAt).toLocaleString()}</span>
                                     </custom-h-stack>
-                                </Text>
+                                </Text> */}
                             </custom-v-stack>
                             <custom-spacer></custom-spacer>
                             <div style={{ minWidth: '24px' }}>

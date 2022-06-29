@@ -17,6 +17,9 @@ import { useState, useEffect } from 'react';
 
 import PropTypes from 'prop-types';
 
+// i18n
+import { useTranslation } from 'react-i18next';
+
 /**
  * ⚛️ Toolbar
  * ----------------------------------------------------------------------------
@@ -63,6 +66,8 @@ function ArtboardToolbar({
     const [computedFolderType, setComputedFolderType] = useState('none');
     const [sortedUsedFolders, setSortedUsedFolders] = useState([]);
     const [temporaryUploadDestination, setTemporaryUploadDestination] = useState(null);
+
+    let { t } = useTranslation();
 
     useEffect(() => {
         setSortedUsedFolders(() => {
@@ -378,15 +383,8 @@ function ArtboardToolbar({
                     style="Secondary"
                     hugWidth={false}
                     onClick={() => uploadSome()}
-                    icon={
-                        <IconUploadAlternative
-                            style={{
-                                color: modifiedArtboards.length == 0 ? 'inherit' : 'var(--box-selected-strong-color)',
-                            }}
-                        />
-                    }
                 >
-                    Upload changes
+                    {t('artboards.update_all')}
                 </Button>
             ) : (
                 'Uploading …'

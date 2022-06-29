@@ -45,7 +45,6 @@ export function SourceView() {
             <custom-v-stack stretch>
                 {/* <Toolbar></Toolbar> */}
                 <NavigationBar></NavigationBar>
-                <custom-line></custom-line>
 
                 <custom-h-stack padding="medium">
                     <Slider

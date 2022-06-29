@@ -178,11 +178,6 @@ function ArtboardGroupItem({ group, uploadGroup, open, onOpen, onClose }) {
                 ? group.children.map((artboard) => {
                       return (
                           <custom-v-stack key={artboard.id} style={{ marginLeft: '28px' }}>
-                              {artboard.destinations.length == 0 ? (
-                                  <UntrackedArtboardItem artboard={artboard}></UntrackedArtboardItem>
-                              ) : (
-                                  ''
-                              )}
                               {artboard.destinations.map((destination) => {
                                   return (
                                       <ArtboardDestinationItem
@@ -376,6 +371,10 @@ export function ArtboardsView() {
     const [showDestinationPicker, setShowDestinationPicker] = useState(false);
     const [total, setTotal] = useState(0);
     const [usedFolders, setUsedFolders] = useState(new Map());
+
+    // Legacy: We used to have "all" and "modified" views.
+    // Now, there’s only a view of "all" which excludes untracked artboards.
+
     const [view, setView] = useState('all');
 
     const [groupsExpansionState, setGroupsExpansionState] = useLocalStorage('cache.groupsExpansionState', 'collapsed');
@@ -484,24 +483,15 @@ export function ArtboardsView() {
      */
 
     useEffect(async () => {
-        let map = {
-            ungrouped: {
-                breadcrumbs: ['Unknown'],
-                key: 'ungrouped',
-                title: 'No Folder',
-                path: null,
-                project_id: null,
-                children: [],
-                open: true,
-            },
-        };
+        let map = {};
 
-        let groups = [map['ungrouped']];
+        let groups = [];
 
         if (artboards) {
             artboards.forEach((artboard) => {
                 if (!artboard.destinations || artboard.destinations.length == 0) {
-                    map['ungrouped'].children.push(artboard);
+                    // Do nothing
+                    // map['ungrouped'].children.push(artboard);
                     return;
                 }
 
@@ -729,61 +719,6 @@ export function ArtboardsView() {
     if (artboards && artboards.length && !hasSelection) {
         return (
             <custom-v-stack flex stretch="true" overflow="hidden">
-                <custom-h-stack padding="small" gap="small">
-                    {['all', 'modified'].map((item) => {
-                        return view == item ? (
-                            <Badge
-                                key={item}
-                                emphasis="Strong"
-                                style="Progress"
-                                onClick={() => {
-                                    setView(item);
-                                }}
-                            >
-                                <span style={{ textTransform: 'capitalize' }}>{item}</span>{' '}
-                                {item == 'modified' && <span>({modifiedArtboards.length})</span>}
-                            </Badge>
-                        ) : (
-                            <Badge
-                                key={item}
-                                emphasis="None"
-                                style="Primary"
-                                onClick={() => {
-                                    setView(item);
-                                }}
-                            >
-                                <span style={{ textTransform: 'capitalize' }}>{item}</span>{' '}
-                                {item == 'modified' && <span>({modifiedArtboards.length})</span>}
-                            </Badge>
-                        );
-                    })}
-                    <custom-spacer></custom-spacer>
-                    <custom-h-stack>
-                        {groupsExpansionState == 'expanded' && (
-                            <Button
-                                aria-label="Collapse Groups"
-                                inverted={true}
-                                size="Small"
-                                onClick={() => {
-                                    collapseGroups();
-                                }}
-                                icon={<IconCollapse size="Size12"></IconCollapse>}
-                            ></Button>
-                        )}
-                        {groupsExpansionState == 'collapsed' && (
-                            <Button
-                                aria-label="Expand Groups"
-                                inverted={true}
-                                size="Small"
-                                onClick={() => {
-                                    expandGroups();
-                                }}
-                                icon={<IconExpand size="Size12"></IconExpand>}
-                            ></Button>
-                        )}
-                    </custom-h-stack>
-                </custom-h-stack>
-                <custom-line></custom-line>
                 <custom-scroll-view>
                     {groupedArtboards.length ? (
                         <custom-v-stack flex stretch="true" separator="between">
@@ -803,19 +738,10 @@ export function ArtboardsView() {
                         </custom-v-stack>
                     ) : (
                         <custom-v-stack flex stretch="true">
-                            <custom-v-stack
-                                gap="small"
-                                padding="small"
-                                flex
-                                stretch="true"
-                                align-items="center"
-                                justify-content="center"
-                            >
-                                <Text color="weak">No changes</Text>
-                                {/* <Text color="weak">
-                                    Use this view to update artboards that are already tracked on Frontify.
-                                </Text> */}
-                            </custom-v-stack>
+                            <EmptyState
+                                title={t('artboards.no_selection_title')}
+                                description={t('artboards.no_selection_description')}
+                            ></EmptyState>
                         </custom-v-stack>
                     )}
                 </custom-scroll-view>

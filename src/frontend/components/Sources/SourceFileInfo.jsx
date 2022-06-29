@@ -1,7 +1,7 @@
 import React from 'react';
 
 // Components
-import { IconArrowLeft, IconCaretDown, Text } from '@frontify/fondue';
+import { Button, IconArrowLeft, IconCaretDown, Text } from '@frontify/fondue';
 import { SourceStatusIcon } from './SourceStatusIcon';
 
 // Router
@@ -16,6 +16,7 @@ export function SourceFileInfo({ status, source, transferMap, loading }) {
     return (
         <custom-h-stack flex style={{ height: '100%' }} align-items="center" stretch-children-height="true">
             <custom-h-stack
+                padding-x="small"
                 gap="medium"
                 align-items="center"
                 style={{ height: '100%', overflow: 'hidden', width: '100%' }}
@@ -25,7 +26,7 @@ export function SourceFileInfo({ status, source, transferMap, loading }) {
                 {/* <SourceStatusIcon status={status} state={source.state} loading={loading}></SourceStatusIcon> */}
 
                 <Link to="/sources">
-                    <IconArrowLeft size="Size24"></IconArrowLeft>
+                    <Button inverted="true" icon={<IconArrowLeft size="Size24"></IconArrowLeft>}></Button>
                 </Link>
 
                 <custom-h-stack gap="xx-small" align-items="center" style={{ overflow: 'hidden', width: '100%' }}>
@@ -100,10 +101,6 @@ export function SourceFileInfo({ status, source, transferMap, loading }) {
                             </Text>
                         </custom-v-stack>
                     )}
-                    <custom-spacer></custom-spacer>
-                    <div style={{ flex: 0 }}>
-                        <IconCaretDown></IconCaretDown>
-                    </div>
                 </custom-h-stack>
             </custom-h-stack>
         </custom-h-stack>

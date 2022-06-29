@@ -34,9 +34,9 @@ export function Toolbar() {
                             onOpenChange={(isOpen) => setOpen(isOpen)}
                             legacyFooter={false}
                             trigger={
-                                <Button onClick={() => setOpen((open) => !open)} size="Small">
+                                <Button onClick={() => setOpen((open) => !open)} size="Small" inverted="true">
                                     <custom-h-stack gap="small">
-                                        <Text as="span" color="white" size="medium" weight="strong">
+                                        <Text as="span" size="medium" weight="strong">
                                             {context.brands && context.selection.brand && context.selection.brand.name}
                                         </Text>
                                         <IconCaretDown></IconCaretDown>
@@ -52,7 +52,7 @@ export function Toolbar() {
                                         </custom-avatar>
                                     )}
 
-                                    <Text as="span" color="white" size="medium" weight="medium">
+                                    <Text as="span" size="medium" weight="medium">
                                         {context.user.name}
                                     </Text>
                                     <custom-spacer></custom-spacer>

@@ -1,14 +1,22 @@
 import React from 'react';
-import { useContext } from 'react';
 
+// Context
+import { useContext } from 'react';
+import { UserContext } from '../../context/UserContext';
+
+// Router
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+
+// Components
+import { Button, Text } from '@frontify/fondue';
+
+import { LoadingIndicator } from '../Core/LoadingIndicator';
+import { RecentDocumentsView } from './RecentDocumentsView';
 import { Toolbar } from '../App/Toolbar';
-import { Badge, Button } from '@frontify/fondue';
+
+// Hooks
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { useTranslation } from 'react-i18next';
-
-import { UserContext } from '../../context/UserContext';
-import { LoadingIndicator } from '../Core/LoadingIndicator';
 
 export function SourcesView() {
     let [activeSourceScope, setActiveSourceScope] = useLocalStorage('cache.activeSourceScope', 'open');
@@ -18,57 +26,70 @@ export function SourcesView() {
 
     const { t } = useTranslation();
 
+    const redirectToDocument = () => {
+        navigate(`/source/artboards/`);
+    };
+
     if (context.user?.name) {
         return (
-            <custom-v-stack stretch style={{ background: 'rgba(0, 0, 0, 0.5)' }}>
+            <custom-v-stack stretch>
                 <Toolbar></Toolbar>
+                <custom-line></custom-line>
 
                 <custom-v-stack
                     style={{
-                        borderRadius: '16px',
                         overflow: 'hidden',
-                        margin: ' 1rem',
                         height: ' 100%',
                         background: 'white',
                     }}
                 >
-                    <custom-scope-bar-wrapper padding="small">
-                        <custom-h-stack align-items="center" gap="x-small">
-                            {[
-                                { label: t('sources.local'), value: 'local', url: '/sources/recent' },
-                                { label: t('sources.remote'), value: 'remote', url: '/sources/remote' },
-                            ].map((item) => {
-                                return (
-                                    <Badge
-                                        key={item.value}
-                                        emphasis={activeSourceScope == item.value ? 'Strong' : ''}
-                                        style="Progress"
-                                        onClick={() => {
-                                            navigate(item.url);
-                                            setActiveSourceScope(item.value);
-                                        }}
-                                    >
-                                        <span style={{ textTransform: 'capitalize' }}>{item.label}</span>
-                                    </Badge>
-                                );
-                            })}
+                    <custom-v-stack>
+                        <custom-v-stack padding="large" style={{ paddingBottom: '1rem' }}>
+                            <Text size="large" weight="strong">
+                                Current File
+                            </Text>
+                        </custom-v-stack>
 
-                            <custom-spacer></custom-spacer>
-
-                            <div>
-                                <Button
-                                    style="Secondary"
-                                    onClick={() => {
-                                        navigate('/source/artboards');
-                                    }}
-                                >
-                                    {t('general.close')}
-                                </Button>
-                            </div>
-                        </custom-h-stack>
-                    </custom-scope-bar-wrapper>
+                        <custom-palette-item
+                            padding-y="medium"
+                            padding-x="large"
+                            onClick={() => {
+                                redirectToDocument();
+                            }}
+                        >
+                            {context.currentDocument && (
+                                <custom-v-stack gap="xx-small" overflow="hidden">
+                                    <Text color="weak">
+                                        {context.currentDocument.remote?.path || context.currentDocument.state}
+                                    </Text>
+                                    <Text weight="strong">
+                                        {context.currentDocument.local?.filename.replace('.sketch', '')}
+                                    </Text>
+                                </custom-v-stack>
+                            )}
+                        </custom-palette-item>
+                    </custom-v-stack>
                     <custom-line></custom-line>
-                    <Outlet />
+                    <custom-v-stack>
+                        <custom-v-stack padding="large" style={{ paddingBottom: '1rem' }}>
+                            <Text size="large" weight="strong">
+                                Recent Files
+                            </Text>
+                        </custom-v-stack>
+
+                        <RecentDocumentsView
+                            onInput={(value) => {
+                                setTemporaryUploadDestination(value);
+                            }}
+                            onChange={(value) => {
+                                setUploadDestination(value);
+
+                                // setShowRecentDestinations(false);
+                                setTemporaryUploadDestination(null);
+                                openSource(value);
+                            }}
+                        ></RecentDocumentsView>
+                    </custom-v-stack>
                 </custom-v-stack>
             </custom-v-stack>
         );

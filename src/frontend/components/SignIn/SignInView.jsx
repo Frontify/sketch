@@ -67,7 +67,8 @@ export function SignInView() {
     }
 
     useEffect(() => {
-        if (!urlIsEmpty(domain) && !urlIsBlackListed(domain) && urlStartsWithProtocol(domain)) {
+        // 29 Jun: removed && urlStartsWithProtocol(domain)
+        if (!urlIsEmpty(domain) && !urlIsBlackListed(domain)) {
             setValidDomain(true);
         } else {
             setValidDomain(false);
@@ -90,7 +91,7 @@ export function SignInView() {
                                 setDomain(event.target.value);
                                 handleSignIn(event.target.value);
                             }}
-                            type="text"
+                            type="email"
                             placeholder={placeholders.domain}
                             value={domain}
                             onChange={(value) => setDomain(value)}
