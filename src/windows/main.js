@@ -77,7 +77,7 @@ function refresh() {
 
 export default function (context, view) {
     let baseURL = isDev ? 'http://localhost:3000' : pathInsidePluginBundle('index.html');
-    let mainURL = `${baseURL}/#/source`;
+    let mainURL = `${baseURL}/#/source/artboards`;
 
     // create window and webview
     let win = new BrowserWindow({
