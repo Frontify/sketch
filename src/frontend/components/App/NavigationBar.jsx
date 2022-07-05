@@ -21,7 +21,6 @@ import {
 
 import { CustomDialog } from '../Core/CustomDialog';
 import { SourceFileInfo } from '../Sources/SourceFileInfo';
-import { SourcePicker } from '../Sources/SourcePicker';
 import { UploadDestinationPicker } from '../Core/UploadDestinationPicker';
 
 // Hooks
@@ -369,29 +368,18 @@ export function NavigationBar() {
         }
     }, [context.currentDocument]);
 
+    // Without open document:
     if (!context.currentDocument.local)
         return (
             <custom-h-stack align-items="center">
-                <custom-h-stack stretch-children="true" align-items="center" style={{ width: '100%', height: '100%' }}>
+                <custom-h-stack stretch-children="true" align-items="center" style={{ width: '100%' }}>
                     <div style={{ height: '100%', overflow: 'hidden', flex: 1 }}>
-                        <Link to="/sources">
-                            <Button inverted="true" icon={<IconArrowLeft size="Size24"></IconArrowLeft>}></Button>
-                        </Link>
-                        <SourcePicker style={{ height: '100%', overflow: 'hidden' }}>
-                            <custom-h-stack
-                                align-items="center"
-                                style={{ height: '100%', minHeight: '44px', overflow: 'hidden', width: '100%' }}
-                            >
-                                <custom-v-stack>
-                                    <Text weight="strong" size="x-small">
-                                        {t('sources.no_open_document')}
-                                    </Text>
-                                    <Text size="x-small" color="weak">
-                                        Open a document or refresh.
-                                    </Text>
-                                </custom-v-stack>
-                            </custom-h-stack>
-                        </SourcePicker>
+                        <SourceFileInfo
+                            source={context.currentDocument}
+                            status={status}
+                            loading={loading}
+                            transferMap={context.transferMap}
+                        ></SourceFileInfo>
                     </div>
                 </custom-h-stack>
                 <custom-h-stack padding="small" gap="xx-small" style={{ flex: 0 }}>
@@ -437,6 +425,7 @@ export function NavigationBar() {
             </custom-h-stack>
         );
 
+    // With open document:
     return (
         <custom-h-stack stretch-children="true" align-items="center" style={{ width: '100%' }}>
             <div style={{ height: '100%', overflow: 'hidden', flex: 1 }}>
