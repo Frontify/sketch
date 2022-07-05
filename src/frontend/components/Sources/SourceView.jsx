@@ -46,7 +46,7 @@ export function SourceView() {
                 {/* <Toolbar></Toolbar> */}
                 <NavigationBar></NavigationBar>
 
-                <custom-h-stack padding="medium">
+                <custom-h-stack padding="medium" padding-x="large">
                     <Slider
                         items={sliderItems}
                         activeItemId={activeView}

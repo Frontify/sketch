@@ -88,8 +88,8 @@ export function ArtboardItem({ artboard, showPath = true }) {
 
 function ArtboardGroupItem({ group, uploadGroup, open, onOpen, onClose }) {
     return (
-        <custom-v-stack padding="x-small" gap="x-small" style={{ paddingBottom: '12px' }}>
-            <custom-h-stack gap="xx-small">
+        <custom-v-stack padding="x-small" gap="x-small">
+            <custom-h-stack gap="xx-small" align-items="center" style={{ marginLeft: '12px' }}>
                 <div>
                     {open ? (
                         <Button
@@ -108,22 +108,21 @@ function ArtboardGroupItem({ group, uploadGroup, open, onOpen, onClose }) {
                     )}
                 </div>
                 <custom-v-stack gap="x-small">
-                    <custom-v-stack gap="xx-small" style={{ paddingTop: group.key == 'ungrouped' ? 'initial' : '4px' }}>
+                    <custom-v-stack gap="xx-small">
                         <custom-breadcrumbs>
                             {group.breadcrumbs &&
                                 group.breadcrumbs.map((breadcrumb, index) => (
-                                    <Text color="weak" size="x-small" key={index}>
-                                        {breadcrumb} /
-                                    </Text>
+                                    <custom-h-stack gap="x-small">
+                                        <Text color="weak" size="small" key={index}>
+                                            {breadcrumb}
+                                        </Text>
+                                        <Text color="weak">/</Text>
+                                    </custom-h-stack>
                                 ))}
-                        </custom-breadcrumbs>
-                        <custom-h-stack gap="x-small">
-                            {group.key == 'ungrouped' ? <IconUnknown></IconUnknown> : <IconFolder></IconFolder>}
-
-                            <Text padding="small" weight="strong">
+                            <Text padding="small" size="small" weight="strong">
                                 {group.title}
                             </Text>
-                        </custom-h-stack>
+                        </custom-breadcrumbs>
                     </custom-v-stack>
                     {group.selectionCount > 0 && (
                         <Text padding="small" size="x-small">
@@ -172,12 +171,11 @@ function ArtboardGroupItem({ group, uploadGroup, open, onOpen, onClose }) {
                     </div>
                 </custom-h-stack>
             </custom-h-stack>
-            {open && <custom-line style={{ marginLeft: '28px' }}></custom-line>}
 
             {open
                 ? group.children.map((artboard) => {
                       return (
-                          <custom-v-stack key={artboard.id} style={{ marginLeft: '28px' }}>
+                          <custom-v-stack key={artboard.id} style={{ marginLeft: '16px' }}>
                               {artboard.destinations.map((destination) => {
                                   return (
                                       <ArtboardDestinationItem
@@ -254,20 +252,27 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
             }}
         >
             {display == 'artboard' ? (
-                <custom-h-stack gap="x-small" align-items="center">
+                <custom-h-stack gap="small" align-items="center">
                     {/* Modified */}
-                    <ArtboardDestinationStatusIcon
+                    {/* <ArtboardDestinationStatusIcon
                         destination={destination}
                         transfer={transfer}
-                    ></ArtboardDestinationStatusIcon>
+                    ></ArtboardDestinationStatusIcon> */}
 
-                    <Text
-                        size="x-small"
-                        color={destination.selected ? '' : '    '}
-                        weight={destination.selected && transfer?.status != 'upload-complete' ? 'strong' : 'default'}
-                    >
-                        {artboard.name}.png
-                    </Text>
+                    <custom-artboard-thumbnail></custom-artboard-thumbnail>
+                    <custom-v-stack gap="x-small">
+                        <Text
+                            color={destination.selected ? '' : '    '}
+                            weight={
+                                destination.selected && transfer?.status != 'upload-complete' ? 'strong' : 'default'
+                            }
+                        >
+                            {artboard.name}
+                        </Text>
+                        <Text size="small" color="weak">
+                            ??? ago
+                        </Text>
+                    </custom-v-stack>
                 </custom-h-stack>
             ) : (
                 <custom-h-stack size="small" color="weak" gap="x-small" align-items="center">
@@ -724,7 +729,7 @@ export function ArtboardsView() {
                         <custom-v-stack flex stretch="true" separator="between">
                             {groupedArtboards.map((group) => {
                                 return (
-                                    <custom-v-stack key={group.key}>
+                                    <custom-v-stack key={group.key} style={{ paddingBottom: '8px' }}>
                                         <ArtboardGroupItem
                                             onOpen={onOpen}
                                             onClose={onClose}
@@ -788,7 +793,7 @@ export function ArtboardsView() {
                             return (
                                 <custom-v-stack key={artboard.key}>
                                     <ArtboardItem artboard={artboard} showPath={false}></ArtboardItem>
-                                    <custom-v-stack style={{ marginLeft: '12px' }}>
+                                    <custom-v-stack>
                                         {artboard.destinations.map((destination) => {
                                             return (
                                                 <ArtboardDestinationItem

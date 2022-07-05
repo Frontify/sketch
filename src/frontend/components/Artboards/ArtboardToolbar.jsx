@@ -133,7 +133,14 @@ function ArtboardToolbar({
     }, [artboards, projectMap]);
 
     return (
-        <custom-h-stack padding="small" gap="small" align-items="center" separator="top" style={{ width: '100%' }}>
+        <custom-h-stack
+            padding-x="large"
+            padding-y="medium"
+            gap="small"
+            align-items="center"
+            separator="top"
+            style={{ width: '100%' }}
+        >
             {withDestinationPicker ? (
                 <custom-h-stack
                     flex
@@ -378,14 +385,14 @@ function ArtboardToolbar({
                     </div>
                 </custom-h-stack>
             ) : !loading ? (
-                <Button
-                    disabled={modifiedArtboards.length == 0}
-                    style="Secondary"
-                    hugWidth={false}
-                    onClick={() => uploadSome()}
-                >
-                    {t('artboards.update_all')}
-                </Button>
+                <custom-h-stack gap="small" stretch-children="true" flex>
+                    <Button style="Secondary" hugWidth={false} onClick={() => uploadSome()}>
+                        {t('artboards.upload_selected')}
+                    </Button>
+                    <Button style="Primary" hugWidth={false} onClick={() => uploadSome()}>
+                        {t('artboards.update_all')} ({modifiedArtboards.length})
+                    </Button>
+                </custom-h-stack>
             ) : (
                 'Uploading …'
             )}
