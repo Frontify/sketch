@@ -721,7 +721,7 @@ export function ArtboardsView() {
     }, []);
 
     // All Artboards
-    if (artboards && artboards.length && !hasSelection) {
+    if (artboards && artboards.length) {
         return (
             <custom-v-stack flex stretch="true" overflow="hidden">
                 <custom-scroll-view>
@@ -757,75 +757,6 @@ export function ArtboardsView() {
                     usedFolders={usedFolders}
                     onCreateFolder={onCreateFolder}
                     modifiedArtboards={modifiedArtboards}
-                    withDestinationPicker={hasSelection}
-                    showRecentDestinations={showRecentDestinations}
-                    setShowRecentDestinations={setShowRecentDestinations}
-                    setShowDestinationPicker={setShowDestinationPicker}
-                    showDestinationPicker={showDestinationPicker}
-                    setUploadDestination={setUploadDestination}
-                    uploadDestination={uploadDestination}
-                    uploadArtboards={uploadArtboards}
-                    uploadSome={uploadSome}
-                    uploadArtboardsToDestination={uploadArtboardsToDestination}
-                ></ArtboardToolbar>
-            </custom-v-stack>
-        );
-    }
-
-    if (artboards && artboards.length && hasSelection) {
-        return (
-            <custom-v-stack stretch overflow="hidden">
-                {showRecentDestinations && !showDestinationPicker && (
-                    <custom-dim
-                        onClick={() => {
-                            setShowRecentDestinations(false);
-                        }}
-                    ></custom-dim>
-                )}
-                <custom-h-stack padding="small" separator="bottom">
-                    <Text color="weak" size="x-small">
-                        Selected Artboards ( {artboards.length} )
-                    </Text>
-                </custom-h-stack>
-                <custom-scroll-view flex>
-                    <custom-v-stack>
-                        {artboards.map((artboard) => {
-                            return (
-                                <custom-v-stack key={artboard.key}>
-                                    <ArtboardItem artboard={artboard} showPath={false}></ArtboardItem>
-                                    <custom-v-stack>
-                                        {artboard.destinations.map((destination) => {
-                                            return (
-                                                <ArtboardDestinationItem
-                                                    key={destination.remote_id}
-                                                    artboard={artboard}
-                                                    destination={destination}
-                                                    display="path"
-                                                ></ArtboardDestinationItem>
-                                            );
-                                        })}
-
-                                        {artboard.destinations.length == 0 ? (
-                                            <ArtboardDestinationItem
-                                                key={artboard.id}
-                                                artboard={artboard}
-                                                display="path"
-                                            ></ArtboardDestinationItem>
-                                        ) : (
-                                            ''
-                                        )}
-                                    </custom-v-stack>
-                                </custom-v-stack>
-                            );
-                        })}
-                    </custom-v-stack>
-                </custom-scroll-view>
-                <ArtboardToolbar
-                    artboards={artboards}
-                    loading={loading}
-                    projectMap={projectMap}
-                    usedFolders={usedFolders}
-                    onCreateFolder={onCreateFolder}
                     withDestinationPicker={hasSelection}
                     showRecentDestinations={showRecentDestinations}
                     setShowRecentDestinations={setShowRecentDestinations}
