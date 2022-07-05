@@ -187,6 +187,7 @@ function refresh() {
 
     if (isWebviewPresent('frontifymain')) {
         frontend.send('refresh', payload);
+        console.log('sent refresh');
     }
     // Send artboard information, if there is a document
     // If no document is open, then do nothing.

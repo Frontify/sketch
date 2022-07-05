@@ -45,8 +45,8 @@ export function SourcesView() {
         console.log('open source', document);
         setLoading(true);
         await useSketch('openSource', { path: document.local.path });
+        context.actions.refresh();
         setLoading(false);
-        setShowRecentDestinations(false);
     };
 
     if (context.user?.name) {

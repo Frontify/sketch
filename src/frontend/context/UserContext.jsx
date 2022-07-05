@@ -87,6 +87,7 @@ export const UserContextProvider = ({ children }) => {
                     break;
                 case 'refresh':
                     actions.refresh(payload);
+                    console.log('REFRESH', payload);
                     break;
             }
         };
