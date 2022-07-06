@@ -106,6 +106,10 @@ custom-artboard-thumbnail {
     height: 48px;
     border-radius: 4px;
     border: 1px solid var(--box-neutral-color);
+    background: var(--box-neutral-color);
+    padding: 2px;
+    display: grid;
+    place-items: center;
 }
 
 /* Avatar */

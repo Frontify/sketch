@@ -32,6 +32,40 @@ import { useTranslation } from 'react-i18next';
 // Context
 import { UserContext } from '../../context/UserContext';
 
+// GraphQL
+import { queryGraphQLWithAuth } from '../../graphql/graphql';
+
+/**
+ * Helper function for relative dates
+ *
+ */
+
+const timeAgo = (prevDate) => {
+    const diff = Number(new Date()) - prevDate;
+    const minute = 60 * 1000;
+    const hour = minute * 60;
+    const day = hour * 24;
+    const month = day * 30;
+    const year = day * 365;
+    switch (true) {
+        case diff < 2 * minute:
+            const seconds = Math.round(diff / 1000);
+            return `Just now`;
+        case diff < hour:
+            return Math.round(diff / minute) + ' mins ago';
+        case diff < day:
+            return Math.round(diff / hour) + ' hours ago';
+        case diff < month:
+            return Math.round(diff / day) + ' days ago';
+        case diff < year:
+            return Math.round(diff / month) + ' months ago';
+        case diff > year:
+            return Math.round(diff / year) + ' years ago';
+        default:
+            return '';
+    }
+};
+
 /**
  * ⚛️ Artboard Item
  * ----------------------------------------------------------------------------
@@ -87,6 +121,12 @@ export function ArtboardItem({ artboard, showPath = true }) {
  */
 
 function ArtboardGroupItem({ group, uploadGroup, open, onOpen, onClose }) {
+    useEffect(() => {
+        /**
+         * Query:
+         */
+        console.log('group update');
+    }, [group]);
     return (
         <custom-v-stack padding="x-small" gap="x-small">
             <custom-h-stack gap="xx-small" align-items="center" style={{ marginLeft: '12px' }}>
@@ -259,7 +299,9 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
                         transfer={transfer}
                     ></ArtboardDestinationStatusIcon> */}
 
-                    <custom-artboard-thumbnail></custom-artboard-thumbnail>
+                    <custom-artboard-thumbnail>
+                        <img src={destination.api?.previewUrl} alt="" />
+                    </custom-artboard-thumbnail>
                     <custom-v-stack gap="x-small">
                         <Text
                             color={destination.selected ? '' : '    '}
@@ -270,7 +312,8 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
                             {artboard.name}
                         </Text>
                         <Text size="small" color="weak">
-                            ??? ago
+                            {/* {new Date(destination.api?.modifiedAt).toLocaleString()} */}
+                            {timeAgo(new Date(destination.api?.modifiedAt))}
                         </Text>
                     </custom-v-stack>
                 </custom-h-stack>
@@ -365,6 +408,7 @@ export function ArtboardsView() {
     const context = useContext(UserContext);
 
     const [artboards, setArtboards] = useState([]);
+    const [artboardsMap, setArtboardsMap] = useState(new Map());
     const [destinationPickerOpen, setDestinationPickerOpen] = useState(false);
     const [documentArtboards, setDocumentArtboards] = useState([]);
     const [groupedArtboards, setGroupedArtboards] = useState({});
@@ -480,6 +524,7 @@ export function ArtboardsView() {
         setDocumentArtboards(response.documentArtboards);
         setTotal(response.total);
         setHasSelection(response.hasSelection);
+
         // setArtboards(mockedArtall);
     };
 
@@ -493,7 +538,13 @@ export function ArtboardsView() {
         let groups = [];
 
         if (artboards) {
-            artboards.forEach((artboard) => {
+            /**
+             * Note: This used to be artboards.forEach which would reflect the selection
+             * By using "documentArtboards" we’ll always use all artboards, but still filter
+             * out the ones that have never been uploaded.
+             *
+             */
+            documentArtboards.forEach((artboard) => {
                 if (!artboard.destinations || artboard.destinations.length == 0) {
                     // Do nothing
                     // map['ungrouped'].children.push(artboard);
@@ -544,6 +595,8 @@ export function ArtboardsView() {
                         // Pre-select the item for upload based on the diff
 
                         destination.selected = artboard.sha != destination.sha;
+                        destination.api = artboardsMap.get(destination.remote_id);
+
                         if (destination.selected) group.selectionCount++;
 
                         let transferEntry = context.transferMap[destination.remote_id || artboard.id];
@@ -591,21 +644,6 @@ export function ArtboardsView() {
                 group.transfer = transfer;
             });
 
-            // Only show groups that include modified artboards
-
-            if (view == 'modified') {
-                groups = groups
-                    .map((group) => {
-                        return {
-                            ...group,
-                            children: group.children.filter(
-                                (artboard) => artboard.destinations.filter((destination) => destination.selected).length
-                            ),
-                        };
-                    })
-                    .filter((group) => group.children.length);
-            }
-
             setModifiedArtboards(() => {
                 let result = [];
                 groups.forEach((group) => {
@@ -628,7 +666,7 @@ export function ArtboardsView() {
 
             setGroupedArtboards(groups);
         }
-    }, [artboards, projectMap, context.transferMap, view]);
+    }, [artboards, artboardsMap, projectMap, context.transferMap, view]);
 
     // Computed used folders
     useEffect(() => {
@@ -699,15 +737,65 @@ export function ArtboardsView() {
      */
 
     useEffect(() => {
-        let handler = (event) => {
+        let handler = async (event) => {
             let { type, payload } = event.detail.data;
 
             switch (type) {
                 case 'artboards-changed':
+                    /**
+                     * Note: We used to filter the view by setting it to the selected artboards only
+                     * But now we’ll always include all artboards that have been previously uploaded.
+                     */
+                    // setArtboards(payload.artboards);
                     setArtboards(payload.artboards);
                     setDocumentArtboards(payload.documentArtboards);
                     setTotal(payload.total);
                     setHasSelection(payload.hasSelection);
+
+                    console.log('Initial load');
+                    console.log('fetch graphql', groupsMap);
+
+                    console.log(payload.artboards);
+                    let ids = [];
+                    let artboardsMetadataMap = new Map();
+                    payload.documentArtboards.forEach((artboard) => {
+                        artboard.destinations.forEach((destination) => {
+                            ids.push(destination.remote_id);
+                        });
+                    });
+                    console.log(ids);
+                    if (ids && ids.length) {
+                        console.log('send query', ids);
+                        let query = `{
+                        assets(ids: [${ids}]) {
+                          __typename
+                          id
+                          title
+                          createdAt
+                          creator {
+                            name
+                            email
+                          }
+                          modifiedAt
+                          modifier {
+                              name
+                              email
+                          }
+                          ...on Image {
+                            downloadUrl
+                            previewUrl
+                          }
+                          
+                        }
+                      }`;
+
+                        let result = await queryGraphQLWithAuth({ query, auth: context.auth });
+
+                        result.data.assets.forEach((entry, index) => {
+                            artboardsMetadataMap.set(ids[index], entry);
+                        });
+                        setArtboardsMap(artboardsMetadataMap);
+                    }
 
                     break;
             }
@@ -743,10 +831,19 @@ export function ArtboardsView() {
                         </custom-v-stack>
                     ) : (
                         <custom-v-stack flex stretch="true">
-                            <EmptyState
-                                title={t('artboards.no_selection_title')}
-                                description={t('artboards.no_selection_description')}
-                            ></EmptyState>
+                            {!hasSelection && (
+                                <EmptyState
+                                    title={t('artboards.no_selection_title')}
+                                    description={t('artboards.no_selection_description')}
+                                ></EmptyState>
+                            )}
+
+                            {hasSelection && (
+                                <EmptyState
+                                    title={t('artboards.upload_selected_title')}
+                                    description={t('artboards.upload_selected_description')}
+                                ></EmptyState>
+                            )}
                         </custom-v-stack>
                     )}
                 </custom-scroll-view>
