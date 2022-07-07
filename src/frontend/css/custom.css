@@ -108,8 +108,12 @@ custom-artboard-thumbnail {
     border: 1px solid var(--box-neutral-color);
     background: var(--box-neutral-color);
     padding: 2px;
-    display: grid;
+    display: flex;
     place-items: center;
+}
+custom-artboard-thumbnail > * {
+    max-height: 100%;
+    margin: 0 auto;
 }
 
 /* Avatar */

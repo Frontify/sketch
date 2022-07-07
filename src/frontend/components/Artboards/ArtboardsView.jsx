@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 
 // Components
 import {
@@ -121,12 +121,6 @@ export function ArtboardItem({ artboard, showPath = true }) {
  */
 
 function ArtboardGroupItem({ group, uploadGroup, open, onOpen, onClose }) {
-    useEffect(() => {
-        /**
-         * Query:
-         */
-        console.log('group update');
-    }, [group]);
     return (
         <custom-v-stack padding="x-small" gap="x-small">
             <custom-h-stack gap="xx-small" align-items="center" style={{ marginLeft: '12px' }}>
@@ -152,7 +146,7 @@ function ArtboardGroupItem({ group, uploadGroup, open, onOpen, onClose }) {
                         <custom-breadcrumbs>
                             {group.breadcrumbs &&
                                 group.breadcrumbs.map((breadcrumb, index) => (
-                                    <custom-h-stack gap="x-small">
+                                    <custom-h-stack gap="x-small" key={index}>
                                         <Text color="weak" size="small" key={index}>
                                             {breadcrumb}
                                         </Text>
@@ -164,7 +158,7 @@ function ArtboardGroupItem({ group, uploadGroup, open, onOpen, onClose }) {
                             </Text>
                         </custom-breadcrumbs>
                     </custom-v-stack>
-                    {group.selectionCount > 0 && (
+                    {/* {group.selectionCount > 0 && (
                         <Text padding="small" size="x-small">
                             {group.transfer?.status == 'uploading' ? (
                                 `Uploading (${group.transfer.remaining} remaining) `
@@ -188,7 +182,7 @@ function ArtboardGroupItem({ group, uploadGroup, open, onOpen, onClose }) {
                                 </Text>
                             )}
                         </Text>
-                    )}
+                    )} */}
                 </custom-v-stack>
                 <custom-spacer></custom-spacer>
                 <custom-h-stack style={{ flex: 0, alignSelf: 'start' }}>
@@ -384,6 +378,8 @@ export function ArtboardGroupTransferAction({ group, uploadGroup }) {
 
         case 'done':
             return <IconCheck></IconCheck>;
+        case 'upload-complete':
+            return '';
 
         case 'uploading':
             return (
@@ -629,6 +625,8 @@ export function ArtboardsView() {
                 }
                 if (transfer.progress == 100) {
                     transfer.status = 'upload-complete';
+                    // Group done
+                    fetchArtboardsFromAPI(documentArtboards);
                     // transfer.progress = 0;
                 }
                 if (transfer.progress == 0) {
@@ -732,41 +730,19 @@ export function ArtboardsView() {
         setHasSelection(response.hasSelection);
     }, []);
 
-    /**
-     * Subscription
-     */
+    const fetchArtboardsFromAPI = useCallback(async (artboards) => {
+        let ids = [];
+        let artboardsMetadataMap = new Map();
 
-    useEffect(() => {
-        let handler = async (event) => {
-            let { type, payload } = event.detail.data;
-
-            switch (type) {
-                case 'artboards-changed':
-                    /**
-                     * Note: We used to filter the view by setting it to the selected artboards only
-                     * But now we’ll always include all artboards that have been previously uploaded.
-                     */
-                    // setArtboards(payload.artboards);
-                    setArtboards(payload.artboards);
-                    setDocumentArtboards(payload.documentArtboards);
-                    setTotal(payload.total);
-                    setHasSelection(payload.hasSelection);
-
-                    console.log('Initial load');
-                    console.log('fetch graphql', groupsMap);
-
-                    console.log(payload.artboards);
-                    let ids = [];
-                    let artboardsMetadataMap = new Map();
-                    payload.documentArtboards.forEach((artboard) => {
-                        artboard.destinations.forEach((destination) => {
-                            ids.push(destination.remote_id);
-                        });
-                    });
-                    console.log(ids);
-                    if (ids && ids.length) {
-                        console.log('send query', ids);
-                        let query = `{
+        artboards.forEach((artboard) => {
+            artboard.destinations.forEach((destination) => {
+                ids.push(destination.remote_id);
+            });
+        });
+        console.log(ids);
+        if (ids && ids.length) {
+            console.log('send query', ids);
+            let query = `{
                         assets(ids: [${ids}]) {
                           __typename
                           id
@@ -789,13 +765,36 @@ export function ArtboardsView() {
                         }
                       }`;
 
-                        let result = await queryGraphQLWithAuth({ query, auth: context.auth });
+            let result = await queryGraphQLWithAuth({ query, auth: context.auth });
 
-                        result.data.assets.forEach((entry, index) => {
-                            artboardsMetadataMap.set(ids[index], entry);
-                        });
-                        setArtboardsMap(artboardsMetadataMap);
-                    }
+            result.data.assets.forEach((entry, index) => {
+                artboardsMetadataMap.set(ids[index], entry);
+            });
+            setArtboardsMap(artboardsMetadataMap);
+        }
+    });
+
+    /**
+     * Subscription
+     */
+
+    useEffect(() => {
+        let handler = async (event) => {
+            let { type, payload } = event.detail.data;
+
+            switch (type) {
+                case 'artboards-changed':
+                    /**
+                     * Note: We used to filter the view by setting it to the selected artboards only
+                     * But now we’ll always include all artboards that have been previously uploaded.
+                     */
+                    // setArtboards(payload.artboards);
+                    setArtboards(payload.artboards);
+                    setDocumentArtboards(payload.documentArtboards);
+                    setTotal(payload.total);
+                    setHasSelection(payload.hasSelection);
+
+                    fetchArtboardsFromAPI(payload.documentArtboards);
 
                     break;
             }
