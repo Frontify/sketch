@@ -68,8 +68,13 @@ function shaForLayer(layer) {
     // Otherwise, the SHA would be different for a selected / unselected artboard…
     let json = layer.toJSON();
     json.selected = false;
+    let stringified = JSON.stringify(json);
+    // We also need to make sure that the "selected" property of any layer is ignored.
+    // Otherwise, changing the selection of layers would trigger artboard modification (although nothing has visually changed)
+    // Instead of actually deselecting layers recursively, we just replace the text that we use for comparisons.
+    let purged = stringified.replaceAll(`"selected":true`, `"selected":false`);
 
-    return sha1(JSON.stringify(json));
+    return sha1(purged);
 }
 
 export function computedSHA(artboard) {
