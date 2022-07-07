@@ -294,7 +294,7 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
                     ></ArtboardDestinationStatusIcon> */}
 
                     <custom-artboard-thumbnail>
-                        <img src={destination.api?.previewUrl} alt="" />
+                        <img src={`${destination.api?.previewUrl}?width=96`} alt="" />
                     </custom-artboard-thumbnail>
                     <custom-v-stack gap="x-small">
                         <Text
@@ -683,6 +683,8 @@ export function ArtboardsView() {
 
             setUsedFolders(usedFolders);
         });
+
+        if (documentArtboards.length) fetchArtboardsFromAPI(documentArtboards);
     }, [documentArtboards]);
 
     const uploadArtboardsToDestination = (artboards) => {
@@ -731,6 +733,7 @@ export function ArtboardsView() {
     }, []);
 
     const fetchArtboardsFromAPI = useCallback(async (artboards) => {
+        console.log('fetchArtboardsFromAPI');
         let ids = [];
         let artboardsMetadataMap = new Map();
 
@@ -794,7 +797,7 @@ export function ArtboardsView() {
                     setTotal(payload.total);
                     setHasSelection(payload.hasSelection);
 
-                    fetchArtboardsFromAPI(payload.documentArtboards);
+                    // fetchArtboardsFromAPI(payload.documentArtboards);
 
                     break;
             }
@@ -816,7 +819,10 @@ export function ArtboardsView() {
                         <custom-v-stack flex stretch="true" separator="between">
                             {groupedArtboards.map((group) => {
                                 return (
-                                    <custom-v-stack key={group.key} style={{ paddingBottom: '8px' }}>
+                                    <custom-v-stack
+                                        key={group.key}
+                                        style={{ paddingBottom: groupsMap[group.key]?.open ? '8px' : 0 }}
+                                    >
                                         <ArtboardGroupItem
                                             onOpen={onOpen}
                                             onClose={onClose}
