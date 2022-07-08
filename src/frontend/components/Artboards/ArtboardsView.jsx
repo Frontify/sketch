@@ -148,50 +148,37 @@ function ArtboardGroupItem({ group, uploadGroup, open, onOpen, onClose }) {
                         ></Button>
                     )}
                 </div>
-                <custom-v-stack gap="x-small">
+                <custom-v-stack
+                    gap="x-small"
+                    overflow="hidden"
+                    flex
+                    style={{ cursor: 'default' }}
+                    title={`${group.breadcrumbs?.join(' / ')} / ${group.title}`}
+                >
                     <custom-v-stack gap="xx-small">
-                        <custom-breadcrumbs>
+                        <custom-breadcrumbs overflow="hidden" flex>
                             {group.breadcrumbs &&
                                 group.breadcrumbs.map((breadcrumb, index) => (
-                                    <custom-h-stack gap="x-small" key={index}>
-                                        <Text color="weak" size="small" key={index}>
+                                    <custom-h-stack gap="x-small" key={index} overflow="hidden">
+                                        <Text
+                                            color="weak"
+                                            size="small"
+                                            key={index}
+                                            overflow="ellipsis"
+                                            whitespace="nowrap"
+                                        >
                                             {breadcrumb}
                                         </Text>
                                         <Text color="weak">/</Text>
                                     </custom-h-stack>
                                 ))}
-                            <Text padding="small" size="small" weight="strong">
+                            <Text padding="small" size="small" weight="strong" overflow="ellipsis" whitespace="nowrap">
                                 {group.title}
                             </Text>
                         </custom-breadcrumbs>
                     </custom-v-stack>
-                    {/* {group.selectionCount > 0 && (
-                        <Text padding="small" size="x-small">
-                            {group.transfer?.status == 'uploading' ? (
-                                `Uploading (${group.transfer.remaining} remaining) `
-                            ) : group.selectionCount ? (
-                                <custom-h-stack align-items="center" gap="x-small">
-                                    <Text
-                                        size="x-small"
-                                        weight="strong"
-                                        style={{ color: 'var(--box-selected-strong-color)' }}
-                                    >
-                                        {group.selectionCount} Modified
-                                    </Text>
-                                </custom-h-stack>
-                            ) : group.key != 'ungrouped' ? (
-                                <Text color="weak" size="x-small">
-                                    No changes
-                                </Text>
-                            ) : (
-                                <Text color="weak" size="x-small">
-                                    To upload, select artboards on the canvas first.
-                                </Text>
-                            )}
-                        </Text>
-                    )} */}
                 </custom-v-stack>
-                <custom-spacer></custom-spacer>
+
                 <custom-h-stack style={{ flex: 0, alignSelf: 'start' }}>
                     {group.path ? (
                         group.selectionCount ? (
@@ -207,7 +194,7 @@ function ArtboardGroupItem({ group, uploadGroup, open, onOpen, onClose }) {
                     ) : (
                         ''
                     )}
-                    <div style={{ marginRight: '12px' }}>
+                    <div style={{ marginRight: '12px', flex: 0 }}>
                         <Button inverted={false} style="Secondary" solid={false} icon={<IconMore />}></Button>
                     </div>
                 </custom-h-stack>
@@ -335,10 +322,19 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
 
                 {transfer && transfer.status == 'uploading' && (
                     <div>
-                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg
+                            width="18"
+                            height="18"
+                            viewBox="0 0 18 18"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                            style={{ transform: 'rotate(-90deg)' }}
+                        >
                             <circle cx="9" cy="9" r="8" stroke="rgba(0,0, 0,0.16)" strokeWidth="2" />
                             <circle
-                                style={{ strokeDasharray: `${(transfer ? transfer.progress / 100 : 0) * 50} 50` }}
+                                style={{
+                                    strokeDasharray: `${(transfer ? transfer.progress / 100 : 0) * 50} 50`,
+                                }}
                                 cx="9"
                                 cy="9"
                                 r="8"
@@ -860,12 +856,15 @@ export function ArtboardsView() {
                                 return (
                                     <custom-v-stack
                                         key={group.key}
-                                        style={{ paddingBottom: groupsMap[group.key]?.open ? '8px' : 0 }}
+                                        style={{
+                                            paddingBottom:
+                                                !groupsMap[group.key] || groupsMap[group.key]?.open ? '8px' : 0,
+                                        }}
                                     >
                                         <ArtboardGroupItem
                                             onOpen={onOpen}
                                             onClose={onClose}
-                                            open={groupsMap[group.key]?.open}
+                                            open={groupsMap[group.key] ? groupsMap[group.key]?.open : true}
                                             group={group}
                                             uploadGroup={uploadGroup}
                                         ></ArtboardGroupItem>

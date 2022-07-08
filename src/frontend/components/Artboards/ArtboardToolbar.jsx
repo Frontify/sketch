@@ -83,6 +83,10 @@ function ArtboardToolbar({
 
     // Callback function that starts the upload after pressing the "upload" button in the toolbar
     const performUpload = () => {
+        console.log('perform', artboards, uploadDestination);
+        console.warn(
+            'Selecting a recent folder does not set it as final upload destination -> use temporary destination'
+        );
         // uploadDestination?
         let overrideDestination = uploadDestination && uploadDestination.folderPath;
         if (overrideDestination) {
@@ -179,7 +183,7 @@ function ArtboardToolbar({
                                                 setTemporaryUploadDestination(value);
                                             }}
                                             onChange={(value) => {
-                                                setTemporaryUploadDestination(value);
+                                                setUploadDestination(value);
                                             }}
                                         ></UploadDestinationPicker>
                                         <custom-h-stack padding="small" gap="small" separator="top">
@@ -209,9 +213,10 @@ function ArtboardToolbar({
                                                     setShowDestinationPicker(false);
                                                     setShowRecentDestinations(false);
                                                     setUploadDestination(temporaryUploadDestination);
+                                                    performUpload(artboards);
                                                 }}
                                             >
-                                                Select
+                                                Upload
                                             </Button>
                                         </custom-h-stack>
                                     </custom-v-stack>
@@ -226,14 +231,14 @@ function ArtboardToolbar({
                                     Cancel
                                 </Button>{' '}
                                 <Button
-                                    disabled={!temporaryUploadDestination}
+                                    disabled={!uploadDestination}
                                     style="Primary"
                                     hugWidth={true}
                                     onClick={() => {
                                         setUploadDestination(temporaryUploadDestination);
-                                        performUpload(artboards);
                                         setShowRecentDestinations(false);
                                         setTemporaryUploadDestination(null);
+                                        performUpload(artboards);
                                     }}
                                     icon={
                                         <IconUploadAlternative
@@ -291,7 +296,7 @@ function ArtboardToolbar({
                                             tabindex="-1"
                                             onFocus={() => {
                                                 let folder = sortedUsedFolders.get(key);
-                                                setTemporaryUploadDestination({
+                                                setUploadDestination({
                                                     project: {
                                                         id: folder.remote_project_id,
                                                     },
@@ -322,6 +327,7 @@ function ArtboardToolbar({
                                                 });
                                                 setShowRecentDestinations(false);
                                                 setTemporaryUploadDestination(null);
+                                                performUpload(artboards);
                                             }}
                                         >
                                             <custom-h-stack gap="x-small" align-items="center">
