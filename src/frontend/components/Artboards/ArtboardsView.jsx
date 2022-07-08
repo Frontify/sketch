@@ -893,6 +893,7 @@ export function ArtboardsView() {
                 </custom-scroll-view>
                 <ArtboardToolbar
                     artboards={artboards}
+                    hasSelection={hasSelection}
                     loading={loading}
                     projectMap={projectMap}
                     usedFolders={usedFolders}

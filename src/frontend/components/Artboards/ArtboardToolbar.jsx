@@ -27,6 +27,7 @@ import { useTranslation } from 'react-i18next';
 
 ArtboardToolbar.propTypes = {
     artboards: PropTypes.array,
+    hasSelection: PropTypes.boolean,
     loading: PropTypes.bool,
     modifiedArtboards: PropTypes.array,
     onCreateFolder: PropTypes.func,
@@ -46,6 +47,7 @@ ArtboardToolbar.propTypes = {
 
 function ArtboardToolbar({
     artboards,
+    hasSelection,
     loading,
     onCreateFolder,
     modifiedArtboards = [],
@@ -386,7 +388,7 @@ function ArtboardToolbar({
                 </custom-h-stack>
             ) : !loading ? (
                 <custom-h-stack gap="small" stretch-children="true" flex>
-                    <Button style="Secondary" hugWidth={false} onClick={() => uploadSome()}>
+                    <Button disabled={!hasSelection} style="Secondary" hugWidth={false} onClick={() => uploadSome()}>
                         {t('artboards.upload_selected')}
                     </Button>
                     <Button style="Primary" hugWidth={false} onClick={() => uploadSome()}>
