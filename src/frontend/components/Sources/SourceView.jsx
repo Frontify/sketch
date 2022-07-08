@@ -32,7 +32,7 @@ export function SourceView() {
     let sliderItems = [
         {
             id: 'artboards',
-            value: t('general.artboards'),
+            value: t('general.uploads'),
         },
         {
             id: 'brand',

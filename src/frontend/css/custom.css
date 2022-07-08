@@ -105,7 +105,7 @@ custom-artboard-thumbnail {
     width: 48px;
     height: 48px;
     border-radius: 4px;
-    border: 1px solid var(--box-neutral-color);
+    border: 1px solid rgba(0, 0, 0, 0.08);
     background: var(--box-neutral-color);
     padding: 2px;
     display: flex;
@@ -209,6 +209,12 @@ custom-palette-item:active {
 custom-palette-item[disabled='true'] {
     opacity: 0.5;
     pointer-events: none;
+}
+[show-on-hover='true'] {
+    opacity: 0;
+}
+custom-palette-item:hover [show-on-hover='true'] {
+    opacity: 1;
 }
 
 custom-palette-item[selectable]:focus {

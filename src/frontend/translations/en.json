@@ -54,7 +54,8 @@
             "select": "Select",
             "user": "User",
             "untitled_collection": "Untitled Collection",
-            "untitled": "Untitled"
+            "untitled": "Untitled",
+            "uploads": "Uploads"
         },
         "sources": {
             "browse": "Browse",

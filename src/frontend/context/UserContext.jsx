@@ -77,6 +77,7 @@ export const UserContextProvider = ({ children }) => {
                             });
                             break;
                         default:
+                            console.log(payload);
                             setTransferMap((state) => {
                                 return { ...state, [id]: payload };
                             });

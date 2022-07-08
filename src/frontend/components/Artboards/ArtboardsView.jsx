@@ -4,15 +4,18 @@ import React, { useState, useEffect, useContext, useCallback } from 'react';
 import {
     Badge,
     Button,
+    Flyout,
     IconCaretRight,
     IconCaretDown,
     IconCheck,
+    IconExternalLink,
     IconFolder,
     IconMore,
     IconArrowUp,
     IconCircle,
     IconUploadAlternative,
     LoadingCircle,
+    MenuItem,
     Text,
     IconAddSimple,
     IconCollapse,
@@ -122,19 +125,23 @@ export function ArtboardItem({ artboard, showPath = true }) {
 
 function ArtboardGroupItem({ group, uploadGroup, open, onOpen, onClose }) {
     return (
-        <custom-v-stack padding="x-small" gap="x-small">
-            <custom-h-stack gap="xx-small" align-items="center" style={{ marginLeft: '12px' }}>
+        <custom-v-stack>
+            <custom-h-stack gap="xx-small" align-items="center" style={{ marginLeft: '16px' }} padding="xx-small">
                 <div>
                     {open ? (
                         <Button
-                            inverted={true}
+                            inverted={false}
+                            style="Secondary"
+                            solid={false}
                             size="Small"
                             icon={<IconCaretDown></IconCaretDown>}
                             onClick={() => onClose(group.key)}
                         ></Button>
                     ) : (
                         <Button
-                            inverted={true}
+                            inverted={false}
+                            style="Secondary"
+                            solid={false}
                             size="Small"
                             icon={<IconCaretRight></IconCaretRight>}
                             onClick={() => onOpen(group.key)}
@@ -200,8 +207,8 @@ function ArtboardGroupItem({ group, uploadGroup, open, onOpen, onClose }) {
                     ) : (
                         ''
                     )}
-                    <div>
-                        <Button inverted="true" icon={<IconMore />}></Button>
+                    <div style={{ marginRight: '12px' }}>
+                        <Button inverted={false} style="Secondary" solid={false} icon={<IconMore />}></Button>
                     </div>
                 </custom-h-stack>
             </custom-h-stack>
@@ -209,7 +216,7 @@ function ArtboardGroupItem({ group, uploadGroup, open, onOpen, onClose }) {
             {open
                 ? group.children.map((artboard) => {
                       return (
-                          <custom-v-stack key={artboard.id} style={{ marginLeft: '16px' }}>
+                          <custom-v-stack key={artboard.id}>
                               {artboard.destinations.map((destination) => {
                                   return (
                                       <ArtboardDestinationItem
@@ -273,91 +280,123 @@ export function ArtboardDestinationStatusIcon({ destination, transfer }) {
  */
 
 export function ArtboardDestinationItem({ artboard, destination, display = 'path' }) {
+    const [open, setOpen] = useState(false);
     const context = useContext(UserContext);
     const [transfer, setTransfer] = useState({});
     useEffect(() => {
         if (destination) setTransfer(context.transferMap[destination.remote_id || artboard.id]);
     }, [context.transferMap]);
+
+    const openExternal = (url) => {
+        useSketch('openUrl', { url });
+    };
+
+    const base = 'https://company-136571.frontify.com';
+
+    const frontifyUrl = `${base}/screens/${destination.remote_id}`;
+
     return (
-        <custom-h-stack
-            gap="x-small"
-            style={{
-                width: '100%',
-            }}
-        >
-            {display == 'artboard' ? (
-                <custom-h-stack gap="small" align-items="center">
-                    {/* Modified */}
-                    {/* <ArtboardDestinationStatusIcon
-                        destination={destination}
-                        transfer={transfer}
-                    ></ArtboardDestinationStatusIcon> */}
+        <custom-palette-item gap="x-small">
+            <custom-h-stack gap="small" align-items="center" padding-x="small">
+                {/* Modified */}
 
-                    <custom-artboard-thumbnail>
-                        <img src={`${destination.api?.previewUrl}?width=96`} alt="" />
-                    </custom-artboard-thumbnail>
-                    <custom-v-stack gap="x-small">
-                        <Text
-                            color={destination.selected ? '' : '    '}
-                            weight={
-                                destination.selected && transfer?.status != 'upload-complete' ? 'strong' : 'default'
-                            }
-                        >
-                            {artboard.name}
-                        </Text>
-                        <Text size="small" color="weak">
-                            {/* {new Date(destination.api?.modifiedAt).toLocaleString()} */}
-                            {timeAgo(new Date(destination.api?.modifiedAt))}
-                        </Text>
-                    </custom-v-stack>
-                </custom-h-stack>
-            ) : (
-                <custom-h-stack size="small" color="weak" gap="x-small" align-items="center">
-                    <ArtboardDestinationStatusIcon
-                        destination={destination}
-                        transfer={transfer}
-                    ></ArtboardDestinationStatusIcon>
+                <custom-artboard-thumbnail>
+                    {destination.api?.previewUrl && <img src={`${destination.api?.previewUrl}?width=96`} alt="" />}
+                </custom-artboard-thumbnail>
+                <custom-v-stack gap="xx-small">
+                    <Text
+                        color={destination.selected ? '' : '    '}
+                        weight={destination.selected && transfer?.status != 'upload-complete' ? 'strong' : 'default'}
+                    >
+                        {artboard.name}
+                    </Text>
+                    <Text size="small" color="weak">
+                        {/* {new Date(destination.api?.modifiedAt).toLocaleString()} */}
+                        {timeAgo(new Date(destination.api?.modifiedAt))}
+                    </Text>
+                </custom-v-stack>
 
-                    {destination ? (
-                        <custom-h-stack align-items="center">
-                            <Text color="weak" size="x-small">
-                                /
-                            </Text>
-                            <Text color="weak" size="x-small">
-                                {destination.remote_project_name}
-                            </Text>
-                            <Text color="weak" size="x-small">
-                                {destination.remote_path}
-                            </Text>
-                        </custom-h-stack>
-                    ) : (
-                        <Text color="weak" size="x-small">
-                            Not yet uploaded
-                        </Text>
-                    )}
-                </custom-h-stack>
-            )}
+                <custom-spacer></custom-spacer>
+
+                {destination.selected && !transfer && (
+                    <IconUploadAlternative
+                        style={{ color: 'rgba(0, 0, 0, 0.5)' }}
+                        size="Size20"
+                    ></IconUploadAlternative>
+                )}
+
+                {transfer && transfer.status == 'upload-queued' && (
+                    <div>
+                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="9" cy="9" r="8" stroke="rgba(0,0, 0,0.16)" strokeWidth="2" />
+                        </svg>
+                    </div>
+                )}
+
+                {transfer && transfer.status == 'uploading' && (
+                    <div>
+                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="9" cy="9" r="8" stroke="rgba(0,0, 0,0.16)" strokeWidth="2" />
+                            <circle
+                                style={{ strokeDasharray: `${(transfer ? transfer.progress / 100 : 0) * 50} 50` }}
+                                cx="9"
+                                cy="9"
+                                r="8"
+                                stroke="var(--box-selected-strong-color)"
+                                strokeWidth="2"
+                            />
+                        </svg>
+                    </div>
+                )}
+
+                <div show-on-hover="false" style={{ marginRight: '-8px' }}>
+                    <Flyout
+                        hug={false}
+                        fitContent={true}
+                        isOpen={open}
+                        onOpenChange={(isOpen) => setOpen(isOpen)}
+                        legacyFooter={false}
+                        trigger={
+                            <Button
+                                style="Secondary"
+                                solid={false}
+                                inverted={false}
+                                icon={<IconMore />}
+                                onClick={() => setOpen((open) => !open)}
+                            ></Button>
+                        }
+                    >
+                        <custom-v-stack>
+                            <div
+                                tabIndex={0}
+                                role="menuitem"
+                                aria-label={`View on Frontify`}
+                                onClick={() => {
+                                    openExternal(frontifyUrl);
+                                    setOpen(false);
+                                }}
+                            >
+                                <MenuItem decorator={<IconExternalLink />} title={'View on Frontify'}>
+                                    View on Frontify
+                                </MenuItem>
+                            </div>
+                        </custom-v-stack>
+                    </Flyout>
+                </div>
+
+                {/* <ArtboardDestinationStatusIcon
+                destination={destination}
+                transfer={transfer}
+            ></ArtboardDestinationStatusIcon> */}
+            </custom-h-stack>
 
             <custom-spacer></custom-spacer>
 
             {/* context.transferMap[destination.remote_id]?.progress &&
             context.transferMap[destination.remote_id]?.progress != 100 */}
 
-            {transfer && transfer.status == 'uploading' ? (
-                <custom-h-stack gap="small" align-items="center" style={{ marginRight: '8px' }}>
-                    <Text size="small">
-                        <span style={{ fontSize: '12px', fontFeatureSettings: 'tnum' }}>
-                            {Math.floor(transfer.progress)}%
-                        </span>
-                    </Text>
-                    {/* <LoadingCircle size="Small"></LoadingCircle> */}
-                </custom-h-stack>
-            ) : (
-                ''
-            )}
-
             {transfer && transfer.status == 'upload-queued' ? '' : ''}
-        </custom-h-stack>
+        </custom-palette-item>
     );
 }
 
@@ -367,7 +406,9 @@ export function ArtboardGroupTransferAction({ group, uploadGroup }) {
             return (
                 <Button
                     icon={<IconUploadAlternative style={{ color: 'var(--box-selected-strong-color)' }} />}
-                    inverted="true"
+                    style="Secondary"
+                    inverted={false}
+                    solid={false}
                     onClick={() => {
                         uploadGroup(group);
                     }}
@@ -383,9 +424,7 @@ export function ArtboardGroupTransferAction({ group, uploadGroup }) {
 
         case 'uploading':
             return (
-                <custom-h-stack padding="x-small">
-                    <LoadingCircle size="Small"></LoadingCircle>
-                </custom-h-stack>
+                <custom-h-stack padding="x-small">{/* <LoadingCircle size="Small"></LoadingCircle> */}</custom-h-stack>
             );
 
         case 'pending':
@@ -814,7 +853,7 @@ export function ArtboardsView() {
     if (artboards && artboards.length) {
         return (
             <custom-v-stack flex stretch="true" overflow="hidden">
-                <custom-scroll-view>
+                <custom-scroll-view class="tw-bg-black-0">
                     {groupedArtboards.length ? (
                         <custom-v-stack flex stretch="true" separator="between">
                             {groupedArtboards.map((group) => {
