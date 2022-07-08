@@ -143,8 +143,14 @@ function ArtboardToolbar({
             separator="top"
             style={{ width: '100%' }}
         >
-            {!loading ? (
-                <custom-h-stack gap="small" stretch-children="true" flex>
+            {withDestinationPicker ? (
+                <custom-h-stack
+                    flex
+                    style={{ width: '100%' }}
+                    gap="small"
+                    justify-content="space-between"
+                    stretch-children
+                >
                     <Flyout
                         hug={false}
                         fitContent={true}
@@ -227,26 +233,13 @@ function ArtboardToolbar({
                                 </Button>{' '}
                                 <Button
                                     disabled={!temporaryUploadDestination}
-                                    style="Primary"
-                                    hugWidth={true}
                                     onClick={() => {
                                         setUploadDestination(temporaryUploadDestination);
-                                        performUpload(artboards);
                                         setShowRecentDestinations(false);
                                         setTemporaryUploadDestination(null);
                                     }}
-                                    icon={
-                                        <IconUploadAlternative
-                                            style={{
-                                                color:
-                                                    modifiedArtboards.length == 0
-                                                        ? 'inherit'
-                                                        : 'var(--box-selected-strong-color)',
-                                            }}
-                                        />
-                                    }
                                 >
-                                    Upload
+                                    Select
                                 </Button>
                             </custom-h-stack>
                         }
@@ -264,7 +257,6 @@ function ArtboardToolbar({
                         }}
                         trigger={
                             <Button
-                                disabled={!hasSelection}
                                 classNames="tw-m-0"
                                 hugWidth={false}
                                 style="Secondary"
@@ -272,8 +264,27 @@ function ArtboardToolbar({
                                     setTemporaryUploadDestination(null);
                                     setShowRecentDestinations(true);
                                 }}
+                                icon={<IconFolder />}
                             >
-                                {t('artboards.upload_selected')} …
+                                <custom-h-stack
+                                    align-items="center"
+                                    justify-content="space-between"
+                                    style={{ width: '100%' }}
+                                    gap="x-small"
+                                    classNames="tw-w-full"
+                                >
+                                    <Text size="x-small" classNames="tw-w-full" whitespace="nowrap" overflow="ellipsis">
+                                        {!uploadDestination && computedFolderType == 'none' && 'Choose Folder …'}
+                                        {!uploadDestination && computedFolderType == 'mixed' && 'Multiple Folders'}
+                                        {!uploadDestination &&
+                                            computedFolderType == 'single' &&
+                                            computedFolders[0].name}
+                                        {uploadDestination && uploadDestination.folderPath
+                                            ? uploadDestination.name
+                                            : ''}
+                                    </Text>
+                                </custom-h-stack>
+                                <IconCaretDown></IconCaretDown>
                             </Button>
                         }
                     >
@@ -339,6 +350,47 @@ function ArtboardToolbar({
                         )}
                     </Flyout>
 
+                    {/* Upload to chosen destination */}
+
+                    {uploadDestination && (
+                        <div style={{ flex: 0 }}>
+                            <Button
+                                style="Secondary"
+                                onClick={() => setUploadDestination(null)}
+                                aria-label="Reset"
+                                title="Reset"
+                            >
+                                <IconRevert></IconRevert>
+                            </Button>
+                        </div>
+                    )}
+
+                    <div style={{ flex: 0 }}>
+                        <Button
+                            disabled={computedFolderType == 'none' && !uploadDestination?.folderPath}
+                            style="Primary"
+                            hugWidth={true}
+                            onClick={() => performUpload(artboards)}
+                            icon={
+                                <IconUploadAlternative
+                                    style={{
+                                        color:
+                                            modifiedArtboards.length == 0
+                                                ? 'inherit'
+                                                : 'var(--box-selected-strong-color)',
+                                    }}
+                                />
+                            }
+                        >
+                            Upload
+                        </Button>
+                    </div>
+                </custom-h-stack>
+            ) : !loading ? (
+                <custom-h-stack gap="small" stretch-children="true" flex>
+                    <Button disabled={!hasSelection} style="Secondary" hugWidth={false} onClick={() => uploadSome()}>
+                        {t('artboards.upload_selected')}
+                    </Button>
                     <Button style="Primary" hugWidth={false} onClick={() => uploadSome()}>
                         {t('artboards.update_all')} ({modifiedArtboards.length})
                     </Button>
