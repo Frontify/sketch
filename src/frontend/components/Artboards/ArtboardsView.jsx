@@ -299,7 +299,11 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
                     >
                         {artboard.name}
                     </Text>
-                    <Text size="small" color="weak">
+                    <Text
+                        size="small"
+                        color={destination.selected ? '' : 'weak'}
+                        weight={destination.selected && transfer?.status != 'upload-complete' ? 'strong' : 'default'}
+                    >
                         {/* {new Date(destination.api?.modifiedAt).toLocaleString()} */}
                         {timeAgo(new Date(destination.api?.modifiedAt))}
                     </Text>
@@ -453,6 +457,7 @@ export function ArtboardsView() {
     const [showDestinationPicker, setShowDestinationPicker] = useState(false);
     const [total, setTotal] = useState(0);
     const [usedFolders, setUsedFolders] = useState(new Map());
+    const [uploadStatus, setUploadStatus] = useState({});
 
     // Legacy: We used to have "all" and "modified" views.
     // Now, there’s only a view of "all" which excludes untracked artboards.
@@ -714,6 +719,15 @@ export function ArtboardsView() {
             });
 
             setGroupedArtboards(groups);
+
+            setUploadStatus({
+                status: 'idle',
+                totalProgress: 0,
+                remaining: groups.reduce((a, b) => a.transfer.remaining + b.transfer.remaining),
+                total: groups.reduce((a, b) => a.transfer.total + b.transfer.total),
+                progress: groups.reduce((a, b) => a.transfer.progress + b.transfer.progress),
+                completed: groups.reduce((a, b) => a.transfer.completed + b.transfer.completed),
+            });
         }
     }, [artboards, artboardsMap, projectMap, context.transferMap, view]);
 
@@ -756,6 +770,14 @@ export function ArtboardsView() {
         requestArtboards();
     };
 
+    /**
+     * Tracks the transfer items and when there are no more things to upload, stop the loading.
+     */
+    useEffect(() => {
+        if (Object.keys(context.transferMap).length == 0) setLoading(false);
+        if (Object.keys(context.transferMap).length > 0) setLoading(true);
+    }, [context.transferMap]);
+
     useEffect(() => {
         if (artboards) {
             artboards.forEach((artboard) => {
@@ -768,9 +790,9 @@ export function ArtboardsView() {
     }, [documentArtboards, projectMap]);
 
     const uploadArtboards = async (artboards) => {
-        setLoading(true);
-        await useSketch('uploadArtboards', { artboards, brandID: context.selection.brand.id });
-        setLoading(false);
+        if (artboards.length) {
+            await useSketch('uploadArtboards', { artboards, brandID: context.selection.brand.id });
+        }
     };
 
     useEffect(async () => {
@@ -784,7 +806,6 @@ export function ArtboardsView() {
     }, []);
 
     const fetchArtboardsFromAPI = useCallback(async (artboards) => {
-        console.log('fetchArtboardsFromAPI', artboards);
         let ids = [];
         // React can’t detect deep changes to ES6 Map, so we’ll clone it first.
         // Otherwise, React would only see the same reference and not trigger re-renders.
@@ -910,6 +931,7 @@ export function ArtboardsView() {
                 </custom-scroll-view>
                 <ArtboardToolbar
                     artboards={artboards}
+                    uploadStatus={uploadStatus}
                     hasSelection={hasSelection}
                     loading={loading}
                     projectMap={projectMap}

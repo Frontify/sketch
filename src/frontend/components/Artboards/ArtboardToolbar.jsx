@@ -2,18 +2,20 @@ import React from 'react';
 import {
     Button,
     Flyout,
-    IconCaretDown,
     IconFolder,
     IconUploadAlternative,
+    LoadingCircle,
     Text,
-    IconRevert,
     IconFrequentlyUsed,
     IconAdd,
 } from '@frontify/fondue';
 
 import { UploadDestinationPicker } from '../Core/UploadDestinationPicker';
 import { CustomDialog } from '../Core/CustomDialog';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useContext } from 'react';
+
+// Context
+import { UserContext } from '../../context/UserContext';
 
 import PropTypes from 'prop-types';
 
@@ -41,6 +43,7 @@ ArtboardToolbar.propTypes = {
     uploadArtboardsToDestination: PropTypes.func,
     uploadDestination: PropTypes.object,
     uploadSome: PropTypes.func,
+    uploadStatus: PropTypes.object,
     usedFolders: PropTypes.any,
     withDestinationPicker: PropTypes.bool,
 };
@@ -62,6 +65,7 @@ function ArtboardToolbar({
     uploadDestination,
     uploadArtboards,
     uploadSome,
+    uploadStatus,
     uploadArtboardsToDestination,
 }) {
     const [computedFolders, setComputedFolders] = useState([]);
@@ -69,7 +73,11 @@ function ArtboardToolbar({
     const [sortedUsedFolders, setSortedUsedFolders] = useState([]);
     const [temporaryUploadDestination, setTemporaryUploadDestination] = useState(null);
 
+    // Translation
     let { t } = useTranslation();
+
+    // Context
+    const context = useContext(UserContext);
 
     useEffect(() => {
         setSortedUsedFolders(() => {
@@ -347,14 +355,28 @@ function ArtboardToolbar({
                         )}
                     </Flyout>
 
-                    <Button style="Primary" hugWidth={false} onClick={() => uploadSome()}>
+                    <Button
+                        style="Primary"
+                        disabled={modifiedArtboards.length == 0}
+                        hugWidth={false}
+                        onClick={() => uploadSome()}
+                    >
                         {t('artboards.update_all')}
                         &nbsp;
                         {modifiedArtboards.length > 0 && <span> ({modifiedArtboards.length})</span>}
                     </Button>
                 </custom-h-stack>
             ) : (
-                'Uploading …'
+                <custom-h-stack align-items="center" gap="large" style={{ width: '100%' }}>
+                    <Button style="Secondary" hugWidth={true}>
+                        {t('general.cancel')}
+                    </Button>
+
+                    <custom-spacer></custom-spacer>
+                    {uploadStatus.remaining > 0 && <Text>{uploadStatus.remaining} remaining</Text>}
+
+                    <LoadingCircle size="Small"></LoadingCircle>
+                </custom-h-stack>
             )}
         </custom-h-stack>
     );
