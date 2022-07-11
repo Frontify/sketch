@@ -286,7 +286,7 @@ function ArtboardToolbar({
                     >
                         <custom-h-stack padding="small" gap="x-small">
                             <IconFrequentlyUsed />
-                            <Text weight="strong">Used in this document</Text>
+                            <Text weight="strong">{t('artboards.used_folders')}</Text>
                         </custom-h-stack>
                         {sortedUsedFolders.size ? (
                             <ul>
@@ -333,7 +333,7 @@ function ArtboardToolbar({
                                             }}
                                         >
                                             <custom-h-stack gap="x-small" align-items="center">
-                                                <IconFolder></IconFolder>
+                                                <IconFolder size="Size24"></IconFolder>
                                                 <Text size="small">{sortedUsedFolders.get(key).name}</Text>
                                             </custom-h-stack>
                                         </custom-palette-item>

@@ -26,7 +26,8 @@
             "upload_selected_title": "Press “Upload Selected”",
             "upload_selected_description": "You’ll be asked to select a destination for the artboards you’ve selected.",
             "upload_selected": "Upload Selected",
-            "update_all": "Update All"
+            "update_all": "Update All",
+            "used_folders": "Used in this document"
         },
         "general": {
             "artboards": "Artboards",

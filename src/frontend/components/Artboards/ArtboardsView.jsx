@@ -270,6 +270,7 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
     const [open, setOpen] = useState(false);
     const context = useContext(UserContext);
     const [transfer, setTransfer] = useState({});
+
     useEffect(() => {
         if (destination) setTransfer(context.transferMap[destination.remote_id || artboard.id]);
     }, [context.transferMap]);
@@ -290,6 +291,7 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
                 <custom-artboard-thumbnail>
                     {destination.api?.previewUrl && <img src={`${destination.api?.previewUrl}?width=96`} alt="" />}
                 </custom-artboard-thumbnail>
+
                 <custom-v-stack gap="xx-small">
                     <Text
                         color={destination.selected ? '' : '    '}
@@ -612,7 +614,7 @@ export function ArtboardsView() {
             groups = groups.filter((group) => group.children.length);
             // Include transfer status
 
-            groups.forEach((group) => {
+            groups.forEach(async (group) => {
                 let transfer = {
                     status: 'idle',
                     totalProgress: 0,
@@ -622,7 +624,7 @@ export function ArtboardsView() {
                     completed: 0,
                 };
                 group.children.forEach((artboard) => {
-                    artboard.destinations.forEach((destination) => {
+                    artboard.destinations.forEach(async (destination) => {
                         // Pre-select the item for upload based on the diff
 
                         destination.selected = artboard.sha != destination.sha;
@@ -644,7 +646,10 @@ export function ArtboardsView() {
                                 destination.sha = artboard.sha;
                                 // destination.selected = false;
                                 // group.selectionCount--;
-                                console.log('completed:', transfer, destination);
+
+                                // Patch
+                                destination.remote_id = transferEntry.target.remote_id;
+                                await fetchArtboardsFromAPI([artboard]);
                             }
                             transfer.totalProgress += transferEntry.progress;
                             if (destination.selected) {
@@ -664,7 +669,15 @@ export function ArtboardsView() {
                 if (transfer.progress == 100) {
                     transfer.status = 'upload-complete';
                     // Group done
-                    fetchArtboardsFromAPI(documentArtboards);
+
+                    /**
+                     * Todo: If we only request new data after the group is done, it would mean less API requests.
+                     * But the UI would be less responsive, e.g. lack of feedback after an upload is finished.
+                     * Right now, we’re fetching for each completed upload.
+                     * // requestArtboards();
+                     */
+
+                    // fetchArtboardsFromAPI(documentArtboards);
                     // transfer.progress = 0;
                 }
                 if (transfer.progress == 0) {
@@ -771,18 +784,19 @@ export function ArtboardsView() {
     }, []);
 
     const fetchArtboardsFromAPI = useCallback(async (artboards) => {
-        console.log('fetchArtboardsFromAPI');
+        console.log('fetchArtboardsFromAPI', artboards);
         let ids = [];
-        let artboardsMetadataMap = new Map();
+        // React can’t detect deep changes to ES6 Map, so we’ll clone it first.
+        // Otherwise, React would only see the same reference and not trigger re-renders.
+        let artboardsMetadataMap = new Map(artboardsMap) || new Map();
 
         artboards.forEach((artboard) => {
             artboard.destinations.forEach((destination) => {
                 ids.push(destination.remote_id);
             });
         });
-        console.log(ids);
+
         if (ids && ids.length) {
-            console.log('send query', ids);
             let query = `{
                         assets(ids: [${ids}]) {
                           __typename
@@ -811,6 +825,7 @@ export function ArtboardsView() {
             result.data.assets.forEach((entry, index) => {
                 artboardsMetadataMap.set(ids[index], entry);
             });
+
             setArtboardsMap(artboardsMetadataMap);
         }
     });
