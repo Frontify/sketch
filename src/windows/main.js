@@ -369,6 +369,9 @@ export default function (context, view) {
                     payload = { status: 'error' };
                 }
                 break;
+            case 'cancelArtboardUpload':
+                artboard.cancelUpload();
+                break;
             case 'checkout':
                 try {
                     /**

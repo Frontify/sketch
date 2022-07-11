@@ -19,6 +19,9 @@ class Artboard {
         this.remoteAssets = null;
         this.uploadInProgress = false;
     }
+    cancelUpload() {
+        this.uploadInProgress = false;
+    }
 
     updateProgress(options, progress) {
         if (isWebviewPresent('frontifymain')) {
@@ -497,6 +500,7 @@ class Artboard {
 
     uploadArtboards(artboards, brandID) {
         // sequence artboard export and upload
+        console.log('method: upload: ', this.uploadInProgress);
         this.uploadInProgress = true;
 
         /**
@@ -538,19 +542,14 @@ class Artboard {
                                             return uploadsequence
                                                 .then(
                                                     function (assetId) {
+                                                        // Figure out if the upload has been canceled in the meantime
+                                                        if (this.uploadInProgress == false) {
+                                                            this.failUpload(artboard);
+                                                            clearInterval(polling);
+                                                            return artboard.id;
+                                                        }
+
                                                         if (file.type === 'artboard') {
-                                                            // Todo: Fix comparison
-                                                            // artboard.sha = the sha based on layer.toJSON()
-                                                            // -> should be compared against the sha stored as a layer setting
-                                                            // artboard.target.sha
-                                                            console.log(
-                                                                'upload artboard - SHA should be unequal',
-                                                                artboard,
-                                                                artboard.sha,
-                                                                artboard.target.sha,
-                                                                assetId,
-                                                                file
-                                                            );
                                                             if (artboard.sha != artboard.target.sha) {
                                                                 artboardChanged = true;
 
@@ -572,12 +571,7 @@ class Artboard {
                                                                     .then(
                                                                         function (data) {
                                                                             // Uploaded
-                                                                            console.log(
-                                                                                'before patch',
-                                                                                data,
-                                                                                artboard,
-                                                                                brandID
-                                                                            );
+
                                                                             let destination = {
                                                                                 remote_brand_id: brandID,
                                                                                 remote_project_id:

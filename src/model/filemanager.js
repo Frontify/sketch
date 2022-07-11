@@ -110,7 +110,6 @@ class FileManager {
     }
 
     uploadFile(info, overallProgress) {
-        console.log('uploadFile', info);
         // remap slashes in filename to folders
         let filenameParts = info.filename.split('/');
         let filename = filenameParts.pop();

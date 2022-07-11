@@ -21,6 +21,7 @@ import PropTypes from 'prop-types';
 
 // i18n
 import { useTranslation } from 'react-i18next';
+import { useSketch } from '../../hooks/useSketch';
 
 /**
  * ⚛️ Toolbar
@@ -78,6 +79,10 @@ function ArtboardToolbar({
 
     // Context
     const context = useContext(UserContext);
+
+    const cancelArtboardUpload = () => {
+        useSketch('cancelArtboardUpload');
+    };
 
     useEffect(() => {
         setSortedUsedFolders(() => {
@@ -368,7 +373,7 @@ function ArtboardToolbar({
                 </custom-h-stack>
             ) : (
                 <custom-h-stack align-items="center" gap="large" style={{ width: '100%' }}>
-                    <Button style="Secondary" hugWidth={true}>
+                    <Button style="Secondary" hugWidth={true} onClick={() => cancelArtboardUpload()}>
                         {t('general.cancel')}
                     </Button>
 
