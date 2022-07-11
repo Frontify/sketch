@@ -71,6 +71,7 @@ function ArtboardToolbar({
 }) {
     const [computedFolders, setComputedFolders] = useState([]);
     const [computedFolderType, setComputedFolderType] = useState('none');
+    const [didCancel, setDidCancel] = useState(false);
     const [sortedUsedFolders, setSortedUsedFolders] = useState([]);
     const [temporaryUploadDestination, setTemporaryUploadDestination] = useState(null);
 
@@ -81,6 +82,7 @@ function ArtboardToolbar({
     const context = useContext(UserContext);
 
     const cancelArtboardUpload = () => {
+        setDidCancel(true);
         useSketch('cancelArtboardUpload');
     };
 
@@ -96,10 +98,6 @@ function ArtboardToolbar({
 
     // Callback function that starts the upload after pressing the "upload" button in the toolbar
     const performUpload = useCallback(() => {
-        console.log('perform', artboards, uploadDestination);
-        console.warn(
-            'Selecting a recent folder does not set it as final upload destination -> use temporary destination'
-        );
         // uploadDestination?
         let overrideDestination = uploadDestination && uploadDestination.folderPath;
         if (overrideDestination) {
@@ -255,16 +253,7 @@ function ArtboardToolbar({
                                         setTemporaryUploadDestination(null);
                                         performUpload();
                                     }}
-                                    icon={
-                                        <IconUploadAlternative
-                                            style={{
-                                                color:
-                                                    modifiedArtboards.length == 0
-                                                        ? 'inherit'
-                                                        : 'var(--box-selected-strong-color)',
-                                            }}
-                                        />
-                                    }
+                                    icon={<IconUploadAlternative />}
                                 >
                                     Upload
                                 </Button>
@@ -364,7 +353,10 @@ function ArtboardToolbar({
                         style="Primary"
                         disabled={modifiedArtboards.length == 0}
                         hugWidth={false}
-                        onClick={() => uploadSome()}
+                        onClick={() => {
+                            setDidCancel(false);
+                            uploadSome();
+                        }}
                     >
                         {t('artboards.update_all')}
                         &nbsp;
@@ -373,7 +365,12 @@ function ArtboardToolbar({
                 </custom-h-stack>
             ) : (
                 <custom-h-stack align-items="center" gap="large" style={{ width: '100%' }}>
-                    <Button style="Secondary" hugWidth={true} onClick={() => cancelArtboardUpload()}>
+                    <Button
+                        style="Secondary"
+                        hugWidth={true}
+                        onClick={() => cancelArtboardUpload()}
+                        disabled={didCancel}
+                    >
                         {t('general.cancel')}
                     </Button>
 
