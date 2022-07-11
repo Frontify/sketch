@@ -596,6 +596,9 @@ class Artboard {
                                                                             );
                                                                             // 3. Handle the response from the API
                                                                             filemanager.deleteFile(file.path);
+
+                                                                            // Patch artboard id
+                                                                            artboard.target.remote_id = data.id;
                                                                             this.updateProgress(
                                                                                 artboard,
                                                                                 artboardProgress
