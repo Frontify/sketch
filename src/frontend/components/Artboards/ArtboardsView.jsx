@@ -102,7 +102,7 @@ export function ArtboardItem({ artboard, showPath = true }) {
                                             <ArtboardDestinationItem
                                                 artboard={artboard}
                                                 destination={destination}
-                                                key={index}
+                                                key={destination.remote_id}
                                             ></ArtboardDestinationItem>
                                         );
                                     })}
@@ -278,7 +278,7 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
         useSketch('openUrl', { url });
     };
 
-    const base = 'https://company-136571.frontify.com';
+    const base = context.auth.domain;
 
     const frontifyUrl = `${base}/screens/${destination.remote_id}`;
 
@@ -626,7 +626,9 @@ export function ArtboardsView() {
                         // Pre-select the item for upload based on the diff
 
                         destination.selected = artboard.sha != destination.sha;
-                        destination.api = artboardsMap.get(destination.remote_id);
+                        if (destination.remote_id) {
+                            destination.api = artboardsMap.get(destination.remote_id);
+                        }
 
                         if (destination.selected) group.selectionCount++;
 
@@ -642,6 +644,7 @@ export function ArtboardsView() {
                                 destination.sha = artboard.sha;
                                 // destination.selected = false;
                                 // group.selectionCount--;
+                                console.log('completed:', transfer, destination);
                             }
                             transfer.totalProgress += transferEntry.progress;
                             if (destination.selected) {
