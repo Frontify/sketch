@@ -27,7 +27,7 @@ import { useTranslation } from 'react-i18next';
 
 ArtboardToolbar.propTypes = {
     artboards: PropTypes.array,
-    hasSelection: PropTypes.boolean,
+    hasSelection: PropTypes.bool,
     loading: PropTypes.bool,
     modifiedArtboards: PropTypes.array,
     onCreateFolder: PropTypes.func,
