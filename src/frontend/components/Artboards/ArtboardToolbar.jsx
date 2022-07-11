@@ -13,7 +13,7 @@ import {
 
 import { UploadDestinationPicker } from '../Core/UploadDestinationPicker';
 import { CustomDialog } from '../Core/CustomDialog';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import PropTypes from 'prop-types';
 
@@ -82,7 +82,7 @@ function ArtboardToolbar({
     }, [usedFolders]);
 
     // Callback function that starts the upload after pressing the "upload" button in the toolbar
-    const performUpload = () => {
+    const performUpload = useCallback(() => {
         console.log('perform', artboards, uploadDestination);
         console.warn(
             'Selecting a recent folder does not set it as final upload destination -> use temporary destination'
@@ -94,7 +94,7 @@ function ArtboardToolbar({
             return;
         }
         uploadArtboards(artboards);
-    };
+    });
     useEffect(() => {
         setShowDestinationPicker(false);
         setUploadDestination(null);
@@ -181,9 +181,11 @@ function ArtboardToolbar({
                                             paths={uploadDestination ? [uploadDestination] : []}
                                             onInput={(value) => {
                                                 setTemporaryUploadDestination(value);
+                                                setUploadDestination(value);
                                             }}
                                             onChange={(value) => {
                                                 setUploadDestination(value);
+                                                performUpload();
                                             }}
                                         ></UploadDestinationPicker>
                                         <custom-h-stack padding="small" gap="small" separator="top">
@@ -213,7 +215,7 @@ function ArtboardToolbar({
                                                     setShowDestinationPicker(false);
                                                     setShowRecentDestinations(false);
                                                     setUploadDestination(temporaryUploadDestination);
-                                                    performUpload(artboards);
+                                                    performUpload();
                                                 }}
                                             >
                                                 Upload
@@ -238,7 +240,7 @@ function ArtboardToolbar({
                                         setUploadDestination(temporaryUploadDestination);
                                         setShowRecentDestinations(false);
                                         setTemporaryUploadDestination(null);
-                                        performUpload(artboards);
+                                        performUpload();
                                     }}
                                     icon={
                                         <IconUploadAlternative
@@ -327,7 +329,7 @@ function ArtboardToolbar({
                                                 });
                                                 setShowRecentDestinations(false);
                                                 setTemporaryUploadDestination(null);
-                                                performUpload(artboards);
+                                                performUpload();
                                             }}
                                         >
                                             <custom-h-stack gap="x-small" align-items="center">
@@ -346,7 +348,9 @@ function ArtboardToolbar({
                     </Flyout>
 
                     <Button style="Primary" hugWidth={false} onClick={() => uploadSome()}>
-                        {t('artboards.update_all')} ({modifiedArtboards.length})
+                        {t('artboards.update_all')}
+                        &nbsp;
+                        {modifiedArtboards.length > 0 && <span> ({modifiedArtboards.length})</span>}
                     </Button>
                 </custom-h-stack>
             ) : (

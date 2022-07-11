@@ -248,7 +248,7 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
                 return [];
             }
         });
-        onChange(wrappedFolder(folder));
+        onInput(wrappedFolder(folder));
     };
 
     const focusFile = (file) => {
@@ -275,6 +275,9 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
         });
     };
 
+    /**
+     * Case 1: No projects loaded
+     */
     if (!projects)
         return (
             <custom-v-stack align-items="center" justify-content="center" stretch>
@@ -282,6 +285,9 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
             </custom-v-stack>
         );
 
+    /**
+     * Case 2: No projects exist for this user
+     */
     if (projects.length == 0)
         return (
             <custom-v-stack align-items="center" justify-content="center" stretch>
@@ -289,6 +295,9 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
             </custom-v-stack>
         );
 
+    /**
+     * Case 3: No project has been selected
+     */
     if (!project && !folder)
         return (
             <custom-scroll-view>
@@ -316,6 +325,9 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
             </custom-scroll-view>
         );
 
+    /**
+     * Case 4: Project has been selected, folders are shown
+     */
     if (project) {
         return (
             <custom-v-stack stretch overflow="hidden">
