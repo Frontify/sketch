@@ -500,7 +500,7 @@ class Artboard {
 
     uploadArtboards(artboards, brandID) {
         // sequence artboard export and upload
-        console.log('method: upload: ', this.uploadInProgress);
+
         this.uploadInProgress = true;
 
         /**
