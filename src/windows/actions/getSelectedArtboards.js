@@ -43,6 +43,24 @@ export function removeDestinations(artboard) {
     Settings.setLayerSettingForKey(layer, DESTINATION_KEY, []);
 }
 
+export function removeDestination(artboard, destination) {
+    let layer = sketch3.find(`[id="${artboard.id}"]`)[0];
+    let destinations = Settings.layerSettingForKey(layer, DESTINATION_KEY);
+    let patchedDestinations = destinations.filter((original) => {
+        if (
+            original.remote_project_id == destination.remote_project_id &&
+            original.remote_path == destination.remote_path
+        ) {
+            // Remove it if it exist
+            return false;
+        } else {
+            // Keep it
+            return true;
+        }
+    });
+    Settings.setLayerSettingForKey(layer, DESTINATION_KEY, patchedDestinations);
+}
+
 export function setDestinations(artboard, brandID) {
     let destinations = artboard.destinations;
     destinations = destinations.map((destination) => {

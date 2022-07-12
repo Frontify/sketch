@@ -22,7 +22,7 @@ import { frontend } from '../helpers/ipc';
  * For information on the parameters, check the implementation of the
  * function. The parameters are defined using the spread operator.
  */
-import { getSelectedArtboards } from './actions/getSelectedArtboards';
+import { getSelectedArtboards, removeDestination, removeDestinations } from './actions/getSelectedArtboards';
 import { uploadArtboards } from './actions/uploadArtboards';
 
 import recentFiles from '../model/recent';
@@ -734,6 +734,26 @@ export default function (context, view) {
                 } catch (error) {
                     payload = { success: false, error };
                 }
+                break;
+            case 'removeAllDestinations':
+                removeDestinations({ id: args.id });
+
+                let artboardsAfterRemovingAllDestinations = getSelectedArtboards(args.brandID);
+
+                frontend.send('artboards-changed', artboardsAfterRemovingAllDestinations);
+
+                payload = { success: true };
+
+                break;
+            case 'removeDestination':
+                removeDestination({ id: args.id }, args.destination);
+
+                let artboardsAfterRemovingDestination = getSelectedArtboards(args.brandID);
+
+                frontend.send('artboards-changed', artboardsAfterRemovingDestination);
+
+                payload = { success: true };
+
                 break;
             case 'reveal':
                 if (createFolder(args.path)) {

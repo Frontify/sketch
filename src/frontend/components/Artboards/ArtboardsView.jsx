@@ -22,6 +22,9 @@ import {
     IconExpand,
     IconUnknown,
     IconUnknownSimple,
+    IconCross,
+    IconTrash,
+    IconMinusCircle,
 } from '@frontify/fondue';
 
 import { ArtboardToolbar } from './ArtboardToolbar';
@@ -284,7 +287,14 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
     const frontifyUrl = `${base}/screens/${destination.remote_id}`;
 
     return (
-        <custom-palette-item gap="x-small">
+        <custom-palette-item
+            gap="x-small"
+            selectable={true}
+            onDoubleClick={() => {
+                openExternal(frontifyUrl);
+                setOpen(false);
+            }}
+        >
             <custom-h-stack gap="small" align-items="center" padding-x="small">
                 {/* Modified */}
 
@@ -380,6 +390,27 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
                             >
                                 <MenuItem decorator={<IconExternalLink />} title={'View on Frontify'}>
                                     View on Frontify
+                                </MenuItem>
+                            </div>
+
+                            <custom-line></custom-line>
+
+                            <div
+                                tabIndex={0}
+                                role="menuitem"
+                                aria-label={`Remove`}
+                                onClick={() => {
+                                    useSketch('removeDestination', {
+                                        id: artboard.id,
+                                        brandID: context.selection.brand.id,
+                                        destination,
+                                    });
+
+                                    setOpen(false);
+                                }}
+                            >
+                                <MenuItem decorator={<IconMinusCircle />} title={'Remove'}>
+                                    Remove
                                 </MenuItem>
                             </div>
                         </custom-v-stack>
@@ -562,8 +593,6 @@ export function ArtboardsView() {
         setDocumentArtboards(response.documentArtboards);
         setTotal(response.total);
         setHasSelection(response.hasSelection);
-
-        // setArtboards(mockedArtall);
     };
 
     /**
