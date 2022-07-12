@@ -54,6 +54,8 @@ function ArtboardToolbar({
     hasSelection,
     loading,
     onCreateFolder,
+    canCancel,
+    onCancel,
     modifiedArtboards = [],
     projectMap,
     withDestinationPicker,
@@ -71,7 +73,7 @@ function ArtboardToolbar({
 }) {
     const [computedFolders, setComputedFolders] = useState([]);
     const [computedFolderType, setComputedFolderType] = useState('none');
-    const [didCancel, setDidCancel] = useState(false);
+
     const [sortedUsedFolders, setSortedUsedFolders] = useState([]);
     const [temporaryUploadDestination, setTemporaryUploadDestination] = useState(null);
 
@@ -82,7 +84,7 @@ function ArtboardToolbar({
     const context = useContext(UserContext);
 
     const cancelArtboardUpload = () => {
-        setDidCancel(true);
+        onCancel();
         useSketch('cancelArtboardUpload');
     };
 
@@ -354,7 +356,6 @@ function ArtboardToolbar({
                         disabled={modifiedArtboards.length == 0}
                         hugWidth={false}
                         onClick={() => {
-                            setDidCancel(false);
                             uploadSome();
                         }}
                     >
@@ -369,7 +370,7 @@ function ArtboardToolbar({
                         style="Secondary"
                         hugWidth={true}
                         onClick={() => cancelArtboardUpload()}
-                        disabled={didCancel}
+                        disabled={!canCancel}
                     >
                         {t('general.cancel')}
                     </Button>

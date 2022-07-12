@@ -102,6 +102,7 @@ custom-breadcrumbs {
 /* Artboard Thumbnails */
 
 custom-artboard-thumbnail {
+    cursor: pointer !important;
     width: 48px;
     height: 48px;
     border-radius: 4px;
@@ -110,6 +111,13 @@ custom-artboard-thumbnail {
     padding: 2px;
     display: flex;
     place-items: center;
+}
+custom-artboard-thumbnail img {
+    cursor: pointer !important;
+}
+
+custom-artboard-thumbnail:hover {
+    border: 1px solid rgba(0, 0, 0, 0.16);
 }
 custom-artboard-thumbnail > * {
     max-height: 100%;
@@ -195,15 +203,16 @@ custom-palette-item {
     user-select: none;
     -webkit-user-select: none;
 }
+
 custom-palette-item * {
     cursor: default;
     user-select: none;
     -webkit-user-select: none;
 }
-custom-palette-item:hover {
+custom-palette-item:not([hover='off']):hover {
     background: rgba(0, 0, 0, 0.04);
 }
-custom-palette-item:active {
+custom-palette-item:not([hover='off']):active {
     background: rgba(0, 0, 0, 0.12);
 }
 custom-palette-item[disabled='true'] {
@@ -350,4 +359,10 @@ custom-dim {
 [data-test-id='flyout-trigger'] {
     -webkit-appearance: none;
     background: none;
+}
+
+/* Hack to always show a pointer for icons inside Button */
+button svg,
+button svg * {
+    cursor: pointer;
 }

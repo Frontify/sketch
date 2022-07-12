@@ -289,18 +289,16 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
     const frontifyUrl = `${base}/screens/${destination.remote_id}`;
 
     return (
-        <custom-palette-item
-            gap="x-small"
-            selectable={true}
-            onDoubleClick={() => {
-                openExternal(frontifyUrl);
-                setOpen(false);
-            }}
-        >
+        <custom-palette-item hover="off" gap="x-small">
             <custom-h-stack gap="small" align-items="center" padding-x="small">
                 {/* Modified */}
 
-                <custom-artboard-thumbnail>
+                <custom-artboard-thumbnail
+                    onClick={() => {
+                        openExternal(frontifyUrl);
+                        setOpen(false);
+                    }}
+                >
                     {destination.api?.previewUrl && <img src={`${destination.api?.previewUrl}?width=96`} alt="" />}
                 </custom-artboard-thumbnail>
 
@@ -499,6 +497,7 @@ export function ArtboardsView() {
 
     const [artboards, setArtboards] = useState([]);
     const [artboardsMap, setArtboardsMap] = useState(new Map());
+    const [canCancel, setCanCancel] = useState(true);
     const [destinationPickerOpen, setDestinationPickerOpen] = useState(false);
     const [documentArtboards, setDocumentArtboards] = useState([]);
     const [groupedArtboards, setGroupedArtboards] = useState({});
@@ -900,6 +899,7 @@ export function ArtboardsView() {
     }, [documentArtboards, projectMap]);
 
     const uploadArtboards = async (artboards) => {
+        setCanCancel(true);
         if (artboards.length) {
             await useSketch('uploadArtboards', { artboards, brandID: context.selection.brand.id });
         }
@@ -1042,6 +1042,8 @@ export function ArtboardsView() {
                 </custom-scroll-view>
                 <ArtboardToolbar
                     artboards={artboards}
+                    canCancel={canCancel}
+                    onCancel={() => setCanCancel(false)}
                     uploadStatus={uploadStatus}
                     hasSelection={hasSelection}
                     loading={loading}
