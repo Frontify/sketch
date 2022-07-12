@@ -160,6 +160,13 @@ function ArtboardToolbar({
             separator="top"
             style={{ width: '100%' }}
         >
+            {showRecentDestinations && (
+                <custom-dim
+                    onClick={() => {
+                        setShowRecentDestinations(false);
+                    }}
+                ></custom-dim>
+            )}
             {!loading ? (
                 <custom-h-stack gap="small" stretch-children="true" flex>
                     <Flyout
