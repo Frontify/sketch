@@ -76,7 +76,7 @@ const timeAgo = (prevDate) => {
  * ⚛️ Artboard Item
  * ----------------------------------------------------------------------------
  */
-export function ArtboardItem({ artboard, showPath = true }) {
+export function ArtboardItem({ artboard, showPath = true, uploadArtboards }) {
     return (
         <custom-v-stack>
             <custom-h-stack gap="small" flex padding="small">
@@ -106,6 +106,7 @@ export function ArtboardItem({ artboard, showPath = true }) {
                                                 artboard={artboard}
                                                 destination={destination}
                                                 key={destination.remote_id}
+                                                uploadArtboards={uploadArtboards}
                                             ></ArtboardDestinationItem>
                                         );
                                     })}
@@ -126,10 +127,10 @@ export function ArtboardItem({ artboard, showPath = true }) {
  * ----------------------------------------------------------------------------
  */
 
-function ArtboardGroupItem({ group, uploadGroup, open, onOpen, onClose }) {
+function ArtboardGroupItem({ group, uploadGroup, open, onOpen, onClose, uploadArtboards }) {
     return (
         <custom-v-stack>
-            <custom-h-stack gap="xx-small" align-items="center" style={{ marginLeft: '16px' }} padding="xx-small">
+            <custom-h-stack gap="x-small" align-items="center" style={{ marginLeft: '16px' }} padding="xx-small">
                 <div>
                     {open ? (
                         <Button
@@ -214,6 +215,7 @@ function ArtboardGroupItem({ group, uploadGroup, open, onOpen, onClose }) {
                                           display="artboard"
                                           destination={destination}
                                           key={destination.remote_id}
+                                          uploadArtboards={uploadArtboards}
                                       ></ArtboardDestinationItem>
                                   );
                               })}
@@ -269,7 +271,7 @@ export function ArtboardDestinationStatusIcon({ destination, transfer }) {
  * ----------------------------------------------------------------------------
  */
 
-export function ArtboardDestinationItem({ artboard, destination, display = 'path' }) {
+export function ArtboardDestinationItem({ artboard, destination, display = 'path', uploadArtboards }) {
     const [open, setOpen] = useState(false);
     const context = useContext(UserContext);
     const [transfer, setTransfer] = useState({});
@@ -321,101 +323,114 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
 
                 <custom-spacer></custom-spacer>
 
-                {destination.selected && !transfer && (
-                    <IconUploadAlternative
-                        style={{ color: 'rgba(0, 0, 0, 0.5)' }}
-                        size="Size20"
-                    ></IconUploadAlternative>
-                )}
-
-                {transfer && transfer.status == 'upload-queued' && (
-                    <div>
-                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="9" cy="9" r="8" stroke="rgba(0,0, 0,0.16)" strokeWidth="2" />
-                        </svg>
-                    </div>
-                )}
-
-                {transfer && transfer.status == 'uploading' && (
-                    <div>
-                        <svg
-                            width="18"
-                            height="18"
-                            viewBox="0 0 18 18"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                            style={{ transform: 'rotate(-90deg)' }}
+                <custom-h-stack align-items="center">
+                    {destination.selected && !transfer && (
+                        <Button
+                            style="Secondary"
+                            icon={
+                                <IconUploadAlternative
+                                    size="Size20"
+                                    style={{ color: 'var(--box-selected-strong-color)' }}
+                                />
+                            }
+                            inverted={false}
+                            solid={false}
+                            hugWidth={true}
+                            onClick={() => {
+                                uploadArtboards([artboard]);
+                            }}
+                        ></Button>
+                    )}
+                    {transfer && transfer.status == 'upload-queued' && (
+                        <div style={{ marginRight: '8px' }}>
+                            <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 18 18"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <circle cx="9" cy="9" r="8" stroke="rgba(0,0, 0,0.16)" strokeWidth="2" />
+                            </svg>
+                        </div>
+                    )}
+                    {transfer && transfer.status == 'uploading' && (
+                        <div style={{ marginRight: '8px' }}>
+                            <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 18 18"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                                style={{ transform: 'rotate(-90deg)' }}
+                            >
+                                <circle cx="9" cy="9" r="8" stroke="rgba(0,0, 0,0.16)" strokeWidth="2" />
+                                <circle
+                                    style={{
+                                        strokeDasharray: `${(transfer ? transfer.progress / 100 : 0) * 50} 50`,
+                                    }}
+                                    cx="9"
+                                    cy="9"
+                                    r="8"
+                                    stroke="var(--box-selected-strong-color)"
+                                    strokeWidth="2"
+                                />
+                            </svg>
+                        </div>
+                    )}
+                    <div show-on-hover="false" style={{ marginRight: '-8px' }}>
+                        <Flyout
+                            hug={false}
+                            fitContent={true}
+                            isOpen={open}
+                            onOpenChange={(isOpen) => setOpen(isOpen)}
+                            legacyFooter={false}
+                            trigger={
+                                <Button
+                                    style="Secondary"
+                                    solid={false}
+                                    inverted={false}
+                                    icon={<IconMore />}
+                                    onClick={() => setOpen((open) => !open)}
+                                ></Button>
+                            }
                         >
-                            <circle cx="9" cy="9" r="8" stroke="rgba(0,0, 0,0.16)" strokeWidth="2" />
-                            <circle
-                                style={{
-                                    strokeDasharray: `${(transfer ? transfer.progress / 100 : 0) * 50} 50`,
-                                }}
-                                cx="9"
-                                cy="9"
-                                r="8"
-                                stroke="var(--box-selected-strong-color)"
-                                strokeWidth="2"
-                            />
-                        </svg>
+                            <custom-v-stack>
+                                <div
+                                    tabIndex={0}
+                                    role="menuitem"
+                                    aria-label={`View on Frontify`}
+                                    onClick={() => {
+                                        openExternal(frontifyUrl);
+                                        setOpen(false);
+                                    }}
+                                >
+                                    <MenuItem decorator={<IconExternalLink />} title={'View on Frontify'}>
+                                        View on Frontify
+                                    </MenuItem>
+                                </div>
+                                <custom-line></custom-line>
+                                <div
+                                    tabIndex={0}
+                                    role="menuitem"
+                                    aria-label={`Remove`}
+                                    onClick={() => {
+                                        useSketch('removeDestination', {
+                                            id: artboard.id,
+                                            brandID: context.selection.brand.id,
+                                            destination,
+                                        });
+                                        setOpen(false);
+                                    }}
+                                >
+                                    <MenuItem decorator={<IconMinusCircle />} title={'Remove'}>
+                                        Remove
+                                    </MenuItem>
+                                </div>
+                            </custom-v-stack>
+                        </Flyout>
                     </div>
-                )}
-
-                <div show-on-hover="false" style={{ marginRight: '-8px' }}>
-                    <Flyout
-                        hug={false}
-                        fitContent={true}
-                        isOpen={open}
-                        onOpenChange={(isOpen) => setOpen(isOpen)}
-                        legacyFooter={false}
-                        trigger={
-                            <Button
-                                style="Secondary"
-                                solid={false}
-                                inverted={false}
-                                icon={<IconMore />}
-                                onClick={() => setOpen((open) => !open)}
-                            ></Button>
-                        }
-                    >
-                        <custom-v-stack>
-                            <div
-                                tabIndex={0}
-                                role="menuitem"
-                                aria-label={`View on Frontify`}
-                                onClick={() => {
-                                    openExternal(frontifyUrl);
-                                    setOpen(false);
-                                }}
-                            >
-                                <MenuItem decorator={<IconExternalLink />} title={'View on Frontify'}>
-                                    View on Frontify
-                                </MenuItem>
-                            </div>
-
-                            <custom-line></custom-line>
-
-                            <div
-                                tabIndex={0}
-                                role="menuitem"
-                                aria-label={`Remove`}
-                                onClick={() => {
-                                    useSketch('removeDestination', {
-                                        id: artboard.id,
-                                        brandID: context.selection.brand.id,
-                                        destination,
-                                    });
-
-                                    setOpen(false);
-                                }}
-                            >
-                                <MenuItem decorator={<IconMinusCircle />} title={'Remove'}>
-                                    Remove
-                                </MenuItem>
-                            </div>
-                        </custom-v-stack>
-                    </Flyout>
-                </div>
+                </custom-h-stack>
 
                 {/* <ArtboardDestinationStatusIcon
                 destination={destination}
@@ -437,17 +452,24 @@ export function ArtboardGroupTransferAction({ group, uploadGroup }) {
     switch (group.transfer.status) {
         case 'idle':
             return (
-                <Button
-                    icon={<IconUploadAlternative style={{ color: 'var(--box-selected-strong-color)' }} />}
-                    style="Secondary"
-                    inverted={false}
-                    solid={false}
-                    onClick={() => {
-                        uploadGroup(group);
-                    }}
-                >
-                    <Text classNames="">{group.selectionCount}</Text>
-                </Button>
+                <custom-h-stack gap="x-small" align-items="center">
+                    {/* <Text classNames="">{group.selectionCount}</Text> */}
+                    {/* <Button
+                        style="Secondary"
+                        inverted={false}
+                        solid={false}
+                        hugWidth={true}
+                        onClick={() => {
+                            uploadGroup(group);
+                        }}
+                        icon={
+                            <IconUploadAlternative
+                                size="Size20"
+                                style={{ color: 'var(--box-selected-strong-color)' }}
+                            />
+                        }
+                    ></Button> */}
+                </custom-h-stack>
             );
 
         case 'done':
@@ -994,6 +1016,7 @@ export function ArtboardsView() {
                                             open={groupsMap[group.key] ? groupsMap[group.key]?.open : true}
                                             group={group}
                                             uploadGroup={uploadGroup}
+                                            uploadArtboards={uploadArtboards}
                                         ></ArtboardGroupItem>
                                     </custom-v-stack>
                                 );
