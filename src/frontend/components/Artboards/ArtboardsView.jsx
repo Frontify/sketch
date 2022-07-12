@@ -720,13 +720,18 @@ export function ArtboardsView() {
 
             setGroupedArtboards(groups);
 
+            /**
+             * We can derive the total upload progress by summing up all the
+             * numbers that we have previously calculated for each folder/group.
+             * We can then use that to display it in the toolbar.
+             */
             setUploadStatus({
-                status: 'idle',
+                status: 'unknown',
                 totalProgress: 0,
-                remaining: groups.reduce((a, b) => a.transfer.remaining + b.transfer.remaining),
-                total: groups.reduce((a, b) => a.transfer.total + b.transfer.total),
-                progress: groups.reduce((a, b) => a.transfer.progress + b.transfer.progress),
-                completed: groups.reduce((a, b) => a.transfer.completed + b.transfer.completed),
+                remaining: groups.reduce((total, group) => total + group.transfer?.remaining, 0),
+                total: groups.reduce((total, group) => total + group.transfer?.total, 0),
+                progress: groups.reduce((total, group) => total + group.transfer?.progress, 0),
+                completed: groups.reduce((total, group) => total + group.transfer?.completed, 0),
             });
         }
     }, [artboards, artboardsMap, projectMap, context.transferMap, view]);
@@ -752,17 +757,71 @@ export function ArtboardsView() {
         if (documentArtboards.length) fetchArtboardsFromAPI(documentArtboards);
     }, [documentArtboards]);
 
+    /**
+     * This function overrides any existing destinations
+     */
     const uploadArtboardsToDestination = (artboards) => {
         let patchedArtboards = artboards.map((artboard) => {
+            /**
+             * 2 Scenarios:
+             *
+             * A) The artboard has no existing destinations:
+             *      -> add the new destination
+             * B) The artboard has existing destinations:
+             *      && the "remote_project_id" and the "remote_path" are:
+             *          -> same: return
+             *          -> different: replace the existing destinations with the new destination
+             */
+
+            let newDestination = {
+                remote_project_id: uploadDestination.project.id,
+                remote_id: null,
+                remote_path: `/${uploadDestination.folderPath}/`,
+            };
+
+            // By default, we assign a single new destination.
+            // But in case that we find an existing destination, we’ll use the original destinations.
+            let patchedDestinations = [newDestination];
+            let existingDestinations = artboard.destinations.length > 0;
+
+            if (existingDestinations) {
+                // Compare
+                let match = false;
+                artboard.destinations.forEach((destination) => {
+                    let sameProject = destination.remote_project_id == uploadDestination.project.id;
+                    let samePath = destination.remote_path == `/${uploadDestination.folderPath}/`;
+                    if (sameProject && samePath) {
+                        // keep it
+                        match = true;
+                        return;
+                    }
+                });
+
+                /**
+                 * If the location already exists, then we keep it -> this will replace the asset
+                 */
+
+                if (match) patchedDestinations = artboard.destinations;
+
+                if (!match) {
+                    /**
+                     * In theory, we could just push the new destination
+                     * This would result in *multiple* destinations.
+                     * The asset would be uploaded to one or more folders.
+                     *
+                     * NOTE: We don’t support multiple destinations right now.
+                     * There are a few open UX questions to be answered and
+                     * it makes everything more complex. The data structure supports it
+                     * (destinations is an Array) and the upload also works.
+                     * The grouping doesn’t work correctly, as the asset will be
+                     * displayed mutiple times per group.
+                     */
+                    // patchedDestinations.push(...artboard.destinations);
+                }
+            }
             return {
                 ...artboard,
-                destinations: [
-                    {
-                        remote_project_id: uploadDestination.project.id,
-                        remote_id: null,
-                        remote_path: `/${uploadDestination.folderPath}/`,
-                    },
-                ],
+                destinations: patchedDestinations,
             };
         });
 
