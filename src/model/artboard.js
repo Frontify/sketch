@@ -230,7 +230,7 @@ class Artboard {
                 // Optimize layers
                 artboardExport.layers = this.optimizeLayers(artboardExport.layers);
 
-                const exportName = 'data';
+                const exportName = `data-${artboard.id}`;
                 const exportPath = filemanager.getExportPath();
                 writeJSON(exportName, artboardExport, exportPath);
 
@@ -606,6 +606,7 @@ class Artboard {
                                                                     )
                                                                     .catch((error) => {
                                                                         console.error(error);
+                                                                        this.failUpload(artboard);
                                                                     });
                                                             } else {
                                                                 // Skip upload because the file hasn’t changed

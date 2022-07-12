@@ -293,7 +293,7 @@ class FileManager {
             )
             .catch(
                 function (e) {
-                    if (e.localizedDescription) {
+                    if (e?.localizedDescription) {
                         console.error(e.localizedDescription);
                     } else {
                         console.error(e);
