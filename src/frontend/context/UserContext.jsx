@@ -65,12 +65,11 @@ export const UserContextProvider = ({ children }) => {
                 case 'progress':
                     switch (payload.status) {
                         case 'upload-failed':
-                            console.log('fail', payload);
                             setTransferMap((state) => {
                                 // Remove the entry from transferMap
                                 delete state[id];
                                 // Cleanup eventual uploads that had to be tracked by artboard id
-                                delete state[payload.target.for];
+                                delete state[payload.target?.for];
                                 return { ...state, [id]: payload };
                             });
                             break;
@@ -79,9 +78,11 @@ export const UserContextProvider = ({ children }) => {
                                 // Remove the entry from transferMap
                                 delete state[id];
                                 // Cleanup eventual uploads that had to be tracked by artboard id
-                                delete state[payload.target.for];
+                                delete state[payload.target?.for];
+
                                 return { ...state };
                             });
+
                             break;
                         default:
                             setTransferMap((state) => {

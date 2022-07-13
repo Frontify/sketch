@@ -887,8 +887,13 @@ export function ArtboardsView() {
      * Tracks the transfer items and when there are no more things to upload, stop the loading.
      */
     useEffect(() => {
-        if (Object.keys(context.transferMap).length == 0) setLoading(false);
-        if (Object.keys(context.transferMap).length > 0) setLoading(true);
+        let artboardsOnly = Object.keys(context.transferMap).filter((key) => {
+            let entry = context.transferMap[key];
+            return entry.type == 'artboard';
+        });
+
+        if (artboardsOnly.length == 0) setLoading(false);
+        if (artboardsOnly.length > 0) setLoading(true);
     }, [context.transferMap]);
 
     useEffect(() => {
@@ -1002,6 +1007,7 @@ export function ArtboardsView() {
     if (artboards && artboards.length) {
         return (
             <custom-v-stack flex stretch="true" overflow="hidden">
+                {JSON.stringify(context.transferMap)}
                 <custom-scroll-view class="tw-bg-black-0">
                     {groupedArtboards.length ? (
                         <custom-v-stack flex stretch="true" separator="between">

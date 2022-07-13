@@ -605,6 +605,7 @@ class Artboard {
                                                                         }.bind(this)
                                                                     )
                                                                     .catch((error) => {
+                                                                        console.log('damn fail');
                                                                         console.error(error);
                                                                         this.failUpload(artboard);
                                                                     });
@@ -665,7 +666,10 @@ class Artboard {
                                                                             status.sha = data.sha;
                                                                             return assetId;
                                                                         }.bind(this)
-                                                                    );
+                                                                    )
+                                                                    .catch((error) => {
+                                                                        console.log('damn fail attachment', error);
+                                                                    });
                                                             } else {
                                                                 filemanager.deleteFile(file.path);
                                                                 artboardProgress.setCompletedUnitCount(
@@ -707,7 +711,11 @@ class Artboard {
                                                 //     'artboardUploaded(' + JSON.stringify(artboard) + ')'
                                                 // );
 
-                                                this.finishUpload(artboard);
+                                                if (data) {
+                                                    this.finishUpload(artboard);
+                                                } else {
+                                                    this.failUpload(artboard);
+                                                }
                                             }
                                             return true;
                                         }.bind(this)

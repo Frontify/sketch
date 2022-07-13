@@ -286,9 +286,13 @@ class FileManager {
         })
             .then(
                 async function (response) {
-                    let json = await response.json();
-
-                    return response.json();
+                    console.log(response);
+                    try {
+                        let json = await response.json();
+                        return json;
+                    } catch (error) {
+                        console.error(error);
+                    }
                 }.bind(this)
             )
             .catch(

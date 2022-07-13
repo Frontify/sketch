@@ -448,6 +448,7 @@ class Source {
                     if (isWebviewPresent('frontifymain')) {
                         frontend.send('progress', {
                             state: 'upload-complete',
+                            status: 'upload-complete',
                             ...file,
                         });
                     }
@@ -497,6 +498,13 @@ class Source {
                         clearInterval(polling);
                         data.modified = data.created;
                         filemanager.updateAssetStatus(target.project.id, data);
+
+                        if (isWebviewPresent('frontifymain')) {
+                            frontend.send('progress', {
+                                status: 'upload-complete',
+                                ...file,
+                            });
+                        }
 
                         resolve(data);
                     })

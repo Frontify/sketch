@@ -9,6 +9,10 @@ import {
     IconFrequentlyUsed,
     IconAdd,
     IconCrossCircle,
+    IconCheckMarkCircle,
+    IconLayers,
+    IconMore,
+    Badge,
 } from '@frontify/fondue';
 
 import { UploadDestinationPicker } from '../Core/UploadDestinationPicker';
@@ -202,11 +206,9 @@ function ArtboardToolbar({
                                             paths={uploadDestination ? [uploadDestination] : []}
                                             onInput={(value) => {
                                                 setTemporaryUploadDestination(value);
-                                                setUploadDestination(value);
                                             }}
                                             onChange={(value) => {
                                                 setUploadDestination(value);
-                                                performUpload();
                                             }}
                                         ></UploadDestinationPicker>
                                         <custom-h-stack padding="small" gap="small" separator="top">
@@ -235,7 +237,7 @@ function ArtboardToolbar({
                                                 onClick={() => {
                                                     setShowDestinationPicker(false);
                                                     setShowRecentDestinations(false);
-                                                    setUploadDestination(temporaryUploadDestination);
+
                                                     performUpload();
                                                 }}
                                             >
