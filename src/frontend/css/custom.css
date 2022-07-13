@@ -366,3 +366,8 @@ button svg,
 button svg * {
     cursor: pointer;
 }
+
+[cursor='pointer'],
+[cursor='pointer'] * {
+    cursor: pointer !important;
+}

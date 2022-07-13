@@ -226,6 +226,8 @@ function ArtboardToolbar({
                                             <Button
                                                 style="Secondary"
                                                 onClick={() => {
+                                                    setTemporaryUploadDestination(null);
+                                                    setUploadDestination(null);
                                                     setShowDestinationPicker(false);
                                                     setShowRecentDestinations(false);
                                                 }}
@@ -241,7 +243,7 @@ function ArtboardToolbar({
                                                     performUpload();
                                                 }}
                                             >
-                                                Upload
+                                                Upload {JSON.stringify(uploadDestination?.folderPath)}
                                             </Button>
                                         </custom-h-stack>
                                     </custom-v-stack>
@@ -265,7 +267,6 @@ function ArtboardToolbar({
                                         setTemporaryUploadDestination(null);
                                         performUpload();
                                     }}
-                                    icon={<IconUploadAlternative />}
                                 >
                                     Upload
                                 </Button>

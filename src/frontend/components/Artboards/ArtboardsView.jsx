@@ -889,7 +889,7 @@ export function ArtboardsView() {
     useEffect(() => {
         let artboardsOnly = Object.keys(context.transferMap).filter((key) => {
             let entry = context.transferMap[key];
-            return entry.type == 'artboard';
+            return entry.type == 'Artboard';
         });
 
         if (artboardsOnly.length == 0) setLoading(false);
@@ -1007,7 +1007,6 @@ export function ArtboardsView() {
     if (artboards && artboards.length) {
         return (
             <custom-v-stack flex stretch="true" overflow="hidden">
-                {JSON.stringify(context.transferMap)}
                 <custom-scroll-view class="tw-bg-black-0">
                     {groupedArtboards.length ? (
                         <custom-v-stack flex stretch="true" separator="between">

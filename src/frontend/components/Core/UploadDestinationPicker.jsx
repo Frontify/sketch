@@ -42,7 +42,6 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
     let context = useContext(UserContext);
 
     useEffect(() => {
-        console.log('use effect with {paths}', paths);
         if (paths && paths.length) {
             if (paths.length == 1) {
                 // single
@@ -214,6 +213,26 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
         };
     };
 
+    const wrappedCurrentFolder = (folder) => {
+        if (!breadcrumbs) breadcrumbs = [];
+
+        return {
+            type: 'folder',
+            folder,
+            project,
+            name: folder.name,
+            breadcrumbs,
+            folderPath: []
+                .concat(breadcrumbs.map((breadcrumb) => breadcrumb.name))
+
+                .join('/'),
+            path: [selection.brand.name, project?.name || folder.project.name]
+                .concat(breadcrumbs.map((breadcrumb) => breadcrumb.name))
+
+                .join('/'),
+        };
+    };
+
     // Back
     const browseBack = () => {
         console.log('back!', breadcrumbs);
@@ -232,7 +251,11 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
             let previous = breadcrumbs[breadcrumbs.length - 1];
 
             if (previous) {
-                enterFolder(previous);
+                // enterFolder(previous);
+                console.log('PREVIOUS', previous);
+                setFolder(previous);
+                onInput(wrappedFolder(previous));
+                onChange(wrappedFolder(previous));
             } else {
                 enterProject(project);
             }
@@ -259,9 +282,11 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
 
         onChange(wrappedFolder(root));
     };
-    const focusFolder = (folder) => {
+    const focusFolder = (newFolder) => {
+        console.log('focus folder', newFolder, folder);
         if (onInput) {
-            onInput(wrappedFolder(folder));
+            onInput(wrappedFolder(newFolder));
+            onChange(wrappedFolder(newFolder));
         }
     };
 
@@ -336,7 +361,8 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
                         <custom-palette-item
                             selectable
                             tabindex="-1"
-                            onDoubleClick={() => {
+                            cursor="pointer"
+                            onFocus={() => {
                                 enterProject(project);
                             }}
                             key={project.id}
@@ -395,16 +421,13 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
                             {folders.map((folder) => {
                                 return (
                                     <custom-palette-item
+                                        cursor="pointer"
                                         selectable
                                         key={folder.id}
                                         tabindex="-1"
-                                        onFocus={() => focusFolder(folder)}
+                                        onFocus={() => enterFolder(folder)}
                                     >
-                                        <custom-h-stack
-                                            gap="small"
-                                            align-items="center"
-                                            onDoubleClick={() => enterFolder(folder)}
-                                        >
+                                        <custom-h-stack gap="small" align-items="center">
                                             <IconFolder></IconFolder>
                                             <Text>{folder.name}</Text>
                                         </custom-h-stack>

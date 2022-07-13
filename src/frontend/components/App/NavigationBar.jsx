@@ -474,6 +474,19 @@ export function NavigationBar() {
                                 <div
                                     tabIndex={0}
                                     role="menuitem"
+                                    aria-label={`View on Frontify`}
+                                    onClick={() => {
+                                        openExternal(documentURL);
+                                        setOpen(false);
+                                    }}
+                                >
+                                    <MenuItem decorator={<IconExternalLink />} title={'View on Frontify'}>
+                                        View on Frontify
+                                    </MenuItem>
+                                </div>
+                                <div
+                                    tabIndex={0}
+                                    role="menuitem"
                                     aria-label={`Reveal in Finder`}
                                     onClick={() => {
                                         // We only have access to the full path including the filename.
@@ -492,19 +505,6 @@ export function NavigationBar() {
                                 >
                                     <MenuItem decorator={<IconView />} title={'Reveal in Finder'}>
                                         Reveal in Finder
-                                    </MenuItem>
-                                </div>
-                                <div
-                                    tabIndex={0}
-                                    role="menuitem"
-                                    aria-label={`View on Frontify`}
-                                    onClick={() => {
-                                        openExternal(documentURL);
-                                        setOpen(false);
-                                    }}
-                                >
-                                    <MenuItem decorator={<IconExternalLink />} title={'View on Frontify'}>
-                                        View on Frontify
                                     </MenuItem>
                                 </div>
                             </custom-v-stack>
