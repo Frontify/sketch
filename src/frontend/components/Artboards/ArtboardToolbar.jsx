@@ -8,6 +8,7 @@ import {
     Text,
     IconFrequentlyUsed,
     IconAdd,
+    IconCrossCircle,
 } from '@frontify/fondue';
 
 import { UploadDestinationPicker } from '../Core/UploadDestinationPicker';
@@ -373,19 +374,21 @@ function ArtboardToolbar({
                 </custom-h-stack>
             ) : (
                 <custom-h-stack align-items="center" gap="large" style={{ width: '100%' }}>
+                    <LoadingCircle size="Small"></LoadingCircle>
+                    <Text>
+                        {canCancel ? 'Uploading' : 'Canceling …'}{' '}
+                        {uploadStatus.remaining > 0 && <Text>({uploadStatus.remaining})</Text>}
+                    </Text>
+
+                    <custom-spacer></custom-spacer>
                     <Button
                         style="Secondary"
+                        solid={false}
                         hugWidth={true}
                         onClick={() => cancelArtboardUpload()}
                         disabled={!canCancel}
-                    >
-                        {t('general.cancel')}
-                    </Button>
-
-                    <custom-spacer></custom-spacer>
-                    {uploadStatus.remaining > 0 && <Text>{uploadStatus.remaining} remaining</Text>}
-
-                    <LoadingCircle size="Small"></LoadingCircle>
+                        icon={<IconCrossCircle></IconCrossCircle>}
+                    ></Button>
                 </custom-h-stack>
             )}
         </custom-h-stack>
