@@ -14,8 +14,12 @@ export function browseWorkspaceProject(project) {
                   filename
                   downloadUrl
                 }
-              }
-              
+                ...on Image {
+                  extension
+                  filename
+                  downloadUrl
+                }
+              } 
             }
             subFolders {
               items {
