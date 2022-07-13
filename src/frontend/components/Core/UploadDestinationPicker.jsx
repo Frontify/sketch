@@ -68,7 +68,7 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
     // Watch folderID
 
     const refreshFolder = async () => {
-        if (folder) {
+        if (folder && folder.id) {
             setLoading(true);
 
             // Todo: Use workspace query
@@ -123,6 +123,12 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
                           externalId
                           downloadUrl
                         }
+                        ...on Image {
+                            filename
+                            extension
+                            externalId
+                            downloadUrl
+                          }
                       }
                     }
                     subFolders {
@@ -138,6 +144,8 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
               }`;
 
             let graphQLresult = await queryGraphQLWithAuth({ query, auth: context.auth });
+
+            console.log({ graphQLresult, query });
 
             let files = graphQLresult.data.node.assets.items;
             let folders = graphQLresult.data.node.subFolders.items;
@@ -188,6 +196,7 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
 
     const wrappedFolder = (folder) => {
         if (!breadcrumbs) breadcrumbs = [];
+
         return {
             type: 'folder',
             folder,
@@ -198,7 +207,7 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
                 .concat(breadcrumbs.map((breadcrumb) => breadcrumb.name))
                 .concat(folder.name)
                 .join('/'),
-            path: [selection.brand.name, project.name]
+            path: [selection.brand.name, project?.name || folder.project.name]
                 .concat(breadcrumbs.map((breadcrumb) => breadcrumb.name))
                 .concat(folder.name)
                 .join('/'),
@@ -230,8 +239,24 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
     };
 
     const enterProject = (project) => {
-        setFolder(null);
+        console.log('enter', project);
+        let root = {
+            type: 'folder',
+            folder: {
+                id: project.id,
+                name: project.name,
+            },
+            project,
+            name: project.name,
+            breadcrumbs,
+            folderPath: [],
+            path: '/',
+        };
         fetchProjectFolders(project);
+        setFolder(root);
+        setProject(project);
+
+        onInput(wrappedFolder(root));
     };
     const focusFolder = (folder) => {
         if (onInput) {
@@ -311,7 +336,7 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
                             selectable
                             tabindex="-1"
                             onDoubleClick={() => {
-                                setProject(project);
+                                enterProject(project);
                             }}
                             key={project.id}
                         >
@@ -347,7 +372,7 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
                         }}
                     ></Button>
 
-                    <Text weight="strong">{folder?.name}</Text>
+                    <Text weight="strong">{folder?.name || project?.name}</Text>
                 </custom-h-stack>
 
                 <custom-scroll-view>
@@ -387,6 +412,7 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
                             })}
 
                             {files.map((file) => {
+                                if (file == null) return '';
                                 if (file.extension == 'sketch') {
                                     return (
                                         <custom-palette-item
