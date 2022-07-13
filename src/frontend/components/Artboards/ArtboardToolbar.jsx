@@ -376,7 +376,7 @@ function ArtboardToolbar({
                 <custom-h-stack align-items="center" gap="large" style={{ width: '100%' }}>
                     <LoadingCircle size="Small"></LoadingCircle>
                     <Text>
-                        {canCancel ? 'Uploading' : 'Canceling …'}{' '}
+                        {canCancel ? 'Uploading' : 'Canceling…'}{' '}
                         {uploadStatus.remaining > 0 && <Text>({uploadStatus.remaining})</Text>}
                     </Text>
 
