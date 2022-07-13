@@ -276,6 +276,8 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
     const context = useContext(UserContext);
     const [transfer, setTransfer] = useState({});
 
+    const { t } = useTranslation();
+
     useEffect(() => {
         if (destination) setTransfer(context.transferMap[destination.remote_id || artboard.id]);
     }, [context.transferMap]);
@@ -294,6 +296,7 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
                 {/* Modified */}
 
                 <custom-artboard-thumbnail
+                    title={t('artboards.view_on_frontify')}
                     onClick={() => {
                         openExternal(frontifyUrl);
                         setOpen(false);
@@ -397,15 +400,16 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
                                 <div
                                     tabIndex={0}
                                     role="menuitem"
-                                    aria-label={`View on Frontify`}
+                                    aria-label={t('artboards.view_on_frontify')}
                                     onClick={() => {
                                         openExternal(frontifyUrl);
                                         setOpen(false);
                                     }}
                                 >
-                                    <MenuItem decorator={<IconExternalLink />} title={'View on Frontify'}>
-                                        View on Frontify
-                                    </MenuItem>
+                                    <MenuItem
+                                        decorator={<IconExternalLink />}
+                                        title={t('artboards.view_on_frontify')}
+                                    ></MenuItem>
                                 </div>
                                 <custom-line></custom-line>
                                 <div
