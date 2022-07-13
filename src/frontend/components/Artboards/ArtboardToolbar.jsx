@@ -160,7 +160,7 @@ function ArtboardToolbar({
             separator="top"
             style={{ width: '100%' }}
         >
-            {showRecentDestinations && (
+            {showRecentDestinations && !showDestinationPicker && (
                 <custom-dim
                     onClick={() => {
                         setShowRecentDestinations(false);
