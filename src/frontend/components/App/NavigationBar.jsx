@@ -84,6 +84,9 @@ function SourceAction({ status, actions, loading }) {
                             onInput={(value) => {
                                 setTemporaryUploadDestination(value);
                             }}
+                            onChange={(value) => {
+                                setUploadDestination(value);
+                            }}
                         ></UploadDestinationPicker>
                         <custom-h-stack padding="small" gap="small" separator="top">
                             <Button
@@ -106,11 +109,11 @@ function SourceAction({ status, actions, loading }) {
                                 Cancel
                             </Button>
                             <Button
-                                disabled={temporaryUploadDestination == null}
+                                disabled={uploadDestination == null}
                                 onClick={() => {
                                     setShowDestinationPicker(false);
-                                    setUploadDestination(temporaryUploadDestination);
-                                    actions.publish(temporaryUploadDestination);
+                                    setUploadDestination(uploadDestination);
+                                    actions.publish(uploadDestination);
                                 }}
                             >
                                 Publish
@@ -225,10 +228,12 @@ export function NavigationBar() {
 
     const publish = async (destination) => {
         setLoading(true);
+        console.log('Publish', destination);
 
         target.project = destination.project;
         target.path = context.currentDocument.local.path;
-        target.set.path = destination.folder.name;
+        // target.set.path = destination.folder.name;
+        target.set.path = destination.folderPath;
 
         /**
          * This is the legacy data model "target" that was used to cache

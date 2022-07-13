@@ -216,11 +216,13 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
 
     // Back
     const browseBack = () => {
+        console.log('back!', breadcrumbs);
         const shouldEnterRoot = !breadcrumbs || breadcrumbs.length == 0;
 
         if (shouldEnterRoot) {
             setProject(null);
             setFolder(null);
+            onChange(null);
         }
 
         const shouldEnterFolder = breadcrumbs && breadcrumbs.length > 0;
@@ -239,7 +241,6 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
     };
 
     const enterProject = (project) => {
-        console.log('enter', project);
         let root = {
             type: 'folder',
             folder: {
@@ -256,7 +257,7 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
         setFolder(root);
         setProject(project);
 
-        onInput(wrappedFolder(root));
+        onChange(wrappedFolder(root));
     };
     const focusFolder = (folder) => {
         if (onInput) {
@@ -273,7 +274,7 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
                 return [];
             }
         });
-        onInput(wrappedFolder(folder));
+        onChange(wrappedFolder(folder));
     };
 
     const focusFile = (file) => {
