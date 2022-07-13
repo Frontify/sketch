@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 // Router
 import { useNavigate, Link, Outlet, useLocation } from 'react-router-dom';
@@ -24,7 +24,7 @@ export function SourceView() {
     const location = useLocation();
     const { t } = useTranslation();
 
-    let [activeView, setActiveView] = useLocalStorage('cache.activeView', 'brand');
+    let [activeView, setActiveView] = useState('artboards');
     let [activeScope, setActiveScope] = useLocalStorage('cache.activeScope', 'colors');
 
     const navigate = useNavigate();
