@@ -371,3 +371,22 @@ button svg * {
 [cursor='pointer'] * {
     cursor: pointer !important;
 }
+
+/* Sync Button */
+
+custom-sync-button {
+    display: flex;
+    min-width: 40px;
+    min-height: 40px;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+custom-sync-button[variant='add'] {
+    background: #2d3232;
+    color: white;
+    border-radius: 40px;
+}
+custom-sync-button[variant='add']:hover {
+    background: #4a5252;
+}

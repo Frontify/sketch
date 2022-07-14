@@ -365,7 +365,6 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
     if (project) {
         return (
             <custom-v-stack stretch overflow="hidden">
-                <pre>{JSON.stringify(breadcrumbs, null, 2)}</pre>
                 <custom-h-stack
                     gap="small"
                     separator="bottom"

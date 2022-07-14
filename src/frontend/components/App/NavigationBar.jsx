@@ -11,6 +11,8 @@ import {
     IconDownloadAlternative,
     IconExternalLink,
     IconMore,
+    IconPlus,
+    IconPlus16,
     IconRefresh,
     IconUploadAlternative,
     IconView,
@@ -63,15 +65,9 @@ function SourceAction({ status, actions, loading }) {
                 <CustomDialog
                     open={showDestinationPicker}
                     trigger={
-                        <Button
-                            style="Primary"
-                            inverted="true"
-                            hugWidth={false}
-                            onClick={() => setShowDestinationPicker(true)}
-                            icon={<IconUploadAlternative size="Size24" />}
-                        >
-                            {/* <Text whitespace="nowrap">Publish …</Text> */}
-                        </Button>
+                        <custom-sync-button variant="add" onClick={() => setShowDestinationPicker(true)}>
+                            <IconPlus size="Size20" />
+                        </custom-sync-button>
                     }
                 >
                     <custom-v-stack stretch>
