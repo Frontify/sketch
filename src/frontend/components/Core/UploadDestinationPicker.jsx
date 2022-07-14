@@ -67,6 +67,7 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
     // Watch folderID
 
     const refreshFolder = async () => {
+        console.log('refresh folder', folder);
         if (folder && folder.id) {
             setLoading(true);
 
@@ -196,46 +197,23 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
     const wrappedFolder = (folder) => {
         if (!breadcrumbs) breadcrumbs = [];
 
-        return {
-            type: 'folder',
-            folder,
-            project,
-            name: folder.name,
-            breadcrumbs,
-            folderPath: []
-                .concat(breadcrumbs.map((breadcrumb) => breadcrumb.name))
-                .concat(folder.name)
-                .join('/'),
-            path: [selection.brand.name, project?.name || folder.project.name]
-                .concat(breadcrumbs.map((breadcrumb) => breadcrumb.name))
-                .concat(folder.name)
-                .join('/'),
-        };
-    };
-
-    const wrappedCurrentFolder = (folder) => {
-        if (!breadcrumbs) breadcrumbs = [];
-
-        return {
-            type: 'folder',
-            folder,
-            project,
-            name: folder.name,
-            breadcrumbs,
-            folderPath: []
-                .concat(breadcrumbs.map((breadcrumb) => breadcrumb.name))
-
-                .join('/'),
-            path: [selection.brand.name, project?.name || folder.project.name]
-                .concat(breadcrumbs.map((breadcrumb) => breadcrumb.name))
-
-                .join('/'),
-        };
+        if (folder) {
+            return {
+                type: 'folder',
+                folder,
+                project,
+                name: folder.name,
+                breadcrumbs,
+                folderPath: [].concat(breadcrumbs.map((breadcrumb) => breadcrumb.name)).join('/'),
+                path: [selection.brand.name, project?.name || folder.project.name]
+                    .concat(breadcrumbs.map((breadcrumb) => breadcrumb.name))
+                    .join('/'),
+            };
+        }
     };
 
     // Back
     const browseBack = () => {
-        console.log('back!', breadcrumbs);
         const shouldEnterRoot = !breadcrumbs || breadcrumbs.length == 0;
 
         if (shouldEnterRoot) {
@@ -247,15 +225,13 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
         const shouldEnterFolder = breadcrumbs && breadcrumbs.length > 0;
 
         if (shouldEnterFolder) {
-            breadcrumbs.pop();
-            let previous = breadcrumbs[breadcrumbs.length - 1];
+            // breadcrumbs.pop();
+            let previous = breadcrumbs[breadcrumbs.length - 2];
 
             if (previous) {
                 // enterFolder(previous);
-                console.log('PREVIOUS', previous);
+
                 setFolder(previous);
-                onInput(wrappedFolder(previous));
-                onChange(wrappedFolder(previous));
             } else {
                 enterProject(project);
             }
@@ -290,17 +266,23 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
         }
     };
 
-    const enterFolder = (folder) => {
-        setFolder(folder);
+    const enterFolder = (newFolder) => {
+        setFolder(newFolder);
+
+        // Add the folder to the breadcrumbs
         setBreadcrumbs((state) => {
             if (state) {
-                return state.concat(folder);
+                return state.concat(newFolder);
             } else {
                 return [];
             }
         });
-        onChange(wrappedFolder(folder));
     };
+
+    useEffect(() => {
+        onInput(wrappedFolder(folder));
+        onChange(wrappedFolder(folder));
+    }, [breadcrumbs]);
 
     const focusFile = (file) => {
         onInput({
@@ -383,6 +365,7 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
     if (project) {
         return (
             <custom-v-stack stretch overflow="hidden">
+                <pre>{JSON.stringify(breadcrumbs, null, 2)}</pre>
                 <custom-h-stack
                     gap="small"
                     separator="bottom"
