@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 // Components
-import { Button, IconArrowLeft, IconCaretDown, Text } from '@frontify/fondue';
+import { Breadcrumbs, Button, IconArrowLeft, IconCaretDown, Text } from '@frontify/fondue';
 import { SourceStatusIcon } from './SourceStatusIcon';
 
 // Router
@@ -65,7 +65,7 @@ function SourceStateInfo({ source, loading, transferMap }) {
 function NoSource() {
     const { t } = useTranslation();
     return (
-        <custom-v-stack style={{ overflow: 'hidden' }}>
+        <custom-v-stack style={{ overflow: 'hidden' }} gap="xx-small">
             <Text color="weak" size="small">
                 {t('sources.no_open_document')}
             </Text>
@@ -83,26 +83,31 @@ function NoSource() {
  * ----------------------------------------------------------------------------
  */
 function RemoteSource({ source }) {
+    const [breadcrumbs, setBreadcrumbs] = useState([]);
+    useEffect(() => {
+        setBreadcrumbs(() => {
+            // remove leading and trailing slash from the path
+            return source.remote?.path.split('/').slice(1, -1);
+        });
+    }, [source.remote.path]);
     return (
-        <custom-v-stack gap="small" style={{ overflow: 'hidden' }}>
-            <custom-v-stack style={{ overflow: 'hidden' }}>
-                <Text color="weak" size="small">
-                    {source.remote?.path}
-                </Text>
-                <custom-h-stack align-items="center">
-                    <Text weight="strong" whitespace="nowrap" overflow="ellipsis">
-                        {source.local.filename.replace('.sketch', '')}
-                    </Text>
-                </custom-h-stack>
+        <custom-v-stack gap="xx-small">
+            <custom-breadcrumbs overflow="hidden" flex>
+                {breadcrumbs.map((breadcrumb, index) => (
+                    <custom-h-stack gap="x-small" key={index} overflow="hidden">
+                        <Text color="weak" size="small" key={index} overflow="ellipsis" whitespace="nowrap">
+                            {breadcrumb}
+                        </Text>
 
-                {/* Legacy: Not part of the design anymore but kept for reference */}
-
-                {/* <SourceStateInfo
-                source={source}
-                loading={loading}
-                transferMap={transferMap}
-            ></SourceStateInfo> */}
-            </custom-v-stack>
+                        <Text color="weak">
+                            <span style={{ opacity: 0.5 }}>/</span>
+                        </Text>
+                    </custom-h-stack>
+                ))}
+            </custom-breadcrumbs>
+            <Text padding="small" weight="strong" overflow="ellipsis" whitespace="nowrap">
+                {source.local.filename.replace('.sketch', '')}
+            </Text>
         </custom-v-stack>
     );
 }
@@ -115,7 +120,7 @@ function RemoteSource({ source }) {
 function UntrackedSource({ source }) {
     const { t } = useTranslation();
     return (
-        <custom-v-stack>
+        <custom-v-stack gap="xx-small">
             <Text color="weak" size="small">
                 {t('sources.untracked')}
             </Text>
@@ -132,12 +137,12 @@ function UntrackedSource({ source }) {
  */
 function UnsavedSource({ source }) {
     return (
-        <custom-v-stack>
+        <custom-v-stack gap="xx-small">
             <Text color="weak" size="small">
-                Unsaved Document
+                Unsaved File
             </Text>
             <Text weight="strong" whitespace="nowrap" overflow="ellipsis">
-                Save this file or checkout a remote file …
+                (No information available)
             </Text>
         </custom-v-stack>
     );

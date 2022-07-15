@@ -9,6 +9,7 @@ import {
     IconAdd,
     IconAlert,
     IconArrowLeft,
+    IconArrowSync,
     IconCheckMarkCircle,
     IconDownloadAlternative,
     IconExternalLink,
@@ -467,16 +468,12 @@ export function NavigationBar() {
     if (!context.currentDocument.local)
         return (
             <custom-h-stack align-items="center">
-                <custom-h-stack stretch-children="true" align-items="center" style={{ width: '100%' }}>
-                    <div style={{ height: '100%', overflow: 'hidden', flex: 1 }}>
-                        <SourceFileInfo
-                            source={context.currentDocument}
-                            status={status}
-                            loading={loading}
-                            transferMap={context.transferMap}
-                        ></SourceFileInfo>
-                    </div>
-                </custom-h-stack>
+                <SourceFileInfo
+                    source={context.currentDocument}
+                    status={status}
+                    loading={loading}
+                    transferMap={context.transferMap}
+                ></SourceFileInfo>
                 <custom-h-stack padding="small" gap="xx-small" style={{ flex: 0 }} align-items="center">
                     <button
                         onClick={() => {
@@ -504,7 +501,7 @@ export function NavigationBar() {
                             <div
                                 tabIndex={0}
                                 role="menuitem"
-                                aria-label={`Learn more …`}
+                                aria-label={`Get Help`}
                                 onClick={() => {
                                     setOpen(false);
                                     openExternal('https://www.frontify.com/de/support/');
@@ -544,7 +541,8 @@ export function NavigationBar() {
 
                 {context.currentDocument.state == 'same' ||
                 context.currentDocument.state == 'push' ||
-                context.currentDocument.state == 'pull' ? (
+                context.currentDocument.state == 'pull' ||
+                context.currentDocument.state == 'conflict' ? (
                     <div style={{ flex: 0 }} align-items="center">
                         <Flyout
                             hug={false}
@@ -597,6 +595,45 @@ export function NavigationBar() {
                                         Reveal in Finder
                                     </MenuItem>
                                 </div>
+                                <custom-line></custom-line>
+
+                                <div
+                                    tabIndex={0}
+                                    role="menuitem"
+                                    aria-label={`Fetch Again`}
+                                    onClick={() => {
+                                        setOpen(false);
+                                        refresh();
+                                    }}
+                                >
+                                    <MenuItem decorator={<IconArrowSync />} title={'Fetch Again'}></MenuItem>
+                                </div>
+
+                                <div
+                                    tabIndex={0}
+                                    role="menuitem"
+                                    aria-label={`Reload Plugin`}
+                                    onClick={() => {
+                                        setOpen(false);
+                                        window.postMessage('reload');
+                                    }}
+                                >
+                                    <MenuItem decorator={<IconRefresh />} title={'Reload Plugin'}></MenuItem>
+                                </div>
+
+                                <div
+                                    tabIndex={0}
+                                    role="menuitem"
+                                    aria-label={`Learn more …`}
+                                    onClick={() => {
+                                        setOpen(false);
+                                        openExternal('https://www.frontify.com/de/support/');
+                                    }}
+                                >
+                                    <MenuItem decorator={<IconExternalLink />} title={'Get Help'}>
+                                        Learn more …
+                                    </MenuItem>
+                                </div>
                             </custom-v-stack>
                         </Flyout>
                     </div>
@@ -616,6 +653,18 @@ export function NavigationBar() {
                                 ></Button>
                             }
                         >
+                            <div
+                                tabIndex={0}
+                                role="menuitem"
+                                aria-label={`Reload Plugin`}
+                                onClick={() => {
+                                    setOpen(false);
+                                    window.postMessage('reload');
+                                }}
+                            >
+                                <MenuItem decorator={<IconRefresh />} title={'Reload Plugin'}></MenuItem>
+                            </div>
+
                             <div
                                 tabIndex={0}
                                 role="menuitem"

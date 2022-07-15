@@ -173,7 +173,9 @@ function ArtboardGroupItem({ group, uploadGroup, open, onOpen, onClose, uploadAr
                                         >
                                             {breadcrumb}
                                         </Text>
-                                        <Text color="weak">/</Text>
+                                        <Text color="weak">
+                                            <span style={{ opacity: 0.5 }}>/</span>
+                                        </Text>
                                     </custom-h-stack>
                                 ))}
                             <Text padding="small" size="small" weight="strong" overflow="ellipsis" whitespace="nowrap">
