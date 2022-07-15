@@ -15,7 +15,7 @@
         },
         "error": {
             "artboard_error_code_0": "Unknown Error",
-            "artboard_error_code_1": "Artboard doesn’t exist on Frontify.",
+            "artboard_error_code_1": "The original asset has been removed from Frontify. Retry to upload anyway.",
             "artboard_error_code_2": "Attachment could not be uploaded.",
             "blacklisted": "Please use your dedicated Frontify domain.",
             "connection": "Connection failed. Are you connected to the internet?",

@@ -79,7 +79,7 @@ const timeAgo = (prevDate) => {
  * ⚛️ Artboard Item
  * ----------------------------------------------------------------------------
  */
-export function ArtboardItem({ artboard, showPath = true, uploadArtboards }) {
+export function ArtboardItem({ artboard, showPath = true, requestArtboards, uploadArtboards }) {
     return (
         <custom-v-stack>
             <custom-h-stack gap="small" flex padding="small">
@@ -109,6 +109,7 @@ export function ArtboardItem({ artboard, showPath = true, uploadArtboards }) {
                                                 artboard={artboard}
                                                 destination={destination}
                                                 key={destination.remote_id}
+                                                requestArtboards={requestArtboards}
                                                 uploadArtboards={uploadArtboards}
                                             ></ArtboardDestinationItem>
                                         );
@@ -130,7 +131,7 @@ export function ArtboardItem({ artboard, showPath = true, uploadArtboards }) {
  * ----------------------------------------------------------------------------
  */
 
-function ArtboardGroupItem({ group, uploadGroup, open, onOpen, onClose, uploadArtboards }) {
+function ArtboardGroupItem({ group, uploadGroup, open, onOpen, onClose, requestArtboards, uploadArtboards }) {
     return (
         <custom-v-stack>
             <custom-h-stack gap="x-small" align-items="center" style={{ marginLeft: '16px' }} padding="xx-small">
@@ -220,6 +221,7 @@ function ArtboardGroupItem({ group, uploadGroup, open, onOpen, onClose, uploadAr
                                           display="artboard"
                                           destination={destination}
                                           key={destination.remote_id}
+                                          requestArtboards={requestArtboards}
                                           uploadArtboards={uploadArtboards}
                                       ></ArtboardDestinationItem>
                                   );
@@ -276,7 +278,13 @@ export function ArtboardDestinationStatusIcon({ destination, transfer }) {
  * ----------------------------------------------------------------------------
  */
 
-export function ArtboardDestinationItem({ artboard, destination, display = 'path', uploadArtboards }) {
+export function ArtboardDestinationItem({
+    artboard,
+    destination,
+    display = 'path',
+    requestArtboards,
+    uploadArtboards,
+}) {
     const [open, setOpen] = useState(false);
     const context = useContext(UserContext);
     const [transfer, setTransfer] = useState({});
@@ -323,7 +331,7 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
                         weight={destination.selected && transfer?.status != 'upload-complete' ? 'strong' : 'default'}
                     >
                         {/* {new Date(destination.api?.modifiedAt).toLocaleString()} */}
-                        {timeAgo(new Date(destination.api?.modifiedAt))}
+                        {transfer?.status != 'upload-failed' && timeAgo(new Date(destination.api?.modifiedAt))}
                     </Text>
                     {transfer?.status == 'upload-failed' && transfer?.error && (
                         <Tooltip
@@ -370,21 +378,28 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
                         ></Button>
                     )}
                     {transfer && transfer.status == 'upload-failed' && (
-                        <Button
-                            style="Secondary"
-                            icon={<IconMinusCircle size="Size20" />}
-                            inverted={false}
-                            solid={false}
-                            hugWidth={true}
-                            onClick={async () => {
-                                await useSketch('removeDestination', {
-                                    id: artboard.id,
-                                    brandID: context.selection.brand.id,
-                                    destination,
-                                });
-                                // uploadArtboards([artboard]);
-                            }}
-                        ></Button>
+                        <Tooltip
+                            content={t('general.retry')}
+                            withArrow
+                            hoverDelay={0}
+                            triggerElement={
+                                <Button
+                                    style="Secondary"
+                                    icon={<IconRefresh size="Size20" />}
+                                    inverted={false}
+                                    solid={false}
+                                    hugWidth={true}
+                                    onClick={async () => {
+                                        let patched = JSON.parse(JSON.stringify(artboard));
+                                        patched.destinations.forEach((destination) => {
+                                            destination.remote_id = null;
+                                        });
+                                        await uploadArtboards([patched]);
+                                        requestArtboards();
+                                    }}
+                                ></Button>
+                            }
+                        />
                     )}
                     {transfer && transfer.status == 'upload-queued' && (
                         <div style={{ marginRight: '8px' }}>
@@ -952,10 +967,14 @@ export function ArtboardsView() {
     }, [documentArtboards, projectMap]);
 
     const uploadArtboards = async (artboards) => {
-        setCanCancel(true);
-        if (artboards.length) {
-            await useSketch('uploadArtboards', { artboards, brandID: context.selection.brand.id });
-        }
+        return new Promise((resolve, reject) => {
+            setCanCancel(true);
+            if (artboards.length) {
+                useSketch('uploadArtboards', { artboards, brandID: context.selection.brand.id }).then(() => {
+                    resolve();
+                });
+            }
+        });
     };
 
     useEffect(async () => {
@@ -1068,6 +1087,7 @@ export function ArtboardsView() {
                                             onClose={onClose}
                                             open={groupsMap[group.key] ? groupsMap[group.key]?.open : true}
                                             group={group}
+                                            requestArtboards={requestArtboards}
                                             uploadGroup={uploadGroup}
                                             uploadArtboards={uploadArtboards}
                                         ></ArtboardGroupItem>
