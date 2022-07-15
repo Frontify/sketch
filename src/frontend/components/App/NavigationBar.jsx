@@ -58,7 +58,7 @@ function SourceAction({ status, actions, loading }) {
     if (loading || context.refreshing)
         return (
             <custom-v-stack
-                style={{ minWidth: '36px', minHeight: '100%' }}
+                style={{ minWidth: '39px', minHeight: '40px' }}
                 align-items="center"
                 justify-content="center"
             >
