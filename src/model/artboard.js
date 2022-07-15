@@ -9,6 +9,8 @@ import { isWebviewPresent } from 'sketch-module-web-view/remote';
 import { patchDestinations, setDestinations } from '../windows/actions/getSelectedArtboards';
 import { frontend } from '../helpers/ipc';
 
+import { ArtboardError } from './error';
+
 let API = require('sketch');
 let DOM = require('sketch/dom');
 let Settings = require('sketch/settings');
@@ -43,12 +45,14 @@ class Artboard {
             });
         }
     }
-    failUpload(options) {
+    failUpload(options, error) {
+        console.log('failing', options, error);
         if (isWebviewPresent('frontifymain')) {
             frontend.send('progress', {
                 state: 'upload-failed',
                 status: 'upload-failed',
                 progress: 0,
+                error,
                 ...options,
             });
         }
@@ -544,6 +548,7 @@ class Artboard {
                                                     function (assetId) {
                                                         // Figure out if the upload has been canceled in the meantime
                                                         if (this.uploadInProgress == false) {
+                                                            console.log('fail 549');
                                                             this.failUpload(artboard);
                                                             clearInterval(polling);
                                                             return artboard.id;
@@ -571,6 +576,8 @@ class Artboard {
                                                                     .then(
                                                                         function (data) {
                                                                             // Uploaded
+
+                                                                            console.log('uploaded', data);
 
                                                                             let destination = {
                                                                                 remote_brand_id: brandID,
@@ -607,7 +614,10 @@ class Artboard {
                                                                     .catch((error) => {
                                                                         console.log('damn fail');
                                                                         console.error(error);
-                                                                        this.failUpload(artboard);
+                                                                        this.failUpload(
+                                                                            artboard,
+                                                                            ArtboardError.ASSET_NOT_FOUND
+                                                                        );
                                                                     });
                                                             } else {
                                                                 // Skip upload because the file hasn’t changed
@@ -623,6 +633,7 @@ class Artboard {
                                                                 return artboard.id;
                                                             }
                                                         } else if (file.type === 'attachment') {
+                                                            console.log('we’re in attachment case now');
                                                             let status = this.getRemoteStatusForAttachment(
                                                                 artboard,
                                                                 file
@@ -658,6 +669,7 @@ class Artboard {
                                                                     )
                                                                     .then(
                                                                         function (data) {
+                                                                            console.log('data from attachment', data);
                                                                             filemanager.deleteFile(file.path);
                                                                             this.updateProgress(
                                                                                 artboard,
@@ -668,7 +680,11 @@ class Artboard {
                                                                         }.bind(this)
                                                                     )
                                                                     .catch((error) => {
-                                                                        console.log('damn fail attachment', error);
+                                                                        console.log('error from attachment', error);
+                                                                        this.failUpload(
+                                                                            artboard,
+                                                                            ArtboardError.ATTACHMENT_UPLOAD_FAILED
+                                                                        );
                                                                     });
                                                             } else {
                                                                 filemanager.deleteFile(file.path);
@@ -692,6 +708,9 @@ class Artboard {
                                     )
                                     .then(
                                         function (assetId) {
+                                            if (!assetId) {
+                                                throw ArtboardError.ASSET_NOT_FOUND;
+                                            }
                                             // start import of asset
                                             asset.import(assetId); /* calls the import API */
                                             artboardProgress.setCompletedUnitCount(
@@ -702,6 +721,7 @@ class Artboard {
                                     )
                                     .then(
                                         function (data) {
+                                            console.log('got data from attachment?', data);
                                             clearInterval(polling);
                                             if (isWebviewPresent('frontifymain')) {
                                                 // Todo: Remmeber the Frontify ID
@@ -711,22 +731,23 @@ class Artboard {
                                                 //     'artboardUploaded(' + JSON.stringify(artboard) + ')'
                                                 // );
 
-                                                if (data) {
-                                                    this.finishUpload(artboard);
-                                                } else {
-                                                    this.failUpload(artboard);
-                                                }
+                                                /**
+                                                 * Here we used to check if there’s data but apparently,
+                                                 * uploading an attachment doesn’t return data?
+                                                 */
+
+                                                this.finishUpload(artboard);
                                             }
                                             return true;
                                         }.bind(this)
                                     )
                                     .catch(
-                                        function (err) {
+                                        function (error) {
                                             clearInterval(polling);
                                             if (isWebviewPresent('frontifymain')) {
-                                                this.failUpload(artboard);
+                                                this.failUpload(artboard, error);
                                             }
-                                            throw err;
+                                            throw error;
                                         }.bind(this)
                                     );
                             }.bind(this)

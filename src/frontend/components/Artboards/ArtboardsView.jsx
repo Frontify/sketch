@@ -25,6 +25,9 @@ import {
     IconCross,
     IconTrash,
     IconMinusCircle,
+    IconAlert,
+    Tooltip,
+    IconRefresh,
 } from '@frontify/fondue';
 
 import { ArtboardToolbar } from './ArtboardToolbar';
@@ -322,6 +325,28 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
                         {/* {new Date(destination.api?.modifiedAt).toLocaleString()} */}
                         {timeAgo(new Date(destination.api?.modifiedAt))}
                     </Text>
+                    {transfer?.status == 'upload-failed' && transfer?.error && (
+                        <Tooltip
+                            content={t(`error.artboard_error_code_${transfer.error}`)}
+                            withArrow
+                            hoverDelay={0}
+                            triggerElement={
+                                <custom-h-stack gap="x-small" align-items="center">
+                                    <IconAlert></IconAlert>
+                                    <Text
+                                        size="small"
+                                        weight={
+                                            destination.selected && transfer?.status != 'upload-complete'
+                                                ? 'strong'
+                                                : 'default'
+                                        }
+                                    >
+                                        {t('error.upload_failed')}
+                                    </Text>
+                                </custom-h-stack>
+                            }
+                        />
+                    )}
                 </custom-v-stack>
 
                 <custom-spacer></custom-spacer>
@@ -341,6 +366,23 @@ export function ArtboardDestinationItem({ artboard, destination, display = 'path
                             hugWidth={true}
                             onClick={() => {
                                 uploadArtboards([artboard]);
+                            }}
+                        ></Button>
+                    )}
+                    {transfer && transfer.status == 'upload-failed' && (
+                        <Button
+                            style="Secondary"
+                            icon={<IconMinusCircle size="Size20" />}
+                            inverted={false}
+                            solid={false}
+                            hugWidth={true}
+                            onClick={async () => {
+                                await useSketch('removeDestination', {
+                                    id: artboard.id,
+                                    brandID: context.selection.brand.id,
+                                    destination,
+                                });
+                                // uploadArtboards([artboard]);
                             }}
                         ></Button>
                     )}

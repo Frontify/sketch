@@ -9,6 +9,8 @@ import FormData from 'sketch-polyfill-fetch/lib/form-data';
 import extend from '../helpers/extend';
 import response from '../helpers/response';
 
+import { ArtboardError } from './error';
+
 let sketch3 = require('sketch');
 
 class FileManager {
@@ -260,9 +262,22 @@ class FileManager {
                             coscript.shouldKeepAround = false;
                         }
 
+                        /**
+                         * It is possible that we attempt to upload an artboard with a given ID, that no longer exists on Frontify.
+                         * In that case, the API (v1) does not return an error. Status code is 200, but the data is zero.
+                         * So we have to check if there’s actual content in the returned data to know wether the upload was successful.
+                         */
+
                         if (error) {
+                            console.error('unknown error');
                             finished = true;
-                            return reject(error);
+                            return reject(ArtboardError.UNKNOWN);
+                        }
+
+                        if (data.length() == 0) {
+                            console.error('data.length == 0');
+                            finished = true;
+                            return reject(ArtboardError.ASSET_NOT_FOUND);
                         }
 
                         return resolve(response(res, data));
@@ -286,11 +301,14 @@ class FileManager {
         })
             .then(
                 async function (response) {
-                    console.log(response);
+                    console.log('response', response);
                     try {
+                        console.log('json!?');
                         let json = await response.json();
+                        console.log('json!', json);
                         return json;
                     } catch (error) {
+                        console.log('json error');
                         console.error(error);
                     }
                 }.bind(this)
