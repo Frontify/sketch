@@ -589,7 +589,7 @@ export default function (context, view) {
                 // Sync State
                 currentDocument.state = getState(currentDocument);
 
-                console.log({ payload });
+                console.log(JSON.stringify(currentDocument, null, 2));
                 payload = { currentDocument };
                 break;
 

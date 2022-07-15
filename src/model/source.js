@@ -18,6 +18,17 @@ class Source {
     constructor() {}
 
     async getRemoteAssetForProjectIDByAssetID(projectID, assetID) {
+        console.log('getRemoteAssetForProjectIDByAssetID', projectID, assetID);
+
+        /**
+         * Warning:
+         *
+         * This API call will not return files of the same filename.
+         *
+         * So if you have ABC.sketch and another ABC.sketch in the same folder on Frontify,
+         * only one will be returned.
+         */
+
         // Ideally, this would be Infinity or we would use the global GraphQL endpoint …
         const depth = 999999999;
         let result = await fetch(
@@ -25,6 +36,7 @@ class Source {
         );
 
         if (result.assets != null) {
+            console.log(result.assets);
             // The API returns {assets} as an Object (?), and we’re interested in the first one
             // that matches the given ID.
 
@@ -66,6 +78,12 @@ class Source {
                                                         modified: '0000-00-00 00:00:00',
                                                         sha: '0',
                                                     };
+
+                                                    console.log(
+                                                        'assets status',
+                                                        asset.modified,
+                                                        status.assets[asset.id].modified
+                                                    );
 
                                                     if (asset.sha == file.sha) {
                                                         // remote file and local file are the same

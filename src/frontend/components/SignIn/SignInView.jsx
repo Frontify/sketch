@@ -106,8 +106,8 @@ export function SignInView() {
                 <custom-line></custom-line>
                 <Text>{t('signin.need_help')}</Text>
                 <custom-v-stack>
-                    <a href={t('signin.help_link_source')}>
-                        <Text color="interactive">{t('signin.help_link')}</Text>
+                    <a href={t('general.help_link_url')}>
+                        <Text color="interactive">{t('signin.help_link_title')}</Text>
                     </a>
                     <a href={t('signin.create_account_source')}>
                         <Text color="interactive">{t('signin.create_account')}</Text>

@@ -4,21 +4,26 @@ import React, { useContext, useEffect, useState } from 'react';
 
 import {
     Button,
+    Card,
     Flyout,
     IconAdd,
     IconAlert,
     IconArrowLeft,
+    IconCheckMarkCircle,
     IconDownloadAlternative,
     IconExternalLink,
     IconMore,
     IconPlus,
     IconPlus16,
     IconRefresh,
+    IconRejectCircle,
+    IconUpload,
     IconUploadAlternative,
     IconView,
     LoadingCircle,
     MenuItem,
     Text,
+    Tooltip,
 } from '@frontify/fondue';
 
 import { CustomDialog } from '../Core/CustomDialog';
@@ -40,9 +45,11 @@ import { queryGraphQLWithAuth } from '../../graphql/graphql';
 
 // Router
 import { Link } from 'react-router-dom';
+import { t } from 'i18next';
 
 function SourceAction({ status, actions, loading }) {
     let context = useContext(UserContext);
+    let [showConflictDialog, setShowConflictDialog] = useState(false);
     let [showDestinationPicker, setShowDestinationPicker] = useState(false);
     let [destination, setDestination] = useState(null);
     let [temporaryUploadDestination, setTemporaryUploadDestination] = useState(null);
@@ -66,7 +73,7 @@ function SourceAction({ status, actions, loading }) {
                     open={showDestinationPicker}
                     trigger={
                         <custom-sync-button variant="add" onClick={() => setShowDestinationPicker(true)}>
-                            <IconPlus size="Size20" />
+                            <IconPlus size="Size24" />
                         </custom-sync-button>
                     }
                 >
@@ -120,61 +127,148 @@ function SourceAction({ status, actions, loading }) {
             );
         case 'same':
             return (
-                <Button
-                    style="Secondary"
-                    hugWidth={false}
-                    onClick={async () => {
-                        await actions.refresh();
-                    }}
-                    icon={<IconRefresh />}
-                ></Button>
+                <Tooltip
+                    content={t('sources.status_same')}
+                    withArrow
+                    hoverDelay={0}
+                    triggerElement={
+                        <custom-sync-button variant="same" onClick={() => actions.refresh()}>
+                            <IconCheckMarkCircle style={{ color: 'var(--box-positive-inverse-color)' }} size="Size24" />
+                        </custom-sync-button>
+                    }
+                />
             );
 
         case 'push':
             return (
-                <Button
-                    style="Secondary"
-                    hugWidth={false}
-                    onClick={() => {
-                        actions.pushSource();
-                    }}
-                    icon={<IconUploadAlternative />}
-                ></Button>
+                <Tooltip
+                    content={t('sources.status_push')}
+                    withArrow
+                    hoverDelay={0}
+                    triggerElement={
+                        <custom-sync-button variant="push" onClick={() => actions.pushSource()}>
+                            <IconUploadAlternative
+                                style={{ color: 'var(--box-selected-inverse-color)' }}
+                                size="Size24"
+                            />
+                        </custom-sync-button>
+                    }
+                />
             );
 
         case 'pull':
             return (
-                <Button
-                    inverted={true}
-                    icon={<IconDownloadAlternative />}
-                    onClick={() => {
-                        actions.pullSource();
-                    }}
-                >
-                    Pull
-                </Button>
+                <Tooltip
+                    content={t('sources.status_pull')}
+                    withArrow
+                    hoverDelay={0}
+                    triggerElement={
+                        <custom-sync-button variant="pull" onClick={() => actions.pullSource()}>
+                            <IconDownloadAlternative
+                                style={{ color: 'var(--box-selected-inverse-color)' }}
+                                size="Size24"
+                            />
+                        </custom-sync-button>
+                    }
+                />
             );
 
         case 'conflict':
             return (
-                <custom-h-stack>
-                    <Button
-                        icon={<IconAlert />}
-                        onClick={() => {
-                            actions.pushSource();
-                        }}
-                    >
-                        Force Push
-                    </Button>
-                    <Button
-                        icon={<IconAlert />}
-                        onClick={() => {
-                            actions.pullSource();
-                        }}
-                    >
-                        Pull
-                    </Button>
-                </custom-h-stack>
+                <CustomDialog
+                    open={showConflictDialog}
+                    trigger={
+                        <Tooltip
+                            content={t('sources.status_conflict')}
+                            withArrow
+                            hoverDelay={0}
+                            triggerElement={
+                                <custom-sync-button variant="conflict" onClick={() => setShowConflictDialog(true)}>
+                                    <IconAlert style={{ color: 'var(--box-warning-inverse-color)' }} size="Size24" />
+                                </custom-sync-button>
+                            }
+                        />
+                    }
+                >
+                    <custom-v-stack stretch>
+                        <custom-v-stack padding="large" gap="large">
+                            <custom-h-stack align-items="center" gap="small">
+                                <IconAlert size="Size32"></IconAlert>
+                                <Text size="large" weight="strong">
+                                    This file has local and remote changes.
+                                </Text>
+                            </custom-h-stack>
+
+                            <custom-v-stack padding="small" style={{ background: '#fcf8ee' }} gap="small">
+                                <Text weight="strong">Remote changes</Text>
+
+                                <Text>
+                                    <pre>{context.currentDocument.remote.modified} </pre>
+                                </Text>
+                                <Text>
+                                    <pre>{context.currentDocument.remote.modifier_name}</pre>
+                                </Text>
+                            </custom-v-stack>
+
+                            <p>You have two options:</p>
+
+                            <custom-palette-item
+                                border="true"
+                                onClick={() => {
+                                    setShowConflictDialog(false);
+                                    actions.pushSource();
+                                }}
+                            >
+                                <custom-v-stack gap="small" padding="small">
+                                    <custom-h-stack align-items="center" gap="x-small">
+                                        <IconUploadAlternative size="Size20"></IconUploadAlternative>
+                                        <Text weight="strong" size="large">
+                                            Force Push{' '}
+                                        </Text>
+                                    </custom-h-stack>
+
+                                    <Text color="weak">
+                                        {' '}
+                                        Your local changes will be pushed, but any remote changes will be lost.
+                                    </Text>
+                                </custom-v-stack>
+                            </custom-palette-item>
+                            <custom-palette-item
+                                border="true"
+                                onClick={() => {
+                                    setShowConflictDialog(false);
+                                    actions.pullSource();
+                                }}
+                            >
+                                <custom-v-stack gap="small" padding="small">
+                                    <custom-h-stack align-items="center" gap="x-small">
+                                        <IconRejectCircle size="Size20"></IconRejectCircle>
+                                        <Text weight="strong" size="large">
+                                            Discard Changes{' '}
+                                        </Text>
+                                    </custom-h-stack>
+
+                                    <Text color="weak">
+                                        Your local changes will be discarded. The latest remote file will be pulled.
+                                    </Text>
+                                </custom-v-stack>
+                            </custom-palette-item>
+                            <a href={t('general.help_link_url')} rel="noreferrer" target="_blank">
+                                <Text color="interactive">{t('sources.resolve_conflict_link_title')}</Text>
+                            </a>
+                        </custom-v-stack>
+                        <custom-v-stack separator="top" padding="large">
+                            <Button
+                                style="Secondary"
+                                onClick={() => {
+                                    setShowConflictDialog(false);
+                                }}
+                            >
+                                Cancel
+                            </Button>
+                        </custom-v-stack>
+                    </custom-v-stack>
+                </CustomDialog>
             );
     }
     return <div></div>;
@@ -383,7 +477,7 @@ export function NavigationBar() {
                         ></SourceFileInfo>
                     </div>
                 </custom-h-stack>
-                <custom-h-stack padding="small" gap="xx-small" style={{ flex: 0 }}>
+                <custom-h-stack padding="small" gap="xx-small" style={{ flex: 0 }} align-items="center">
                     <button
                         onClick={() => {
                             window.postMessage('reload');
@@ -438,7 +532,7 @@ export function NavigationBar() {
                 ></SourceFileInfo>
             </div>
 
-            <custom-h-stack padding="small" gap="xx-small" style={{ flex: 0 }}>
+            <custom-h-stack padding="small" gap="xx-small" style={{ flex: 0 }} align-items="center">
                 {context.currentDocument.state != 'unsaved' && (
                     <SourceAction
                         style={{ flex: 0 }}
@@ -451,7 +545,7 @@ export function NavigationBar() {
                 {context.currentDocument.state == 'same' ||
                 context.currentDocument.state == 'push' ||
                 context.currentDocument.state == 'pull' ? (
-                    <div style={{ flex: 0 }}>
+                    <div style={{ flex: 0 }} align-items="center">
                         <Flyout
                             hug={false}
                             fitContent={true}
