@@ -21,7 +21,7 @@ import { useSketch } from '../../hooks/useSketch';
 // GraphQL
 import { queryGraphQLWithAuth } from '../../graphql/graphql';
 
-export function UploadDestinationPicker({ onChange, onInput, allowfiles = false, paths = [] }) {
+export function UploadDestinationPicker({ onChange, onInput, allowfiles = false, paths = [], disabled }) {
     let { actions, selection } = useContext(UserContext);
 
     // Loading
@@ -67,7 +67,6 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
     // Watch folderID
 
     const refreshFolder = async () => {
-        console.log('refresh folder', folder);
         if (folder && folder.id) {
             setLoading(true);
 
@@ -373,6 +372,7 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
                     justify-content="space-between"
                 >
                     <Button
+                        disabled={disabled}
                         icon={<IconArrowLeft></IconArrowLeft>}
                         size="Small"
                         style="Secondary"
@@ -403,6 +403,7 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
                             {folders.map((folder) => {
                                 return (
                                     <custom-palette-item
+                                        disabled={disabled}
                                         cursor="pointer"
                                         selectable
                                         key={folder.id}
@@ -425,7 +426,7 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
                                             selectable
                                             key={file.id}
                                             tabindex="-1"
-                                            disabled={!allowfiles}
+                                            disabled={!allowfiles || disabled}
                                             onFocus={() => focusFile(file)}
                                         >
                                             <custom-h-stack

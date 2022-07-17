@@ -153,46 +153,18 @@ export function RecentDocumentsView({ onInput, onChange }) {
             {/* Recent Documents */}
             {mergedDocuments.map((document) => {
                 return (
-                    <custom-palette-item
-                        overflow="hidden"
-                        selectable
-                        tabindex="0"
+                    <SourceFileEntry
+                        title={JSON.stringify(document, null, 2)}
                         key={document.local.uuid}
-                        padding-y="medium"
-                        padding-x="large"
-                        onFocus={() => {
-                            focusSource(document);
-                        }}
-                        onDoubleClick={async () => {
+                        file={document}
+                        path={document.local.path}
+                        name={document.local.filename.replace('.sketch', '')}
+                        loading={loading == document.local.uuid}
+                        onClick={async () => {
                             await openSource(document);
                             redirectToDocument(document);
                         }}
-                    >
-                        <custom-h-stack gap="medium" align-items="center">
-                            <custom-v-stack gap="xx-small" overflow="hidden">
-                                {/* <pre>{new Date(document.local.timestamp).toLocaleString()}</pre> */}
-                                <Text color="weak" overflow="truncate">
-                                    {document.local.path}
-                                </Text>
-
-                                <Text weight="strong">{document.local.filename.replace('.sketch', '')}</Text>
-
-                                {/* <Text size="small" color="weak">
-                                    <custom-h-stack gap="x-small">
-                                        <span>{document.remote.creator.name}</span>
-                                        <span>•</span>
-                                        <span>{new Date(document.remote.modifiedAt).toLocaleString()}</span>
-                                    </custom-h-stack>
-                                </Text> */}
-                            </custom-v-stack>
-                            <custom-spacer></custom-spacer>
-                            <div style={{ minWidth: '24px' }}>
-                                {loading == document.local.uuid && (
-                                    <LoadingCircle style="Positive" size="Small"></LoadingCircle>
-                                )}
-                            </div>
-                        </custom-h-stack>
-                    </custom-palette-item>
+                    ></SourceFileEntry>
                 );
             })}
         </custom-v-stack>

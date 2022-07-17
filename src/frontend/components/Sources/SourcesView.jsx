@@ -11,6 +11,7 @@ import { Button, Badge, Text } from '@frontify/fondue';
 
 import { LoadingIndicator } from '../Core/LoadingIndicator';
 import { RecentDocumentsView } from './RecentDocumentsView';
+import { SourcesViewToolbar } from './SourcesViewToolbar';
 
 import { Toolbar } from '../App/Toolbar';
 
@@ -57,7 +58,7 @@ export function SourcesView() {
 
                 <custom-v-stack
                     style={{
-                        overflow: 'hidden',
+                        overflow: 'auto',
                         height: ' 100%',
                         background: 'white',
                     }}
@@ -100,6 +101,7 @@ export function SourcesView() {
                         ></RecentDocumentsView>
                     </custom-v-stack>
                 </custom-v-stack>
+                <SourcesViewToolbar></SourcesViewToolbar>
             </custom-v-stack>
         );
     } else {
