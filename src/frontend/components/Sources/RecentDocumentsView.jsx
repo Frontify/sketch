@@ -52,9 +52,11 @@ export function RecentDocumentsView({ onInput, onChange }) {
     }, []);
 
     useEffect(() => {
-        setRecentDocumentsForBrand(() => {
-            return context.recentDocuments.filter((doc) => doc.refs?.remote_brand_id == context.selection.brand.id);
-        });
+        if (context.selection?.brand?.id) {
+            setRecentDocumentsForBrand(() => {
+                return context.recentDocuments.filter((doc) => doc.refs?.remote_brand_id == context.selection.brand.id);
+            });
+        }
     }, [context.recentDocuments]);
 
     useEffect(async () => {
