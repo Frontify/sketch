@@ -441,6 +441,7 @@ custom-sync-button[variant='conflict']:hover {
 
 a {
     color: var(--box-selected-strong-color);
+    cursor: pointer;
 }
 a:hover {
     text-decoration: underline;
