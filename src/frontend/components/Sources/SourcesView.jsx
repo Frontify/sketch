@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 // Context
 import { UserContext } from '../../context/UserContext';
@@ -29,6 +29,20 @@ export function SourcesView() {
     let location = useLocation();
     const navigate = useNavigate();
 
+    let [openDocuments, setOpenDocuments] = useState([]);
+
+    useEffect(async () => {
+        await requestOpenDocuments();
+    }, []);
+
+    const requestOpenDocuments = async () => {
+        setLoading(true);
+        let { documents } = await useSketch('getOpenDocumentsMeta');
+        setLoading(false);
+
+        setOpenDocuments([...documents]);
+    };
+
     const { t } = useTranslation();
 
     /**
@@ -50,6 +64,37 @@ export function SourcesView() {
         setLoading(false);
     };
 
+    const openFile = async (document) => {
+        setLoading(true);
+        await useSketch('openSource', { path: document.path.replaceAll('%20', ' ') });
+        redirectToDocument();
+        context.actions.refresh();
+        setLoading(false);
+    };
+
+    /**
+     * Subscription
+     */
+
+    useEffect(() => {
+        let handler = async (event) => {
+            let { type, payload } = event.detail.data;
+
+            switch (type) {
+                case 'document-closed':
+                case 'document-opened':
+                    await requestOpenDocuments();
+                    break;
+            }
+        };
+
+        window.addEventListener('message-from-sketch', handler);
+
+        return () => {
+            window.removeEventListener('message-from-sketch', handler);
+        };
+    }, []);
+
     if (context.user?.name) {
         return (
             <custom-v-stack stretch>
@@ -66,26 +111,27 @@ export function SourcesView() {
                     <custom-v-stack style={{ paddingBottom: '1rem' }}>
                         <custom-v-stack padding="large" style={{ paddingBottom: '1rem' }}>
                             <Text size="large" weight="strong">
-                                Current File
+                                Open Files
                             </Text>
                         </custom-v-stack>
-                        {context.currentDocument.local ? (
-                            <SourceFileEntry
-                                document={context.currentDocument}
-                                path={
-                                    context.currentDocument.local?.relativePath?.replace(
-                                        context.selection?.brand?.name,
-                                        ''
-                                    ) || 'Untracked'
-                                }
-                                name={context.currentDocument.local?.filename.replace('.sketch', '')}
-                                onClick={() => {
-                                    redirectToDocument();
-                                }}
-                            ></SourceFileEntry>
+
+                        {openDocuments.length ? (
+                            openDocuments.map((openDocument) => {
+                                return (
+                                    <SourceFileEntry
+                                        key={document.id}
+                                        document={openDocument}
+                                        path={openDocument.normalizedRelativePath}
+                                        name={openDocument.name}
+                                        onClick={() => {
+                                            openFile(openDocument);
+                                        }}
+                                    ></SourceFileEntry>
+                                );
+                            })
                         ) : (
                             <custom-v-stack padding-y="medium" padding-x="large">
-                                <Text color="weak">{t('sources.no_open_document')}</Text>
+                                <Text color="weak">{t('sources.no_open_documents')}</Text>
                             </custom-v-stack>
                         )}
                     </custom-v-stack>

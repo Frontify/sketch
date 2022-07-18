@@ -46,6 +46,8 @@ export function SourceFileEntry({ document, file, path = '', name, onClick, load
                     <Text size="small" color="weak">
                         {timeAgo(new Date(document.remote?.modifiedAt))}
                     </Text>
+                    <pre>{document.remote?.modifiedAt}</pre>
+                    <pre>{document.local?.localModifiedFromRemote}</pre>
                 </custom-v-stack>
                 {/* <custom-spacer></custom-spacer>
                 <div style={{ minWidth: '24px' }}>

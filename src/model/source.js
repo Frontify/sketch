@@ -250,6 +250,7 @@ class Source {
     }
 
     opened() {
+        frontend.send('document-opened');
         // Todo: Don’t rely on fetching data here but instead just open the file and resolve it
 
         sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'dirty', false);
@@ -335,10 +336,12 @@ class Source {
             path,
             relativePath,
             filename: filename[filename.length - 1],
+            localModifiedFromRemote: sketch3.Settings.documentSettingForKey(sketch.getDocument(), 'remote_modified'),
             refs,
         });
     }
     async saved() {
+        frontend.send('document-saved');
         this.pushRecent();
 
         // Mark as dirty, so that it can be pushed
@@ -362,6 +365,7 @@ class Source {
     }
 
     closed() {
+        frontend.send('document-closed');
         return this.getCurrentAsset().then(function (asset) {
             if (asset) {
                 return fetch('/v1/screen/activity/' + asset.id, {

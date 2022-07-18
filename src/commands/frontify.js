@@ -85,6 +85,7 @@ function activeDocumentDidChange() {
 
     let newDocument = sketch3.Document.getSelectedDocument();
 
+    console.log('active doc?', oldDocumentID, newDocument.id);
     if (newDocument) {
         let newDocumentID = newDocument.id;
         sketch3.Settings.setSessionVariable(key, newDocumentID);

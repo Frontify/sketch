@@ -71,6 +71,7 @@
             "browse_all": "Browse all …",
             "current_document": "Current File",
             "no_open_document": "No File",
+            "no_open_documents": "No Open Files",
             "no_open_document_description": "Open a Sketch File or Refresh",
             "no_recent_documents": "No Recent Files",
             "local": "Local",

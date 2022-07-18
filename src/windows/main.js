@@ -642,6 +642,23 @@ export default function (context, view) {
                 var documents = DOM.getDocuments();
                 payload = { documents };
                 break;
+            case 'getOpenDocumentsMeta':
+                let openDocuments = DOM.getDocuments();
+                let base = target.getPathToSyncFolder();
+
+                let openDocumentsMeta = openDocuments.map((document) => {
+                    let relativePath = document.path.replace(base + '/', '');
+                    return {
+                        id: document.id,
+                        name: relativePath.split('/').pop().replace('.sketch', ''),
+                        path: document.path,
+                        relativePath: relativePath,
+                        normalizedPath: document.path.replaceAll('%20', ' '),
+                        normalizedRelativePath: relativePath.replaceAll('%20', ' '),
+                    };
+                });
+                payload = { documents: openDocumentsMeta };
+                break;
             case 'getAuth':
                 let auth = user.getAuthentication();
 
