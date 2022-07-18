@@ -71,6 +71,7 @@ export function SourcesView() {
                         </custom-v-stack>
                         {context.currentDocument.local ? (
                             <SourceFileEntry
+                                document={context.currentDocument}
                                 path={context.currentDocument.remote?.path || 'Untracked'}
                                 name={context.currentDocument.local?.filename.replace('.sketch', '')}
                                 onClick={() => {

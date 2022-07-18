@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 
 // Components
-import { LoadingCircle, Text } from '@frontify/fondue';
+import { IconSketch, LoadingCircle, Text } from '@frontify/fondue';
 
-export function SourceFileEntry({ file, path = '', name, onClick, loading = false, title = '' }) {
+import { timeAgo } from '../utils';
+
+export function SourceFileEntry({ document, file, path = '', name, onClick, loading = false, title = '' }) {
     const [breadcrumbs, setBreadcrumbs] = useState([]);
 
     useEffect(() => {
@@ -21,7 +23,8 @@ export function SourceFileEntry({ file, path = '', name, onClick, loading = fals
                 onClick();
             }}
         >
-            <custom-h-stack>
+            <custom-h-stack align-items="center" gap="large">
+                <IconSketch size="Size24" style={{ flexShrink: 0 }}></IconSketch>
                 <custom-v-stack gap="xx-small" overflow="hidden">
                     <custom-breadcrumbs>
                         {breadcrumbs.map((breadcrumb, index) => (
@@ -37,6 +40,9 @@ export function SourceFileEntry({ file, path = '', name, onClick, loading = fals
                     </custom-breadcrumbs>
                     <Text padding="small" weight="strong" overflow="ellipsis" whitespace="nowrap">
                         {name}
+                    </Text>
+                    <Text size="small" color="weak">
+                        {timeAgo(new Date(document.remote?.modifiedAt))}
                     </Text>
                 </custom-v-stack>
                 <custom-spacer></custom-spacer>

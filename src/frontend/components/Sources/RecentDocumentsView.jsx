@@ -118,7 +118,7 @@ export function RecentDocumentsView({ onInput, onChange }) {
                 });
             }
 
-            merged = merged.sort((a, b) => (a.local.timestamp < b.local.timestamp ? 1 : -1));
+            merged = merged.sort((a, b) => (a.remote.modifiedAt < b.remote.modifiedAt ? 1 : -1));
             setMergedDocuments(merged);
         }
 
@@ -154,6 +154,7 @@ export function RecentDocumentsView({ onInput, onChange }) {
             {mergedDocuments.map((document) => {
                 return (
                     <SourceFileEntry
+                        document={document}
                         title={JSON.stringify(document, null, 2)}
                         key={document.local.uuid}
                         file={document}
