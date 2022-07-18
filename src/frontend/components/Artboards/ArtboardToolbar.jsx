@@ -243,7 +243,7 @@ function ArtboardToolbar({
                                                     performUpload();
                                                 }}
                                             >
-                                                Upload {JSON.stringify(uploadDestination?.folderPath)}
+                                                Upload
                                             </Button>
                                         </custom-h-stack>
                                     </custom-v-stack>
