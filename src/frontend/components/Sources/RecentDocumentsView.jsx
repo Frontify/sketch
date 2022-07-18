@@ -158,7 +158,10 @@ export function RecentDocumentsView({ onInput, onChange }) {
                         title={JSON.stringify(document, null, 2)}
                         key={document.local.uuid}
                         file={document}
-                        path={document.local.path}
+                        path={
+                            document.local.relativePath?.replace(context.selection?.brand?.name, '') ||
+                            document.local.path
+                        }
                         name={document.local.filename.replace('.sketch', '')}
                         loading={loading == document.local.uuid}
                         onClick={async () => {

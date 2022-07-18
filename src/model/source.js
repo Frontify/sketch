@@ -325,10 +325,18 @@ class Source {
             refs.remote_graphql_id = id;
         }
 
+        let base = target.getPathToSyncFolder();
         let path = '' + nativeSketchDocument.fileURL().path();
         let filename = path.split('/');
+        let relativePath = path.replace(base + '/', '');
 
-        recentFiles.push({ uuid: document.id, path, filename: filename[filename.length - 1], refs });
+        recentFiles.push({
+            uuid: document.id,
+            path,
+            relativePath,
+            filename: filename[filename.length - 1],
+            refs,
+        });
     }
     async saved() {
         this.pushRecent();
