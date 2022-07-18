@@ -442,6 +442,7 @@ export default function (context, view) {
                         id: '',
                         filename: '',
                         path: '',
+                        relativePath: '',
                         modified: '',
                     },
                     remote: {},
@@ -554,11 +555,14 @@ export default function (context, view) {
 
                 if (filemanager.isCurrentSaved()) {
                     let filePath = '' + nativeSketchDocument.fileURL().path();
+                    let base = target.getPathToSyncFolder();
+                    let relativePath = filePath.replace(base + '/', '');
 
                     currentDocument.local = {
                         id: openSketchDocument.id,
                         filename: source.getCurrentFilename(),
                         path: filePath,
+                        relativePath,
                         sha: '' + shaFile(filePath),
                         modified: modified,
                     };

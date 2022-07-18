@@ -74,6 +74,7 @@
             "local": "Local",
             "open": "Open",
             "recent": "Recent",
+            "recent_files": "Recent Files",
             "remote": "Remote",
             "resolve_conflict_link_title": "Learn more",
             "status_same": "All synced.",

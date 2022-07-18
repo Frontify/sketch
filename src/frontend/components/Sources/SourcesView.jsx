@@ -7,7 +7,7 @@ import { UserContext } from '../../context/UserContext';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 // Components
-import { Button, Badge, Text } from '@frontify/fondue';
+import { Button, Flyout, IconCaretDown, Text } from '@frontify/fondue';
 
 import { LoadingIndicator } from '../Core/LoadingIndicator';
 import { RecentDocumentsView } from './RecentDocumentsView';
@@ -72,7 +72,12 @@ export function SourcesView() {
                         {context.currentDocument.local ? (
                             <SourceFileEntry
                                 document={context.currentDocument}
-                                path={context.currentDocument.remote?.path || 'Untracked'}
+                                path={
+                                    context.currentDocument.local?.relativePath?.replace(
+                                        context.selection?.brand?.name,
+                                        ''
+                                    ) || 'Untracked'
+                                }
                                 name={context.currentDocument.local?.filename.replace('.sketch', '')}
                                 onClick={() => {
                                     redirectToDocument();
@@ -88,11 +93,31 @@ export function SourcesView() {
                     <custom-line></custom-line>
 
                     <custom-v-stack>
-                        <custom-v-stack padding="large" style={{ paddingBottom: '1rem' }}>
+                        <custom-h-stack
+                            padding="large"
+                            style={{ paddingBottom: '1rem', paddingRight: '1rem' }}
+                            align-items="center"
+                        >
                             <Text size="large" weight="strong">
-                                Recent Files
+                                {t('sources.recent_files')}
                             </Text>
-                        </custom-v-stack>
+                            <custom-spacer></custom-spacer>
+                            <div style={{ marginRight: '-0.5rem' }}>
+                                {' '}
+                                <Flyout
+                                    trigger={
+                                        <Button inverted="true" size="small">
+                                            <custom-h-stack gap="xx-small" align-items="center" padding-x="x-small">
+                                                <Text as="span" size="medium">
+                                                    Modified First
+                                                </Text>
+                                                <IconCaretDown></IconCaretDown>
+                                            </custom-h-stack>
+                                        </Button>
+                                    }
+                                ></Flyout>
+                            </div>
+                        </custom-h-stack>
 
                         <RecentDocumentsView
                             onInput={(value) => {}}
