@@ -11,6 +11,8 @@ import { UserContext } from '../../context/UserContext';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
+import { useSketch } from '../../hooks/useSketch';
+
 export function SignInPendingView() {
     const { t } = useTranslation();
     const navigate = useNavigate();
@@ -28,10 +30,14 @@ export function SignInPendingView() {
                 });
 
                 // redirect
-                navigate('/source/artboards');
+                navigate('/sources');
             }
         });
     }, []);
+
+    const openExternal = (url) => {
+        useSketch('openUrl', { url });
+    };
 
     function cancel() {
         navigate('/signin');
@@ -52,11 +58,11 @@ export function SignInPendingView() {
                 <custom-line></custom-line>
                 <Text>{t('signin.need_help')}</Text>
                 <custom-v-stack>
-                    <a href={t('signin.help_link_source')} rel="noreferrer" target="_blank">
-                        <Text color="interactive">{t('signin.help_link')}</Text>
+                    <a onClick={() => openExternal(t('general.help_link_url'))}>
+                        <Text color="interactive">{t('signin.help_link_title')}</Text>
                     </a>
-                    <a href={t('signin.create_account_source')} rel="noreferrer" target="_blank">
-                        <Text color="interactive">{t('signin.create_account')}</Text>
+                    <a onClick={() => openExternal(t('signin.create_account_url'))}>
+                        <Text color="interactive">{t('signin.create_account_title')}</Text>
                     </a>
                 </custom-v-stack>
             </custom-v-stack>

@@ -50,7 +50,8 @@
             "import_all": "Add all to Local Styles",
             "imported": "Added to assets",
             "imported_all": "Added all to assets",
-            "offline": "You’re offline",
+            "offline_title": "You’re Offline",
+            "offline_description": "To continue using the plugin, reconnect to the internet.",
             "log_out": "Log out",
             "retry": "Retry",
             "search": "Search",
@@ -59,6 +60,7 @@
             "switch": "Switch",
             "switch_brand": "Switch Brand",
             "select": "Select",
+            "try_again": "Try again",
             "user": "User",
             "untitled_collection": "Untitled Collection",
             "untitled": "Untitled",
@@ -95,8 +97,8 @@
             "description": "Bring your text snippets from Frontify directly into your Figma designs."
         },
         "signin": {
-            "create_account": "Create an account",
-            "creat_account_source": "https://www.frontify.com/signup",
+            "create_account_title": "Create an account",
+            "create_account_url": "https://www.frontify.com/signup",
             "help_link_title": "Get help",
             "loading": "We’re almost there…",
             "need_help": "Not sure what to do?",

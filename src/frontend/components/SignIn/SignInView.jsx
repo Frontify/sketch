@@ -7,6 +7,7 @@ import { Logo } from '../Core/Logo';
 // Hooks
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { useSketch } from '../../hooks/useSketch';
 
 // Context
 import { UserContext } from '../../context/UserContext';
@@ -75,6 +76,10 @@ export function SignInView() {
         }
     }, [domain]);
 
+    const openExternal = (url) => {
+        useSketch('openUrl', { url });
+    };
+
     return (
         <custom-v-stack gap="large" padding="large" style={{ background: 'white' }}>
             <custom-v-stack gap="large" padding="large">
@@ -106,11 +111,11 @@ export function SignInView() {
                 <custom-line></custom-line>
                 <Text>{t('signin.need_help')}</Text>
                 <custom-v-stack>
-                    <a href={t('general.help_link_url')}>
+                    <a onClick={() => openExternal(t('general.help_link_url'))}>
                         <Text color="interactive">{t('signin.help_link_title')}</Text>
                     </a>
-                    <a href={t('signin.create_account_source')}>
-                        <Text color="interactive">{t('signin.create_account')}</Text>
+                    <a onClick={() => openExternal(t('signin.create_account_url'))}>
+                        <Text color="interactive">{t('signin.create_account_title')}</Text>
                     </a>
                 </custom-v-stack>
             </custom-v-stack>
