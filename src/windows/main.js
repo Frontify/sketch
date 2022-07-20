@@ -650,11 +650,12 @@ export default function (context, view) {
                     let relativePath = document.path.replace(base + '/', '');
                     return {
                         id: document.id,
-                        name: relativePath.split('/').pop().replace('.sketch', ''),
+                        name: relativePath.split('/').pop().replace('.sketch', '').replaceAll('%20', ' '),
                         path: document.path,
                         relativePath: relativePath,
                         normalizedPath: document.path.replaceAll('%20', ' '),
                         normalizedRelativePath: relativePath.replaceAll('%20', ' '),
+                        remote_modified: sketch3.Settings.documentSettingForKey(document, 'remote_modified'),
                     };
                 });
                 payload = { documents: openDocumentsMeta };

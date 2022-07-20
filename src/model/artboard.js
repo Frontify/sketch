@@ -221,12 +221,22 @@ class Artboard {
                 // Save origin info
                 let jsdoc = DOM.Document.fromNative(doc);
 
-                this.setLayerSettingForKey(artboardExport, 'meta', {
+                // This metadata appears to be required for the Inspect / Import API.
+                let meta = {
                     document: { id: jsdoc.id, path: jsdoc.path },
                     page: { id: jsdoc.selectedPage.id, name: jsdoc.selectedPage.name },
                     sketch: { version: '' + API.version.sketch, api: API.version.api },
                     // converting 'sketch.version' to string is needed to not lose it at JSON.stringify
-                });
+                };
+
+                /**
+                 * Here used to be a call that didn’t work as expected:
+                 *
+                 * [REMOVED] this.setLayerSettingForKey(artboardExport, 'meta', meta);
+                 *
+                 * Replaced by the following line:
+                 */
+                artboardExport['userInfo']['com.frontify.sketch'] = { meta: JSON.stringify(meta) };
 
                 // Resolve Symbols
                 artboardExport.layers = this.resolveSymbolLayers(artboardExport.layers);
@@ -234,16 +244,23 @@ class Artboard {
                 // Optimize layers
                 artboardExport.layers = this.optimizeLayers(artboardExport.layers);
 
-                const exportName = `data-${artboard.id}`;
+                /**
+                 * If we want to allow parallel uploads, we need to export data files with unique file names.
+                 * data.json -> data-ABCD-1234-EFGH-5678.json
+                 *
+                 * The Frontify API expects a "data.json" for the inspect/import feature.
+                 */
+                const uniqueExportName = `data-${artboard.id}`;
                 const exportPath = filemanager.getExportPath();
-                writeJSON(exportName, artboardExport, exportPath);
+
+                writeJSON(uniqueExportName, artboardExport, exportPath);
 
                 files.push({
-                    name: exportName,
+                    name: 'data',
                     ext: 'json',
                     id_external: artboard.id_external,
                     id: artboard.id,
-                    path: exportPath + exportName + '.json',
+                    path: exportPath + uniqueExportName + '.json',
                     type: 'attachment',
                 });
 
@@ -376,6 +393,12 @@ class Artboard {
         return detachedGroupExport;
     }
 
+    layerIsDetachableSymbolInstance(layer) {
+        // SymbolInstance with empty layer.symbolId is used if symbol overrides
+        // are defined and override property is set to 'no symbol' (Sketch 88)
+        return layer.type === 'SymbolInstance' && !!layer.symbolId;
+    }
+
     /**
      * The recursion is done manually, so we can add meta to separated symbols before we detach them.
      * In this way, we can later determine that it was a symbol.
@@ -392,8 +415,7 @@ class Artboard {
             });
 
             return;
-        } else if (layer.type !== 'SymbolInstance') {
-            /* if it's not a symbol, there's nothing to do */
+        } else if (this.layerIsDetachableSymbolInstance(layer) === false) {
             return;
         }
 
@@ -548,7 +570,6 @@ class Artboard {
                                                     function (assetId) {
                                                         // Figure out if the upload has been canceled in the meantime
                                                         if (this.uploadInProgress == false) {
-                                                            console.log('fail 549');
                                                             this.failUpload(artboard);
                                                             clearInterval(polling);
                                                             return artboard.id;
@@ -576,8 +597,6 @@ class Artboard {
                                                                     .then(
                                                                         function (data) {
                                                                             // Uploaded
-
-                                                                            console.log('uploaded', data);
 
                                                                             let destination = {
                                                                                 remote_brand_id: brandID,
@@ -612,7 +631,6 @@ class Artboard {
                                                                         }.bind(this)
                                                                     )
                                                                     .catch((error) => {
-                                                                        console.log('damn fail');
                                                                         console.error(error);
                                                                         this.failUpload(
                                                                             artboard,
@@ -633,7 +651,6 @@ class Artboard {
                                                                 return artboard.id;
                                                             }
                                                         } else if (file.type === 'attachment') {
-                                                            console.log('we’re in attachment case now');
                                                             let status = this.getRemoteStatusForAttachment(
                                                                 artboard,
                                                                 file
@@ -669,18 +686,18 @@ class Artboard {
                                                                     )
                                                                     .then(
                                                                         function (data) {
-                                                                            console.log('data from attachment', data);
                                                                             filemanager.deleteFile(file.path);
+
                                                                             this.updateProgress(
                                                                                 artboard,
                                                                                 artboardProgress
                                                                             );
+
                                                                             status.sha = data.sha;
                                                                             return assetId;
                                                                         }.bind(this)
                                                                     )
                                                                     .catch((error) => {
-                                                                        console.log('error from attachment', error);
                                                                         this.failUpload(
                                                                             artboard,
                                                                             ArtboardError.ATTACHMENT_UPLOAD_FAILED
@@ -707,12 +724,17 @@ class Artboard {
                                         Promise.resolve()
                                     )
                                     .then(
-                                        function (assetId) {
+                                        async function (assetId) {
                                             if (!assetId) {
                                                 throw ArtboardError.ASSET_NOT_FOUND;
                                             }
                                             // start import of asset
-                                            asset.import(assetId); /* calls the import API */
+                                            try {
+                                                await asset.import(assetId); /* calls the import API */
+                                            } catch (error) {
+                                                console.log('import error', error);
+                                            }
+                                            // Import done!
                                             artboardProgress.setCompletedUnitCount(
                                                 artboardProgress.completedUnitCount() + 20
                                             );
@@ -721,21 +743,9 @@ class Artboard {
                                     )
                                     .then(
                                         function (data) {
-                                            console.log('got data from attachment?', data);
+                                            // Data from attachment?
                                             clearInterval(polling);
                                             if (isWebviewPresent('frontifymain')) {
-                                                // Todo: Remmeber the Frontify ID
-                                                // Add the ID to the "destinations" map or the artboard itself
-                                                // sendToWebview(
-                                                //     'frontifymain',
-                                                //     'artboardUploaded(' + JSON.stringify(artboard) + ')'
-                                                // );
-
-                                                /**
-                                                 * Here we used to check if there’s data but apparently,
-                                                 * uploading an attachment doesn’t return data?
-                                                 */
-
                                                 this.finishUpload(artboard);
                                             }
                                             return true;
@@ -754,7 +764,6 @@ class Artboard {
                         )
                         .catch(
                             function (err) {
-                                console.error(err);
                                 throw err;
                             }.bind(this)
                         );
