@@ -218,6 +218,7 @@ class FileManager {
                     mimeType: options.body.mimetype,
                     data: NSData.alloc().initWithContentsOfFile(options.filepath),
                 };
+
                 if (!attachment.data) {
                     console.error('Could not allocate file', options.filepath);
                     reject();
@@ -269,13 +270,11 @@ class FileManager {
                          */
 
                         if (error) {
-                            console.error('unknown error');
                             finished = true;
                             return reject(ArtboardError.UNKNOWN);
                         }
 
                         if (data.length() == 0) {
-                            console.error('data.length == 0');
                             finished = true;
                             return reject(ArtboardError.ASSET_NOT_FOUND);
                         }
@@ -301,16 +300,7 @@ class FileManager {
         })
             .then(
                 async function (response) {
-                    console.log('response', response);
-                    try {
-                        console.log('json!?');
-                        let json = await response.json();
-                        console.log('json!', json);
-                        return json;
-                    } catch (error) {
-                        console.log('json error');
-                        console.error(error);
-                    }
+                    return response.json();
                 }.bind(this)
             )
             .catch(
