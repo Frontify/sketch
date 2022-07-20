@@ -42,6 +42,7 @@ import { useTranslation } from 'react-i18next';
 import { UserContext } from '../../context/UserContext';
 
 // GraphQL
+import { assetsQuery } from '../../graphql/assets.graphql';
 import { queryGraphQLWithAuth } from '../../graphql/graphql';
 
 import { timeAgo } from '../utils.js';
@@ -275,7 +276,7 @@ export function ArtboardDestinationItem({
     const frontifyUrl = `${base}/screens/${destination.remote_id}`;
 
     return (
-        <custom-palette-item hover="off" gap="x-small">
+        <custom-palette-item hover="off" gap="x-small" title={JSON.stringify(destination, null, 2)}>
             <custom-h-stack gap="small" align-items="center" padding-x="small">
                 {/* Modified */}
 
@@ -398,6 +399,7 @@ export function ArtboardDestinationItem({
                                 <circle cx="9" cy="9" r="8" stroke="rgba(0,0, 0,0.16)" strokeWidth="2" />
                                 <circle
                                     style={{
+                                        transition: 'all 0.25s ease',
                                         strokeDasharray: `${(transfer ? transfer.progress / 100 : 0) * 50} 50`,
                                     }}
                                     cx="9"
@@ -758,16 +760,6 @@ export function ArtboardsView() {
                 if (transfer.progress == 100) {
                     transfer.status = 'upload-complete';
                     // Group done
-
-                    /**
-                     * Todo: If we only request new data after the group is done, it would mean less API requests.
-                     * But the UI would be less responsive, e.g. lack of feedback after an upload is finished.
-                     * Right now, we’re fetching for each completed upload.
-                     * // requestArtboards();
-                     */
-
-                    // fetchArtboardsFromAPI(documentArtboards);
-                    // transfer.progress = 0;
                 }
                 if (transfer.progress == 0) {
                     transfer.status = 'idle';
@@ -847,7 +839,7 @@ export function ArtboardsView() {
     const uploadArtboardsToDestination = (artboards) => {
         let patchedArtboards = artboards.map((artboard) => {
             /**
-             * 2 Scenarios:
+             * 2 possible scenarios:
              *
              * A) The artboard has no existing destinations:
              *      -> add the new destination
@@ -970,30 +962,14 @@ export function ArtboardsView() {
             });
         });
 
-        if (ids && ids.length) {
-            let query = `{
-                        assets(ids: [${ids}]) {
-                          __typename
-                          id
-                          title
-                          createdAt
-                          creator {
-                            name
-                            email
-                          }
-                          modifiedAt
-                          modifier {
-                              name
-                              email
-                          }
-                          ...on Image {
-                            downloadUrl
-                            previewUrl
-                          }
-                          
-                        }
-                      }`;
+        /**
+         * Fetch artboards data, including name, thumbnail, modifiedAt, …
+         * Then, we assign the received data to a lookup Map.
+         * Using the Map, we can access the data for an artboard by its ID.
+         */
 
+        if (ids && ids.length) {
+            let query = assetsQuery({ ids });
             let result = await queryGraphQLWithAuth({ query, auth: context.auth });
 
             result.data.assets.forEach((entry, index) => {
