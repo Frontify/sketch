@@ -2,12 +2,13 @@ import React, { useEffect, useReducer } from 'react';
 import { useContext, useState } from 'react';
 import { UserContext } from '../../context/UserContext';
 
-import { Text } from '@frontify/fondue';
+import { MenuItem, Text, IconMore, IconLogout, IconArrowOutLogout } from '@frontify/fondue';
 import { Button, Flyout, IconCaretDown, IconCheck, IconRefresh } from '@frontify/fondue';
 
 export function Toolbar() {
     const context = useContext(UserContext);
     const [open, setOpen] = useState(false);
+    const [contextMenuOpen, setContextMenuOpen] = useState(false);
     function logout() {
         context.actions.logout();
         window.postMessage('logout');
@@ -15,103 +16,114 @@ export function Toolbar() {
     return (
         <div>
             <custom-toolbar-wrapper>
-                <custom-h-stack gap="small" padding="xx-small" align-items="center">
+                <custom-h-stack gap="xx-small" padding-x="small" align-items="center" style={{ paddingRight: 0 }}>
                     <custom-h-stack direction="row" align-items="center">
-                        {/* <Text as="span" color="white" size="medium" weight="medium">
-                            {context.user.name}
-                        </Text> */}
+                        <custom-h-stack align-items="center" gap={context.brands.length > 1 ? 'xx-small' : 'x-small'}>
+                            <Text weight="strong" whitespace="nowrap">
+                                {context.user.name}
+                            </Text>
 
-                        {/* 
-                            This element steals the focus so that the next real element gets the focus after a first "tab" key press. 
-                            This is for aesthetic reasons only because the focus state of the following "Flyout / Button" doesn’t look very nice. 
-                        */}
-                        <custom-focus-trap tabindex="0"></custom-focus-trap>
-
-                        <Flyout
-                            hug={false}
-                            fitContent={true}
-                            isOpen={open}
-                            onOpenChange={(isOpen) => setOpen(isOpen)}
-                            legacyFooter={false}
-                            trigger={
-                                <Button onClick={() => setOpen((open) => !open)} size="Small" inverted="true">
-                                    <custom-h-stack gap="small">
-                                        <Text as="span" size="medium" weight="strong">
-                                            {context.brands && context.selection.brand && context.selection.brand.name}
-                                        </Text>
-                                        <IconCaretDown></IconCaretDown>
-                                    </custom-h-stack>
-                                </Button>
-                            }
-                        >
-                            <custom-v-stack>
-                                <custom-h-stack direction="row" gap="small" align-items="center" padding="small">
-                                    {context.user.avatar && (
-                                        <custom-avatar>
-                                            <img src={context.user.avatar} alt={context.user.name} />
-                                        </custom-avatar>
-                                    )}
-
-                                    <Text as="span" size="medium" weight="medium">
-                                        {context.user.name}
-                                    </Text>
-                                    <custom-spacer></custom-spacer>
-                                    <Button
-                                        onClick={() => {
-                                            logout();
-                                        }}
-                                    >
-                                        Logout
-                                    </Button>
-                                </custom-h-stack>
-                                <custom-line></custom-line>
-
-                                <custom-v-stack>
-                                    <custom-h-stack padding="x-small">
-                                        <Text weight="strong">Brands</Text>
-                                    </custom-h-stack>
-                                    {context.brands.length == 0 && <Text>No brands</Text>}
-                                    {context.brands &&
-                                        context.brands.length &&
-                                        context.brands.map((brand) => {
-                                            return (
-                                                <custom-palette-item
-                                                    key={brand.id}
-                                                    gap="small"
-                                                    onClick={() => {
-                                                        context.actions.selectBrand(brand);
-                                                        setOpen(false);
-                                                    }}
-                                                >
-                                                    <custom-h-stack gap="x-small">
-                                                        {context.selection.brand?.id == brand.id && (
-                                                            <IconCheck></IconCheck>
-                                                        )}
-                                                        {context.selection.brand?.id != brand.id && (
-                                                            <div style={{ width: '16px' }}></div>
-                                                        )}
-                                                        <Text size="small">{brand.name}</Text>
-                                                    </custom-h-stack>
-                                                </custom-palette-item>
-                                            );
-                                        })}
-                                </custom-v-stack>
-                            </custom-v-stack>
-                        </Flyout>
+                            {context.brands.length > 1 ? (
+                                <Flyout
+                                    hug={false}
+                                    fitContent={true}
+                                    isOpen={open}
+                                    onOpenChange={(isOpen) => setOpen(isOpen)}
+                                    legacyFooter={false}
+                                    trigger={
+                                        <Button onClick={() => setOpen((open) => !open)} size="small" inverted="true">
+                                            <custom-h-stack gap="xx-small" padding-x="x-small" align-items="center">
+                                                <Text as="span">
+                                                    {context.brands &&
+                                                        context.selection.brand &&
+                                                        context.selection.brand.name}
+                                                </Text>
+                                                <IconCaretDown></IconCaretDown>
+                                            </custom-h-stack>
+                                        </Button>
+                                    }
+                                >
+                                    <custom-v-stack>
+                                        <custom-v-stack>
+                                            <custom-h-stack padding="x-small">
+                                                <Text weight="strong">Brands</Text>
+                                            </custom-h-stack>
+                                            {context.brands.length == 0 && <Text>No brands</Text>}
+                                            {context.brands &&
+                                                context.brands.length &&
+                                                context.brands.map((brand) => {
+                                                    return (
+                                                        <custom-palette-item
+                                                            key={brand.id}
+                                                            gap="small"
+                                                            onClick={() => {
+                                                                context.actions.selectBrand(brand);
+                                                                setOpen(false);
+                                                            }}
+                                                        >
+                                                            <custom-h-stack gap="x-small">
+                                                                {context.selection.brand?.id == brand.id && (
+                                                                    <IconCheck></IconCheck>
+                                                                )}
+                                                                {context.selection.brand?.id != brand.id && (
+                                                                    <div style={{ width: '16px' }}></div>
+                                                                )}
+                                                                <Text size="small">{brand.name}</Text>
+                                                            </custom-h-stack>
+                                                        </custom-palette-item>
+                                                    );
+                                                })}
+                                        </custom-v-stack>
+                                    </custom-v-stack>
+                                </Flyout>
+                            ) : (
+                                <Text>{context.selection.brand.name}</Text>
+                            )}
+                        </custom-h-stack>
                     </custom-h-stack>
                     <custom-spacer></custom-spacer>
-                    {/* <button>
-                        <IconNotifications icon="Notifications" size="Size20" />
-                    </button> */}
 
-                    <button
-                        padding-x="small"
-                        onClick={() => {
-                            window.postMessage('reload');
-                        }}
+                    <Flyout
+                        hug={true}
+                        fitContent={true}
+                        isOpen={contextMenuOpen}
+                        onOpenChange={(isOpen) => setContextMenuOpen(isOpen)}
+                        legacyFooter={false}
+                        trigger={
+                            <Button
+                                hugWidth={true}
+                                inverted={true}
+                                padding-x="small"
+                                onClick={() => setContextMenuOpen((open) => !open)}
+                                icon={<IconMore></IconMore>}
+                            ></Button>
+                        }
                     >
-                        <IconRefresh icon="Refresh" size="Size20" />
-                    </button>
+                        <custom-v-stack>
+                            <div
+                                tabIndex={0}
+                                role="menuitem"
+                                aria-label={`Reload Plugin`}
+                                onClick={() => {
+                                    window.postMessage('reload');
+                                    setOpen(false);
+                                }}
+                            >
+                                <MenuItem decorator={<IconRefresh />} title={'Reload Plugin'}></MenuItem>
+                            </div>
+                            <custom-line></custom-line>
+                            <div
+                                tabIndex={0}
+                                role="menuitem"
+                                aria-label={`Logout`}
+                                onClick={() => {
+                                    logout();
+                                }}
+                            >
+                                <MenuItem decorator={<IconArrowOutLogout />} title={'Logout'}></MenuItem>
+                            </div>
+                        </custom-v-stack>
+                    </Flyout>
                 </custom-h-stack>
             </custom-toolbar-wrapper>
         </div>
