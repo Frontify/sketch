@@ -37,6 +37,9 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
     let [folder, setFolder] = useState(null);
     let [breadcrumbs, setBreadcrumbs] = useState([]);
 
+    // Pagination
+    let [currentPage, setCurrentPage] = useState(0);
+
     const [projectMap, setProjectMap] = useState({});
 
     let context = useContext(UserContext);
@@ -64,103 +67,105 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
         if (project) fetchProjectFolders(project);
     }, [project]);
 
-    // Watch folderID
+    // Run this when the currentPage changes
+    useEffect(() => {
+        if (folder && currentPage != 0) loadMore();
+    }, [currentPage]);
 
-    const refreshFolder = async () => {
-        if (folder && folder.id) {
-            setLoading(true);
+    const loadMore = async () => {
+        setLoading(true);
 
-            // Todo: Use workspace query
-
-            /***
-             * 
-             * 
-             * {
-  node(id: "eyJpZGVudGlmaWVyIjoxOTEyNzcsInR5cGUiOiJwcm9qZWN0In0=") {
-    ... on Workspace {
-      id
-      __typename
-      browse {
-        subFolders {
-          items {
-            name
-          }
-        }
-      }
-      assets(
-        query: { inFolder: {id: "eyJpZGVudGlmaWVyIjoxMDQ1NDYsInR5cGUiOiJmb2xkZXIifQ=="}}
-      ) {
-        items {
-          __typename
-          title
-          ... on File {
-            extension
-            modifiedAt
-          }
-        }
-      }
-    }
-  }
-}
-
-             */
-            let query = `{
-                node(id: "${folder.id}") {
-                  __typename
-                  id
-                  ...on SubFolder {
+        let query = `{
+            node(id: "${folder.id || folder.folder.id}") {
+              __typename
+              id
+              ...on SubFolder {
+                id
+                name
+                assets(page: ${currentPage}) {
+                    hasNextPage
+                    page
+                    total
+                  items {
+                    
+                    id
+                    title
+                    __typename
+                    ...on File {
+                      filename
+                      extension
+                      externalId
+                      downloadUrl
+                    }
+                    ...on Image {
+                        filename
+                        extension
+                        externalId
+                        downloadUrl
+                      }
+                  }
+                }
+                subFolders(page: ${currentPage}) {
+                    hasNextPage
+                    total
+                    limit
+                    page
+                  items {
                     id
                     name
-                    assets(page: 1) {
-                      items {
-                        id
-                        title
-                        __typename
-                        ...on File {
-                          filename
-                          extension
-                          externalId
-                          downloadUrl
-                        }
-                        ...on Image {
-                            filename
-                            extension
-                            externalId
-                            downloadUrl
-                          }
-                      }
-                    }
-                    subFolders {
-                      items {
-                        id
-                        name
-                      }
-                    }
-                    
-                 } 
-                  
+                  }
                 }
-              }`;
+                
+             } 
+              
+            }
+          }`;
 
-            let graphQLresult = await queryGraphQLWithAuth({ query, auth: context.auth });
+        // Example: total (31), page (1), limit (25)
 
-            console.log({ graphQLresult, query });
+        // 1. Fetch
+        let graphQLresult = await queryGraphQLWithAuth({ query, auth: context.auth });
+        let subFolders = graphQLresult.data.node.subFolders;
+        let folderFiles = graphQLresult.data.node.assets;
 
-            let files = graphQLresult.data.node.assets.items;
-            let folders = graphQLresult.data.node.subFolders.items;
+        // 2. Concat folders
+        let newFolders = folders.concat(subFolders.items);
 
-            // let { success, folders, folder } = await actions.getProjectFolders(project.id, folder.path);
-            setFiles(files);
-            setFolders(folders);
+        // 3. Sort
+        newFolders = newFolders.sort(function (a, b) {
+            return a.name.localeCompare(b.name, undefined, {
+                numeric: true,
+                sensitivity: 'base',
+            });
+        });
 
-            // GraphQL:
-            // setFolders(result.data.node.subFolders.items);
+        setFolders(newFolders);
+
+        // 4. Files
+        let newFiles = files.concat(folderFiles.items);
+        newFiles = newFiles.sort(function (a, b) {
+            return a?.title?.localeCompare(b?.title, undefined, {
+                numeric: true,
+                sensitivity: 'base',
+            });
+        });
+        setFiles(newFiles);
+
+        // 3. Check if there are more pages
+        let done = newFolders.length == subFolders.total && newFiles.length == folderFiles.total;
+
+        if (!done) {
+            // This will trigger the effect to run and load more items
+            setCurrentPage(currentPage + 1);
+        } else {
             setLoading(false);
         }
     };
 
     useEffect(async () => {
-        refreshFolder();
+        setFolders([]);
+        setFiles([]);
+        setCurrentPage(0);
     }, [folder]);
 
     useEffect(async () => {
@@ -213,6 +218,9 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
 
     // Back
     const browseBack = () => {
+        setFiles([]);
+        setFolders([]);
+
         const shouldEnterRoot = !breadcrumbs || breadcrumbs.length == 0;
 
         if (shouldEnterRoot) {
@@ -222,23 +230,23 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
         }
 
         const shouldEnterFolder = breadcrumbs && breadcrumbs.length > 0;
-
+        let previous = null;
         if (shouldEnterFolder) {
             // breadcrumbs.pop();
-            let previous = breadcrumbs[breadcrumbs.length - 2];
+            previous = breadcrumbs[breadcrumbs.length - 2];
 
             if (previous) {
-                // enterFolder(previous);
-
                 setFolder(previous);
             } else {
                 enterProject(project);
             }
             setBreadcrumbs((breadcrumbs) => breadcrumbs.splice(0, breadcrumbs.length - 1));
         }
+        if (previous) setCurrentPage(1);
     };
 
     const enterProject = (project) => {
+        setCurrentPage(0);
         let root = {
             type: 'folder',
             folder: {
@@ -258,7 +266,6 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
         onChange(wrappedFolder(root));
     };
     const focusFolder = (newFolder) => {
-        console.log('focus folder', newFolder, folder);
         if (onInput) {
             onInput(wrappedFolder(newFolder));
             onChange(wrappedFolder(newFolder));
@@ -266,7 +273,10 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
     };
 
     const enterFolder = (newFolder) => {
+        setFolders([]);
+        setFiles([]);
         setFolder(newFolder);
+        setCurrentPage(1);
 
         // Add the folder to the breadcrumbs
         setBreadcrumbs((state) => {
@@ -348,8 +358,8 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
                             }}
                             key={project.id}
                         >
-                            <custom-h-stack gap="small">
-                                <IconProjects></IconProjects>
+                            <custom-h-stack gap="small" align-items="center">
+                                <IconProjects size="Size20"></IconProjects>
                                 <Text>{project.name}</Text>
                             </custom-h-stack>
                         </custom-palette-item>
@@ -411,7 +421,7 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
                                         onFocus={() => enterFolder(folder)}
                                     >
                                         <custom-h-stack gap="small" align-items="center">
-                                            <IconFolder></IconFolder>
+                                            <IconFolder size="Size20"></IconFolder>
                                             <Text>{folder.name}</Text>
                                         </custom-h-stack>
                                     </custom-palette-item>
@@ -434,7 +444,7 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
                                                 align-items="center"
                                                 onDoubleClick={() => pickFile(file)}
                                             >
-                                                <IconSketch></IconSketch>
+                                                <IconSketch size="Size20"></IconSketch>
                                                 <Text>
                                                     {file.title}
                                                     <span style={{ opacity: 0.5 }}>.{file.extension}</span>
@@ -448,7 +458,7 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
                                     return (
                                         <custom-palette-item key={file.id} disabled>
                                             <custom-h-stack gap="small" align-items="center">
-                                                <IconFile></IconFile>
+                                                <IconFile size="Size20"></IconFile>
                                                 <Text>
                                                     {file.title}
                                                     {file.__typename ? (
