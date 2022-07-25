@@ -417,6 +417,7 @@ class Source {
         }
     }
     getRelativePath(path) {
+        if (!path) return null;
         let base = target.getPathToSyncFolder();
 
         let relativePath = `/${path.replace(base, '').split('/').splice(3).join('/')}`;
@@ -433,16 +434,18 @@ class Source {
             sketch3.Settings.documentSettingForKey(wrappedDocument, 'remote_id') || database[wrappedDocument.id];
 
         // Return early
-        if (!isTracked) return;
+        if (!isTracked) {
+            // Inform the UI that a file has been saved, even though it is untracked.
+            // Then, we can refresh the list of open documents.
+            frontend.send('document-saved');
+            return;
+        }
 
-        console.log(wrappedDocument);
         let filePath = '' + nativeDocument.fileURL().path();
         let filename = filePath.split('/');
         filename = filename[filename.length - 1];
-        console.log(filePath);
-        let sha = '' + shaFile(filePath);
 
-        console.log(sha);
+        let sha = '' + shaFile(filePath);
 
         this.pushRecent();
 

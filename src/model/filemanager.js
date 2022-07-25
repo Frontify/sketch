@@ -86,7 +86,6 @@ class FileManager {
             let sha = '' + shaFile(selectedDocument.path);
 
             if (doc) {
-                console.log('inside doc');
                 let nsurl = doc.fileURL();
                 let nsPath = nsurl.path();
                 let parts = nsPath.split('/');
@@ -100,8 +99,6 @@ class FileManager {
 
                 // move to the target folder
                 doc.moveToURL_completionHandler_(newNsurl, null);
-
-                console.log('moved file', filePath, sha);
 
                 this.updateAssetDatabase({
                     uuid: selectedDocument.id,
@@ -217,7 +214,6 @@ class FileManager {
     }
 
     async updateAssetDatabase(payload) {
-        console.log('updateAssetDatabase', payload);
         if (!payload.uuid) return;
 
         let database = this.getAssetDatabaseFile();

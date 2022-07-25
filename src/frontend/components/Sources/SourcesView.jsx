@@ -35,10 +35,14 @@ export function SourcesView() {
 
     const requestOpenDocuments = async () => {
         setLoading(true);
-        let { documents } = await useSketch('getOpenDocumentsMeta');
-        setLoading(false);
 
-        setOpenDocuments([...documents]);
+        console.log('requestOpenDocuments');
+        let { documents } = await useSketch('getOpenDocumentsMeta');
+
+        setLoading(false);
+        if (documents) {
+            setOpenDocuments([...documents]);
+        }
     };
 
     const { t } = useTranslation();
@@ -82,7 +86,11 @@ export function SourcesView() {
                 case 'document-closed':
                 case 'document-opened':
                 case 'document-saved':
-                    await requestOpenDocuments();
+                    try {
+                        await requestOpenDocuments();
+                    } catch (error) {
+                        console.error(error);
+                    }
                     break;
             }
         };

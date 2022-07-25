@@ -222,7 +222,6 @@ export function NavigationBar() {
             switch (type) {
                 case 'document-closed':
                 case 'document-opened':
-                    console.log('document event');
                     refresh();
                     break;
                 case 'document-pulled':
