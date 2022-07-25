@@ -111,10 +111,10 @@ export function SignInView() {
                 <custom-line></custom-line>
                 <Text>{t('signin.need_help')}</Text>
                 <custom-v-stack>
-                    <a onClick={() => openExternal(t('general.help_link_url'))}>
+                    <a onClick={() => openExternal(t('general.help_link_url'))} target="_blank">
                         <Text color="interactive">{t('signin.help_link_title')}</Text>
                     </a>
-                    <a onClick={() => openExternal(t('signin.create_account_url'))}>
+                    <a onClick={() => openExternal(t('signin.create_account_url'))} target="_blank">
                         <Text color="interactive">{t('signin.create_account_title')}</Text>
                     </a>
                 </custom-v-stack>

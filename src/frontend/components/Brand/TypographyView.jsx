@@ -7,7 +7,7 @@ import { useSketch } from '../../hooks/useSketch';
 import { UserContext } from '../../context/UserContext';
 
 // Components
-import { Button, IconCaretDown, Flyout, Text, IconMore } from '@frontify/fondue';
+import { Button, IconCaretDown, IconCaretRight, Flyout, Text, IconMore, MenuItem } from '@frontify/fondue';
 
 import { GuidelineSwitcher } from './GuidelineSwitcher';
 import { SearchField } from '../Core/SearchField';
@@ -15,9 +15,19 @@ import { Swatch } from './Swatch';
 
 export function TypographyView({ guidelines, palettes }) {
     const { actions, colorMap, selection } = useContext(UserContext);
+
+    useEffect(async () => {
+        await actions.fetchGuidelines(selection.brand.id);
+    }, []);
+
     const [query, setQuery] = useState('');
     const [filteredPalettes, setFilteredPalettes] = useState(palettes);
     const [openFlyout, setOpenFlyout] = useState(null);
+
+    const [open, setOpen] = useState(true);
+
+    const onClose = () => {};
+    const onOpen = () => {};
 
     useEffect(() => {
         if (!palettes) return;
@@ -49,11 +59,19 @@ export function TypographyView({ guidelines, palettes }) {
     }, [selection, palettes, query]);
 
     const applyTextStyle = async (textStyle, color) => {
-        let response = await useSketch('applyFontStyleWithColor', { textStyle, color });
+        await useSketch('applyFontStyleWithColor', { textStyle });
+        if (color) {
+            await useSketch('applyColor', {
+                r: color.r,
+                g: color.g,
+                b: color.b,
+                a: color.alpha,
+            });
+        }
     };
     return (
         <custom-v-stack overflow="hidden" stretch="true">
-            <custom-h-stack stretch-children padding="small" separator="bottom">
+            <custom-h-stack stretch-children padding-x="large" padding-bottom="medium">
                 <SearchField
                     onInput={(value) => {
                         setQuery(value);
@@ -73,7 +91,9 @@ export function TypographyView({ guidelines, palettes }) {
                     )}
                 </div>
             </custom-h-stack>
-            <custom-scroll-view>
+            <custom-line></custom-line>
+
+            <custom-scroll-view separator="between">
                 {!filteredPalettes.length ? (
                     <custom-v-stack padding="small" stretch="true" align-items="center" justify-content="center">
                         <Text color="weak">No Text Styles</Text>
@@ -84,13 +104,48 @@ export function TypographyView({ guidelines, palettes }) {
                 {filteredPalettes &&
                     filteredPalettes.map((palette) => {
                         return (
-                            <custom-v-stack key={palette.id}>
-                                <custom-h-stack gap="x-small" padding="small" separator="bottom">
-                                    <IconCaretDown size="Size16"></IconCaretDown>
+                            <custom-v-stack key={palette.id} padding-y="x-small">
+                                <custom-h-stack
+                                    gap="x-small"
+                                    align-items="center"
+                                    style={{ marginLeft: '16px' }}
+                                    padding="xx-small"
+                                >
+                                    <div>
+                                        {open ? (
+                                            <Button
+                                                inverted={false}
+                                                style="Secondary"
+                                                solid={false}
+                                                size="Small"
+                                                icon={<IconCaretDown></IconCaretDown>}
+                                                onClick={() => onClose(palette.id)}
+                                            ></Button>
+                                        ) : (
+                                            <Button
+                                                inverted={false}
+                                                style="Secondary"
+                                                solid={false}
+                                                size="Small"
+                                                icon={<IconCaretRight></IconCaretRight>}
+                                                onClick={() => onOpen(palette.id)}
+                                            ></Button>
+                                        )}
+                                    </div>
 
-                                    <Text as="span" size="x-small">
-                                        {palette.project_name} / <strong>{palette.title}</strong>
-                                    </Text>
+                                    <custom-breadcrumbs overflow="hidden" flex>
+                                        <custom-h-stack gap="x-small" overflow="hidden">
+                                            <Text color="weak" size="small" overflow="ellipsis" whitespace="nowrap">
+                                                {palette.project_name}
+                                            </Text>
+                                            <Text color="weak">
+                                                <span style={{ opacity: 0.5 }}>/</span>
+                                            </Text>
+                                            <Text size="small" overflow="ellipsis" whitespace="nowrap">
+                                                {palette.title}
+                                            </Text>
+                                        </custom-h-stack>
+                                    </custom-breadcrumbs>
                                 </custom-h-stack>
 
                                 <custom-v-stack>
@@ -98,9 +153,11 @@ export function TypographyView({ guidelines, palettes }) {
                                         return (
                                             <custom-palette-item
                                                 key={textStyle.id}
+                                                title={JSON.stringify(textStyle)}
                                                 onClick={() => {
                                                     applyTextStyle(textStyle, null);
                                                 }}
+                                                padding-x="large"
                                             >
                                                 <custom-h-stack>
                                                     <custom-v-stack>
@@ -113,52 +170,69 @@ export function TypographyView({ guidelines, palettes }) {
                                                     <custom-spacer></custom-spacer>
 
                                                     {textStyle.colors?.foreground && colorMap ? (
-                                                        <Flyout
-                                                            hug={true}
-                                                            fitContent={true}
-                                                            isOpen={openFlyout == textStyle.id}
-                                                            onOpenChange={(open) => {
-                                                                if (open) {
-                                                                    setOpenFlyout(textStyle.id);
-                                                                } else {
-                                                                    setOpenFlyout(null);
+                                                        <div style={{ marginRight: '-8px' }}>
+                                                            <Flyout
+                                                                hug={true}
+                                                                fitContent={true}
+                                                                isOpen={openFlyout == textStyle.id}
+                                                                onOpenChange={(open) => {
+                                                                    if (open) {
+                                                                        setOpenFlyout(textStyle.id);
+                                                                    } else {
+                                                                        setOpenFlyout(null);
+                                                                    }
+                                                                }}
+                                                                legacyFooter={false}
+                                                                trigger={
+                                                                    <Button
+                                                                        style="Secondary"
+                                                                        solid={false}
+                                                                        inverted={false}
+                                                                        icon={<IconMore />}
+                                                                        onClick={() => {
+                                                                            if (open) {
+                                                                                setOpenFlyout(textStyle.id);
+                                                                            } else {
+                                                                                setOpenFlyout(null);
+                                                                            }
+                                                                        }}
+                                                                    ></Button>
                                                                 }
-                                                            }}
-                                                            legacyFooter={false}
-                                                            trigger={
-                                                                <Button
-                                                                    icon={<IconMore />}
-                                                                    style="Secondary"
-                                                                    onClick={() => {
-                                                                        if (open) {
-                                                                            setOpenFlyout(textStyle.id);
-                                                                        } else {
-                                                                            setOpenFlyout(null);
-                                                                        }
-                                                                    }}
-                                                                ></Button>
-                                                            }
-                                                        >
-                                                            <custom-v-stack>
-                                                                {Object.keys(textStyle.colors?.foreground).map(
-                                                                    (color) => (
-                                                                        <custom-h-stack
-                                                                            padding="small"
-                                                                            gap="small"
-                                                                            align-items="center"
-                                                                            onClick={() => {
-                                                                                applyTextStyle(textStyle, color);
-                                                                            }}
-                                                                        >
-                                                                            <Swatch
-                                                                                color={colorMap[color]?.css_value}
-                                                                            ></Swatch>
-                                                                            <Text>{colorMap[color]?.name}</Text>
-                                                                        </custom-h-stack>
-                                                                    )
-                                                                )}
-                                                            </custom-v-stack>
-                                                        </Flyout>
+                                                            >
+                                                                <custom-v-stack>
+                                                                    {Object.keys(textStyle.colors?.foreground)
+                                                                        .filter((key) => key != null)
+                                                                        .map((key) => (
+                                                                            <div
+                                                                                key={key}
+                                                                                tabIndex={0}
+                                                                                role="menuitem"
+                                                                                onClick={(event) => {
+                                                                                    event.stopPropagation();
+                                                                                    applyTextStyle(
+                                                                                        textStyle,
+                                                                                        colorMap[key]
+                                                                                    );
+                                                                                    setOpenFlyout(false);
+                                                                                }}
+                                                                            >
+                                                                                <MenuItem
+                                                                                    title={colorMap[key]?.name}
+                                                                                    decorator={
+                                                                                        <Swatch
+                                                                                            color={
+                                                                                                colorMap[key]?.css_value
+                                                                                            }
+                                                                                        ></Swatch>
+                                                                                    }
+                                                                                >
+                                                                                    {colorMap[key]?.name}{' '}
+                                                                                </MenuItem>
+                                                                            </div>
+                                                                        ))}
+                                                                </custom-v-stack>
+                                                            </Flyout>
+                                                        </div>
                                                     ) : (
                                                         ''
                                                     )}

@@ -7,7 +7,7 @@ import { Badge } from '@frontify/fondue';
 import { useNavigate, Outlet } from 'react-router-dom';
 
 // Context
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 // i18n
 import { useLocalStorage } from '../../hooks/useLocalStorage';
@@ -48,15 +48,15 @@ export function BrandView() {
     let [scopes] = useState(libraryScopes);
 
     return (
-        <custom-v-stack overflow="hidden" flex>
-            <custom-scope-bar-wrapper padding="small">
+        <custom-v-stack overflow="hidden" flex class="tw-bg-black-0">
+            <custom-scope-bar-wrapper padding-x="large" padding-y="medium">
                 <custom-h-stack align-items="center" gap="x-small">
                     {scopes.map((scope) => {
                         return (
                             <Badge
                                 key={scope.key}
                                 emphasis={activeScope == scope.key ? 'Strong' : ''}
-                                style="Progress"
+                                style={activeScope == scope.key ? 'Progress' : 'Primary'}
                                 onClick={() => {
                                     navigate('/source/brand/' + scope.key);
                                     setActiveScope(scope.key);
@@ -68,7 +68,6 @@ export function BrandView() {
                     })}
                 </custom-h-stack>
             </custom-scope-bar-wrapper>
-            <custom-line></custom-line>
 
             {/* Router Outlet that displays colors, text styles or any of the media libraries. */}
 

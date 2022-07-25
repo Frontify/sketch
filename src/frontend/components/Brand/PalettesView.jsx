@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 
 // Components
-import { IconCaretDown, Text } from '@frontify/fondue';
+import { Button, IconCaretDown, IconCaretRight, Text } from '@frontify/fondue';
 
 import { GuidelineSwitcher } from './GuidelineSwitcher';
 import { LoadingIndicator } from '../Core/LoadingIndicator';
@@ -18,6 +18,11 @@ export function PalettesView({ palettes, guidelines }) {
     const { actions, selection } = useContext(UserContext);
     const [query, setQuery] = useState('');
     const [filteredPalettes, setFilteredPalettes] = useState(palettes);
+
+    const [open, setOpen] = useState(true);
+
+    const onClose = () => {};
+    const onOpen = () => {};
 
     const sendColor = async (color) => {
         useSketch('applyColor', color);
@@ -57,8 +62,10 @@ export function PalettesView({ palettes, guidelines }) {
         <LoadingIndicator></LoadingIndicator>
     ) : (
         <custom-v-stack overflow="hidden" stretch="true">
-            <custom-h-stack stretch-children padding="small" separator="bottom">
+            <custom-h-stack stretch-children padding-x="large" padding-bottom="medium">
                 <SearchField
+                    spellcheck={false}
+                    autocomplete={false}
                     onInput={(value) => {
                         setQuery(value);
                     }}
@@ -77,7 +84,8 @@ export function PalettesView({ palettes, guidelines }) {
                     )}
                 </div>
             </custom-h-stack>
-            <custom-scroll-view>
+            <custom-line></custom-line>
+            <custom-scroll-view separator="between">
                 {!filteredPalettes.length ? (
                     <custom-v-stack padding="small" stretch="true" align-items="center" justify-content="center">
                         <Text color="weak">No Colors</Text>
@@ -88,19 +96,55 @@ export function PalettesView({ palettes, guidelines }) {
                 {filteredPalettes.map((palette) => {
                     if (query == '' || palette.colors.length) {
                         return (
-                            <custom-v-stack key={palette.id}>
-                                <custom-h-stack gap="x-small" padding="small" separator="bottom">
-                                    <IconCaretDown size="Size16"></IconCaretDown>
+                            <custom-v-stack key={palette.id} padding-y="x-small">
+                                <custom-h-stack
+                                    gap="x-small"
+                                    align-items="center"
+                                    style={{ marginLeft: '16px' }}
+                                    padding="xx-small"
+                                >
+                                    <div>
+                                        {open ? (
+                                            <Button
+                                                inverted={false}
+                                                style="Secondary"
+                                                solid={false}
+                                                size="Small"
+                                                icon={<IconCaretDown></IconCaretDown>}
+                                                onClick={() => onClose(palette.id)}
+                                            ></Button>
+                                        ) : (
+                                            <Button
+                                                inverted={false}
+                                                style="Secondary"
+                                                solid={false}
+                                                size="Small"
+                                                icon={<IconCaretRight></IconCaretRight>}
+                                                onClick={() => onOpen(palette.id)}
+                                            ></Button>
+                                        )}
+                                    </div>
 
-                                    <Text as="span" size="x-small">
-                                        {palette.project_name} / <strong>{palette.name}</strong>
-                                    </Text>
+                                    <custom-breadcrumbs overflow="hidden" flex>
+                                        <custom-h-stack gap="x-small" overflow="hidden">
+                                            <Text color="weak" size="small" overflow="ellipsis" whitespace="nowrap">
+                                                {palette.project_name}
+                                            </Text>
+                                            <Text color="weak">
+                                                <span style={{ opacity: 0.5 }}>/</span>
+                                            </Text>
+                                            <Text size="small" overflow="ellipsis" whitespace="nowrap">
+                                                {palette.name}
+                                            </Text>
+                                        </custom-h-stack>
+                                    </custom-breadcrumbs>
                                 </custom-h-stack>
+
                                 {palette.colors.length ? (
                                     <custom-v-stack>
                                         {palette.colors.map((color) => {
                                             return (
-                                                <custom-palette-item key={color.id}>
+                                                <custom-palette-item key={color.id} padding-x="large">
                                                     <custom-h-stack
                                                         gap="small"
                                                         align-items="center"

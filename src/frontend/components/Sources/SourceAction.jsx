@@ -253,7 +253,7 @@ export function SourceAction({ status, actions, loading }) {
                                     <pre>{context.currentDocument.remote?.modifier_name}</pre>
                                 </Text>
 
-                                <a onClick={() => openExternal(documentURL)}>
+                                <a onClick={() => openExternal(documentURL)} target="_blank">
                                     <Text color="interactive">{t('sources.view_revisions')}</Text>
                                 </a>
                             </custom-v-stack>

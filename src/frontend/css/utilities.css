@@ -78,6 +78,24 @@
     padding-bottom: var(--space-l);
 }
 
+/* Padding Botton Utilities */
+
+[padding-bottom='xx-small'] {
+    padding-bottom: var(--space-xxs);
+}
+[padding-bottom='x-small'] {
+    padding-bottom: var(--space-xs);
+}
+[padding-bottom='small'] {
+    padding-bottom: var(--space-s);
+}
+[padding-bottom='medium'] {
+    padding-bottom: var(--space-m);
+}
+[padding-bottom='large'] {
+    padding-bottom: var(--space-l);
+}
+
 /* Gap Utilities */
 
 [gap='xx-small'] {

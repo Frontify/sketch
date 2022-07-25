@@ -452,6 +452,7 @@ a {
     color: var(--box-selected-strong-color);
     cursor: pointer;
 }
-a:hover {
+a[href]:hover,
+a[target]:hover {
     text-decoration: underline;
 }
