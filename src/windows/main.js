@@ -347,7 +347,6 @@ export default function (context, view) {
                 break;
 
             case 'refreshCurrentAsset':
-                console.log('refreshCurrentAsset');
                 try {
                     let database = filemanager.getAssetDatabaseFile();
                     let selectedDocument = sketch3.Document.getSelectedDocument();
@@ -471,9 +470,8 @@ export default function (context, view) {
                 let openDocumentsMeta = openDocuments
                     .filter((document) => document.path)
                     .map((document) => {
-                        console.log('map', document, document.path);
                         let relativePath = source.getRelativePath(document.path);
-                        console.log(relativePath);
+
                         let transformedDocument = {
                             id: document.id,
                             name: relativePath.split('/').pop().replace('.sketch', '').replaceAll('%20', ' '),
@@ -523,7 +521,6 @@ export default function (context, view) {
                 }
                 break;
             case 'moveCurrent':
-                console.log('move current');
                 try {
                     await filemanager.moveCurrent(args.brand, args.project, args.folder);
                     payload = { success: true };

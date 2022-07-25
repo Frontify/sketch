@@ -36,7 +36,6 @@ export function SourcesView() {
     const requestOpenDocuments = async () => {
         setLoading(true);
 
-        console.log('requestOpenDocuments');
         let { documents } = await useSketch('getOpenDocumentsMeta');
 
         setLoading(false);

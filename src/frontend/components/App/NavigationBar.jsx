@@ -100,7 +100,6 @@ export function NavigationBar() {
     };
 
     const pushSource = async ({ force = false }) => {
-        console.log('pushSource');
         setLoading(true);
         setStatus('PUSHING');
         // Set correct local path

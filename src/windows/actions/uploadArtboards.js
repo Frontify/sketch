@@ -41,7 +41,6 @@ export function uploadArtboards({ artboards, brandID }) {
     try {
         Artboard.uploadArtboards(queue, brandID);
     } catch (error) {
-        console.log('uploadArtboards.js error 47');
         console.error(error);
     }
 }
