@@ -6,6 +6,8 @@ import fetch from '../helpers/fetch';
 import createFolder from '../helpers/createFolder';
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
 
+const sketch3 = require('sketch');
+
 class Typography {
     constructor() {
         this.colors = {};
@@ -56,23 +58,19 @@ class Typography {
     }
 
     applyFontStyle(fontStyle) {
-        console.log('fontStyle', fontStyle);
-        let selection = sketch.getSelection();
-        let loop = selection.objectEnumerator();
-        let item = null;
+        let currentDocument = sketch3.getSelectedDocument();
+        let selection = currentDocument.selectedLayers;
 
-        while ((item = loop.nextObject())) {
-            if (item.class() == MSLayerGroup) {
-                let layers = item.layers();
-                layers.forEach(
-                    function (layer) {
-                        this.applyFontStyleToLayer(layer, fontStyle);
-                    }.bind(this)
-                );
+        selection.layers.forEach((layer) => {
+            if (layer.layers) {
+                let children = layer.layers();
+                children.forEach((child) => {
+                    this.applyFontStyleToLayer(child, fontStyle);
+                });
             } else {
-                this.applyFontStyleToLayer(item, fontStyle);
+                this.applyFontStyleToLayer(layer, fontStyle);
             }
-        }
+        });
 
         let doc = sketch.getDocument();
         if (doc) {
@@ -83,7 +81,7 @@ class Typography {
     applyFontStyleToLayer(layer, fontStyle) {
         let msstyle = this.convertFontStyle(fontStyle)[0];
 
-        if (layer.class() == MSTextLayer) {
+        if (layer.type == 'Text') {
             layer.style = msstyle.style();
         }
     }
@@ -243,8 +241,6 @@ class Typography {
                 msstyles.push(msstyle);
             }.bind(this)
         );
-
-        console.log(msstyles);
 
         return msstyles;
     }
