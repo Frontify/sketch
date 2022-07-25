@@ -33,11 +33,9 @@ export function Toolbar() {
                                     trigger={
                                         <Button onClick={() => setOpen((open) => !open)} size="small" inverted="true">
                                             <custom-h-stack gap="xx-small" padding-x="x-small" align-items="center">
-                                                <Text as="span">
-                                                    {context.brands &&
-                                                        context.selection.brand &&
-                                                        context.selection.brand.name}
-                                                </Text>
+                                                {context.brands && context.selection?.brand?.name && (
+                                                    <Text as="span">{context.selection?.brand?.name}</Text>
+                                                )}
                                                 <IconCaretDown></IconCaretDown>
                                             </custom-h-stack>
                                         </Button>
@@ -77,7 +75,7 @@ export function Toolbar() {
                                     </custom-v-stack>
                                 </Flyout>
                             ) : (
-                                <Text>{context.selection.brand.name}</Text>
+                                <Text>{context.selection?.brand?.name}</Text>
                             )}
                         </custom-h-stack>
                     </custom-h-stack>
