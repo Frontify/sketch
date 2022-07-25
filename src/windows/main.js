@@ -366,7 +366,6 @@ export default function (context, view) {
                 break;
 
             case 'getCurrentDocument':
-                console.log('getCurrentDocument');
                 try {
                     let database = filemanager.getAssetDatabaseFile();
                     let selectedDocument = sketch3.Document.getSelectedDocument();
@@ -470,9 +469,12 @@ export default function (context, view) {
                 let database = filemanager.getAssetDatabase();
 
                 let openDocumentsMeta = openDocuments
+                    .filter((document) => document.path)
                     .map((document) => {
+                        console.log('map', document, document.path);
                         let relativePath = source.getRelativePath(document.path);
-                        return {
+                        console.log(relativePath);
+                        let transformedDocument = {
                             id: document.id,
                             name: relativePath.split('/').pop().replace('.sketch', '').replaceAll('%20', ' '),
                             path: document.path,
@@ -482,9 +484,12 @@ export default function (context, view) {
                             remote_modified: sketch3.Settings.documentSettingForKey(document, 'remote_modified'),
                             ...database[document.id],
                         };
+
+                        return transformedDocument;
                     })
                     .sort((a, b) => (a.name > b.name ? 1 : -1));
-                payload = { documents: openDocumentsMeta };
+
+                payload = { success: true, documents: openDocumentsMeta };
                 break;
             case 'getAuth':
                 let auth = user.getAuthentication();
