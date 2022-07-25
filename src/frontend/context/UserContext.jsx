@@ -30,7 +30,7 @@ export const UserContextProvider = ({ children }) => {
         colorMap: {},
         colorPalettes: [],
         currentDocument: {},
-        debug: true,
+        debug: false,
         guidelines: [],
         lastFetched: null,
         recentDocuments: [],
