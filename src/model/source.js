@@ -4,6 +4,7 @@ import fetch from '../helpers/fetch';
 import target from './target';
 import sketch from './sketch';
 import filemanager from './filemanager';
+import createFolder from '../helpers/createFolder';
 
 // Message helper
 import { frontend } from '../helpers/ipc';
@@ -13,13 +14,12 @@ import recentFiles from '../model/recent';
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
 
 let sketch3 = require('sketch');
+let Document = require('sketch/dom').Document;
 
 class Source {
     constructor() {}
 
     async getRemoteAssetForProjectIDByAssetID(projectID, assetID) {
-        console.log('getRemoteAssetForProjectIDByAssetID', projectID, assetID);
-
         /**
          * Warning:
          *
@@ -36,7 +36,6 @@ class Source {
         );
 
         if (result.assets != null) {
-            console.log(result.assets);
             // The API returns {assets} as an Object (?), and we’re interested in the first one
             // that matches the given ID.
 
@@ -78,12 +77,6 @@ class Source {
                                                         modified: '0000-00-00 00:00:00',
                                                         sha: '0',
                                                     };
-
-                                                    console.log(
-                                                        'assets status',
-                                                        asset.modified,
-                                                        status.assets[asset.id].modified
-                                                    );
 
                                                     if (asset.sha == file.sha) {
                                                         // remote file and local file are the same
@@ -172,6 +165,7 @@ class Source {
                     console.warn('No target');
                     return;
                 }
+
                 return fetch(
                     '/v1/assets/status/' +
                         target.project.id +
@@ -180,6 +174,7 @@ class Source {
                 ).then(
                     function (result) {
                         let assets = [];
+
                         for (let id in result.assets) {
                             if (result.assets.hasOwnProperty(id)) {
                                 let asset = result.assets[id];
@@ -267,6 +262,83 @@ class Source {
         });
     }
 
+    async getAssetForAssetID(assetID) {
+        // fetch!
+
+        let query = `{
+            asset: node(id: "${assetID}") {
+                __typename
+              id
+              ...on File {
+                title
+              createdAt
+              creator {
+                name
+                email
+              }
+              modifiedAt
+              modifier {
+                  name
+                  email
+              }
+                downloadUrl
+              }
+              
+            }
+          }`;
+        let url = `/graphql`;
+        const options = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                query: query.replace(/(\r\n|\n|\r)/gm, ''),
+            }),
+        };
+
+        let response = await fetch(url, options);
+
+        return response.data?.asset;
+    }
+
+    async getAssetForLegacyAssetID(assetID) {
+        // fetch!
+
+        let query = `{
+        asset(id: ${assetID}) {
+          id
+          title
+          createdAt
+          creator {
+            name
+            email
+          }
+          modifiedAt
+          modifier {
+              name
+              email
+          }
+          ...on File {
+            downloadUrl
+          }
+          
+        }
+      }`;
+        let url = `/graphql`;
+        const options = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                query: query.replace(/(\r\n|\n|\r)/gm, ''),
+            }),
+        };
+        let response = await fetch(url, options);
+        return response.data?.asset;
+    }
+
     async getGraphQLIDForLegacyAssetID(assetID) {
         // fetch!
 
@@ -304,7 +376,6 @@ class Source {
         return response.data?.asset?.id;
     }
     async pushRecent() {
-        console.log('🚀 Push Recent');
         let document = sketch3.Document.fromNative(sketch.getDocument());
         let nativeSketchDocument = sketch.getDocument();
 
@@ -340,16 +411,56 @@ class Source {
             refs,
         });
     }
-    async saved() {
+    getRelativePath(path) {
+        let base = target.getPathToSyncFolder();
+
+        let relativePath = `/${path.replace(base, '').split('/').splice(3).join('/')}`;
+
+        return relativePath;
+    }
+    async saved(context) {
+        let nativeDocument = context.actionContext.document;
+
+        // Is this asset tracked?
+        let isTracked = sketch3.Settings.documentSettingForKey(nativeDocument, 'remote_id');
+
+        // Return early
+        if (!isTracked) return;
+
+        let wrappedDocument = sketch3.Document.fromNative(context.actionContext.document);
+        let filePath = '' + nativeDocument.fileURL().path();
+        let filename = filePath.split('/');
+        filename = filename[filename.length - 1];
+
+        let sha = '' + shaFile(filePath);
+
         frontend.send('document-saved');
         this.pushRecent();
+
+        await filemanager.refreshAsset(wrappedDocument.id);
+
+        filemanager.updateAssetDatabase({
+            action: 'saved',
+            filename: filename,
+            uuid: wrappedDocument.id,
+            sha: sha,
+            saved: { sha: sha },
+            dirty: true,
+            path: filePath,
+            relativePath: this.getRelativePath(filePath),
+            refs: {
+                remote_brand_id: sketch3.Settings.documentSettingForKey(nativeDocument, 'remote_brand_id'),
+                remote_project_id: sketch3.Settings.documentSettingForKey(nativeDocument, 'remote_project_id'),
+                remote_graphql_id: sketch3.Settings.documentSettingForKey(nativeDocument, 'remote_graphql_id'),
+                remote_id: sketch3.Settings.documentSettingForKey(nativeDocument, 'remote_id'),
+            },
+        });
 
         // Mark as dirty, so that it can be pushed
         sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'dirty', true);
 
         return this.getCurrentAsset().then(async (asset) => {
             if (asset) {
-                let sha = shaFile(asset.localpath);
                 if (sha != asset.sha) {
                     let result = await fetch('/v1/screen/activity/' + asset.id, {
                         method: 'POST',
@@ -395,7 +506,7 @@ class Source {
         }
     }
 
-    downloadSource(source) {
+    downloadSource(source, path) {
         var sourceProgress = NSProgress.progressWithTotalUnitCount(10);
         sourceProgress.setCompletedUnitCount(0);
 
@@ -406,14 +517,16 @@ class Source {
             100
         );
 
+        let uri = `/v1/screen/download/${source.id}`;
+
         return filemanager
-            .downloadScreen({ id: source.id, filename: source.filename }, sourceProgress)
+            .downloadFile(uri, path, sourceProgress)
             .then(
                 function (path) {
                     clearInterval(polling);
 
                     if (isWebviewPresent('frontifymain')) {
-                        // sendToWebview('frontifymain', 'sourceDownloaded(' + JSON.stringify(source) + ')');
+                        frontend.send('source-downloaded', { source });
                     }
 
                     return path;
@@ -424,27 +537,78 @@ class Source {
                     clearInterval(polling);
 
                     if (isWebviewPresent('frontifymain')) {
-                        sendToWebview('frontifymain', 'sourceDownloadFailed(' + JSON.stringify(source) + ')');
+                        frontend.send('source-download-failed', { source });
                     }
+                    console.error('Source download failed', e);
 
                     return null;
                 }.bind(this)
             );
     }
+    /**
+     * Check out a source file from remote.
+     *
+     * Expects a GraphQL {id}
+     *
+     */
+    checkoutSource(source, path) {
+        // Path formatting
 
-    pullSource(source) {
-        return this.downloadSource(source).then(
-            function (path) {
-                if (
-                    path &&
-                    source.current == true &&
-                    NSDocumentController.sharedDocumentController().currentDocument()
-                ) {
-                    NSDocumentController.sharedDocumentController().currentDocument().close();
-                    filemanager.openFile(path);
-                }
-            }.bind(this)
-        );
+        let filename = path.split('/');
+        filename = filename[filename.length - 1];
+
+        filemanager.updateAssetDatabase({
+            action: 'pulled',
+            filename: filename,
+            uuid: source.id_external,
+            sha: source.sha,
+            pulled: { sha: source.sha },
+            previous: {
+                sha: source.sha,
+                modifiedAt: source.remote.modifiedAt,
+            },
+            dirty: false,
+            path: path,
+            relativePath: this.getRelativePath(path),
+            remote: source.remote,
+            refs: {
+                remote_id: source.id,
+            },
+            state: 'same',
+        });
+    }
+
+    /**
+     * Pull a source file from remote.
+     *
+     * Expects a legacy {id}
+     *
+     */
+    async pullSource(source, path) {
+        return this.downloadSource(source, path).then(async (path) => {
+            // downloaded
+        });
+    }
+
+    async openSketchFile(path) {
+        let fileToOpen = path;
+
+        let doc = await new Promise((resolve, reject) => {
+            try {
+                Document.open(fileToOpen, function (err, document) {
+                    if (err) {
+                        console.error(err);
+                        reject(err);
+                    }
+                    resolve(document);
+                });
+            } catch (error) {
+                console.error(error);
+                reject(error);
+            }
+        });
+
+        return doc;
     }
 
     pushSource(source, target) {
@@ -452,8 +616,8 @@ class Source {
             path: target.path,
             filename: source.filename,
             name: source.filename,
-            id: source.id,
-            id_external: source.id,
+            id: source.refs.remote_id,
+            id_external: source.uuid,
             folder: target.set.path,
             project: target.project.id,
             type: 'source',
@@ -471,23 +635,56 @@ class Source {
 
         return filemanager
             .uploadFile(file, sourceProgress)
-            .then(
-                function (data) {
-                    clearInterval(polling);
-                    file.id = data.id;
-                    if (isWebviewPresent('frontifymain')) {
-                        frontend.send('progress', {
-                            state: 'upload-complete',
-                            status: 'upload-complete',
-                            ...file,
-                        });
-                    }
+            .then(async (data) => {
+                // Payload of the response: {filesize, id, ext, modifier, filename, type, sha, modified, token}
 
-                    filemanager.updateAssetStatus(target.project.id, data);
+                /**
+                 * Legacy date format:  2022-07-20 12:45:52
+                 * New date format:     2022-07-20T12:45:53.000+00:00
+                 *
+                 * Notice the slight difference: the "modifiedAt" returned from GraphQL is 1 second newer.
+                 * We can assume that the time difference between the legacy and new date could be even bigger
+                 * if the processing time takes longer or so.
+                 *
+                 * Although the upload is done through the legacy API v1, further requests to get data go through GraphQL.
+                 * That means that if we want to reliably compare timestamps, we should get them from the same source.
+                 *
+                 * That’s why here, we’ll request the data from GraphQL and copy the "modifiedAt" field to the file.
+                 */
+                let dataFromGraphQL = await this.getAssetForLegacyAssetID(data.id);
+                data.modifiedAt = dataFromGraphQL.modifiedAt;
 
-                    return data;
-                }.bind(this)
-            )
+                clearInterval(polling);
+                file.id = data.id;
+                if (isWebviewPresent('frontifymain')) {
+                    frontend.send('progress', {
+                        state: 'upload-complete',
+                        status: 'upload-complete',
+                        ...file,
+                    });
+                }
+
+                filemanager.updateAssetStatus(target.project.id, data);
+
+                let sha = '' + shaFile(file.path);
+
+                filemanager.updateAssetDatabase({
+                    action: 'pushed',
+                    uuid: file.id_external,
+                    sha: sha,
+                    dirty: false,
+                    previous: {
+                        sha,
+                        modifiedAt: dataFromGraphQL.modifiedAt,
+                    },
+                    pushed: { sha },
+                    remote: {
+                        ...data,
+                    },
+                });
+
+                return data;
+            })
             .catch(
                 function (e) {
                     clearInterval(polling);
@@ -502,17 +699,18 @@ class Source {
             );
     }
 
-    addSource(source, target) {
+    addSource(source, uploadTarget) {
+        console.log('add source', source, uploadTarget);
         return new Promise((resolve, reject) => {
             try {
                 let file = {
-                    path: target.path,
+                    path: uploadTarget.path,
                     filename: source.filename,
                     name: source.filename,
                     id: null,
-                    id_external: source.id,
-                    folder: target.set.path,
-                    project: target.project.id,
+                    id_external: source.uuid, // source id is the Sketch ID
+                    folder: uploadTarget.set.path,
+                    project: uploadTarget.project.id,
                     type: 'source',
                 };
 
@@ -522,12 +720,38 @@ class Source {
                     this.updateUploadProgress(file, sourceProgress);
                 }, 100);
 
+                // This will be the new location of the file
+                let filePath = uploadTarget.path + source.filename;
+
                 filemanager
                     .uploadFile(file, sourceProgress)
-                    .then((data) => {
+                    .then(async (data) => {
                         clearInterval(polling);
                         data.modified = data.created;
-                        filemanager.updateAssetStatus(target.project.id, data);
+                        // filemanager.updateAssetStatus(target.project.id, data);
+
+                        let dataFromGraphQL = await this.getAssetForLegacyAssetID(data.id);
+                        let sha = shaFile(file.path);
+                        filemanager.updateAssetDatabase({
+                            action: 'added',
+                            dirty: false,
+                            filename: source.filename,
+                            path: uploadTarget.path,
+                            uuid: source.uuid,
+                            relativePath: uploadTarget.path,
+                            previous: {
+                                modifiedAt: dataFromGraphQL.modifiedAt,
+                                sha,
+                            },
+                            remote: dataFromGraphQL,
+                            added: {
+                                sha,
+                            },
+                            refs: {
+                                remote_id: data.id,
+                                remote_project_id: uploadTarget.project.id,
+                            },
+                        });
 
                         if (isWebviewPresent('frontifymain')) {
                             frontend.send('progress', {
@@ -570,6 +794,7 @@ class Source {
 
     getCurrentAsset() {
         let currentFilename = this.getCurrentFilename();
+
         return this.getRemoteSourceFiles().then(
             function (assets) {
                 if (!assets) return null;

@@ -20,6 +20,17 @@ export function RecentDocumentsView({ onInput, onChange }) {
     let [activeScope] = useLocalStorage('cache.activeScope', 'colors');
     let [remoteDocuments, setRemoteDocuments] = useState([]);
     let [mergedDocuments, setMergedDocuments] = useState([]);
+    let [trackedDocuments, setTrackedDocuments] = useState([]);
+
+    useEffect(async () => {
+        let { database } = await useSketch('getAssetDatabase');
+
+        let array = Object.keys(database).map((key) => database[key]);
+
+        let sorted = array.sort((a, b) => (a.remote?.modifiedAt < b.remote?.modifiedAt ? 1 : -1));
+        // convert object map to an array
+        setTrackedDocuments(sorted);
+    }, []);
 
     // The recent documents are a global list, including documents across all brands.
     // These are only the recent documents for the current brand only.
@@ -38,9 +49,8 @@ export function RecentDocumentsView({ onInput, onChange }) {
         onInput(document);
     };
     const openSource = async (document) => {
-        setLoading(document.local.uuid);
+        setLoading(document.uuid);
         onChange(document);
-        // await useSketch('openSource', { path: document.local.path });
     };
 
     const redirectToDocument = (document) => {
@@ -66,7 +76,6 @@ export function RecentDocumentsView({ onInput, onChange }) {
         let ids = recentDocumentsForBrand.map((document) => document.refs?.remote_id || null) || [];
 
         if (ids && ids.length) {
-            console.log('send query', ids);
             let query = `{
             assets(ids: [${ids}]) {
               id
@@ -97,7 +106,6 @@ export function RecentDocumentsView({ onInput, onChange }) {
              *
              * This can happen when we try to request assets that don’t belong to this brand.
              */
-            console.log('result from graphql', result);
 
             setRemoteDocuments(result.data.assets);
 
@@ -152,27 +160,23 @@ export function RecentDocumentsView({ onInput, onChange }) {
 
     return (
         <custom-v-stack>
-            {/* Recent Documents */}
-            {mergedDocuments.map((document) => {
-                return (
-                    <SourceFileEntry
-                        document={document}
-                        title={JSON.stringify(document, null, 2)}
-                        key={document.local.uuid}
-                        file={document}
-                        path={
-                            document.local.relativePath?.replace(context.selection?.brand?.name, '') ||
-                            document.local.path
-                        }
-                        name={document.local.filename.replace('.sketch', '')}
-                        loading={loading == document.local.uuid}
-                        onClick={async () => {
-                            await openSource(document);
-                            redirectToDocument(document);
-                        }}
-                    ></SourceFileEntry>
-                );
-            })}
+            {trackedDocuments &&
+                trackedDocuments.map((document) => {
+                    return (
+                        <SourceFileEntry
+                            document={document}
+                            key={document.uuid}
+                            file={document}
+                            path={document.relativePath?.replace(context.selection?.brand?.name, '') || document.path}
+                            name={document.filename?.replace('.sketch', '')}
+                            loading={loading == document.uuid}
+                            onClick={async () => {
+                                await openSource(document);
+                                redirectToDocument(document);
+                            }}
+                        ></SourceFileEntry>
+                    );
+                })}
         </custom-v-stack>
     );
 }

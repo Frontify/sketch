@@ -439,6 +439,15 @@ custom-sync-button[variant='conflict']:hover {
     background: #e1d4be;
 }
 
+/* Variant: Conflict */
+custom-sync-button[variant='error'] {
+    background: #fcf8ee;
+    border-radius: 40px;
+}
+custom-sync-button[variant='error']:hover {
+    background: #e1d4be;
+}
+
 a {
     color: var(--box-selected-strong-color);
     cursor: pointer;

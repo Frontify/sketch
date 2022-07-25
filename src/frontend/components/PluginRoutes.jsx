@@ -20,7 +20,6 @@ import { SourceView } from './Sources/SourceView';
 import { SourcesView } from './Sources/SourcesView';
 import { OpenDocumentsView } from './Sources/OpenDocumentsView';
 import { RecentDocumentsView } from './Sources/RecentDocumentsView';
-import { RemoteDocumentsView } from './Sources/RemoteDocumentsView';
 
 // Context
 import { UserContext } from '../context/UserContext';
@@ -66,7 +65,6 @@ export function PluginRoutes() {
             >
                 <Route path="open" element={<OpenDocumentsView />} />
                 <Route path="recent" element={<RecentDocumentsView />} />
-                <Route path="remote" element={<RemoteDocumentsView />} />
             </Route>
 
             <Route

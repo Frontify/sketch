@@ -1,17 +1,29 @@
 import readJSON from '../helpers/readJSON';
 import writeJSON from '../helpers/writeJSON';
-import fetch from '../helpers/fetch';
 import createFolder from '../helpers/createFolder';
 import target from './target';
+import source from './source';
 import sketch from './sketch';
 import FormData from 'sketch-polyfill-fetch/lib/form-data';
 
 import extend from '../helpers/extend';
 import response from '../helpers/response';
 
-import { ArtboardError } from './error';
+import { Error } from './error';
 
 let sketch3 = require('sketch');
+
+import shaFile from '../helpers/shaFile';
+
+/**
+ * Merge two objects. A bit smarter than Objects.assign(). Can deal with nested keys, too.
+ */
+function merge(a, b) {
+    return Object.entries(b).reduce((o, [k, v]) => {
+        o[k] = v && typeof v === 'object' ? merge((o[k] = o[k] || (Array.isArray(v) ? [] : {})), v) : v;
+        return o;
+    }, a);
+}
 
 class FileManager {
     constructor() {
@@ -23,6 +35,7 @@ class FileManager {
     }
 
     isCurrentSaved() {
+        if (!sketch.getDocument()) return false;
         return !!sketch.getDocument().fileURL();
     }
 
@@ -66,9 +79,11 @@ class FileManager {
     moveCurrent(brand, project, folder) {
         let base = target.getPathToSyncFolderForBrandAndProject(brand, project);
         let path = `${base}/${folder}/`;
+        let relativePath = `/${project.name}/${folder}/`;
 
         if (createFolder(path)) {
             let doc = sketch.getDocument();
+            let selectedDocument = sketch3.Document.getSelectedDocument();
 
             if (doc) {
                 let nsurl = doc.fileURL();
@@ -79,6 +94,17 @@ class FileManager {
 
                 // move to the target folder
                 doc.moveToURL_completionHandler_(newNsurl, null);
+
+                let sha = shaFile(newNsurl);
+
+                this.updateAssetDatabase({
+                    uuid: selectedDocument.id,
+                    path: path + currentFilename,
+                    relativePath: relativePath + currentFilename,
+                    previous: {
+                        sha: sha,
+                    },
+                });
             }
 
             return true;
@@ -97,8 +123,136 @@ class FileManager {
         writeJSON('sources-' + project, status);
     }
 
+    async fetchRemoteState(entry) {
+        // Edge case: Missing API data.
+        // This really should never happen if the plugin is used to manage files.
+
+        if (entry.refs && entry.refs.remote_id) {
+            let remoteData = await source.getAssetForLegacyAssetID(entry.refs.remote_id);
+            return remoteData;
+        }
+
+        // TODO: Save state to database
+    }
+
+    computeSyncState(entry) {
+        // Don’t mutate the state field if the file is not found
+        // File must be relinked first
+        if (entry.state == 'file-not-found') return;
+        let needsPush = false;
+        let needsPull = false;
+
+        if (entry.action == 'pulled' && entry.dirty == false) {
+            return 'same';
+        }
+
+        if (entry.previous && entry.remote) {
+            // Remote hasn’t changed
+            let remoteChanges = entry.previous?.modifiedAt != entry.remote.modifiedAt;
+
+            if (!remoteChanges) {
+                if (entry.dirty || entry.previous.sha != shaFile(entry.path)) {
+                    return 'push';
+                } else {
+                    return 'same';
+                }
+            }
+            if (remoteChanges) {
+                // Remote has changed
+                // Do we have local changes?
+
+                if (entry.dirty) {
+                    needsPush = true;
+                }
+                if (entry.remote?.modifiedAt > entry.previous?.modifiedAt) {
+                    needsPull = true;
+                }
+                if (needsPull && needsPush) {
+                    return 'conflict';
+                }
+                return 'pull';
+            }
+        }
+
+        return entry.state || 'untracked';
+    }
+
+    validateAssetDatabase() {
+        let database = this.getAssetDatabaseFile();
+        Object.keys(database).forEach((uuid) => {
+            let entry = database[uuid];
+
+            if (typeof entry.path == 'string') {
+                try {
+                    if (!NSFileManager.defaultManager().fileExistsAtPath(entry.path)) {
+                        database[uuid].state = 'file-not-found';
+                    }
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+        });
+        this.writeAssetDatabaseFile(database);
+        return database;
+    }
+
+    writeAssetDatabaseFile(database) {
+        writeJSON('database', database);
+    }
+
+    getAssetDatabaseFile() {
+        return readJSON('database');
+    }
+    getAssetDatabase() {
+        return this.validateAssetDatabase();
+    }
+
+    refreshAssetDatabase() {
+        // asset.searchSketchAssetsInProject()
+        // Get API data for all entries
+    }
+
+    async updateAssetDatabase(payload) {
+        if (!payload.uuid) return;
+
+        let database = readJSON('database') || {};
+        let entry = database[payload.uuid] || {};
+
+        // Merge
+        let merged = [{}, entry, payload].reduce(merge);
+
+        // Timestamp
+        merged.timestamp = '' + new Date().toISOString();
+
+        merged.state = this.computeSyncState(merged);
+
+        database[payload.uuid] = merged;
+
+        writeJSON('database', database);
+
+        return merged;
+    }
+
+    async refreshAsset(uuid) {
+        let database = readJSON('database') || {};
+        let entry = database[uuid] || {};
+
+        // Update remote
+        let remote = await this.fetchRemoteState(entry);
+        entry.remote = remote;
+
+        // Update state
+        entry.state = this.computeSyncState(entry);
+
+        // Write updates to disk
+        database[uuid] = entry;
+        writeJSON('database', database);
+        return entry;
+    }
+
     openFile(path) {
-        NSWorkspace.sharedWorkspace().openFile(path);
+        // return NSWorkspace.sharedWorkspace().openFile(path);
+        return NSWorkspace.sharedWorkspace().openFile(path);
     }
 
     deleteFile(path) {
@@ -271,12 +425,12 @@ class FileManager {
 
                         if (error) {
                             finished = true;
-                            return reject(ArtboardError.UNKNOWN);
+                            return reject(Error.UNKNOWN);
                         }
 
                         if (data.length() == 0) {
                             finished = true;
-                            return reject(ArtboardError.ASSET_NOT_FOUND);
+                            return reject(Error.ASSET_NOT_FOUND);
                         }
 
                         return resolve(response(res, data));
@@ -316,21 +470,106 @@ class FileManager {
             );
     }
 
-    downloadScreen(info, overallProgress) {
-        return fetch('/v1/screen/modified/' + info.id).then(
-            function (meta) {
-                this.updateAssetStatus(meta.screen.project, meta.screen);
+    // uri: /v1/...
+    downloadFile(uri, path, overallProgress) {
+        let folder = path.split('/').slice(0, -1).join('/');
 
-                return target.getTarget('sources').then(
-                    function (target) {
-                        if (createFolder(target.path)) {
-                            return this.downloadFile(
-                                { uri: '/v1/screen/download/' + info.id, path: target.path + info.filename },
-                                overallProgress
+        if (!createFolder(folder)) {
+            throw new Error('Could not create folder');
+        }
+
+        // get token
+        let token = readJSON('token');
+        uri = token.domain + uri;
+
+        let options = {
+            method: 'GET',
+            headers: {
+                Authorization: 'Bearer ' + token.access_token,
+            },
+        };
+
+        if (!uri) {
+            return Promise.reject('Missing URL');
+        }
+
+        var fiber;
+        try {
+            fiber = coscript.createFiber();
+        } catch (err) {
+            coscript.shouldKeepAround = true;
+        }
+
+        return new Promise(
+            function (resolve, reject) {
+                var url = NSURL.alloc().initWithString(uri);
+                var request = NSMutableURLRequest.requestWithURL(url);
+                request.setHTTPMethod('GET');
+
+                Object.keys(options.headers || {}).forEach(function (i) {
+                    request.setValue_forHTTPHeaderField(options.headers[i], i);
+                });
+
+                var finished = false;
+
+                var task = NSURLSession.sharedSession().downloadTaskWithRequest_completionHandler(
+                    request,
+                    __mocha__.createBlock_function(
+                        'v32@?0@"NSURL"8@"NSURLResponse"16@"NSError"24',
+                        function (location, res, error) {
+                            let fileManager = NSFileManager.defaultManager();
+                            let targetUrl = NSURL.fileURLWithPath(path);
+
+                            fileManager.replaceItemAtURL_withItemAtURL_backupItemName_options_resultingItemURL_error(
+                                targetUrl,
+                                location,
+                                nil,
+                                NSFileManagerItemReplacementUsingNewMetadataOnly,
+                                nil,
+                                nil
                             );
+                            task.progress().setCompletedUnitCount(100);
+
+                            if (fiber) {
+                                fiber.cleanup();
+                            } else {
+                                coscript.shouldKeepAround = false;
+                            }
+
+                            if (error) {
+                                finished = true;
+                                console.error(error);
+                                return reject(error);
+                            }
+
+                            return resolve(targetUrl.path());
                         }
-                    }.bind(this)
+                    )
                 );
+
+                task.resume();
+
+                if (overallProgress && task) {
+                    overallProgress.addChild_withPendingUnitCount(task.progress(), 10);
+                }
+
+                if (fiber) {
+                    fiber.onCleanup(function () {
+                        if (!finished) {
+                            task.cancel();
+                        }
+                    });
+                }
+            }.bind(this)
+        ).catch(
+            function (e) {
+                if (e.localizedDescription) {
+                    console.error(e.localizedDescription);
+                } else {
+                    console.error(e);
+                }
+
+                throw e;
             }.bind(this)
         );
     }

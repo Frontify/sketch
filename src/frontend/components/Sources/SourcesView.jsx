@@ -4,7 +4,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { UserContext } from '../../context/UserContext';
 
 // Router
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 // Components
 import { Button, Flyout, IconCaretDown, Text } from '@frontify/fondue';
@@ -24,9 +24,7 @@ import { useTranslation } from 'react-i18next';
 
 export function SourcesView() {
     let [loading, setLoading] = useState(false);
-    let [activeSourceScope, setActiveSourceScope] = useLocalStorage('cache.activeSourceScope', 'open');
     let context = useContext(UserContext);
-    let location = useLocation();
     const navigate = useNavigate();
 
     let [openDocuments, setOpenDocuments] = useState([]);
@@ -57,10 +55,10 @@ export function SourcesView() {
      */
 
     const openSource = async (document) => {
-        console.log('open source', document);
         setLoading(true);
-        await useSketch('openSource', { path: document.local.path });
-        context.actions.refresh();
+        await useSketch('openSource', { path: document.path });
+        redirectToDocument();
+        await context.actions.refresh();
         setLoading(false);
     };
 
@@ -68,7 +66,7 @@ export function SourcesView() {
         setLoading(true);
         await useSketch('openSource', { path: document.path.replaceAll('%20', ' ') });
         redirectToDocument();
-        context.actions.refresh();
+        await context.actions.refresh();
         setLoading(false);
     };
 
@@ -116,10 +114,11 @@ export function SourcesView() {
                         </custom-v-stack>
 
                         {openDocuments.length ? (
-                            openDocuments.map((openDocument) => {
+                            openDocuments.map((openDocument, index) => {
                                 return (
                                     <SourceFileEntry
-                                        key={document.id}
+                                        title={context.debug ? JSON.stringify(openDocument, null, 2) : ''}
+                                        key={document.id || index}
                                         document={openDocument}
                                         path={openDocument.normalizedRelativePath}
                                         name={openDocument.name}
@@ -145,17 +144,16 @@ export function SourcesView() {
                             align-items="center"
                         >
                             <Text size="large" weight="strong">
-                                {t('sources.recent_files')}
+                                {t('sources.all_tracked_files')}
                             </Text>
                             <custom-spacer></custom-spacer>
                             <div style={{ marginRight: '-0.5rem' }}>
-                                {' '}
                                 <Flyout
                                     trigger={
                                         <Button inverted="true" size="small">
                                             <custom-h-stack gap="xx-small" align-items="center" padding-x="x-small">
                                                 <Text as="span" size="medium">
-                                                    Modified First
+                                                    Updates First
                                                 </Text>
                                                 <IconCaretDown></IconCaretDown>
                                             </custom-h-stack>

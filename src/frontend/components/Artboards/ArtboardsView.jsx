@@ -177,7 +177,7 @@ function ArtboardGroupItem({ group, uploadGroup, open, onOpen, onClose, requestA
                         ''
                     )}
                     <div style={{ marginRight: '12px', flex: 0 }}>
-                        <Button inverted={false} style="Secondary" solid={false} icon={<IconMore />}></Button>
+                        {/* <Button inverted={false} style="Secondary" solid={false} icon={<IconMore />}></Button> */}
                     </div>
                 </custom-h-stack>
             </custom-h-stack>
@@ -276,7 +276,7 @@ export function ArtboardDestinationItem({
     const frontifyUrl = `${base}/screens/${destination.remote_id}`;
 
     return (
-        <custom-palette-item hover="off" gap="x-small" title={JSON.stringify(destination, null, 2)}>
+        <custom-palette-item hover="off" gap="x-small">
             <custom-h-stack gap="small" align-items="center" padding-x="small">
                 {/* Modified */}
 
@@ -291,12 +291,22 @@ export function ArtboardDestinationItem({
                 </custom-artboard-thumbnail>
 
                 <custom-v-stack gap="xx-small">
-                    <Text
-                        color={destination.selected ? '' : '    '}
-                        weight={destination.selected && transfer?.status != 'upload-complete' ? 'strong' : 'default'}
-                    >
-                        {artboard.name}
-                    </Text>
+                    <custom-h-stack align-items="center" gap="x-small">
+                        <Text
+                            color={destination.selected ? '' : '    '}
+                            weight={
+                                destination.selected && transfer?.status != 'upload-complete' ? 'strong' : 'default'
+                            }
+                        >
+                            {artboard.name}
+                        </Text>
+                        <div show-on-hover="true" cursor="pointer">
+                            <IconExternalLink
+                                title={t('artboards.view_on_frontify')}
+                                onClick={() => openExternal(frontifyUrl)}
+                            />
+                        </div>
+                    </custom-h-stack>
                     <Text
                         size="small"
                         color={destination.selected ? '' : 'weak'}
@@ -803,7 +813,7 @@ export function ArtboardsView() {
              */
             setUploadStatus({
                 status: 'unknown',
-                totalProgress: 0,
+                totalProgress: groups.reduce((total, group) => total + group.transfer?.totalProgress, 0),
                 remaining: groups.reduce((total, group) => total + group.transfer?.remaining, 0),
                 total: groups.reduce((total, group) => total + group.transfer?.total, 0),
                 progress: groups.reduce((total, group) => total + group.transfer?.progress, 0),
@@ -911,7 +921,8 @@ export function ArtboardsView() {
     useEffect(() => {
         let artboardsOnly = Object.keys(context.transferMap).filter((key) => {
             let entry = context.transferMap[key];
-            return entry.type == 'Artboard';
+            // check type (GraphQL) or ext (Legacy API)
+            return entry.type == 'Artboard' || entry.ext == 'png';
         });
 
         if (artboardsOnly.length == 0) setLoading(false);

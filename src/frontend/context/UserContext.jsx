@@ -30,6 +30,7 @@ export const UserContextProvider = ({ children }) => {
         colorMap: {},
         colorPalettes: [],
         currentDocument: {},
+        debug: false,
         guidelines: [],
         lastFetched: null,
         recentDocuments: [],
@@ -44,6 +45,8 @@ export const UserContextProvider = ({ children }) => {
         transferMap: {},
         user: { name: '', id: null, email: null, avatar: null },
     };
+
+    const [debug, setDebug] = useState(blueprints.debug);
     let [tick, setTick] = useState(0);
     let [transferMap, setTransferMap] = useState(blueprints.transferMap);
 
@@ -56,7 +59,7 @@ export const UserContextProvider = ({ children }) => {
             // We’re using the remote_id for identifying the upload item
             // But we might not know the id until the file is uploaded
             // So we might need to use the Sketch artboard ID instead and combine it with the upload folder id?
-            let id = payload.id || payload.id_external;
+            let id = payload?.id || payload?.id_external;
 
             switch (type) {
                 case 'tick':
@@ -419,6 +422,7 @@ export const UserContextProvider = ({ children }) => {
         colorMap,
         colorPalettes,
         currentDocument,
+        debug,
         documents,
         guidelines,
         lastFetched,

@@ -9,7 +9,7 @@ import { isWebviewPresent } from 'sketch-module-web-view/remote';
 import { patchDestinations, setDestinations } from '../windows/actions/getSelectedArtboards';
 import { frontend } from '../helpers/ipc';
 
-import { ArtboardError } from './error';
+import { Error } from './error';
 
 let API = require('sketch');
 let DOM = require('sketch/dom');
@@ -46,7 +46,6 @@ class Artboard {
         }
     }
     failUpload(options, error) {
-        console.log('failing', options, error);
         if (isWebviewPresent('frontifymain')) {
             frontend.send('progress', {
                 state: 'upload-failed',
@@ -634,7 +633,7 @@ class Artboard {
                                                                         console.error(error);
                                                                         this.failUpload(
                                                                             artboard,
-                                                                            ArtboardError.ASSET_NOT_FOUND
+                                                                            Error.ASSET_NOT_FOUND
                                                                         );
                                                                     });
                                                             } else {
@@ -700,7 +699,7 @@ class Artboard {
                                                                     .catch((error) => {
                                                                         this.failUpload(
                                                                             artboard,
-                                                                            ArtboardError.ATTACHMENT_UPLOAD_FAILED
+                                                                            Error.ATTACHMENT_UPLOAD_FAILED
                                                                         );
                                                                     });
                                                             } else {
@@ -726,7 +725,7 @@ class Artboard {
                                     .then(
                                         async function (assetId) {
                                             if (!assetId) {
-                                                throw ArtboardError.ASSET_NOT_FOUND;
+                                                throw Error.ASSET_NOT_FOUND;
                                             }
                                             // start import of asset
                                             try {

@@ -12,6 +12,25 @@ class Project {
             return match.projects;
         });
     }
+    getFilesAndFoldersForProjectAndFolder(legacyProjectID, legacyFolderID) {
+        return new Promise((resolve, reject) => {
+            // browse project
+            let url = '/v1/project/browse/' + legacyProjectID;
+            if (legacyFolderID) {
+                url += '/' + legacyFolderID;
+            }
+
+            fetch(url)
+                .then((result) => {
+                    resolve({
+                        folder: result.folder,
+                        folders: result.folders,
+                        files: result.files,
+                    });
+                })
+                .catch((error) => reject(error));
+        });
+    }
 
     getProjectFolders(project, folder) {
         return new Promise((resolve, reject) => {

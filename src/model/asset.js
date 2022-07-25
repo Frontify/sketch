@@ -11,6 +11,14 @@ import { Document, Image, Style } from 'sketch/dom';
 class Asset {
     constructor() {}
 
+    searchSketchAssetsInProject(projectID) {
+        let url = `v1/assets/status/${projectID}?ext=sketch&depth=999`;
+
+        return fetch(url).then((data) => {
+            return data;
+        });
+    }
+
     searchAssets(type, query) {
         return target.getSelectedAssetSourceForType(type).then(
             function (assetSource) {

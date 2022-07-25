@@ -5,5 +5,11 @@ export default function (key) {
         return null;
     }
 
-    return JSON.parse(NSString.stringWithContentsOfFile_encoding_error(jsContentFilePath, NSUTF8StringEncoding, null));
+    try {
+        return JSON.parse(
+            NSString.stringWithContentsOfFile_encoding_error(jsContentFilePath, NSUTF8StringEncoding, null)
+        );
+    } catch (error) {
+        return {};
+    }
 }

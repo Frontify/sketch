@@ -100,12 +100,7 @@ export function OpenDocumentsView() {
                 <custom-h-stack padding="small" gap="small" align-items="center" justify-content="center">
                     <Flyout
                         trigger={
-                            <Button
-                                style="Secondary"
-                                onClick={() => {
-                                    console.log('click');
-                                }}
-                            >
+                            <Button style="Secondary" onClick={() => {}}>
                                 {t('sources.browse_all')}
                             </Button>
                         }

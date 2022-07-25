@@ -22,6 +22,8 @@ import { useSketch } from '../../hooks/useSketch';
 import { queryGraphQLWithAuth } from '../../graphql/graphql';
 
 export function UploadDestinationPicker({ onChange, onInput, allowfiles = false, paths = [], disabled }) {
+    const useLegacyAPI = true;
+
     let { actions, selection } = useContext(UserContext);
 
     // Loading
@@ -64,14 +66,35 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
 
     // Watch projectID
     useEffect(async () => {
-        if (project) fetchProjectFolders(project);
+        if (!useLegacyAPI) {
+            if (project) fetchProjectFolders(project);
+        }
     }, [project]);
+
+    useEffect(async () => {
+        if (project && folder) loadMoreLegacy();
+    }, [folder]);
 
     // Run this when the currentPage changes
     useEffect(() => {
-        if (folder && currentPage != 0) loadMore();
+        if (!useLegacyAPI) {
+            if (folder && currentPage != 0) loadMore();
+        }
     }, [currentPage]);
 
+    /**
+     * July 21, 2022 (Florian Schulz)
+     *
+     * This method loads more files and folders through the GraphQL API.
+     * It is the preferred method in the future, but it currently has some drawbacks:
+     *
+     * 1. The query is paginated, so we need to make multiple requests
+     * 2. The result is not sorted
+     * 3. The assets do not return the correct modified dates for the latest revision
+     *
+     * The main problem though is that the asset ids are in the new hashed format.
+     * But as long as uploads are done through the v1 API, they require legacy ids.
+     */
     const loadMore = async () => {
         setLoading(true);
 
@@ -125,8 +148,8 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
 
         // 1. Fetch
         let graphQLresult = await queryGraphQLWithAuth({ query, auth: context.auth });
-        let subFolders = graphQLresult.data.node.subFolders;
-        let folderFiles = graphQLresult.data.node.assets;
+        let subFolders = graphQLresult.data?.node?.subFolders;
+        let folderFiles = graphQLresult.data?.node?.assets;
 
         // 2. Concat folders
         let newFolders = folders.concat(subFolders.items);
@@ -160,6 +183,61 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
         } else {
             setLoading(false);
         }
+    };
+
+    /**
+     * This method used the v1 API.
+     *
+     * Why? Because it’s the only way to get the legacy id for an asset.
+     * Why do we need the legacy id? Because we might want to pull the file.
+     * And after pulling? We probably need to push it again.
+     * But because we use the v1 API to upload files, we definitely need the
+     * legacy id. So the only way to pull a file and then push it again is
+     * by pulling it through the old API.
+     *
+     * Alternatives?
+     *
+     * A) Expose legacy id:
+     * GraphQL could give us the legacy id for an asset. That would solve it.
+     *
+     * B) Upload through GraphQL:
+     * We could use a GraphQL Mutation to upload files. But rewriting the code
+     * to asynchronously upload files via Sketch / macOS with the new API
+     * was out of scope.
+     */
+
+    const loadMoreLegacy = async () => {
+        setLoading(true);
+
+        let legacy = await useSketch('getFilesAndFoldersForProjectAndFolder', {
+            legacyProjectID: project.id,
+            legacyFolderID: folder.id,
+        });
+
+        // 2. Concat folders
+        let newFolders = legacy.folders;
+
+        // 3. Sort
+        newFolders = newFolders.sort(function (a, b) {
+            return a.name.localeCompare(b.name, undefined, {
+                numeric: true,
+                sensitivity: 'base',
+            });
+        });
+
+        setFolders(newFolders);
+
+        // 4. Files
+        let newFiles = legacy.files;
+        newFiles = newFiles.sort(function (a, b) {
+            return a?.title?.localeCompare(b?.title, undefined, {
+                numeric: true,
+                sensitivity: 'base',
+            });
+        });
+        setFiles(newFiles);
+
+        setLoading(false);
     };
 
     useEffect(async () => {
@@ -259,7 +337,10 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
             folderPath: [],
             path: '/',
         };
-        fetchProjectFolders(project);
+        if (!useLegacyAPI) {
+            fetchProjectFolders(project);
+        }
+
         setFolder(root);
         setProject(project);
 
@@ -299,7 +380,7 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
             file,
             project,
             breadcrumbs,
-            path: [selection.brand.name, project.name]
+            path: [selection.brand.name, 'Projects', project.name]
                 .concat(breadcrumbs.map((breadcrumb) => breadcrumb.name))
                 .join('/'),
         });
@@ -311,7 +392,7 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
             file,
             project,
             breadcrumbs,
-            path: [selection.brand.name, project.name]
+            path: [selection.brand.name, 'Projects', project.name]
                 .concat(breadcrumbs.map((breadcrumb) => breadcrumb.name))
                 .join('/'),
         });
@@ -413,6 +494,7 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
                             {folders.map((folder) => {
                                 return (
                                     <custom-palette-item
+                                        title={context.debug ? JSON.stringify(folder, null, 2) : ''}
                                         disabled={disabled}
                                         cursor="pointer"
                                         selectable
@@ -430,9 +512,10 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
 
                             {files.map((file) => {
                                 if (file == null) return '';
-                                if (file.extension == 'sketch') {
+                                if (file.ext == 'sketch') {
                                     return (
                                         <custom-palette-item
+                                            title={context.debug ? JSON.stringify(file, null, 2) : ''}
                                             selectable
                                             key={file.id}
                                             tabindex="-1"
@@ -447,22 +530,27 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
                                                 <IconSketch size="Size20"></IconSketch>
                                                 <Text>
                                                     {file.title}
-                                                    <span style={{ opacity: 0.5 }}>.{file.extension}</span>
+                                                    <span style={{ opacity: 0.5 }}>.{file.ext}</span>
                                                 </Text>
                                             </custom-h-stack>
                                         </custom-palette-item>
                                     );
                                 }
 
-                                if (file.extension != 'sketch') {
+                                if (file.ext != 'sketch') {
                                     return (
-                                        <custom-palette-item key={file.id} disabled>
+                                        <custom-palette-item
+                                            key={file.id}
+                                            disabled
+                                            title={context.debug ? JSON.stringify(file, null, 2) : ''}
+                                        >
                                             <custom-h-stack gap="small" align-items="center">
                                                 <IconFile size="Size20"></IconFile>
                                                 <Text>
                                                     {file.title}
-                                                    {file.__typename ? (
-                                                        <span style={{ opacity: 0.5 }}>.{file.extension}</span>
+
+                                                    {file.ext || file.extension ? (
+                                                        <span style={{ opacity: 0.5 }}>.{file.ext}</span>
                                                     ) : (
                                                         ''
                                                     )}

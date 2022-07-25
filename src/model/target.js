@@ -19,6 +19,7 @@ class Target {
 
         if (target.project) {
             let set = readJSON('set-' + target.project) || {};
+
             if (view == 'sources') {
                 target.set = set.set_sources || 0;
             } else {
@@ -29,25 +30,29 @@ class Target {
         return fetch('/v1/info/target', {
             method: 'POST',
             body: JSON.stringify(target),
-        }).then(
-            function (result) {
-                if (result.success == false) {
-                    return false;
-                }
+        })
+            .then(
+                function (result) {
+                    if (result.success == false) {
+                        return false;
+                    }
 
-                delete result.success;
+                    delete result.success;
 
-                result.path =
-                    '' +
-                    NSHomeDirectory() +
-                    '/Frontify/' +
-                    result.brand.name +
-                    '/Projects/' +
-                    result.project.name +
-                    result.set.path;
-                return result;
-            }.bind(this)
-        );
+                    result.path =
+                        '' +
+                        NSHomeDirectory() +
+                        '/Frontify/' +
+                        result.brand.name +
+                        '/Projects/' +
+                        result.project.name +
+                        result.set.path;
+                    return result;
+                }.bind(this)
+            )
+            .catch((error) => {
+                console.error(error);
+            });
     }
 
     getSimpleTarget() {

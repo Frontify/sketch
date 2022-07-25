@@ -18,7 +18,6 @@ export function uploadArtboards({ artboards, brandID }) {
         setSHA(artboard);
 
         artboard.destinations.forEach((destination) => {
-            console.log('queue push', artboard, destination);
             queue.push({
                 id: destination.remote_id, // Frontify ID
                 id_external: artboard.id, // Sketch ID
@@ -34,8 +33,6 @@ export function uploadArtboards({ artboards, brandID }) {
         });
         Artboard.queueUpload(artboard);
     });
-
-    console.log('potential patch');
 
     queue.forEach((entry) => {
         Artboard.queueUpload(entry);

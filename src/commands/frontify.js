@@ -52,7 +52,7 @@ export function openCommand(context) {
 
 export function savedCommand(context) {
     executeSafely(context, function () {
-        source.saved().then(function () {
+        source.saved(context).then(function () {
             refresh();
         });
     });
@@ -85,7 +85,6 @@ function activeDocumentDidChange() {
 
     let newDocument = sketch3.Document.getSelectedDocument();
 
-    console.log('active doc?', oldDocumentID, newDocument.id);
     if (newDocument) {
         let newDocumentID = newDocument.id;
         sketch3.Settings.setSessionVariable(key, newDocumentID);
@@ -188,7 +187,6 @@ function refresh() {
 
     if (isWebviewPresent('frontifymain')) {
         frontend.send('refresh', payload);
-        console.log('sent refresh');
     }
     // Send artboard information, if there is a document
     // If no document is open, then do nothing.

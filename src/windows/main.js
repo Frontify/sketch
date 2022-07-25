@@ -22,8 +22,7 @@ import { frontend } from '../helpers/ipc';
  * For information on the parameters, check the implementation of the
  * function. The parameters are defined using the spread operator.
  */
-import { getSelectedArtboards, removeDestination, removeDestinations } from './actions/getSelectedArtboards';
-import { uploadArtboards } from './actions/uploadArtboards';
+import { addSource, getSelectedArtboards, removeDestination, removeDestinations, uploadArtboards } from './actions/';
 
 import recentFiles from '../model/recent';
 
@@ -141,7 +140,7 @@ export default function (context, view) {
 
     // Load tab if webview ready
     webview.on('did-finish-load', () => {
-        console.log('did-finish-load');
+        // console.log('did-finish-load');
     });
 
     webview.on('did-fail-load', (error) => {
@@ -201,40 +200,6 @@ export default function (context, view) {
         );
     });
 
-    webview.on('openSource', function (data) {
-        source.openSource(data);
-    });
-
-    webview.on('downloadSource', function (data) {
-        source.downloadSource(data);
-    });
-
-    webview.on('pushSource', function (data) {
-        source.pushSource(data);
-    });
-
-    webview.on('pullSource', function (data) {
-        source.pullSource(data);
-    });
-
-    webview.on('addSource', function (data) {
-        source.addSource(data);
-    });
-
-    webview.on('addCurrentFile', function () {
-        source.addCurrentFile();
-    });
-
-    webview.on('moveCurrentFile', function () {
-        if (filemanager.moveCurrent()) {
-            webview.executeJavaScript('refresh()');
-        }
-    });
-
-    webview.on('resolveConflict', function (id) {
-        webview.executeJavaScript('showSourcesConflict(' + id + ')');
-    });
-
     webview.on('showColors', function () {
         view = 'colors';
         color.showColors();
@@ -277,11 +242,6 @@ export default function (context, view) {
         typography.downloadFonts();
     });
 
-    webview.on('online', function () {
-        target.showTarget();
-        webview.executeJavaScript('switchTab("' + view + '")');
-    });
-
     /**
      * Used to hard-refresh using the "refresh" icon in the toolbar of the plugin
      */
@@ -303,13 +263,14 @@ export default function (context, view) {
      */
 
     let actions = {
+        addSource,
         getSelectedArtboards,
         uploadArtboards,
     };
 
     async function handleRequestFromFrontend({ type = '', requestUUID = null, args = {} }) {
         let payload = {};
-        // console.log('request!', new Date().getTime(), type, args, state);
+
         switch (type) {
             case 'addCurrentFile':
                 try {
@@ -320,31 +281,7 @@ export default function (context, view) {
                 }
                 break;
             case 'addSource':
-                try {
-                    let response = await source.addSource(args.source, args.target);
-
-                    if (response.id) {
-                        // Set Asset ID, saved inside the Sketch File
-                        sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'remote_id', response.id);
-
-                        // Set Project ID, saved inside the Sketch File
-                        sketch3.Settings.setDocumentSettingForKey(
-                            sketch.getDocument(),
-                            'remote_project_id',
-                            args.target.project.id
-                        );
-
-                        // Set Brand ID, saved inside the Sketch File
-                        sketch3.Settings.setDocumentSettingForKey(
-                            sketch.getDocument(),
-                            'remote_brand_id',
-                            args.target.brand.id
-                        );
-                    }
-                    payload = { success: true, response };
-                } catch (error) {
-                    payload = { success: false, error };
-                }
+                payload = await actions['addSource'](args);
                 break;
             case 'applyColor':
                 executeSafely(context, () => {
@@ -375,226 +312,79 @@ export default function (context, view) {
             case 'checkout':
                 try {
                     /**
-                     * Step 1: Download the file to the Sync Folder.
+                     * 1. Checkout file
                      */
 
-                    console.log('🎈 Checking out a file…', args);
+                    let base = target.getPathToSyncFolder();
+                    let folder = `${base}/${args.path}`;
+                    let path = `${folder}/${args.source.name}`;
 
-                    var progress = NSProgress.progressWithTotalUnitCount(10);
-                    progress.setCompletedUnitCount(0);
+                    let result = await source.pullSource(args.source, path);
 
-                    // Base + File Path
+                    // Open path
+                    let document = await source.openSketchFile(path);
 
-                    let path = args.path;
+                    let uuid = document.id;
+                    let remoteId = sketch3.Settings.documentSettingForKey(document, 'remote_id');
+                    // If the file has been uploaded through the old plugin, it won’t have an ID stored.
+                    // To make the file savable, we’ll add one.
+                    if (!remoteId) {
+                        sketch3.Settings.setDocumentSettingForKey(document, 'remote_id', args.source.id);
+                    }
 
-                    if (!args.useFullPath) {
-                        let base = target.getPathToSyncFolder();
-                        let folder = `${base}/${args.path}`;
-                        path = `${folder}/${args.file.filename}`;
+                    let remote = await source.getAssetForLegacyAssetID(args.source.id);
 
-                        if (createFolder(folder)) {
-                        } else {
-                            throw new Error('Could not create folder');
+                    source.checkoutSource({ id_external: uuid, ...args.source, remote }, path);
+
+                    payload = { success: true, result };
+                } catch (error) {
+                    console.error(error);
+                    payload = { success: false, error };
+                }
+
+                break;
+
+            case 'getCurrentDocument':
+                try {
+                    let database = filemanager.getAssetDatabase();
+                    let selectedDocument = sketch3.Document.getSelectedDocument();
+                    let entry = database[selectedDocument.id];
+
+                    // Fetch GraphQL
+                    if (entry) {
+                        entry = await filemanager.refreshAsset(entry.uuid);
+                    }
+                    if (!entry) {
+                        if (!filemanager.isCurrentSaved()) {
+                            entry = {
+                                state: 'unsaved',
+                            };
+                        }
+
+                        if (filemanager.isCurrentSaved()) {
+                            let nativeSketchDocument = sketch.getDocument();
+                            let filePath = '' + nativeSketchDocument.fileURL().path();
+                            let base = target.getPathToSyncFolder();
+                            let relativePath = filePath.replace(base + '/', '');
+
+                            entry = {
+                                state: 'untracked',
+                                uuid: selectedDocument.id,
+                                filename: source.getCurrentFilename(),
+                                path: filePath,
+                                relativePath: '⚠️' + relativePath,
+                                sha: '' + shaFile(filePath),
+                            };
                         }
                     }
 
-                    let result = await filemanager.downloadFileToPath(args.file.downloadUrl, path, progress);
+                    // Get the latest remote info:
 
-                    payload = { success: true };
-
-                    /**
-                     * Step 2: Open the file in Sketch
-                     */
-                    // Close file first?
-                    // Todo: Only close the document if it’s the same one that has been checked out (pull / checkout override)
-                    if (sketch.getDocument()) NSDocumentController.sharedDocumentController().currentDocument().close();
-
-                    source.openSourceAtPath(path);
-
-                    /**
-                     * Step 3: Add the file to the Recent Files.
-                     */
-
-                    /**
-                     * Step 4: Write the remote fields "modified" to the file.
-                     */
-
-                    sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'remote_modified', null);
+                    payload = { currentDocument: entry };
                 } catch (error) {
-                    console.log(error);
-                    payload = { success: false, error };
-                }
-                break;
-            case 'getCurrentDocument':
-                /**
-                 * The shape of the returned object.
-                 * We’ll merge local, remote and meta information.
-                 *
-                 * Local:   This is the Sketch file.
-                 * Remote:  This is the asset on Frontify.
-                 * Refs:    This contains information stored inside the Sketch File that can
-                 *          be used to find the corresponding asset on Frontify.
-                 */
-                let currentDocument = {
-                    dirty: false,
-                    state: 'untracked',
-                    local: {
-                        id: '',
-                        filename: '',
-                        path: '',
-                        relativePath: '',
-                        modified: '',
-                    },
-                    remote: {},
-                    refs: {
-                        remote_id: '',
-                        remote_project_id: '',
-                    },
-                };
-
-                let nativeSketchDocument = sketch.getDocument();
-
-                if (!nativeSketchDocument) {
-                    // Flag the payload, so that React knows that there’s no open file
-                    currentDocument.state = 'unsaved';
-                    currentDocument.local = null;
-                    payload = { currentDocument };
-                    break;
+                    console.error(error);
                 }
 
-                let openSketchDocument;
-                try {
-                    openSketchDocument = sketch3.Document.fromNative(nativeSketchDocument);
-                } catch (error) {
-                    console.log(error);
-                }
-
-                let modified = sketch3.Settings.documentSettingForKey(sketch.getDocument(), 'remote_modified');
-
-                /**
-                 * Refs.
-                 *
-                 * This is information (eventually) stored inside the Sketch file.
-                 * This information can be used to find the corresponding asset on Frontify.
-                 */
-
-                currentDocument.refs = {
-                    remote_id: sketch3.Settings.documentSettingForKey(openSketchDocument, 'remote_id'),
-                    remote_project_id: sketch3.Settings.documentSettingForKey(openSketchDocument, 'remote_project_id'),
-                    remote_graphql_id: sketch3.Settings.documentSettingForKey(openSketchDocument, 'remote_graphql_id'),
-                };
-
-                /**
-                 * State.
-                 *
-                 * This is the sync state.
-                 *
-                 */
-
-                function getState(document) {
-                    let { remote, local } = document;
-
-                    if (!document.remote) return 'untracked';
-
-                    let saved = local.id;
-                    let tracked = remote?.id;
-                    let sameFile = local.sha == remote?.sha;
-                    let sameDate = local.modified == remote?.modified;
-                    let ahead = local.modified >= remote?.modified ? 'local' : 'remote';
-                    let conflict = (document.dirty && !sameFile) || (document.dirty && !sameFile && !sameDate);
-
-                    if (!saved) return 'unsaved';
-                    if (!tracked) return 'untracked';
-
-                    if (sameDate && !sameFile) {
-                        return 'push';
-                    }
-
-                    if (sameFile) return 'same';
-
-                    if (sameFile && sameDate) {
-                        return 'same';
-                    }
-
-                    if (conflict) {
-                        return 'conflict';
-                    }
-
-                    if (ahead == 'local' || !local.modified) return 'push';
-                    if (ahead == 'remote') return 'pull';
-
-                    return 'unknown';
-                }
-
-                if (currentDocument.refs.remote_id && currentDocument.refs.remote_project_id) {
-                    console.log('fetching…', currentDocument);
-                    // MARK: Hardcoded project id
-                    let remoteAsset = await source.getRemoteAssetForProjectIDByAssetID(
-                        currentDocument.refs.remote_project_id,
-                        currentDocument.refs.remote_id
-                    );
-
-                    if (remoteAsset) {
-                        currentDocument.remote = remoteAsset;
-                    } else {
-                        currentDocument.remote = null;
-                        // Ooops! Could not find remote asset …
-                        console.warn('No remote asset found', remoteAsset);
-                    }
-                }
-
-                /**
-                 * Local document.
-                 *
-                 * This is information about the document on the file system.
-                 */
-
-                if (!filemanager.isCurrentSaved()) {
-                    currentDocument.state = 'unsaved';
-                }
-
-                if (filemanager.isCurrentSaved()) {
-                    let filePath = '' + nativeSketchDocument.fileURL().path();
-                    let base = target.getPathToSyncFolder();
-                    let relativePath = filePath.replace(base + '/', '');
-
-                    currentDocument.local = {
-                        id: openSketchDocument.id,
-                        filename: source.getCurrentFilename(),
-                        path: filePath,
-                        relativePath,
-                        sha: '' + shaFile(filePath),
-                        modified: modified,
-                    };
-                }
-
-                /**
-                 * Check if the document has a modified date from a previous fetch request.
-                 * If not, then set it by using the remote modified date and store it the file.
-                 * We can later use that information to compare local/remote changes.
-                 *
-                 * Good to know:
-                 *
-                 * The "modified" inside the file will also be mutated in other places, for example,
-                 * after opening a file.
-                 */
-
-                if (!modified || currentDocument.remote?.sha == currentDocument.local?.sha) {
-                    sketch3.Settings.setDocumentSettingForKey(
-                        sketch.getDocument(),
-                        'remote_modified',
-                        currentDocument.remote.modified
-                    );
-                }
-
-                // Dirty
-                currentDocument.dirty = sketch3.Settings.documentSettingForKey(sketch.getDocument(), 'dirty');
-
-                // Sync State
-                currentDocument.state = getState(currentDocument);
-
-                console.log(JSON.stringify(currentDocument, null, 2));
-                payload = { currentDocument };
                 break;
 
             case 'getRecentFiles':
@@ -634,10 +424,25 @@ export default function (context, view) {
                     payload = { success: false, error };
                 }
                 break;
+            case 'getFilesAndFoldersForProjectAndFolder':
+                try {
+                    let { folder, folders, files } = await project.getFilesAndFoldersForProjectAndFolder(
+                        args.legacyProjectID,
+                        args.legacyFolderID
+                    );
+                    payload = { success: true, folder, folders, files };
+                } catch (error) {
+                    console.error(error);
+                    payload = { success: false, error };
+                }
+                break;
+
             case 'getSelectedArtboards':
                 payload = actions['getSelectedArtboards'](args);
                 break;
-
+            case 'getAssetDatabase':
+                payload = { database: filemanager.getAssetDatabase() };
+                break;
             case 'getOpenDocuments':
                 var documents = DOM.getDocuments();
                 payload = { documents };
@@ -717,9 +522,37 @@ export default function (context, view) {
                      * 1. Checkout file
                      */
 
-                    let result = await source.pullSource(args.source);
+                    // Patch the id. Better: use a consistent payload
+                    args.source.id = args.source.refs?.remote_id;
+
+                    let result = await source.pullSource(args.source, args.path);
+
+                    // Close outdated document
+                    let openDocuments = DOM.getDocuments();
+                    openDocuments.forEach((document) => {
+                        if (document.id == args.source.uuid) {
+                            //close
+                            document.close();
+                        }
+                    });
+                    // Open path
+                    let document = await source.openSketchFile(args.path);
+
+                    let uuid = document.id;
+                    let remoteId = sketch3.Settings.documentSettingForKey(document, 'remote_id');
+                    // If the file has been uploaded through the old plugin, it won’t have an ID stored.
+                    // To make the file savable, we’ll add one.
+                    if (!remoteId) {
+                        sketch3.Settings.setDocumentSettingForKey(document, 'remote_id', args.source.id);
+                    }
+
+                    let remote = await source.getAssetForLegacyAssetID(args.source.id);
+
+                    source.checkoutSource({ id_external: uuid, ...args.source, remote }, args.path);
+
                     payload = { success: true, result };
                 } catch (error) {
+                    console.error(error);
                     payload = { success: false, error };
                 }
 

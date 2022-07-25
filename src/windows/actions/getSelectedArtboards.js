@@ -86,7 +86,13 @@ function shaForLayer(layer) {
     // Otherwise, the SHA would be different for a selected / unselected artboard…
     let json = layer.toJSON();
     json.selected = false;
+
+    // Force coordinates, so that moving artboards around doesn’t trigger a change
+    json.frame.x = 0;
+    json.frame.y = 0;
+
     let stringified = JSON.stringify(json);
+
     // We also need to make sure that the "selected" property of any layer is ignored.
     // Otherwise, changing the selection of layers would trigger artboard modification (although nothing has visually changed)
     // Instead of actually deselecting layers recursively, we just replace the text that we use for comparisons.

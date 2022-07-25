@@ -8,24 +8,30 @@ import { UploadDestinationPicker } from '../Core/UploadDestinationPicker';
 
 // Hooks
 import { useSketch } from '../../hooks/useSketch';
+import { useNavigate } from 'react-router-dom';
 
 export function SourcePicker() {
     // Boolean
     const [showDestinationPicker, setShowDestinationPicker] = useState(false);
 
-    // Destinations
-    const [uploadDestination, setUploadDestination] = useState(null);
-    const [temporaryUploadDestination, setTemporaryUploadDestination] = useState(null);
+    const [temporaryFile, setTemporaryFile] = useState({});
 
     // Loading:
     const [loading, setLoading] = useState(false);
 
+    // Router
+    let navigate = useNavigate();
+
     const checkoutSource = async ({ path, file }) => {
         setLoading(true);
-        let { success } = await useSketch('checkout', { path, file });
+
+        let { success } = await useSketch('checkout', { source: file, path });
+
         if (success) {
             setLoading(false);
             setShowDestinationPicker(false);
+            // redirect
+            navigate('/source/artboards');
         }
     };
 
@@ -46,12 +52,11 @@ export function SourcePicker() {
                     </custom-h-stack>
                     <UploadDestinationPicker
                         allowfiles={true}
-                        paths={uploadDestination ? [uploadDestination] : []}
                         onInput={(value) => {
-                            setTemporaryUploadDestination(value);
+                            setTemporaryFile(value);
                         }}
                         onChange={(value) => {
-                            if (value && value.type == 'file' && value.file.extension == 'sketch') {
+                            if (value && value.file?.ext == 'sketch') {
                                 checkoutSource({ path: value.path, file: value.file });
                             }
                         }}
@@ -60,7 +65,7 @@ export function SourcePicker() {
                     <custom-h-stack padding="small" gap="small" separator="top">
                         <Button
                             style="Secondary"
-                            disabled={true || !temporaryUploadDestination}
+                            disabled={true || !temporaryFile}
                             icon={<IconAdd></IconAdd>}
                             onClick={() => {
                                 // onCreateFolder(temporaryUploadDestination);
@@ -72,6 +77,7 @@ export function SourcePicker() {
                         <Button
                             style="Secondary"
                             onClick={() => {
+                                setTemporaryFile(null);
                                 setShowDestinationPicker(false);
                             }}
                         >
@@ -79,16 +85,11 @@ export function SourcePicker() {
                         </Button>
 
                         <Button
-                            disabled={
-                                loading ||
-                                temporaryUploadDestination == null ||
-                                temporaryUploadDestination.type == 'folder' ||
-                                (temporaryUploadDestination.type == 'file' &&
-                                    temporaryUploadDestination.file?.extension != 'sketch')
-                            }
+                            disabled={loading || temporaryFile == null}
                             onClick={() => {
-                                setShowDestinationPicker(false);
-                                setUploadDestination(temporaryUploadDestination);
+                                if (temporaryFile && temporaryFile.file?.ext == 'sketch') {
+                                    checkoutSource({ path: temporaryFile.path, file: temporaryFile.file });
+                                }
                             }}
                         >
                             {!loading && 'Open'}
