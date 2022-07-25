@@ -210,7 +210,7 @@ class Source {
                                     filename: filename,
                                     folder: dir,
                                     path: '',
-                                    sha: shaFile(dir + '/' + filename),
+                                    sha: '' + shaFile(dir + '/' + filename),
                                 };
 
                                 if (filename == currentFilename) {
@@ -397,19 +397,24 @@ class Source {
             refs.remote_graphql_id = id;
         }
 
-        let base = target.getPathToSyncFolder();
-        let path = '' + nativeSketchDocument.fileURL().path();
-        let filename = path.split('/');
-        let relativePath = path.replace(base + '/', '');
+        if (nativeSketchDocument && nativeSketchDocument.fileURL()) {
+            let base = target.getPathToSyncFolder();
+            let path = '' + nativeSketchDocument.fileURL().path();
+            let filename = path.split('/');
+            let relativePath = path.replace(base + '/', '');
 
-        recentFiles.push({
-            uuid: document.id,
-            path,
-            relativePath,
-            filename: filename[filename.length - 1],
-            localModifiedFromRemote: sketch3.Settings.documentSettingForKey(sketch.getDocument(), 'remote_modified'),
-            refs,
-        });
+            recentFiles.push({
+                uuid: document.id,
+                path,
+                relativePath,
+                filename: filename[filename.length - 1],
+                localModifiedFromRemote: sketch3.Settings.documentSettingForKey(
+                    sketch.getDocument(),
+                    'remote_modified'
+                ),
+                refs,
+            });
+        }
     }
     getRelativePath(path) {
         let base = target.getPathToSyncFolder();
@@ -434,7 +439,6 @@ class Source {
 
         let sha = '' + shaFile(filePath);
 
-        frontend.send('document-saved');
         this.pushRecent();
 
         await filemanager.refreshAsset(wrappedDocument.id);
@@ -458,6 +462,8 @@ class Source {
 
         // Mark as dirty, so that it can be pushed
         sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'dirty', true);
+
+        frontend.send('document-saved');
 
         return this.getCurrentAsset().then(async (asset) => {
             if (asset) {
@@ -731,7 +737,7 @@ class Source {
                         // filemanager.updateAssetStatus(target.project.id, data);
 
                         let dataFromGraphQL = await this.getAssetForLegacyAssetID(data.id);
-                        let sha = shaFile(file.path);
+                        let sha = '' + shaFile(file.path);
                         filemanager.updateAssetDatabase({
                             action: 'added',
                             dirty: false,

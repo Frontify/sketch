@@ -81,6 +81,7 @@
             "recent_files": "Recent Files",
             "remote": "Remote",
             "resolve_conflict_link_title": "Learn More",
+            "status_untracked": "Add to Frontify",
             "status_file_not_found": "File Not Found",
             "status_same": "Synced",
             "status_pull": "Pull Changes",

@@ -655,7 +655,10 @@ class Artboard {
                                                                 file
                                                             );
 
-                                                            if (artboardChanged || status.sha != shaFile(file.path)) {
+                                                            if (
+                                                                artboardChanged ||
+                                                                status.sha != '' + shaFile(file.path)
+                                                            ) {
                                                                 let filename;
 
                                                                 if (file.ext === 'json') {

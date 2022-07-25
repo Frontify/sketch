@@ -81,6 +81,7 @@ export function SourcesView() {
             switch (type) {
                 case 'document-closed':
                 case 'document-opened':
+                case 'document-saved':
                     await requestOpenDocuments();
                     break;
             }
@@ -107,11 +108,30 @@ export function SourcesView() {
                     }}
                 >
                     <custom-v-stack style={{ paddingBottom: '1rem' }}>
-                        <custom-v-stack padding="large" style={{ paddingBottom: '1rem' }}>
+                        <custom-h-stack
+                            padding="large"
+                            style={{ paddingBottom: '1rem', paddingRight: '1rem' }}
+                            align-items="center"
+                        >
                             <Text size="large" weight="strong">
                                 Open Files
                             </Text>
-                        </custom-v-stack>
+                            <custom-spacer></custom-spacer>
+                            <div style={{ marginRight: '-0.5rem' }}>
+                                <Flyout
+                                    trigger={
+                                        <Button inverted="true" size="small">
+                                            <custom-h-stack gap="xx-small" align-items="center" padding-x="x-small">
+                                                <Text as="span" size="medium">
+                                                    By Name
+                                                </Text>
+                                                <IconCaretDown></IconCaretDown>
+                                            </custom-h-stack>
+                                        </Button>
+                                    }
+                                ></Flyout>
+                            </div>
+                        </custom-h-stack>
 
                         {openDocuments.length ? (
                             openDocuments.map((openDocument, index) => {

@@ -105,14 +105,22 @@ export function SourceAction({ status, actions, loading }) {
                 />
             );
 
+        default:
         case 'untracked':
             return (
                 <CustomDialog
                     open={showDestinationPicker}
                     trigger={
-                        <custom-sync-button variant="add" onClick={() => setShowDestinationPicker(true)}>
-                            <IconPlus size="Size24" />
-                        </custom-sync-button>
+                        <Tooltip
+                            content={t('sources.status_untracked')}
+                            withArrow
+                            hoverDelay={0}
+                            triggerElement={
+                                <custom-sync-button variant="add" onClick={() => setShowDestinationPicker(true)}>
+                                    <IconPlus size="Size24" />
+                                </custom-sync-button>
+                            }
+                        />
                     }
                 >
                     <custom-v-stack stretch>

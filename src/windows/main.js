@@ -372,7 +372,7 @@ export default function (context, view) {
                                 uuid: selectedDocument.id,
                                 filename: source.getCurrentFilename(),
                                 path: filePath,
-                                relativePath: '⚠️' + relativePath,
+                                relativePath: relativePath,
                                 sha: '' + shaFile(filePath),
                             };
                         }
@@ -449,20 +449,23 @@ export default function (context, view) {
                 break;
             case 'getOpenDocumentsMeta':
                 let openDocuments = DOM.getDocuments();
-                let base = target.getPathToSyncFolder();
+                let database = filemanager.getAssetDatabase();
 
-                let openDocumentsMeta = openDocuments.map((document) => {
-                    let relativePath = document.path.replace(base + '/', '');
-                    return {
-                        id: document.id,
-                        name: relativePath.split('/').pop().replace('.sketch', '').replaceAll('%20', ' '),
-                        path: document.path,
-                        relativePath: relativePath,
-                        normalizedPath: document.path.replaceAll('%20', ' '),
-                        normalizedRelativePath: relativePath.replaceAll('%20', ' '),
-                        remote_modified: sketch3.Settings.documentSettingForKey(document, 'remote_modified'),
-                    };
-                });
+                let openDocumentsMeta = openDocuments
+                    .map((document) => {
+                        let relativePath = source.getRelativePath(document.path);
+                        return {
+                            id: document.id,
+                            name: relativePath.split('/').pop().replace('.sketch', '').replaceAll('%20', ' '),
+                            path: document.path,
+                            relativePath: relativePath,
+                            normalizedPath: document.path.replaceAll('%20', ' '),
+                            normalizedRelativePath: relativePath.replaceAll('%20', ' '),
+                            remote_modified: sketch3.Settings.documentSettingForKey(document, 'remote_modified'),
+                            ...database[document.id],
+                        };
+                    })
+                    .sort((a, b) => (a.name > b.name ? 1 : -1));
                 payload = { documents: openDocumentsMeta };
                 break;
             case 'getAuth':
@@ -497,6 +500,7 @@ export default function (context, view) {
                 }
                 break;
             case 'moveCurrent':
+                console.log('move current');
                 try {
                     await filemanager.moveCurrent(args.brand, args.project, args.folder);
                     payload = { success: true };

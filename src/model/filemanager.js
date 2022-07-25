@@ -79,28 +79,35 @@ class FileManager {
     moveCurrent(brand, project, folder) {
         let base = target.getPathToSyncFolderForBrandAndProject(brand, project);
         let path = `${base}/${folder}/`;
-        let relativePath = `/${project.name}/${folder}/`;
 
         if (createFolder(path)) {
             let doc = sketch.getDocument();
             let selectedDocument = sketch3.Document.getSelectedDocument();
+            let sha = '' + shaFile(selectedDocument.path);
 
             if (doc) {
+                console.log('inside doc');
                 let nsurl = doc.fileURL();
                 let nsPath = nsurl.path();
                 let parts = nsPath.split('/');
                 let currentFilename = parts.pop();
                 let newNsurl = NSURL.fileURLWithPath(path + currentFilename);
 
+                // full path
+                let filePath = path + currentFilename;
+
+                let relativePath = source.getRelativePath(filePath);
+
                 // move to the target folder
                 doc.moveToURL_completionHandler_(newNsurl, null);
 
-                let sha = shaFile(newNsurl);
+                console.log('moved file', filePath, sha);
 
                 this.updateAssetDatabase({
                     uuid: selectedDocument.id,
-                    path: path + currentFilename,
-                    relativePath: relativePath + currentFilename,
+                    path: filePath,
+                    relativePath: relativePath,
+                    sha: sha,
                     previous: {
                         sha: sha,
                     },
@@ -151,7 +158,7 @@ class FileManager {
             let remoteChanges = entry.previous?.modifiedAt != entry.remote.modifiedAt;
 
             if (!remoteChanges) {
-                if (entry.dirty || entry.previous.sha != shaFile(entry.path)) {
+                if (entry.dirty || entry.previous.sha != '' + shaFile(entry.path)) {
                     return 'push';
                 } else {
                     return 'same';
@@ -213,6 +220,7 @@ class FileManager {
     }
 
     async updateAssetDatabase(payload) {
+        console.log(payload);
         if (!payload.uuid) return;
 
         let database = readJSON('database') || {};

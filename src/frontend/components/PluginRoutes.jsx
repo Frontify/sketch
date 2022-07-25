@@ -50,7 +50,7 @@ export function PluginRoutes() {
         navigate('/offline');
     });
     window.addEventListener('online', () => {
-        navigate('/source');
+        navigate('/source/artboards');
     });
     return (
         <Routes>
