@@ -15,12 +15,21 @@ export async function useSketch(type, args) {
 
         window.postMessage('request', { type, requestUUID, args });
 
-        const handler = (event) => {
-            let { type, payload } = event.detail.data;
+        setTimeout(() => {
+            window.removeEventListener('message-from-sketch', handler);
+            reject();
+        }, 60000);
 
-            if (type == 'response' && requestUUID == payload.responseUUID) {
-                window.removeEventListener('message-from-sketch', handler);
-                resolve(payload);
+        const handler = (event) => {
+            if (event.detail?.data) {
+                let { type, payload } = event.detail.data;
+
+                if (type == 'response' && requestUUID == payload.responseUUID) {
+                    window.removeEventListener('message-from-sketch', handler);
+                    resolve(payload);
+                }
+            } else {
+                reject();
             }
         };
 
