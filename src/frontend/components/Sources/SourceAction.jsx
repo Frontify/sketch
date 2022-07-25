@@ -64,26 +64,24 @@ export function SourceAction({ status, actions, loading }) {
                 align-items="center"
                 justify-content="center"
             >
-                {context.transferMap[context.currentDocument.refs?.remote_id] ? (
-                    <Tooltip
-                        content={
-                            <span style={{ fontFeatureSettings: 'tnum' }}>
-                                {`${Math.ceil(
-                                    context.transferMap[context.currentDocument.refs?.remote_id]?.progress
-                                )}%`}
-                            </span>
-                        }
-                        withArrow
-                        hoverDelay={0}
-                        triggerElement={
-                            <div>
-                                <LoadingCircle size="Small"></LoadingCircle>
-                            </div>
-                        }
-                    />
-                ) : (
-                    <LoadingCircle size="Small"></LoadingCircle>
-                )}
+                <Tooltip
+                    content={
+                        <span style={{ fontFeatureSettings: 'tnum' }}>
+                            {context.transferMap[context.currentDocument.refs?.remote_id]
+                                ? `${Math.ceil(
+                                      context.transferMap[context.currentDocument.refs?.remote_id]?.progress
+                                  )}%`
+                                : 'Fetching …'}
+                        </span>
+                    }
+                    withArrow
+                    hoverDelay={0}
+                    triggerElement={
+                        <div>
+                            <LoadingCircle size="Small"></LoadingCircle>
+                        </div>
+                    }
+                />
             </custom-v-stack>
         );
 
@@ -178,7 +176,7 @@ export function SourceAction({ status, actions, loading }) {
                     withArrow
                     hoverDelay={0}
                     triggerElement={
-                        <custom-sync-button variant="same" onClick={() => actions.refresh()}>
+                        <custom-sync-button variant="same" onClick={() => actions.fetchAndRefresh()}>
                             <IconCheckMarkCircle style={{ color: 'var(--box-positive-inverse-color)' }} size="Size24" />
                         </custom-sync-button>
                     }
@@ -192,7 +190,7 @@ export function SourceAction({ status, actions, loading }) {
                     withArrow
                     hoverDelay={0}
                     triggerElement={
-                        <custom-sync-button variant="push" onClick={() => actions.pushSource()}>
+                        <custom-sync-button variant="push" onClick={() => actions.pushSource({ force: false })}>
                             <IconUploadAlternative
                                 style={{ color: 'var(--box-selected-inverse-color)' }}
                                 size="Size24"
@@ -266,14 +264,14 @@ export function SourceAction({ status, actions, loading }) {
                                 border="true"
                                 onClick={() => {
                                     setShowConflictDialog(false);
-                                    actions.pushSource();
+                                    actions.pushSource({ force: true });
                                 }}
                             >
                                 <custom-v-stack gap="small" padding="small">
                                     <custom-h-stack align-items="center" gap="x-small">
                                         <IconUploadAlternative size="Size20"></IconUploadAlternative>
                                         <Text weight="strong" size="large">
-                                            Force Push{' '}
+                                            Force Push
                                         </Text>
                                     </custom-h-stack>
 

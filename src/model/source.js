@@ -425,19 +425,24 @@ class Source {
     }
     async saved(context) {
         let nativeDocument = context.actionContext.document;
+        let wrappedDocument = sketch3.Document.fromNative(context.actionContext.document);
 
         // Is this asset tracked?
-        let isTracked = sketch3.Settings.documentSettingForKey(nativeDocument, 'remote_id');
+        let database = filemanager.getAssetDatabaseFile();
+        let isTracked =
+            sketch3.Settings.documentSettingForKey(wrappedDocument, 'remote_id') || database[wrappedDocument.id];
 
         // Return early
         if (!isTracked) return;
 
-        let wrappedDocument = sketch3.Document.fromNative(context.actionContext.document);
+        console.log(wrappedDocument);
         let filePath = '' + nativeDocument.fileURL().path();
         let filename = filePath.split('/');
         filename = filename[filename.length - 1];
-
+        console.log(filePath);
         let sha = '' + shaFile(filePath);
+
+        console.log(sha);
 
         this.pushRecent();
 
@@ -448,16 +453,10 @@ class Source {
             filename: filename,
             uuid: wrappedDocument.id,
             sha: sha,
-            saved: { sha: sha },
+            saved: { sha: sha, timestamp: '' + new Date().toISOString() },
             dirty: true,
             path: filePath,
             relativePath: this.getRelativePath(filePath),
-            refs: {
-                remote_brand_id: sketch3.Settings.documentSettingForKey(nativeDocument, 'remote_brand_id'),
-                remote_project_id: sketch3.Settings.documentSettingForKey(nativeDocument, 'remote_project_id'),
-                remote_graphql_id: sketch3.Settings.documentSettingForKey(nativeDocument, 'remote_graphql_id'),
-                remote_id: sketch3.Settings.documentSettingForKey(nativeDocument, 'remote_id'),
-            },
         });
 
         // Mark as dirty, so that it can be pushed
@@ -559,7 +558,7 @@ class Source {
      */
     checkoutSource(source, path) {
         // Path formatting
-
+        console.log('prepare to write to database', source, path, source.remote.modifiedAt);
         let filename = path.split('/');
         filename = filename[filename.length - 1];
 
@@ -568,7 +567,7 @@ class Source {
             filename: filename,
             uuid: source.id_external,
             sha: source.sha,
-            pulled: { sha: source.sha },
+            pulled: { sha: source.sha, timestamp: '' + new Date().toISOString() },
             previous: {
                 sha: source.sha,
                 modifiedAt: source.remote.modifiedAt,
@@ -683,7 +682,7 @@ class Source {
                         sha,
                         modifiedAt: dataFromGraphQL.modifiedAt,
                     },
-                    pushed: { sha },
+                    pushed: { sha, timestamp: '' + new Date().toISOString() },
                     remote: {
                         ...data,
                     },
@@ -741,6 +740,7 @@ class Source {
                         filemanager.updateAssetDatabase({
                             action: 'added',
                             dirty: false,
+                            id: data.id,
                             filename: source.filename,
                             path: uploadTarget.path,
                             uuid: source.uuid,

@@ -336,6 +336,8 @@ export default function (context, view) {
 
                     source.checkoutSource({ id_external: uuid, ...args.source, remote }, path);
 
+                    frontend.send('document-pulled');
+
                     payload = { success: true, result };
                 } catch (error) {
                     console.error(error);
@@ -344,16 +346,32 @@ export default function (context, view) {
 
                 break;
 
-            case 'getCurrentDocument':
+            case 'refreshCurrentAsset':
+                console.log('refreshCurrentAsset');
                 try {
-                    let database = filemanager.getAssetDatabase();
+                    let database = filemanager.getAssetDatabaseFile();
                     let selectedDocument = sketch3.Document.getSelectedDocument();
                     let entry = database[selectedDocument.id];
 
                     // Fetch GraphQL
                     if (entry) {
                         entry = await filemanager.refreshAsset(entry.uuid);
+
+                        payload = { success: true, currentDocument: entry };
                     }
+                } catch (error) {
+                    payload = { success: false };
+                }
+
+                break;
+
+            case 'getCurrentDocument':
+                console.log('getCurrentDocument');
+                try {
+                    let database = filemanager.getAssetDatabaseFile();
+                    let selectedDocument = sketch3.Document.getSelectedDocument();
+                    let entry = database[selectedDocument.id];
+
                     if (!entry) {
                         if (!filemanager.isCurrentSaved()) {
                             entry = {

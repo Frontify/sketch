@@ -146,19 +146,16 @@ class FileManager {
         // Don’t mutate the state field if the file is not found
         // File must be relinked first
         if (entry.state == 'file-not-found') return;
+
         let needsPush = false;
         let needsPull = false;
-
-        if (entry.action == 'pulled' && entry.dirty == false) {
-            return 'same';
-        }
 
         if (entry.previous && entry.remote) {
             // Remote hasn’t changed
             let remoteChanges = entry.previous?.modifiedAt != entry.remote.modifiedAt;
 
             if (!remoteChanges) {
-                if (entry.dirty || entry.previous.sha != '' + shaFile(entry.path)) {
+                if (entry.dirty || entry.previous.sha != entry.sha) {
                     return 'push';
                 } else {
                     return 'same';
@@ -220,10 +217,10 @@ class FileManager {
     }
 
     async updateAssetDatabase(payload) {
-        console.log(payload);
+        console.log('updateAssetDatabase', payload);
         if (!payload.uuid) return;
 
-        let database = readJSON('database') || {};
+        let database = this.getAssetDatabaseFile();
         let entry = database[payload.uuid] || {};
 
         // Merge
@@ -236,13 +233,13 @@ class FileManager {
 
         database[payload.uuid] = merged;
 
-        writeJSON('database', database);
+        this.writeAssetDatabaseFile(database);
 
         return merged;
     }
 
     async refreshAsset(uuid) {
-        let database = readJSON('database') || {};
+        let database = this.getAssetDatabaseFile();
         let entry = database[uuid] || {};
 
         // Update remote
@@ -254,7 +251,8 @@ class FileManager {
 
         // Write updates to disk
         database[uuid] = entry;
-        writeJSON('database', database);
+
+        this.writeAssetDatabaseFile(database);
         return entry;
     }
 

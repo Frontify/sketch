@@ -99,7 +99,8 @@ export function NavigationBar() {
         setLoading(false);
     };
 
-    const pushSource = async () => {
+    const pushSource = async ({ force = false }) => {
+        console.log('pushSource');
         setLoading(true);
         setStatus('PUSHING');
         // Set correct local path
@@ -115,25 +116,46 @@ export function NavigationBar() {
             ...context.currentDocument,
         };
 
-        await useSketch('pushSource', { source, target });
-        setStatus('FETCHING');
-        await context.actions.refresh();
-        setStatus('PENDING');
+        /**
+         * It’s possible that a new revision has been uploaded in the meantime.
+         * We need to fetch the latest API data first before pushing.
+         * If we see a new revision, we’ve got a conflict.
+         */
+
+        let { currentDocument } = await useSketch('refreshCurrentAsset');
+
+        if (currentDocument.state == 'push' || force) {
+            await useSketch('pushSource', { source, target });
+            setStatus('FETCHING');
+            await context.actions.refresh();
+            setStatus('PENDING');
+        } else {
+            // Conflict!
+            console.warn('conflict');
+            refresh();
+        }
+
         setLoading(false);
     };
 
     const pullSource = async () => {
         setLoading(true);
         setStatus('PULLING');
+
         // Set correct local path
         target.path = context.currentDocument.path;
 
         await useSketch('pullSource', { source: context.currentDocument, path: context.currentDocument.path });
 
         setStatus('FETCHING');
-        await context.actions.refresh();
+        // await context.actions.refresh();
         setStatus('PENDING');
         setLoading(false);
+    };
+
+    const fetchAndRefresh = async () => {
+        await useSketch('refreshCurrentAsset');
+        refresh();
     };
 
     const refresh = async () => {
@@ -201,6 +223,9 @@ export function NavigationBar() {
                 case 'document-closed':
                 case 'document-opened':
                     console.log('document event');
+                    refresh();
+                    break;
+                case 'document-pulled':
                     refresh();
                     break;
             }
@@ -288,7 +313,7 @@ export function NavigationBar() {
                     <SourceAction
                         style={{ flex: 0 }}
                         status={context.currentDocument.state}
-                        actions={{ pushSource, refresh, publish, pullSource }}
+                        actions={{ pushSource, refresh, fetchAndRefresh, publish, pullSource }}
                         loading={loading}
                     ></SourceAction>
                 )}
@@ -357,7 +382,7 @@ export function NavigationBar() {
                                     aria-label={`Fetch Again`}
                                     onClick={() => {
                                         setOpen(false);
-                                        refresh();
+                                        fetchAndRefresh();
                                     }}
                                 >
                                     <MenuItem decorator={<IconArrowSync />} title={'Fetch Again'}></MenuItem>

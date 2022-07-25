@@ -396,7 +396,7 @@ function ArtboardToolbar({
                     </Button>
                 </custom-h-stack>
             ) : (
-                'Uploading …'
+                'Working …'
             )}
         </custom-h-stack>
     );

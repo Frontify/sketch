@@ -49,6 +49,7 @@
         "@frontify/frontify-authenticator": "^2.0.0",
         "@skpm/builder": "^0.7.7",
         "@skpm/child_process": "^0.4.1",
+        "@skpm/fs": "^0.2.6",
         "@vitejs/plugin-legacy": "^1.6.4",
         "create-hash": "^1.2.0",
         "i18next": "^21.6.11",
