@@ -474,6 +474,7 @@ class FileManager {
 
     // uri: /v1/...
     downloadFile(uri, path, overallProgress) {
+        console.log('download: ', uri, path);
         let folder = path.split('/').slice(0, -1).join('/');
 
         if (!createFolder(folder)) {
@@ -504,6 +505,7 @@ class FileManager {
 
         return new Promise(
             function (resolve, reject) {
+                console.log('inside promise');
                 var url = NSURL.alloc().initWithString(uri);
                 var request = NSMutableURLRequest.requestWithURL(url);
                 request.setHTTPMethod('GET');
@@ -538,11 +540,16 @@ class FileManager {
                                 coscript.shouldKeepAround = false;
                             }
 
+                            if (res.statusCode() == 404) {
+                                return reject('Server responded with status code 404');
+                            }
                             if (error) {
                                 finished = true;
                                 console.error(error);
                                 return reject(error);
                             }
+
+                            console.log('resolve targeturl.path', res, res.statusCode());
 
                             return resolve(targetUrl.path());
                         }

@@ -321,24 +321,28 @@ export default function (context, view) {
 
                     let result = await source.pullSource(args.source, path);
 
-                    // Open path
-                    let document = await source.openSketchFile(path);
+                    if (!result) {
+                        payload = { success: false };
+                    } else {
+                        // Open path
+                        let document = await source.openSketchFile(path);
 
-                    let uuid = document.id;
-                    let remoteId = sketch3.Settings.documentSettingForKey(document, 'remote_id');
-                    // If the file has been uploaded through the old plugin, it won’t have an ID stored.
-                    // To make the file savable, we’ll add one.
-                    if (!remoteId) {
-                        sketch3.Settings.setDocumentSettingForKey(document, 'remote_id', args.source.id);
+                        let uuid = document.id;
+                        let remoteId = sketch3.Settings.documentSettingForKey(document, 'remote_id');
+                        // If the file has been uploaded through the old plugin, it won’t have an ID stored.
+                        // To make the file savable, we’ll add one.
+                        if (!remoteId) {
+                            sketch3.Settings.setDocumentSettingForKey(document, 'remote_id', args.source.id);
+                        }
+
+                        let remote = await source.getAssetForLegacyAssetID(args.source.id);
+
+                        source.checkoutSource({ id_external: uuid, ...args.source, remote }, path);
+
+                        frontend.send('document-pulled');
+
+                        payload = { success: true, result };
                     }
-
-                    let remote = await source.getAssetForLegacyAssetID(args.source.id);
-
-                    source.checkoutSource({ id_external: uuid, ...args.source, remote }, path);
-
-                    frontend.send('document-pulled');
-
-                    payload = { success: true, result };
                 } catch (error) {
                     console.error(error);
                     payload = { success: false, error };

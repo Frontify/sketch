@@ -27,7 +27,15 @@ export function SourcePicker() {
 
         let { success } = await useSketch('checkout', { source: file, path });
 
+        console.log('checked out', success);
+
         if (success) {
+            setLoading(false);
+            setShowDestinationPicker(false);
+            // redirect
+            navigate('/source/artboards');
+        } else {
+            // ERROR: Document was not checked out.
             setLoading(false);
             setShowDestinationPicker(false);
             // redirect

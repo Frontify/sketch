@@ -531,6 +531,9 @@ class Source {
             .downloadFile(uri, path, sourceProgress)
             .then(
                 function (path) {
+                    if (path == null) {
+                        return null;
+                    }
                     clearInterval(polling);
 
                     if (isWebviewPresent('frontifymain')) {
@@ -561,7 +564,7 @@ class Source {
      */
     checkoutSource(source, path) {
         // Path formatting
-        console.log('prepare to write to database', source, path, source.remote.modifiedAt);
+
         let filename = path.split('/');
         filename = filename[filename.length - 1];
 
@@ -595,6 +598,8 @@ class Source {
     async pullSource(source, path) {
         return this.downloadSource(source, path).then(async (path) => {
             // downloaded
+
+            return path;
         });
     }
 
@@ -708,7 +713,6 @@ class Source {
     }
 
     addSource(source, uploadTarget) {
-        console.log('add source', source, uploadTarget);
         return new Promise((resolve, reject) => {
             try {
                 let file = {
