@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 
 // Hooks
 import { useSketch } from '../../hooks/useSketch';
+import { useTranslation } from 'react-i18next';
 
 // Context
 import { UserContext } from '../../context/UserContext';
@@ -10,11 +11,14 @@ import { UserContext } from '../../context/UserContext';
 import { Button, IconCaretDown, IconCaretRight, Flyout, Text, IconMore, MenuItem } from '@frontify/fondue';
 
 import { GuidelineSwitcher } from './GuidelineSwitcher';
+import { EmptyState } from '../Core/EmptyState';
 import { SearchField } from '../Core/SearchField';
 import { Swatch } from './Swatch';
 
 export function TypographyView({ guidelines, palettes }) {
     const { actions, colorMap, selection } = useContext(UserContext);
+
+    const { t } = useTranslation();
 
     useEffect(async () => {
         await actions.fetchGuidelines(selection.brand.id);
@@ -96,13 +100,7 @@ export function TypographyView({ guidelines, palettes }) {
             <custom-line></custom-line>
 
             <custom-scroll-view separator="between">
-                {!filteredPalettes.length ? (
-                    <custom-v-stack padding="small" stretch="true" align-items="center" justify-content="center">
-                        <Text color="weak">No Text Styles</Text>
-                    </custom-v-stack>
-                ) : (
-                    ''
-                )}
+                {!filteredPalettes.length ? <EmptyState title={t('emptyStates.no_textstyles')}></EmptyState> : ''}
                 {filteredPalettes &&
                     filteredPalettes.map((palette) => {
                         return (

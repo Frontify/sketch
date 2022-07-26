@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState } from 'react';
-import { Badge, Switch, Flyout, IconSettings, Button, IconGuidelines, Text } from '@frontify/fondue';
+import { Switch, Flyout, Button, IconGuidelines, Text } from '@frontify/fondue';
 
 export function GuidelineSwitcher({ guidelines, selection, onChange }) {
     const [open, setOpen] = useState(false);

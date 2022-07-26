@@ -66,6 +66,9 @@
             "untitled": "Untitled",
             "uploads": "Uploads"
         },
+        "libraries": {
+            "help": "Drag & drop to place a preview. Double click to place best quality."
+        },
         "sources": {
             "all_tracked_files": "All Tracked Files",
             "browse": "Browse",

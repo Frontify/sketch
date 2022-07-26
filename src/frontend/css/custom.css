@@ -260,7 +260,6 @@ custom-grid-item {
     display: flex;
     border: 1px solid #eaebeb;
     border-radius: 4px;
-    padding: var(--space-s);
 
     height: calc((100vw - 128px) / 3);
     animation: fade-in 0.25s both;
@@ -268,9 +267,21 @@ custom-grid-item {
     -webkit-user-select: none;
     position: relative;
     z-index: 0;
+    padding: var(--space-s);
 
     justify-content: center;
     align-items: center;
+}
+custom-grid-item img {
+    cursor: grab;
+    transition: opacity 0.15s;
+}
+custom-grid-item img:hover {
+    opacity: 0.5 !important;
+}
+
+custom-grid-item:hover {
+    opacity: 0.6;
 }
 
 custom-grid-item:focus {
@@ -493,4 +504,10 @@ custom-combo-field > * + * {
 }
 custom-combo-field .tw-rounded {
     border-radius: 0 !important;
+}
+
+/* Custom status bar */
+custom-status-bar {
+    display: block;
+    background: white;
 }

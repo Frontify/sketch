@@ -31,7 +31,7 @@ import {
 } from '@frontify/fondue';
 
 import { ArtboardToolbar } from './ArtboardToolbar';
-import { EmptyState } from './EmptyState';
+import { EmptyState } from '../Core/EmptyState';
 
 // Hooks
 import { useLocalStorage } from '../../hooks/useLocalStorage';

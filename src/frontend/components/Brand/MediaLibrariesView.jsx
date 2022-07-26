@@ -1,10 +1,15 @@
 import React, { useState, useContext, useEffect } from 'react';
 
 // Components
-import { Dropdown, LoadingCircle, Text } from '@frontify/fondue';
+import { Dropdown, IconQuestionMarkCircle, LoadingCircle, Text, Tooltip } from '@frontify/fondue';
 
+import { EmptyState } from '../Core/EmptyState';
 import { GridView } from './GridView';
+import { LibrariesSwitcher } from './LibrariesSwitcher';
 import { SearchField } from '../Core/SearchField';
+
+// Hooks
+import { useTranslation } from 'react-i18next';
 
 // Context
 import { UserContext } from '../../context/UserContext';
@@ -13,6 +18,9 @@ export function MediaLibrariesView({ type }) {
     const context = useContext(UserContext);
     const [selectedLibrary, setSelectedLibrary] = useState(null);
     const [libraries, setLibraries] = useState([]);
+
+    // i18n
+    const { t, i18n } = useTranslation();
 
     let { actions, auth } = useContext(UserContext);
 
@@ -155,47 +163,43 @@ export function MediaLibrariesView({ type }) {
         setSelectedLibrary(libraries[0]);
     }, [type]);
 
-    if (!libraries.length)
-        return (
-            <custom-v-stack stretch="true" align-items="center" justify-content="center">
-                <Text color="weak">No Libraries</Text>
-            </custom-v-stack>
-        );
+    if (!libraries.length) return <EmptyState title={t('emptyStates.no_libraries')}></EmptyState>;
 
     return (
         <custom-v-stack overflow="hidden" flex>
-            <custom-h-stack padding-x="large" padding-bottom="medium" gap="small">
-                <SearchField
-                    onInput={(value) => {
-                        setQuery(value);
-                    }}
-                    onChange={(value) => {
-                        let newMode = value != '' ? 'search' : 'browse';
-                        reset();
-                        setQuery(value);
-                        loadMore(newMode);
-                    }}
-                    onClear={() => {
-                        setQuery('');
-                        loadMore('browse');
-                    }}
-                ></SearchField>
-                <Dropdown
-                    activeItemId={selectedLibrary.id}
-                    menuBlocks={[
-                        {
-                            ariaLabel: 'First section',
-                            id: 'block1',
-                            menuItems: libraries.map((library) => {
-                                return { id: library.id, title: library.name };
-                            }),
-                        },
-                    ]}
-                    onChange={(id) => {
-                        let library = libraries.find((library) => library.id == id);
-                        setSelectedLibrary(library);
-                    }}
-                ></Dropdown>
+            <custom-h-stack stretch-children padding-x="large" padding-bottom="medium">
+                <custom-combo-field>
+                    <SearchField
+                        onInput={(value) => {
+                            setQuery(value);
+                        }}
+                        onChange={(value) => {
+                            let newMode = value != '' ? 'search' : 'browse';
+                            reset();
+                            setQuery(value);
+                            loadMore(newMode);
+                        }}
+                        onClear={() => {
+                            setQuery('');
+                            loadMore('browse');
+                        }}
+                    ></SearchField>
+
+                    <div style={{ flex: 0 }}>
+                        {libraries.length ? (
+                            <LibrariesSwitcher
+                                type={type}
+                                libraries={libraries}
+                                selection={selectedLibrary}
+                                onChange={(value) => {
+                                    setSelection(value);
+                                }}
+                            ></LibrariesSwitcher>
+                        ) : (
+                            ''
+                        )}
+                    </div>
+                </custom-combo-field>
             </custom-h-stack>
 
             <custom-line></custom-line>
@@ -209,8 +213,19 @@ export function MediaLibrariesView({ type }) {
                 ></GridView>
             </custom-scroll-view>
 
-            <custom-status-bar padding="small" separator="top">
+            <custom-status-bar padding="small" padding-x="large" separator="top">
                 <custom-h-stack align-items="center" justify-content="center">
+                    <Tooltip
+                        position="top"
+                        content={t('libraries.help')}
+                        withArrow
+                        hoverDelay={0}
+                        triggerElement={
+                            <div>
+                                <IconQuestionMarkCircle></IconQuestionMarkCircle>
+                            </div>
+                        }
+                    ></Tooltip>
                     <div style={{ width: '24px' }}></div>
                     {images ? (
                         <custom-h-stack style={{ width: '100%' }} justify-content="center">

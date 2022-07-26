@@ -5,6 +5,8 @@ import { Button, IconCaretDown, IconCaretRight, Text } from '@frontify/fondue';
 
 import { GuidelineSwitcher } from './GuidelineSwitcher';
 import { LoadingIndicator } from '../Core/LoadingIndicator';
+import { EmptyState } from '../Core/EmptyState';
+
 import { SearchField } from '../Core/SearchField';
 import { Swatch } from './Swatch';
 
@@ -13,6 +15,7 @@ import { UserContext } from '../../context/UserContext';
 
 // Hooks
 import { useSketch } from '../../hooks/useSketch';
+import { useTranslation } from 'react-i18next';
 
 export function PalettesView({ palettes, guidelines }) {
     const { actions, selection } = useContext(UserContext);
@@ -20,6 +23,8 @@ export function PalettesView({ palettes, guidelines }) {
     const [filteredPalettes, setFilteredPalettes] = useState(palettes);
 
     const [open, setOpen] = useState(true);
+
+    const { t } = useTranslation();
 
     const onClose = () => {};
     const onOpen = () => {};
@@ -86,13 +91,7 @@ export function PalettesView({ palettes, guidelines }) {
             </custom-h-stack>
             <custom-line></custom-line>
             <custom-scroll-view separator="between">
-                {!filteredPalettes.length ? (
-                    <custom-v-stack padding="small" stretch="true" align-items="center" justify-content="center">
-                        <Text color="weak">No Colors</Text>
-                    </custom-v-stack>
-                ) : (
-                    ''
-                )}
+                {!filteredPalettes.length ? <EmptyState title={t('emptyStates.no_palettes')}></EmptyState> : ''}
                 {filteredPalettes.map((palette) => {
                     if (query == '' || palette.colors.length) {
                         return (
@@ -167,9 +166,7 @@ export function PalettesView({ palettes, guidelines }) {
                                         })}
                                     </custom-v-stack>
                                 ) : (
-                                    <div padding="small">
-                                        <Text color="weak">No colors</Text>
-                                    </div>
+                                    <EmptyState title={t('emptyStates.no_palettes')}></EmptyState>
                                 )}
                             </custom-v-stack>
                         );

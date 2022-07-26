@@ -27,6 +27,14 @@ export function SourceView() {
     let [activeView, setActiveView] = useState('artboards');
     let [activeScope, setActiveScope] = useLocalStorage('cache.activeScope', 'colors');
 
+    useEffect(() => {
+        if (location.pathname.includes('artboards')) {
+            setActiveView('artboards');
+        } else {
+            setActiveView('brand');
+        }
+    }, [location]);
+
     const navigate = useNavigate();
 
     let sliderItems = [
@@ -42,11 +50,11 @@ export function SourceView() {
 
     if (context.user?.name) {
         return (
-            <custom-v-stack stretch>
+            <custom-v-stack stretch padding-top="small">
                 {/* <Toolbar></Toolbar> */}
                 <NavigationBar></NavigationBar>
 
-                <custom-h-stack padding="medium" padding-x="large">
+                <custom-h-stack padding-bottom="medium" padding-top="small" padding-x="large">
                     <Slider
                         items={sliderItems}
                         activeItemId={activeView}

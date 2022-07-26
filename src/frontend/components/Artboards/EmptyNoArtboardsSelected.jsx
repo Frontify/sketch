@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text } from '@frontify/fondue';
-import { EmptyPattern } from './EmptyPattern';
+import { EmptyPattern } from '../Core/EmptyPattern';
 
 export function EmptyNoArtboardsSelected() {
     return (
