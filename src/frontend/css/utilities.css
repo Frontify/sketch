@@ -78,7 +78,7 @@
     padding-bottom: var(--space-l);
 }
 
-/* Padding Botton Utilities */
+/* Padding Bottom Utilities */
 
 [padding-bottom='xx-small'] {
     padding-bottom: var(--space-xxs);
@@ -94,6 +94,24 @@
 }
 [padding-bottom='large'] {
     padding-bottom: var(--space-l);
+}
+
+/* Padding Top Utilities */
+
+[padding-top='xx-small'] {
+    padding-top: var(--space-xxs);
+}
+[padding-top='x-small'] {
+    padding-top: var(--space-xs);
+}
+[padding-top='small'] {
+    padding-top: var(--space-s);
+}
+[padding-top='medium'] {
+    padding-top: var(--space-m);
+}
+[padding-top='large'] {
+    padding-top: var(--space-l);
 }
 
 /* Gap Utilities */

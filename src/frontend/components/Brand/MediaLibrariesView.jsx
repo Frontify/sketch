@@ -39,10 +39,13 @@ export function MediaLibrariesView({ type }) {
 
     // When the {project} prop changes, load fresh data
     useEffect(() => {
+        document.scrollingElement.scrollTop = 0;
         reset();
+        loadMore('browse');
     }, [selectedLibrary]);
 
     const reset = () => {
+        setLoading(false);
         setTotalImages(Infinity);
         setPage(1);
         setImages([]);
@@ -78,6 +81,7 @@ export function MediaLibrariesView({ type }) {
         setImages((state) => {
             if (totalImages == Infinity) return state;
 
+            console.log('will add', Math.min(LIMIT, totalImages - images.length));
             let placeholders = Array(Math.min(LIMIT, totalImages - images.length))
                 .fill(0)
                 .map((entry) => {
@@ -160,7 +164,22 @@ export function MediaLibrariesView({ type }) {
 
     return (
         <custom-v-stack overflow="hidden" flex>
-            <custom-v-stack padding="small" gap="small" separator="bottom">
+            <custom-h-stack padding-x="large" padding-bottom="medium" gap="small">
+                <SearchField
+                    onInput={(value) => {
+                        setQuery(value);
+                    }}
+                    onChange={(value) => {
+                        let newMode = value != '' ? 'search' : 'browse';
+                        reset();
+                        setQuery(value);
+                        loadMore(newMode);
+                    }}
+                    onClear={() => {
+                        setQuery('');
+                        loadMore('browse');
+                    }}
+                ></SearchField>
                 <Dropdown
                     activeItemId={selectedLibrary.id}
                     menuBlocks={[
@@ -177,24 +196,11 @@ export function MediaLibrariesView({ type }) {
                         setSelectedLibrary(library);
                     }}
                 ></Dropdown>
-                <SearchField
-                    onInput={(value) => {
-                        setQuery(value);
-                    }}
-                    onChange={(value) => {
-                        let newMode = value != '' ? 'search' : 'browse';
-                        reset();
-                        setQuery(value);
-                        loadMore(newMode);
-                    }}
-                    onClear={() => {
-                        setQuery('');
-                        loadMore('browse');
-                    }}
-                ></SearchField>
-            </custom-v-stack>
+            </custom-h-stack>
 
-            <custom-scroll-view padding="small" flex>
+            <custom-line></custom-line>
+
+            <custom-scroll-view padding-x="large" padding-top="medium" padding-bottom="small" flex>
                 <GridView
                     images={images}
                     thumbWidth="320"
@@ -208,11 +214,13 @@ export function MediaLibrariesView({ type }) {
                     <div style={{ width: '24px' }}></div>
                     {images ? (
                         <custom-h-stack style={{ width: '100%' }} justify-content="center">
-                            <Text size="x-small">
-                                {selection && selection.length == 1
-                                    ? selection[0].title
-                                    : `${images.length} / ${totalImages}`}
-                            </Text>
+                            {totalImages != Infinity && (
+                                <Text size="x-small">
+                                    {selection && selection.length == 1
+                                        ? selection[0].title
+                                        : `${images.length} / ${totalImages}`}
+                                </Text>
+                            )}
                         </custom-h-stack>
                     ) : (
                         ''

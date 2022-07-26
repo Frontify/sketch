@@ -255,10 +255,11 @@ custom-grid {
 
 custom-grid-item {
     background-image: url(../assets/images/transparent.png);
+    background: white;
     background-size: 8px;
     display: flex;
     border: 1px solid #eaebeb;
-    border-radius: 2px;
+    border-radius: 4px;
     padding: var(--space-s);
 
     height: calc((100vw - 128px) / 3);
@@ -455,4 +456,41 @@ a {
 a[href]:hover,
 a[target]:hover {
     text-decoration: underline;
+}
+
+/* Custom Badge */
+custom-badge {
+    display: inline-block;
+    min-width: 16px;
+    max-width: 24px;
+    border-radius: 48px;
+    background: var(--box-selected-strong-color);
+    color: white;
+}
+
+/* Custom Combo Field */
+custom-combo-field {
+    border: 1px solid rgba(0, 0, 0, 0.16);
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+
+    background: white;
+    gap: var(--space-xxs);
+    justify-content: space-between;
+}
+custom-combo-field:focus-within {
+    /* tw-border-black-90 */
+    border: 1px solid rgba(0, 0, 0, 0.9);
+}
+custom-combo-field > div:first-child {
+    border: none !important;
+    outline: none;
+}
+custom-combo-field > * + * {
+    border-left: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 0 !important;
+}
+custom-combo-field .tw-rounded {
+    border-radius: 0 !important;
 }

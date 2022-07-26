@@ -72,24 +72,26 @@ export function TypographyView({ guidelines, palettes }) {
     return (
         <custom-v-stack overflow="hidden" stretch="true">
             <custom-h-stack stretch-children padding-x="large" padding-bottom="medium">
-                <SearchField
-                    onInput={(value) => {
-                        setQuery(value);
-                    }}
-                ></SearchField>
-                <div style={{ flex: 0 }}>
-                    {guidelines.length ? (
-                        <GuidelineSwitcher
-                            guidelines={guidelines}
-                            selection={selection.guidelines[selection.brand.id]}
-                            onChange={(changedGuidelines) => {
-                                actions.setGuidelinesForBrand(changedGuidelines, selection.brand);
-                            }}
-                        ></GuidelineSwitcher>
-                    ) : (
-                        ''
-                    )}
-                </div>
+                <custom-combo-field>
+                    <SearchField
+                        onInput={(value) => {
+                            setQuery(value);
+                        }}
+                    ></SearchField>
+                    <div style={{ flex: 0 }}>
+                        {guidelines.length ? (
+                            <GuidelineSwitcher
+                                guidelines={guidelines}
+                                selection={selection.guidelines[selection.brand.id]}
+                                onChange={(changedGuidelines) => {
+                                    actions.setGuidelinesForBrand(changedGuidelines, selection.brand);
+                                }}
+                            ></GuidelineSwitcher>
+                        ) : (
+                            ''
+                        )}
+                    </div>
+                </custom-combo-field>
             </custom-h-stack>
             <custom-line></custom-line>
 

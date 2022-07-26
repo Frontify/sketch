@@ -1,21 +1,34 @@
 import React from 'react';
 import { useState } from 'react';
-import { Switch, Flyout, IconSettings, Button, IconGuidelines, Text } from '@frontify/fondue';
+import { Badge, Switch, Flyout, IconSettings, Button, IconGuidelines, Text } from '@frontify/fondue';
 
 export function GuidelineSwitcher({ guidelines, selection, onChange }) {
     const [open, setOpen] = useState(false);
 
     return (
         <Flyout
+            hug={false}
+            fitContent={true}
             isOpen={open}
             onOpenChange={(isOpen) => setOpen(isOpen)}
             legacyFooter={false}
             trigger={
-                <Button icon={<IconGuidelines />} style="Secondary" onClick={() => setOpen((open) => !open)}>
-                    <Text size="x-small">
-                        <nobr>
-                            {selection.length} / {guidelines.length}
-                        </nobr>
+                <Button
+                    border-radius="none"
+                    icon={<IconGuidelines />}
+                    inverted={true}
+                    style="Primary"
+                    onClick={() => setOpen((open) => !open)}
+                >
+                    <Text size="x-small" whitespace="pre">
+                        <custom-h-stack gap="x-small">
+                            <span>Guidelines</span>
+                            {selection.length != guidelines.length ? (
+                                <custom-badge>{selection.length}</custom-badge>
+                            ) : (
+                                ''
+                            )}
+                        </custom-h-stack>
                     </Text>
                 </Button>
             }
