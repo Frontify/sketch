@@ -162,7 +162,12 @@ export function NavigationBar() {
         setStatus('FETCHING');
         await context.actions.getCurrentDocument();
         setStatus('PENDING');
-        setLoading(false);
+
+        // UX: Show the loading spinner for at least some time to get a sense of a working system,
+        // even though the request might be faster
+        setTimeout(() => {
+            setLoading(false);
+        }, 750);
     };
     useEffect(() => {
         // Update the relative time display every minute

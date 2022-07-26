@@ -1,29 +1,24 @@
 import readJSON from './readJSON';
 import extend from '../helpers/extend';
 import fetch from 'sketch-polyfill-fetch';
+import user from '../model/user';
 let sketch3 = require('sketch');
 
 export default function (uri, options) {
     // get token
-    let domain = sketch3.Settings.settingForKey('domain');
-    let access_token = sketch3.Settings.settingForKey('token');
-
-    let token = {
-        domain,
-        access_token,
-    };
+    let { token, domain } = user.getAuthentication();
 
     let defaults = {
         method: 'GET',
         headers: {
-            Authorization: 'Bearer ' + token.access_token,
+            Authorization: 'Bearer ' + token,
         },
     };
 
     options = extend({}, defaults, options);
 
     if (!options.cdn) {
-        uri = token.domain + uri;
+        uri = domain + uri;
     }
 
     return fetch(uri, options)

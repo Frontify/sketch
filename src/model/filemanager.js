@@ -4,6 +4,7 @@ import createFolder from '../helpers/createFolder';
 import target from './target';
 import source from './source';
 import sketch from './sketch';
+import user from './user';
 import FormData from 'sketch-polyfill-fetch/lib/form-data';
 
 import extend from '../helpers/extend';
@@ -268,6 +269,7 @@ class FileManager {
     }
 
     uploadFile(info, overallProgress) {
+        console.log('filemanager.uploadfile', info);
         // remap slashes in filename to folders
         let filenameParts = info.filename.split('/');
         let filename = filenameParts.pop();
@@ -325,19 +327,12 @@ class FileManager {
 
         // get token
 
-        // get token
-        let domain = sketch3.Settings.settingForKey('domain');
-        let access_token = sketch3.Settings.settingForKey('token');
-
-        let token = {
-            domain,
-            access_token,
-        };
+        let { domain, token } = user.getAuthentication();
 
         let defaults = {
             method: 'GET',
             headers: {
-                Authorization: 'Bearer ' + token.access_token,
+                Authorization: 'Bearer ' + token,
             },
         };
 
@@ -347,7 +342,7 @@ class FileManager {
             return Promise.reject('Missing URL');
         }
 
-        uri = token.domain + uri;
+        uri = domain + uri;
 
         var fiber;
         try {
@@ -482,15 +477,19 @@ class FileManager {
         }
 
         // get token
-        let token = readJSON('token');
-        uri = token.domain + uri;
+
+        let { token, domain } = user.getAuthentication();
+
+        uri = domain + uri;
 
         let options = {
             method: 'GET',
             headers: {
-                Authorization: 'Bearer ' + token.access_token,
+                Authorization: 'Bearer ' + token,
             },
         };
+
+        console.log('full uri', uri, options);
 
         if (!uri) {
             return Promise.reject('Missing URL');

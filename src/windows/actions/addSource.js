@@ -3,6 +3,7 @@ let sketch3 = require('sketch');
 import sourceModel from '../../model/source';
 
 export async function addSource({ source, target }) {
+    console.log('addsource');
     try {
         let response = await sourceModel.addSource(source, target);
 

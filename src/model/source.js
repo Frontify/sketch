@@ -50,216 +50,34 @@ class Source {
         }
     }
 
-    getLocalAndRemoteSourceFiles() {
-        return target.getTarget('sources').then(
-            function (target) {
-                // load remote assets status
-                return this.getRemoteSourceFiles().then(
-                    function (assets) {
-                        let sources = [];
-                        // Here we get the cached information about the assets with their modified date etc.
-                        let status = readJSON('sources-' + target.project.id) || { assets: {} };
-                        let alreadyAdded = false;
-
-                        // compare with local status
-                        return this.getLocalSketchFiles(target.path).then(
-                            function (files) {
-                                assets.forEach(
-                                    function (asset) {
-                                        files.forEach(
-                                            function (file) {
-                                                if (file.filename == asset.filename) {
-                                                    file.existing = true;
-
-                                                    // force conflict if the asset has not been downloaded via plugin
-                                                    status.assets[asset.id] = status.assets[asset.id] || {
-                                                        id: asset.id,
-                                                        modified: '0000-00-00 00:00:00',
-                                                        sha: '0',
-                                                    };
-
-                                                    if (asset.sha == file.sha) {
-                                                        // remote file and local file are the same
-                                                        asset.state = 'same';
-                                                    } else if (
-                                                        file.sha != status.assets[asset.id].sha &&
-                                                        asset.modified > status.assets[asset.id].modified
-                                                    ) {
-                                                        // there are local and remote changes
-                                                        asset.state = 'conflict';
-                                                    } else if (asset.modified > status.assets[asset.id].modified) {
-                                                        // there is a newer version of this asset on frontify
-                                                        asset.state = 'pull';
-                                                    } else if (asset.modified <= status.assets[asset.id].modified) {
-                                                        asset.state = 'push';
-                                                    }
-
-                                                    asset.current = file.current;
-
-                                                    if (asset.current) {
-                                                        alreadyAdded = true;
-                                                    }
-                                                }
-                                            }.bind(this)
-                                        );
-
-                                        if (!asset.state) {
-                                            asset.state = 'new';
-                                        }
-
-                                        sources.push(asset);
-                                    }.bind(this)
-                                );
-
-                                files.forEach(
-                                    function (file) {
-                                        if (!file.existing) {
-                                            file.id = '' + NSUUID.UUID().UUIDString();
-                                            file.state = 'addable';
-                                            sources.push(file);
-                                        }
-                                    }.bind(this)
-                                );
-
-                                // sort (order: current, conflict, addable, new, sync, alphabetically
-                                let states = ['conflict', 'addable', 'new', 'push', 'pull', 'same'];
-                                sources.sort(
-                                    function (a, b) {
-                                        let statea = states.indexOf(a.state);
-                                        let stateb = states.indexOf(b.state);
-
-                                        if (a.current) {
-                                            return -1;
-                                        } else if (b.current) {
-                                            return 1;
-                                        } else if (statea < stateb) {
-                                            return -1;
-                                        } else if (statea > stateb) {
-                                            return 1;
-                                        } else {
-                                            return a.filename < b.filename;
-                                        }
-                                    }.bind(this)
-                                );
-
-                                let data = {
-                                    sources: sources,
-                                    target: target,
-                                    already_added: alreadyAdded,
-                                    has_document: !!sketch.getDocument(),
-                                };
-
-                                return data;
-                            }.bind(this)
-                        );
-                    }.bind(this)
-                );
-            }.bind(this)
-        );
-    }
-
-    getRemoteSourceFiles() {
-        return target.getTarget('sources').then(
-            function (target) {
-                if (!target) {
-                    console.warn('No target');
-                    return;
-                }
-
-                return fetch(
-                    '/v1/assets/status/' +
-                        target.project.id +
-                        '?include_screen_activity=true&depth=0&ext=sketch&path=' +
-                        encodeURIComponent(target.set.path)
-                ).then(
-                    function (result) {
-                        let assets = [];
-
-                        for (let id in result.assets) {
-                            if (result.assets.hasOwnProperty(id)) {
-                                let asset = result.assets[id];
-                                asset.localpath = target.path + '/' + asset.filename;
-                                assets.push(asset);
-                            }
-                        }
-
-                        this.assets = assets;
-
-                        return assets;
-                    }.bind(this)
-                );
-            }.bind(this)
-        );
-    }
-
-    getLocalSketchFiles(dir) {
-        return Promise.resolve().then(
-            function () {
-                let files = [];
-                let filenames = NSFileManager.defaultManager().contentsOfDirectoryAtPath_error(dir, null);
-
-                let currentFilename = this.getCurrentFilename();
-
-                if (filenames) {
-                    filenames.forEach(
-                        function (filename) {
-                            filename = '' + filename;
-                            if (filename.endsWith('.sketch')) {
-                                let file = {
-                                    ext: 'sketch',
-                                    filename: filename,
-                                    folder: dir,
-                                    path: '',
-                                    sha: '' + shaFile(dir + '/' + filename),
-                                };
-
-                                if (filename == currentFilename) {
-                                    file.current = true;
-                                }
-
-                                files.push(file);
-                            }
-                        }.bind(this)
-                    );
-                }
-
-                return files;
-            }.bind(this)
-        );
-    }
-
     openSourceAtPath(path) {
         filemanager.openFile(path);
     }
 
-    showSources() {
-        return this.getLocalAndRemoteSourceFiles().then(
-            function (data) {
-                if (isWebviewPresent('frontifymain')) {
-                    // MARK: Removed show sources event
-                    // sendToWebview('frontifymain', 'showSources(' + JSON.stringify(data) + ')');
-                }
-                return true;
-            }.bind(this)
-        );
-    }
-
     opened() {
+        console.log('opened');
         frontend.send('document-opened');
         // Todo: Don’t rely on fetching data here but instead just open the file and resolve it
 
         sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'dirty', false);
         this.pushRecent();
-        return this.getCurrentAsset().then(function (asset) {
-            if (asset) {
-                return fetch('/v1/screen/activity/' + asset.id, {
-                    method: 'POST',
-                    body: JSON.stringify({ activity: 'OPEN' }),
-                });
-            }
 
-            return null;
+        // ‼️ Temporarily disabled Pusher
+
+        return new Promise((resolve, reject) => {
+            resolve();
         });
+
+        // return this.getCurrentAsset().then(function (asset) {
+        //     if (asset) {
+        //         return fetch('/v1/screen/activity/' + asset.id, {
+        //             method: 'POST',
+        //             body: JSON.stringify({ activity: 'OPEN' }),
+        //         });
+        //     }
+
+        //     return null;
+        // });
     }
 
     async getAssetForAssetID(assetID) {
@@ -467,33 +285,46 @@ class Source {
 
         frontend.send('document-saved');
 
-        return this.getCurrentAsset().then(async (asset) => {
-            if (asset) {
-                if (sha != asset.sha) {
-                    let result = await fetch('/v1/screen/activity/' + asset.id, {
-                        method: 'POST',
-                        body: JSON.stringify({ activity: 'LOCAL_CHANGE' }),
-                    });
+        // ‼️ Temporarily disabled Pusher
 
-                    return result;
-                }
-            }
-
-            return null;
+        return new Promise((resolve, reject) => {
+            resolve();
         });
+
+        // return this.getCurrentAsset().then(async (asset) => {
+        //     if (asset) {
+        //         if (sha != asset.sha) {
+        //             let result = await fetch('/v1/screen/activity/' + asset.id, {
+        //                 method: 'POST',
+        //                 body: JSON.stringify({ activity: 'LOCAL_CHANGE' }),
+        //             });
+
+        //             return result;
+        //         }
+        //     }
+
+        //     return null;
+        // });
     }
 
     closed() {
         frontend.send('document-closed');
-        return this.getCurrentAsset().then(function (asset) {
-            if (asset) {
-                return fetch('/v1/screen/activity/' + asset.id, {
-                    method: 'DELETE',
-                });
-            }
 
-            return null;
+        // ‼️ Temporarily disabled Pusher
+
+        return new Promise((resolve, reject) => {
+            resolve();
         });
+
+        // return this.getCurrentAsset().then(function (asset) {
+        //     if (asset) {
+        //         return fetch('/v1/screen/activity/' + asset.id, {
+        //             method: 'DELETE',
+        //         });
+        //     }
+
+        //     return null;
+        // });
     }
 
     updateUploadProgress(options, progress) {
@@ -735,9 +566,11 @@ class Source {
                 // This will be the new location of the file
                 let filePath = uploadTarget.path + source.filename;
 
+                console.log('pass it on to filemanager', file);
                 filemanager
                     .uploadFile(file, sourceProgress)
                     .then(async (data) => {
+                        console.log('then');
                         clearInterval(polling);
                         data.modified = data.created;
                         // filemanager.updateAssetStatus(target.project.id, data);
@@ -806,6 +639,7 @@ class Source {
      */
 
     getCurrentAsset() {
+        console.log('get current asset');
         let currentFilename = this.getCurrentFilename();
 
         return this.getRemoteSourceFiles().then(

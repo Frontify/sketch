@@ -14,6 +14,7 @@ class Target {
     }
 
     getTarget(view) {
+        console.log('get target');
         // load brand and project name
         let target = readJSON('target') || {};
 
@@ -72,6 +73,7 @@ class Target {
     }
 
     getDomain() {
+        console.log('get domain');
         let token = readJSON('token');
 
         if (token && token.domain) {

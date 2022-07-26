@@ -334,8 +334,6 @@ export const UserContextProvider = ({ children }) => {
 
             setRefreshing(true);
 
-            // let { sources } = await useSketch('getLocalAndRemoteSourceFiles');
-
             // setSources(sources.sources);
             setLastFetched(new Date().getTime());
 

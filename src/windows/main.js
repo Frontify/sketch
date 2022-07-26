@@ -281,6 +281,7 @@ export default function (context, view) {
                 }
                 break;
             case 'addSource':
+                console.log('case addSource');
                 payload = await actions['addSource'](args);
                 break;
             case 'applyColor':
@@ -503,6 +504,7 @@ export default function (context, view) {
                 }
                 break;
             case 'getLocalAndRemoteSourceFiles':
+                console.log('getLocalAndRemoteSourceFiles');
                 try {
                     let sources = await source.getLocalAndRemoteSourceFiles();
                     payload = { success: true, sources };
