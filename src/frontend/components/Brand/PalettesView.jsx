@@ -143,7 +143,11 @@ export function PalettesView({ palettes, guidelines }) {
                                     <custom-v-stack>
                                         {palette.colors.map((color) => {
                                             return (
-                                                <custom-palette-item key={color.id} padding-x="large">
+                                                <custom-palette-item
+                                                    key={color.id}
+                                                    padding-x="large"
+                                                    title={JSON.stringify(color, null, 2)}
+                                                >
                                                     <custom-h-stack
                                                         gap="small"
                                                         align-items="center"
@@ -159,7 +163,14 @@ export function PalettesView({ palettes, guidelines }) {
                                                         <Swatch color={color.css_value}></Swatch>
                                                         <Text>{color.name}</Text>
                                                         <custom-spacer></custom-spacer>
-                                                        <Text color="weak">{color.css_value_hex}</Text>
+                                                        <Text color="weak">
+                                                            {color.css_value_hex ||
+                                                                color.css_value
+                                                                    .replace('rgba(', '')
+                                                                    .replace(')', '')
+                                                                    .split(',')
+                                                                    .join(', ')}
+                                                        </Text>
                                                     </custom-h-stack>
                                                 </custom-palette-item>
                                             );
