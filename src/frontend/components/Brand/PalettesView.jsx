@@ -143,11 +143,7 @@ export function PalettesView({ palettes, guidelines }) {
                                     <custom-v-stack>
                                         {palette.colors.map((color) => {
                                             return (
-                                                <custom-palette-item
-                                                    key={color.id}
-                                                    padding-x="large"
-                                                    title={JSON.stringify(color, null, 2)}
-                                                >
+                                                <custom-palette-item key={color.id} padding-x="large">
                                                     <custom-h-stack
                                                         gap="small"
                                                         align-items="center"
