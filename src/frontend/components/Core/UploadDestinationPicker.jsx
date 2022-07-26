@@ -10,7 +10,10 @@ import {
     IconArrowLeft,
     LoadingCircle,
     IconFile,
+    TextInput,
 } from '@frontify/fondue';
+
+import { CustomInlineTextInput } from './CustomInlineTextInput';
 
 // Context
 import { UserContext } from '../../context/UserContext';
@@ -21,7 +24,16 @@ import { useSketch } from '../../hooks/useSketch';
 // GraphQL
 import { queryGraphQLWithAuth } from '../../graphql/graphql';
 
-export function UploadDestinationPicker({ onChange, onInput, allowfiles = false, paths = [], disabled }) {
+export function UploadDestinationPicker({
+    onChange,
+    onInput,
+    allowfiles = false,
+    paths = [],
+    disabled,
+    createFolder = false,
+    onCreateFolder = () => {},
+    onCancelCreateFolder = () => {},
+}) {
     const useLegacyAPI = true;
 
     let { actions, selection } = useContext(UserContext);
@@ -37,6 +49,9 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
     let [folders, setFolders] = useState([]);
     let [files, setFiles] = useState([]);
     let [folder, setFolder] = useState(null);
+    let [temporaryNewFolderName, setTemporaryNewFolderName] = useState('New Folder');
+    let [newFolderName, setNewFolderName] = useState('');
+
     let [breadcrumbs, setBreadcrumbs] = useState([]);
 
     // Pagination
@@ -45,6 +60,24 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
     const [projectMap, setProjectMap] = useState({});
 
     let context = useContext(UserContext);
+
+    const createNewFolder = async (name) => {
+        if (name != null && name != '') {
+            await onCreateFolder({
+                project: project.id,
+                folder: folder.id,
+                name: name,
+            });
+            // load more?
+            setFiles([]);
+            setFolders([]);
+            loadMoreLegacy();
+        } else {
+            // cancel
+            setTemporaryNewFolderName('New Folder');
+            onCancelCreateFolder();
+        }
+    };
 
     useEffect(() => {
         if (paths && paths.length) {
@@ -509,6 +542,18 @@ export function UploadDestinationPicker({ onChange, onInput, allowfiles = false,
                                     </custom-palette-item>
                                 );
                             })}
+                            {createFolder && (
+                                <custom-palette-item selectable tabindex="-1">
+                                    <custom-h-stack gap="small" align-items="center">
+                                        <IconFolder size="Size20"></IconFolder>
+                                        <CustomInlineTextInput
+                                            value={temporaryNewFolderName}
+                                            onInput={(value) => setTemporaryNewFolderName(value)}
+                                            onChange={(value) => createNewFolder(value)}
+                                        ></CustomInlineTextInput>
+                                    </custom-h-stack>
+                                </custom-palette-item>
+                            )}
 
                             {files.map((file) => {
                                 if (file == null) return '';

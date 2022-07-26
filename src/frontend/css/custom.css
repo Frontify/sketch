@@ -208,8 +208,6 @@ custom-palette-item {
 
 custom-palette-item * {
     cursor: default;
-    user-select: none;
-    -webkit-user-select: none;
 }
 custom-palette-item:not([hover='off']):hover {
     background: rgba(0, 0, 0, 0.04);
@@ -228,7 +226,8 @@ custom-palette-item:hover [show-on-hover='true'] {
     opacity: 1;
 }
 
-custom-palette-item[selectable]:focus {
+custom-palette-item[selectable]:focus,
+custom-palette-item[selectable]:focus-within {
     box-shadow: inset 0 0 0 2px var(--box-selected-strong-color);
     outline: none;
     color: white;
@@ -237,6 +236,7 @@ custom-palette-item[selectable]:focus {
 custom-palette-item[selectable]:focus * {
     color: white;
 }
+
 custom-palette-item[border='true'] {
     border: 1px solid rgba(0, 0, 0, 0.12);
     border-radius: 8px;
@@ -510,4 +510,21 @@ custom-combo-field .tw-rounded {
 custom-status-bar {
     display: block;
     background: white;
+}
+
+/* Custom Input Field */
+
+input[variant='naked'] {
+    border: none;
+    color: initial;
+    font-size: 14px;
+    width: 100%;
+}
+input[variant='naked']:focus {
+    outline: none;
+    color: initial;
+}
+
+[figures='tabular'] {
+    font-feature-settings: 'tnum';
 }

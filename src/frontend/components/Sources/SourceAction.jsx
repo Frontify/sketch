@@ -57,6 +57,13 @@ export function SourceAction({ status, actions, loading }) {
         useSketch('openUrl', { url });
     };
 
+    // create folder
+    const [createFolder, setCreateFolder] = useState(false);
+
+    const onCreateFolder = async (folder) => {
+        await useSketch('createFolder', folder);
+    };
+
     if (loading || context.refreshing)
         return (
             <custom-v-stack
@@ -66,11 +73,11 @@ export function SourceAction({ status, actions, loading }) {
             >
                 <Tooltip
                     content={
-                        <span style={{ fontFeatureSettings: 'tnum' }}>
+                        <span figures="tabular" style={{ fontSize: '14px' }}>
                             {context.transferMap[context.currentDocument.refs?.remote_id]
                                 ? `${Math.ceil(
                                       context.transferMap[context.currentDocument.refs?.remote_id]?.progress
-                                  )}%`
+                                  )} %`
                                 : 'Fetching …'}
                         </span>
                     }
@@ -126,6 +133,14 @@ export function SourceAction({ status, actions, loading }) {
                             <Text weight="strong">Publish on Frontify</Text>
                         </custom-h-stack>
                         <UploadDestinationPicker
+                            createFolder={createFolder}
+                            onCreateFolder={async (folder) => {
+                                setCreateFolder(false);
+                                await onCreateFolder(folder);
+                            }}
+                            onCancelCreateFolder={() => {
+                                setCreateFolder(false);
+                            }}
                             allowfiles={false}
                             paths={uploadDestination ? [uploadDestination] : []}
                             onInput={(value) => {
@@ -138,10 +153,10 @@ export function SourceAction({ status, actions, loading }) {
                         <custom-h-stack padding="small" gap="small" separator="top">
                             <Button
                                 style="Secondary"
-                                disabled={true || !temporaryUploadDestination}
+                                disabled={!temporaryUploadDestination}
                                 icon={<IconAdd></IconAdd>}
                                 onClick={() => {
-                                    onCreateFolder(temporaryUploadDestination);
+                                    setCreateFolder(true);
                                 }}
                             >
                                 New folder

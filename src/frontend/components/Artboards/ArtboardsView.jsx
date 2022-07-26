@@ -9,21 +9,14 @@ import {
     IconCaretDown,
     IconCheck,
     IconExternalLink,
-    IconFolder,
     IconMore,
     IconArrowUp,
     IconCircle,
     IconUploadAlternative,
-    LoadingCircle,
     MenuItem,
     Text,
     IconAddSimple,
-    IconCollapse,
-    IconExpand,
-    IconUnknown,
     IconUnknownSimple,
-    IconCross,
-    IconTrash,
     IconMinusCircle,
     IconAlert,
     Tooltip,
@@ -619,15 +612,6 @@ export function ArtboardsView() {
         uploadArtboards(someArtboards);
     };
 
-    const onCreateFolder = async (folder) => {
-        let payload = {
-            project: folder.project.id,
-            folder: folder.folderPath,
-            name: 'New Folder',
-        };
-        let response = await useSketch('createFolder', payload);
-    };
-
     const uploadGroup = (group) => {
         uploadSome([group]);
     };
@@ -1080,7 +1064,6 @@ export function ArtboardsView() {
                     loading={loading}
                     projectMap={projectMap}
                     usedFolders={usedFolders}
-                    onCreateFolder={onCreateFolder}
                     modifiedArtboards={modifiedArtboards}
                     withDestinationPicker={hasSelection}
                     showRecentDestinations={showRecentDestinations}

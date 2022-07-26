@@ -38,7 +38,6 @@ ArtboardToolbar.propTypes = {
     hasSelection: PropTypes.bool,
     loading: PropTypes.bool,
     modifiedArtboards: PropTypes.array,
-    onCreateFolder: PropTypes.func,
     projectMap: PropTypes.object,
     setShowDestinationPicker: PropTypes.func,
     setShowRecentDestinations: PropTypes.func,
@@ -58,7 +57,7 @@ function ArtboardToolbar({
     artboards,
     hasSelection,
     loading,
-    onCreateFolder,
+
     canCancel,
     onCancel,
     modifiedArtboards = [],
@@ -81,6 +80,13 @@ function ArtboardToolbar({
 
     const [sortedUsedFolders, setSortedUsedFolders] = useState([]);
     const [temporaryUploadDestination, setTemporaryUploadDestination] = useState(null);
+
+    // create folder
+    const [createFolder, setCreateFolder] = useState(false);
+
+    const onCreateFolder = async (folder) => {
+        await useSketch('createFolder', folder);
+    };
 
     // Translation
     let { t } = useTranslation();
@@ -210,14 +216,22 @@ function ArtboardToolbar({
                                             onChange={(value) => {
                                                 setUploadDestination(value);
                                             }}
+                                            createFolder={createFolder}
+                                            onCreateFolder={async (folder) => {
+                                                setCreateFolder(false);
+                                                await onCreateFolder(folder);
+                                            }}
+                                            onCancelCreateFolder={() => {
+                                                setCreateFolder(false);
+                                            }}
                                         ></UploadDestinationPicker>
                                         <custom-h-stack padding="small" gap="small" separator="top">
                                             <Button
                                                 style="Secondary"
-                                                disabled={true || !temporaryUploadDestination}
+                                                disabled={!temporaryUploadDestination}
                                                 icon={<IconAdd></IconAdd>}
                                                 onClick={() => {
-                                                    onCreateFolder(temporaryUploadDestination);
+                                                    setCreateFolder(true);
                                                 }}
                                             >
                                                 New folder

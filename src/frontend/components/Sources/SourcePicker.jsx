@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 
 // Components
 import { Button, IconAdd, LoadingCircle, Text } from '@frontify/fondue';
@@ -10,7 +10,12 @@ import { UploadDestinationPicker } from '../Core/UploadDestinationPicker';
 import { useSketch } from '../../hooks/useSketch';
 import { useNavigate } from 'react-router-dom';
 
+// Context
+import { UserContext } from '../../context/UserContext';
+
 export function SourcePicker() {
+    const context = useContext(UserContext);
+
     // Boolean
     const [showDestinationPicker, setShowDestinationPicker] = useState(false);
 
@@ -18,6 +23,13 @@ export function SourcePicker() {
 
     // Loading:
     const [loading, setLoading] = useState(false);
+
+    // create folder
+    const [createFolder, setCreateFolder] = useState(false);
+
+    const onCreateFolder = async (folder) => {
+        await useSketch('createFolder', folder);
+    };
 
     // Router
     let navigate = useNavigate();
@@ -59,6 +71,14 @@ export function SourcePicker() {
                         <custom-spacer></custom-spacer>
                     </custom-h-stack>
                     <UploadDestinationPicker
+                        createFolder={createFolder}
+                        onCreateFolder={async (folder) => {
+                            setCreateFolder(false);
+                            await onCreateFolder(folder);
+                        }}
+                        onCancelCreateFolder={() => {
+                            setCreateFolder(false);
+                        }}
                         allowfiles={true}
                         onInput={(value) => {
                             setTemporaryFile(value);
@@ -70,17 +90,18 @@ export function SourcePicker() {
                         }}
                         disabled={loading}
                     ></UploadDestinationPicker>
-                    <custom-h-stack padding="small" gap="small" separator="top">
-                        <Button
-                            style="Secondary"
-                            disabled={true || !temporaryFile}
-                            icon={<IconAdd></IconAdd>}
-                            onClick={() => {
-                                // onCreateFolder(temporaryUploadDestination);
-                            }}
-                        >
-                            New folder
-                        </Button>
+                    <custom-h-stack padding="small" gap="small" separator="top" align-items="center">
+                        {loading ? (
+                            <custom-h-stack gap="small" align-items="center">
+                                <LoadingCircle size="Small"></LoadingCircle>
+                                <span figures="tabular" style={{ fontSize: '14px' }}>
+                                    {Math.ceil(context.transferMap[temporaryFile?.file?.id]?.progress || 0)} %
+                                </span>
+                            </custom-h-stack>
+                        ) : (
+                            ''
+                        )}
+
                         <custom-spacer></custom-spacer>
                         <Button
                             style="Secondary"

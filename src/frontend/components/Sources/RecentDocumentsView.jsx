@@ -29,6 +29,7 @@ export function RecentDocumentsView({ onInput, onChange }) {
 
         let sorted = array.sort((a, b) => (a.remote?.modifiedAt < b.remote?.modifiedAt ? 1 : -1));
         // convert object map to an array
+
         setTrackedDocuments(sorted);
     }, []);
 
