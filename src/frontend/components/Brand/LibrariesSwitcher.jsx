@@ -46,7 +46,7 @@ export function LibrariesSwitcher({ libraries, selection, onChange }) {
                                     }}
                                 >
                                     <MenuItem
-                                        active={selection.id == library.id}
+                                        active={selection?.id == library.id}
                                         selectionIndicator="Check"
                                         title={library.name}
                                     >

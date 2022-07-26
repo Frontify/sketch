@@ -20,6 +20,7 @@
             "blacklisted": "Please use your dedicated Frontify domain.",
             "connection": "Connection failed. Are you connected to the internet?",
             "domain": "Something doesn’t seem right with your domain.",
+            "error": "Oh no, something broke.",
             "get_access_token": "We could not sign you in. Did you grant access too long ago?",
             "poll_access_token": "We could not sign you in. Did you already grant access in your browser?",
             "upload_failed": "Upload Failed"

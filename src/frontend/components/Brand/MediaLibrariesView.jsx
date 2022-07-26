@@ -62,6 +62,7 @@ export function MediaLibrariesView({ type }) {
     // Depending on the {newMode}, we’ll load more assets, either by
     // either using {loadMediaLibrary} or {searchMediaLibrary}.
     const loadMore = async (newMode) => {
+        if (!selectedLibrary) return;
         let nextPage = page;
         if (newMode != mode) {
             setPage(1);
@@ -89,7 +90,6 @@ export function MediaLibrariesView({ type }) {
         setImages((state) => {
             if (totalImages == Infinity) return state;
 
-            console.log('will add', Math.min(LIMIT, totalImages - images.length));
             let placeholders = Array(Math.min(LIMIT, totalImages - images.length))
                 .fill(0)
                 .map((entry) => {
@@ -156,12 +156,27 @@ export function MediaLibrariesView({ type }) {
         setSelection(selection);
     }
 
+    const selectLibrary = (library) => {
+        context.actions.setLibrariesForBrand({
+            ...context.selection.libraries,
+            [type]: library,
+        });
+        reset();
+    };
+
     // React to changes of the library type
-    useEffect(() => {
-        let libraries = context.actions.getLibrariesByType(type);
+    useEffect(async () => {
+        let libraries = await context.actions.getLibrariesByType(type);
+
         setLibraries(libraries);
-        setSelectedLibrary(libraries[0]);
-    }, [type]);
+
+        setSelectedLibrary(
+            context.selection.libraries && context.selection.libraries[type]
+                ? context.selection.libraries[type]
+                : libraries[0]
+        );
+        reset();
+    }, [type, context.selection.libraries]);
 
     if (!libraries.length) return <EmptyState title={t('emptyStates.no_libraries')}></EmptyState>;
 
@@ -192,7 +207,7 @@ export function MediaLibrariesView({ type }) {
                                 libraries={libraries}
                                 selection={selectedLibrary}
                                 onChange={(value) => {
-                                    setSelection(value);
+                                    selectLibrary(value);
                                 }}
                             ></LibrariesSwitcher>
                         ) : (

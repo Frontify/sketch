@@ -7,8 +7,8 @@ import { Badge } from '@frontify/fondue';
 import { useNavigate, Outlet } from 'react-router-dom';
 
 // Context
-import { useState, useEffect } from 'react';
-
+import { useState, useEffect, useContext } from 'react';
+import { UserContext } from '../../context/UserContext';
 // i18n
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 
@@ -40,7 +40,13 @@ const libraryScopes = [
 export function BrandView() {
     let [activeScope, setActiveScope] = useLocalStorage('cache.activeScope', 'colors');
 
+    const context = useContext(UserContext);
+
     const navigate = useNavigate();
+
+    useEffect(async () => {
+        await context.actions.getUser(context.auth);
+    }, []);
 
     /**
      * Scope buttons for each library type

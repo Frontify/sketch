@@ -40,6 +40,7 @@ export const UserContextProvider = ({ children }) => {
             brand: null,
             document: null,
             guidelines: {},
+            libraries: {},
         },
         textStylePalettes: [],
         transferMap: {},
@@ -305,7 +306,6 @@ export const UserContextProvider = ({ children }) => {
         // todo: Isn’t getCurrentDocument() == refresh() ?
         async getCurrentDocument(force = false) {
             if (refreshing && !force) {
-                console.warn('Still refreshing…');
                 return;
             }
 
@@ -321,7 +321,6 @@ export const UserContextProvider = ({ children }) => {
         },
         async refresh(payload) {
             if (refreshing) {
-                console.warn('Still refreshing…');
                 return;
             }
 
@@ -362,6 +361,14 @@ export const UserContextProvider = ({ children }) => {
             });
             setGuidelines([...guidelines]);
         },
+        setLibrariesForBrand(libraries, brand) {
+            setSelection((state) => {
+                return {
+                    ...state,
+                    libraries,
+                };
+            });
+        },
         setAuth(authData) {
             if (authData) {
                 setAuth(authData);
@@ -396,9 +403,13 @@ export const UserContextProvider = ({ children }) => {
 
                         setBrands(data.brands);
 
-                        actions.selectBrand(selection.brand || data.brands[0]);
+                        let selectedBrand = selection.brand
+                            ? data.brands.find((brand) => brand.id == selection.brand.id)
+                            : data.brands[0];
 
-                        resolve();
+                        actions.selectBrand(selectedBrand);
+
+                        resolve(data);
                     } catch (error) {
                         console.error(error);
                     }
