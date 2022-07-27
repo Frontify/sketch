@@ -647,6 +647,18 @@ export default function (context, view) {
                     }
                 }
                 break;
+            case 'revealFrontifyFolder':
+                let brand = args.brand;
+                let base = target.getPathToSyncFolder();
+                let path = brand ? `${base}/${brand.name}` : base;
+                if (createFolder(path)) {
+                    try {
+                        NSWorkspace.sharedWorkspace().openFile(path);
+                    } catch (error) {
+                        console.log(error);
+                    }
+                }
+                break;
             case 'setBrand':
                 try {
                     let id = args.brand?.id;
