@@ -1,5 +1,5 @@
 export default function (key, data, path) {
-    let jsContent = JSON.stringify(data);
+    let jsContent = JSON.stringify(data, null, 2);
     let jsContentNSSString = NSString.stringWithFormat('%@', jsContent);
     let jsFolderPath = path || '' + NSHomeDirectory() + '/Frontify/.config/';
     let jsContentFilePath = jsFolderPath + key + '.json';
