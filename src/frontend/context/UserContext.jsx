@@ -184,9 +184,7 @@ export const UserContextProvider = ({ children }) => {
                 return palette;
             });
 
-            setColorMap(colors);
-
-            resolve(palettes);
+            resolve({ palettes, colors });
         });
     }
 
@@ -278,18 +276,22 @@ export const UserContextProvider = ({ children }) => {
                 });
 
                 let guidelineTextStylePalettes = [];
+                let guidelineColors = {};
 
                 // Fetch Text Style Palettes
                 Promise.all(
                     guidelines.map(async (guideline) => {
-                        let palettes = await getTextStylePalettesForGuideline(guideline);
+                        let { palettes, colors } = await getTextStylePalettesForGuideline(guideline);
                         palettes = palettes.map((palette) => {
                             return { ...palette, project: guideline.project_id };
                         });
 
                         guidelineTextStylePalettes = guidelineTextStylePalettes.concat(palettes);
+
+                        guidelineColors = { ...guidelineColors, ...colors };
                     })
                 ).then(() => {
+                    setColorMap(guidelineColors);
                     setTextStylePalettes((state) => {
                         return [...guidelineTextStylePalettes];
                     });

@@ -129,12 +129,16 @@ export function PalettesView({ palettes, guidelines }) {
                                             <Text color="weak" size="small" overflow="ellipsis" whitespace="nowrap">
                                                 {palette.project_name}
                                             </Text>
-                                            <Text color="weak">
-                                                <span style={{ opacity: 0.5 }}>/</span>
-                                            </Text>
-                                            <Text size="small" overflow="ellipsis" whitespace="nowrap">
-                                                {palette.name}
-                                            </Text>
+                                            {palette.name && (
+                                                <custom-h-stack gap="x-small" overflow="hidden">
+                                                    <Text color="weak">
+                                                        <span style={{ opacity: 0.5 }}>/</span>
+                                                    </Text>
+                                                    <Text size="small" overflow="ellipsis" whitespace="nowrap">
+                                                        {palette.name}
+                                                    </Text>
+                                                </custom-h-stack>
+                                            )}
                                         </custom-h-stack>
                                     </custom-breadcrumbs>
                                 </custom-h-stack>
