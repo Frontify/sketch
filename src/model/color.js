@@ -20,7 +20,7 @@ class Color {
 
         selection.layers.forEach((layer) => {
             if (layer.layers) {
-                let children = layer.layers();
+                let children = layer.layers;
                 children.forEach((child) => {
                     this.applyColorToLayer(child, color);
                 });
