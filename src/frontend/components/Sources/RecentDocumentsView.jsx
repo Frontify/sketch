@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 
 // Components
-import { IconSketch, Text, LoadingCircle } from '@frontify/fondue';
+import { Text, LoadingCircle } from '@frontify/fondue';
 import { SourceFileEntry } from './SourceFileEntry';
 
 // Context
@@ -13,30 +13,14 @@ import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-// GraphQL
-import { queryGraphQLWithAuth } from '../../graphql/graphql';
-
 export function RecentDocumentsView({ onInput, onChange, trackedDocuments }) {
-    let [activeScope] = useLocalStorage('cache.activeScope', 'colors');
-    let [remoteDocuments, setRemoteDocuments] = useState([]);
-    let [mergedDocuments, setMergedDocuments] = useState([]);
-
     let context = useContext(UserContext);
     let navigate = useNavigate();
 
-    // The recent documents are a global list, including documents across all brands.
-    // These are only the recent documents for the current brand only.
-    let [recentDocumentsForBrand, setRecentDocumentsForBrand] = useState([]);
-
     let [loading, setLoading] = useState('');
-
-    let { sources } = useContext(UserContext);
 
     const { t } = useTranslation();
 
-    const focusSource = (document) => {
-        onInput(document);
-    };
     const openSource = async (document) => {
         setLoading(document.uuid);
         onChange(document);
@@ -49,80 +33,6 @@ export function RecentDocumentsView({ onInput, onChange, trackedDocuments }) {
     useEffect(() => {
         useSketch('requestUpdate');
     }, []);
-
-    useEffect(() => {
-        if (context.selection?.brand?.id) {
-            setRecentDocumentsForBrand(() => {
-                return context.recentDocuments.filter((doc) => doc.refs?.remote_brand_id == context.selection.brand.id);
-            });
-        }
-    }, [context.recentDocuments]);
-
-    useEffect(async () => {
-        // Query GraphQL
-        setLoading(true);
-
-        let ids = recentDocumentsForBrand.map((document) => document.refs?.remote_id || null) || [];
-
-        if (ids && ids.length) {
-            let query = `{
-            assets(ids: [${ids}]) {
-              id
-              title
-              createdAt
-              creator {
-                name
-                email
-              }
-              modifiedAt
-              modifier {
-                  name
-                  email
-              }
-              ...on File {
-                downloadUrl
-              }
-              
-            }
-          }`;
-
-            let result = await queryGraphQLWithAuth({ query, auth: context.auth });
-
-            /**
-             * Here we might get errors:
-             *
-             * >>> message: "policy 'assets style guide' not fulfilled"
-             *
-             * This can happen when we try to request assets that don’t belong to this brand.
-             */
-
-            setRemoteDocuments(result.data.assets);
-
-            let merged = [];
-
-            // Todo: This doesn’t work. Local files don’t know the GraphQL ID...
-            const localFileForGraphQLID = (id) => {
-                // Todo: ID is an index, but we should find an ID if we have it.
-                return (
-                    recentDocumentsForBrand.find((doc) => doc.refs.remote_graphql_id == id) ||
-                    recentDocumentsForBrand[id]
-                );
-            };
-            if (result.data?.assets) {
-                result.data.assets.forEach((document, index) => {
-                    merged.push({
-                        remote: document,
-                        local: localFileForGraphQLID(index),
-                    });
-                });
-            }
-
-            merged = merged.sort((a, b) => (a.remote.modifiedAt < b.remote.modifiedAt ? 1 : -1));
-            setMergedDocuments(merged);
-        }
-
-        setLoading(false);
-    }, [recentDocumentsForBrand]);
 
     if (!trackedDocuments) {
         return (
