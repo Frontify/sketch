@@ -199,11 +199,13 @@ class FileManager {
     }
 
     writeAssetDatabaseFile(database) {
-        writeJSON('database', database);
+        let id = target.getValueForKey('brand');
+        writeJSON(`brand-${id}`, database);
     }
 
     getAssetDatabaseFile() {
-        return readJSON('database');
+        let id = target.getValueForKey('brand');
+        return readJSON(`brand-${id}`) || {};
     }
     getAssetDatabase() {
         return this.validateAssetDatabase();

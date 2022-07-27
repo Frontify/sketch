@@ -281,7 +281,6 @@ export default function (context, view) {
                 }
                 break;
             case 'addSource':
-                console.log('case addSource');
                 payload = await actions['addSource'](args);
                 break;
             case 'applyColor':
@@ -504,7 +503,6 @@ export default function (context, view) {
                 }
                 break;
             case 'getLocalAndRemoteSourceFiles':
-                console.log('getLocalAndRemoteSourceFiles');
                 try {
                     let sources = await source.getLocalAndRemoteSourceFiles();
                     payload = { success: true, sources };
@@ -651,7 +649,9 @@ export default function (context, view) {
                 break;
             case 'setBrand':
                 try {
-                    target.setBrand(args.brandID);
+                    let id = args.brand?.id;
+                    target.setBrand(id);
+                    frontend.send('brand-changed');
                 } catch (error) {
                     console.error(error);
                 }
