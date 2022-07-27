@@ -421,7 +421,7 @@ export default function (context, view) {
             case 'createFolder':
                 try {
                     console.log(args);
-                    let response = await project.addFolder2({ ...args });
+                    let response = await project.addFolder({ ...args });
                     payload = { success: true, response };
                 } catch (error) {
                     payload = { success: false, error };
@@ -647,6 +647,13 @@ export default function (context, view) {
                     } catch (error) {
                         console.log(error);
                     }
+                }
+                break;
+            case 'setBrand':
+                try {
+                    target.setBrand(args.brandID);
+                } catch (error) {
+                    console.error(error);
                 }
                 break;
             case 'uploadArtboards':
