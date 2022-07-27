@@ -6,6 +6,27 @@ import notification from './notification';
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
 
 class Target {
+    readTarget() {
+        return readJSON('target') || {};
+    }
+    writeTarget(value) {
+        writeJSON('target', value);
+    }
+    getValueForKey(key) {
+        let target = this.readTarget();
+        return target[key];
+    }
+    setValueForKey(key, value) {
+        let target = this.readTarget();
+        target[key] = value;
+        this.writeTarget(target);
+    }
+    setBrand(brandID) {
+        this.setValueForKey('brand', brandID);
+    }
+    getBrand() {
+        readJSON('target');
+    }
     getPathToSyncFolder() {
         return `${NSHomeDirectory()}/Frontify`;
     }
@@ -73,7 +94,6 @@ class Target {
     }
 
     getDomain() {
-        console.log('get domain');
         let token = readJSON('token');
 
         if (token && token.domain) {

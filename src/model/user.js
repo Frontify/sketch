@@ -2,6 +2,7 @@ import fetch from '../helpers/fetch';
 import notification from './notification';
 
 import { Settings } from 'sketch';
+import target from './target';
 
 let threadDictionary = NSThread.mainThread().threadDictionary();
 
@@ -41,6 +42,11 @@ class User {
     logout() {
         // Previously, the API endpoint "logout" was called but we’ve removed it.
         return new Promise((resolve, reject) => {
+            // File based storage
+            target.setValueForKey('domain', null);
+            target.setValueForKey('token', null);
+
+            // Sketch storage
             Settings.setSettingForKey('domain', null);
             Settings.setSettingForKey('token', null);
 
@@ -54,6 +60,11 @@ class User {
     }
 
     login(data) {
+        // File based storage
+        target.setValueForKey('domain', data.domain);
+        target.setValueForKey('token', data.access_token);
+
+        // Sketch storage
         Settings.setSettingForKey('domain', data.domain);
         Settings.setSettingForKey('token', data.access_token);
         return Promise.resolve().then(
