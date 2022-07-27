@@ -112,6 +112,8 @@ export const UserContextProvider = ({ children }) => {
         };
     }, []);
 
+    let [errors, setErrors] = useState([]);
+
     let [currentDocument, setCurrentDocument] = useState(blueprints.currentDocument);
     let [lastFetched, setLastFetched] = useState(blueprints.lastFetched);
 
@@ -342,11 +344,10 @@ export const UserContextProvider = ({ children }) => {
             setRefreshing(false);
         },
         selectBrand(brand) {
-            useSketch('setBrand', { brandID: brand.id });
+            useSketch('setBrand', { brand });
             setSelection((state) => {
                 return { ...state, brand };
             });
-            // window.postMessage('reload');
         },
         setGuidelinesForBrand(guidelines, brand) {
             setSelection((state) => {
@@ -383,13 +384,34 @@ export const UserContextProvider = ({ children }) => {
             setAuth(blueprints.auth);
             setUser(blueprints.user);
             setBrands(blueprints.brands);
+
+            actions.selectBrand(null);
+        },
+        clearErrors() {
+            setErrors([]);
+        },
+        handleError({ title, description }) {
+            setErrors((state) => [...state, { title, description }]);
         },
         async getUser(credentials) {
             return new Promise(async (resolve, reject) => {
                 if (credentials && credentials.domain && credentials.token) {
                     try {
-                        let { data, errors } = await queryGraphQLWithAuth({ query: userQuery, auth: credentials });
-
+                        console.log('await query');
+                        let data = null;
+                        let errors = null;
+                        try {
+                            let response = await queryGraphQLWithAuth({ query: userQuery, auth: credentials });
+                            data = response.data;
+                            errors = response.errors;
+                        } catch (error) {
+                            this.handleError({
+                                title: 'Error',
+                                description: 'Could not load data about you and your brands from the API.',
+                            });
+                            reject();
+                        }
+                        console.log('done query');
                         if (errors) {
                             console.error(
                                 'Could not load user data from GraphQL, because errors were returned',
@@ -412,11 +434,13 @@ export const UserContextProvider = ({ children }) => {
 
                         resolve(data);
                     } catch (error) {
+                        console.log('oops');
                         console.error(error);
                     }
                 } else {
                     reject('Not authenticated');
                 }
+                reject();
             });
         },
     };
@@ -436,6 +460,7 @@ export const UserContextProvider = ({ children }) => {
         currentDocument,
         debug,
         documents,
+        errors,
         guidelines,
         lastFetched,
         refreshing,
