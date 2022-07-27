@@ -14,6 +14,7 @@ import {
 } from '@frontify/fondue';
 
 import { CustomInlineTextInput } from './CustomInlineTextInput';
+import { EmptyState } from '../Core/EmptyState';
 
 // Context
 import { UserContext } from '../../context/UserContext';
@@ -23,6 +24,7 @@ import { useSketch } from '../../hooks/useSketch';
 
 // GraphQL
 import { queryGraphQLWithAuth } from '../../graphql/graphql';
+import { t } from 'i18next';
 
 export function UploadDestinationPicker({
     onChange,
@@ -444,12 +446,7 @@ export function UploadDestinationPicker({
     /**
      * Case 2: No projects exist for this user
      */
-    if (projects.length == 0)
-        return (
-            <custom-v-stack align-items="center" justify-content="center" stretch>
-                <Text>No Projects</Text>
-            </custom-v-stack>
-        );
+    if (projects.length == 0) return <EmptyState title={t('emptyStates.no_projects')}></EmptyState>;
 
     /**
      * Case 3: No project has been selected

@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 
 // Context
 import { UserContext } from '../../context/UserContext';
+import { t } from 'i18next';
 
 export function SourcePicker() {
     const context = useContext(UserContext);
@@ -39,8 +40,6 @@ export function SourcePicker() {
 
         let { success } = await useSketch('checkout', { source: file, path });
 
-        console.log('checked out', success);
-
         if (success) {
             setLoading(false);
             setShowDestinationPicker(false);
@@ -48,6 +47,8 @@ export function SourcePicker() {
             navigate('/source/artboards');
         } else {
             // ERROR: Document was not checked out.
+
+            context.actions.handleError({ title: t('error.checkout_failed') });
             setLoading(false);
             setShowDestinationPicker(false);
             // redirect
@@ -56,7 +57,7 @@ export function SourcePicker() {
     };
 
     return (
-        <div stretch-height="true" style={{ height: '100%' }} padding="large">
+        <div stretch-height="true" style={{ height: '100%' }} padding-x="large" padding-y="medium">
             <CustomDialog
                 open={showDestinationPicker}
                 trigger={

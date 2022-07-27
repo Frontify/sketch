@@ -9,6 +9,9 @@ body {
 #root {
     height: 100%;
 }
+#window {
+    height: 100%;
+}
 
 /* 
     # Pseudo Custom Element Styles:

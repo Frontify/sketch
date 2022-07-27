@@ -179,38 +179,42 @@ export function SourcesView() {
                             })
                         ) : (
                             <custom-v-stack padding-y="medium" padding-x="large">
-                                <Text color="weak">{t('sources.no_open_documents')}</Text>
+                                <Text color="weak">{t('sources.no_open_files')}</Text>
                             </custom-v-stack>
                         )}
                     </custom-v-stack>
 
                     <custom-line></custom-line>
 
-                    <custom-v-stack>
-                        <custom-h-stack
-                            padding="large"
-                            style={{ paddingBottom: '1rem', paddingRight: '1rem' }}
-                            align-items="center"
-                        >
-                            <Text size="large" weight="strong">
-                                {t('sources.all_tracked_files')}
-                            </Text>
-                            <custom-spacer></custom-spacer>
-                            <div style={{ marginRight: '-0.5rem' }}>
-                                <Flyout
-                                    trigger={
-                                        <Button inverted="true" size="small">
-                                            <custom-h-stack gap="xx-small" align-items="center" padding-x="x-small">
-                                                <Text as="span" size="medium">
-                                                    Updates First
-                                                </Text>
-                                                <IconCaretDown></IconCaretDown>
-                                            </custom-h-stack>
-                                        </Button>
-                                    }
-                                ></Flyout>
-                            </div>
-                        </custom-h-stack>
+                    <custom-v-stack flex>
+                        {trackedDocuments.length ? (
+                            <custom-h-stack
+                                padding="large"
+                                style={{ paddingBottom: '1rem', paddingRight: '1rem' }}
+                                align-items="center"
+                            >
+                                <Text size="large" weight="strong">
+                                    {t('sources.all_tracked_files')}
+                                </Text>
+                                <custom-spacer></custom-spacer>
+                                <div style={{ marginRight: '-0.5rem' }}>
+                                    <Flyout
+                                        trigger={
+                                            <Button inverted="true" size="small">
+                                                <custom-h-stack gap="xx-small" align-items="center" padding-x="x-small">
+                                                    <Text as="span" size="medium">
+                                                        Updates First
+                                                    </Text>
+                                                    <IconCaretDown></IconCaretDown>
+                                                </custom-h-stack>
+                                            </Button>
+                                        }
+                                    ></Flyout>
+                                </div>
+                            </custom-h-stack>
+                        ) : (
+                            ''
+                        )}
 
                         <RecentDocumentsView
                             trackedDocuments={trackedDocuments}

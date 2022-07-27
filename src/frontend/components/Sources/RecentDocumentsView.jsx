@@ -3,6 +3,7 @@ import React, { useContext, useEffect, useState } from 'react';
 // Components
 import { Text, LoadingCircle } from '@frontify/fondue';
 import { SourceFileEntry } from './SourceFileEntry';
+import { EmptyState } from '../Core/EmptyState';
 
 // Context
 import { UserContext } from '../../context/UserContext';
@@ -50,9 +51,10 @@ export function RecentDocumentsView({ onInput, onChange, trackedDocuments }) {
             );
         } else {
             return (
-                <custom-v-stack flex padding-y="medium" padding-x="large">
-                    <Text color="weak">{t('sources.no_recent_documents')}</Text>
-                </custom-v-stack>
+                <EmptyState
+                    title={t('sources.no_tracked_files_title')}
+                    description={t('sources.no_tracked_files_description')}
+                ></EmptyState>
             );
         }
     }
