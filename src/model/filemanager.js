@@ -144,6 +144,7 @@ class FileManager {
         // Don’t mutate the state field if the file is not found
         // File must be relinked first
         if (entry.state == 'file-not-found') return;
+        if (entry.refs && !entry.remote) return 'asset-not-found';
 
         let needsPush = false;
         let needsPull = false;
@@ -243,6 +244,12 @@ class FileManager {
 
         // Update remote
         let remote = await this.fetchRemoteState(entry);
+
+        // asset no longer exists
+        if (!remote) {
+            console.log('remote no longer exists');
+            // entry.refs = {};
+        }
         entry.remote = remote;
 
         // Update state

@@ -26,7 +26,7 @@ export function SourceFileEntry({ document, file, path = '', name, onClick, load
         >
             <custom-h-stack align-items="center" gap="large">
                 <IconSketch size="Size24" style={{ flexShrink: 0 }}></IconSketch>
-                <custom-h-stack style={{ width: '100%' }} gap="x-small">
+                <custom-h-stack style={{ width: '100%' }} gap="x-small" align-items="center">
                     <custom-v-stack gap="xx-small" overflow="hidden">
                         <custom-breadcrumbs>
                             {breadcrumbs.map((breadcrumb, index) => (
@@ -58,7 +58,9 @@ export function SourceFileEntry({ document, file, path = '', name, onClick, load
                         {children}
                     </custom-v-stack>
                     <custom-spacer></custom-spacer>
-                    <SourceAction status={document.state} actions={{}}></SourceAction>
+                    <div pointer-events="none">
+                        <SourceAction status={document.state} actions={{}}></SourceAction>
+                    </div>
                 </custom-h-stack>
 
                 {/* <custom-spacer></custom-spacer>

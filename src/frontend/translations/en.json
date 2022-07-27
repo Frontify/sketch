@@ -15,6 +15,8 @@
             "untitled_palette": "Untitled Palette"
         },
         "error": {
+            "asset_not_found_title": "Not Found",
+            "asset_not_found_description": "The asset no longer exists. It was probably deleted from Frontify.",
             "artboard_error_code_0": "Unknown Error",
             "artboard_error_code_1": "The original asset has been removed from Frontify. Retry to upload anyway.",
             "artboard_error_code_2": "Attachment could not be uploaded.",
@@ -61,6 +63,7 @@
             "search": "Search",
             "settings": "Settings",
             "sign_out": "Sign Out",
+            "sort_updates_first": "Updates First",
             "switch": "Switch",
             "switch_brand": "Switch Brand",
             "select": "Select",

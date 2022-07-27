@@ -65,6 +65,7 @@ export function RecentDocumentsView({ onInput, onChange, trackedDocuments }) {
                 trackedDocuments.map((document) => {
                     return (
                         <SourceFileEntry
+                            withTooltip={false}
                             document={document}
                             key={document.uuid}
                             file={document}

@@ -406,6 +406,10 @@ custom-sync-button {
     align-items: center;
     cursor: pointer;
 }
+
+custom-sync-button[disabled='true'] {
+    pointer-events: none;
+}
 custom-sync-button[variant='add'] {
     background: #2d3232;
     color: white;
@@ -530,4 +534,8 @@ input[variant='naked']:focus {
 
 [figures='tabular'] {
     font-feature-settings: 'tnum';
+}
+
+[pointer-events='none'] {
+    pointer-events: none;
 }

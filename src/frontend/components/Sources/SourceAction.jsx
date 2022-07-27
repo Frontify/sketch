@@ -335,5 +335,4 @@ export function SourceAction({ status, actions, loading }) {
                 </CustomDialog>
             );
     }
-    return <div></div>;
 }

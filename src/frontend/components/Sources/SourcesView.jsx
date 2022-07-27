@@ -133,7 +133,6 @@ export function SourcesView() {
                     style={{
                         overflow: 'auto',
                         height: ' 100%',
-                        background: 'white',
                     }}
                 >
                     <custom-v-stack style={{ paddingBottom: '1rem' }}>
@@ -146,7 +145,7 @@ export function SourcesView() {
                                 Open Files
                             </Text>
                             <custom-spacer></custom-spacer>
-                            <div style={{ marginRight: '-0.5rem' }}>
+                            {/* <div style={{ marginRight: '-0.5rem' }}>
                                 <Flyout
                                     trigger={
                                         <Button inverted="true" size="small">
@@ -159,7 +158,7 @@ export function SourcesView() {
                                         </Button>
                                     }
                                 ></Flyout>
-                            </div>
+                            </div> */}
                         </custom-h-stack>
 
                         {openDocuments.length ? (
@@ -186,7 +185,7 @@ export function SourcesView() {
 
                     <custom-line></custom-line>
 
-                    <custom-v-stack flex>
+                    <custom-v-stack flex class="tw-bg-black-0">
                         {trackedDocuments.length ? (
                             <custom-h-stack
                                 padding="large"
@@ -200,10 +199,10 @@ export function SourcesView() {
                                 <div style={{ marginRight: '-0.5rem' }}>
                                     <Flyout
                                         trigger={
-                                            <Button inverted="true" size="small">
+                                            <Button style="Secondary" solid={false} size="small">
                                                 <custom-h-stack gap="xx-small" align-items="center" padding-x="x-small">
                                                     <Text as="span" size="medium">
-                                                        Updates First
+                                                        {t('general.sort_updates_first')}
                                                     </Text>
                                                     <IconCaretDown></IconCaretDown>
                                                 </custom-h-stack>

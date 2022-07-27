@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 // Components
-import { Breadcrumbs, Button, IconArrowLeft, IconCaretDown, Text } from '@frontify/fondue';
+import { Breadcrumbs, Button, IconAlert, IconArrowLeft, IconCaretDown, Text, Tooltip } from '@frontify/fondue';
 
 // Router
 import { useNavigate, Link, Outlet, useLocation } from 'react-router-dom';
@@ -101,6 +101,30 @@ function UnsavedSource({ source }) {
     );
 }
 
+function RemovedSource({ source }) {
+    const { t } = useTranslation();
+    return (
+        <custom-v-stack gap="xx-small" cursor="pointer">
+            <Tooltip
+                hoverDelay={0}
+                withArrow
+                content={t('error.asset_not_found_description')}
+                triggerElement={
+                    <custom-h-stack align-items="center" gap="xx-small">
+                        <IconAlert></IconAlert>
+                        <Text color="weak" size="small">
+                            {t('error.asset_not_found_title')}
+                        </Text>
+                    </custom-h-stack>
+                }
+            ></Tooltip>
+            <Text weight="strong" whitespace="nowrap" overflow="ellipsis">
+                {source.filename?.replace('.sketch', '')}
+            </Text>
+        </custom-v-stack>
+    );
+}
+
 export function SourceFileInfo({ status, source, transferMap, loading }) {
     const { t } = useTranslation();
 
@@ -120,8 +144,10 @@ export function SourceFileInfo({ status, source, transferMap, loading }) {
                     {/* No open file detected */}
                     {!source && <NoSource></NoSource>}
 
+                    {source && source.state == 'asset-not-found' && <RemovedSource source={source}></RemovedSource>}
+
                     {/* Tracked remote file */}
-                    {source && source.refs?.remote_id && <RemoteSource source={source}></RemoteSource>}
+                    {source && source.remote && source.refs?.remote_id && <RemoteSource source={source}></RemoteSource>}
 
                     {/* Untracked */}
                     {source && source.filename && !source.refs?.remote_id && (
