@@ -19,45 +19,6 @@ class Asset {
         });
     }
 
-    searchAssets(type, query) {
-        return target.getSelectedAssetSourceForType(type).then(
-            function (assetSource) {
-                // search assets
-                let url = '/v1/assets/search/';
-                if (assetSource.implicit_access) {
-                    url += assetSource.connected_document_id + '?' + query;
-                } else {
-                    url += '?project_id=' + assetSource.id + '&' + query;
-                }
-
-                if (query === '') {
-                    url += '&limit=100';
-                }
-
-                return fetch(url).then(
-                    function (data) {
-                        return data;
-                    }.bind(this)
-                );
-            }.bind(this)
-        );
-    }
-
-    search(type, query) {
-        this.searchAssets(type, query).then(
-            function (data) {
-                if (data.success) {
-                    if (isWebviewPresent('frontifymain')) {
-                        sendToWebview(
-                            'frontifymain',
-                            'showLibraryAssets(' + JSON.stringify({ type: type, assets: data.data }) + ')'
-                        );
-                    }
-                }
-            }.bind(this)
-        );
-    }
-
     import(assetId) {
         const url = '/v1/inspect/import/' + assetId;
         return fetch(url, { method: 'GET' });
