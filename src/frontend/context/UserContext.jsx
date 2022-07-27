@@ -342,6 +342,7 @@ export const UserContextProvider = ({ children }) => {
             setRefreshing(false);
         },
         selectBrand(brand) {
+            useSketch('setBrand', { brandID: brand.id });
             setSelection((state) => {
                 return { ...state, brand };
             });
