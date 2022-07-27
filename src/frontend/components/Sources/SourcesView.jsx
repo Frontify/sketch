@@ -60,17 +60,17 @@ export function SourcesView() {
     const openSource = async (document) => {
         setLoading(true);
         await useSketch('openSource', { path: document.path });
-        redirectToDocument();
         await context.actions.refresh();
         setLoading(false);
+        redirectToDocument();
     };
 
     const openFile = async (document) => {
         setLoading(true);
         await useSketch('openSource', { path: document.path.replaceAll('%20', ' ') });
-        redirectToDocument();
         await context.actions.refresh();
         setLoading(false);
+        redirectToDocument();
     };
 
     /**
