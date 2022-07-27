@@ -16,29 +16,17 @@ import { useNavigate } from 'react-router-dom';
 // GraphQL
 import { queryGraphQLWithAuth } from '../../graphql/graphql';
 
-export function RecentDocumentsView({ onInput, onChange }) {
+export function RecentDocumentsView({ onInput, onChange, trackedDocuments }) {
     let [activeScope] = useLocalStorage('cache.activeScope', 'colors');
     let [remoteDocuments, setRemoteDocuments] = useState([]);
     let [mergedDocuments, setMergedDocuments] = useState([]);
-    let [trackedDocuments, setTrackedDocuments] = useState([]);
 
-    useEffect(async () => {
-        let { database } = await useSketch('getAssetDatabase');
-
-        let array = Object.keys(database).map((key) => database[key]);
-
-        let sorted = array.sort((a, b) => (a.remote?.modifiedAt < b.remote?.modifiedAt ? 1 : -1));
-        // convert object map to an array
-
-        setTrackedDocuments(sorted);
-    }, []);
+    let context = useContext(UserContext);
+    let navigate = useNavigate();
 
     // The recent documents are a global list, including documents across all brands.
     // These are only the recent documents for the current brand only.
     let [recentDocumentsForBrand, setRecentDocumentsForBrand] = useState([]);
-
-    let context = useContext(UserContext);
-    let navigate = useNavigate();
 
     let [loading, setLoading] = useState('');
 
@@ -136,14 +124,14 @@ export function RecentDocumentsView({ onInput, onChange }) {
         setLoading(false);
     }, [recentDocumentsForBrand]);
 
-    if (!mergedDocuments) {
+    if (!trackedDocuments) {
         return (
             <custom-v-stack flex padding="small" align-items="center" justify-content="center">
                 <LoadingCircle></LoadingCircle>
             </custom-v-stack>
         );
     }
-    if (mergedDocuments.length == 0) {
+    if (trackedDocuments.length == 0) {
         if (loading) {
             return (
                 <custom-v-stack flex align-items="center" justify-content="center" padding-y="medium" padding-x="large">

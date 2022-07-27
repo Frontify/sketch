@@ -44,6 +44,7 @@ export function BrandView() {
 
     const navigate = useNavigate();
 
+    // Make sure to refresh brand guidelines when loading this view
     useEffect(async () => {
         await context.actions.getUser(context.auth);
     }, []);

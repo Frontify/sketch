@@ -28,10 +28,31 @@ export function SourcesView() {
     const navigate = useNavigate();
 
     let [openDocuments, setOpenDocuments] = useState([]);
+    let [trackedDocuments, setTrackedDocuments] = useState([]);
 
     useEffect(async () => {
         await requestOpenDocuments();
     }, []);
+
+    useEffect(async () => {
+        await requestAll();
+    }, [context.selection.brand]);
+
+    const requestAll = async () => {
+        requestTrackedDocuments();
+        requestOpenDocuments();
+    };
+
+    const requestTrackedDocuments = async () => {
+        let { database } = await useSketch('getAssetDatabase');
+
+        let array = Object.keys(database).map((key) => database[key]);
+
+        let sorted = array.sort((a, b) => (a.remote?.modifiedAt < b.remote?.modifiedAt ? 1 : -1));
+        // convert object map to an array
+
+        setTrackedDocuments(sorted);
+    };
 
     const requestOpenDocuments = async () => {
         setLoading(true);
@@ -82,11 +103,12 @@ export function SourcesView() {
             let { type, payload } = event.detail.data;
 
             switch (type) {
+                case 'brand-changed':
                 case 'document-closed':
                 case 'document-opened':
                 case 'document-saved':
                     try {
-                        await requestOpenDocuments();
+                        await requestAll();
                     } catch (error) {
                         console.error(error);
                     }
@@ -191,6 +213,7 @@ export function SourcesView() {
                         </custom-h-stack>
 
                         <RecentDocumentsView
+                            trackedDocuments={trackedDocuments}
                             onInput={(value) => {}}
                             onChange={(value) => {
                                 openSource(value);

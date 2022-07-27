@@ -22,7 +22,7 @@ export function Window() {
         // Todo: It would be ideal to refresh data whenever the plugin loads,
         // but in development, this component is hot reloaded too often which causes
         // API rate limits to take effect …
-        context.actions.getUser(context.auth);
+        // context.actions.getUser(context.auth);
     }, []);
     return (
         <div id="window">
