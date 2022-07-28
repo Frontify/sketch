@@ -7,6 +7,7 @@ export function CustomInlineTextInput({ value, onInput, onChange }) {
 
     return (
         <input
+            spellcheck="false"
             ref={element}
             type="text"
             variant="naked"

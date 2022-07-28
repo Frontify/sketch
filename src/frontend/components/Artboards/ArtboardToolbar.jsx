@@ -82,6 +82,10 @@ function ArtboardToolbar({
         await useSketch('createFolder', folder);
     };
 
+    useEffect(() => {
+        setCreateFolder(false);
+    }, [showDestinationPicker]);
+
     // Translation
     let { t } = useTranslation();
 

@@ -985,6 +985,8 @@ export function ArtboardsView() {
 
             switch (type) {
                 case 'artboards-changed':
+                    setShowDestinationPicker(false);
+                    setShowRecentDestinations(false);
                     /**
                      * Note: We used to filter the view by setting it to the selected artboards only
                      * But now we’ll always include all artboards that have been previously uploaded.
