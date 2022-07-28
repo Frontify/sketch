@@ -11,7 +11,8 @@ import { useSketch } from '../../hooks/useSketch';
 
 // Components
 import { CustomDialog } from '../Core/CustomDialog';
-import { UploadDestinationPicker } from '../Core/UploadDestinationPicker';
+
+import { Browser, BrowserHeader } from '../Core/Browser';
 
 import {
     Button,
@@ -129,10 +130,8 @@ export function SourceAction({ status, actions, loading }) {
                     }
                 >
                     <custom-v-stack stretch>
-                        <custom-h-stack padding="small" separator="bottom">
-                            <Text weight="strong">Publish on Frontify</Text>
-                        </custom-h-stack>
-                        <UploadDestinationPicker
+                        <BrowserHeader></BrowserHeader>
+                        <Browser
                             createFolder={createFolder}
                             onCreateFolder={async (folder) => {
                                 setCreateFolder(false);
@@ -149,8 +148,8 @@ export function SourceAction({ status, actions, loading }) {
                             onChange={(value) => {
                                 setUploadDestination(value);
                             }}
-                        ></UploadDestinationPicker>
-                        <custom-h-stack padding="small" gap="small" separator="top">
+                        ></Browser>
+                        <custom-h-stack padding="medium" gap="small" separator="top">
                             <Button
                                 style="Secondary"
                                 disabled={!temporaryUploadDestination}

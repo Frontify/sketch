@@ -4,7 +4,7 @@ import React, { useState, useContext } from 'react';
 import { Button, IconAdd, LoadingCircle, Text } from '@frontify/fondue';
 
 import { CustomDialog } from '../Core/CustomDialog';
-import { UploadDestinationPicker } from '../Core/UploadDestinationPicker';
+import { Browser, BrowserHeader } from '../Core/Browser';
 
 // Hooks
 import { useSketch } from '../../hooks/useSketch';
@@ -67,11 +67,8 @@ export function SourcePicker() {
                 }
             >
                 <custom-v-stack stretch>
-                    <custom-h-stack padding="small" separator="bottom">
-                        <Text weight="strong">Sketch Files on Frontify</Text>
-                        <custom-spacer></custom-spacer>
-                    </custom-h-stack>
-                    <UploadDestinationPicker
+                    <BrowserHeader></BrowserHeader>
+                    <Browser
                         createFolder={createFolder}
                         onCreateFolder={async (folder) => {
                             setCreateFolder(false);
@@ -90,8 +87,8 @@ export function SourcePicker() {
                             }
                         }}
                         disabled={loading}
-                    ></UploadDestinationPicker>
-                    <custom-h-stack padding="small" gap="small" separator="top" align-items="center">
+                    ></Browser>
+                    <custom-h-stack padding="medium" gap="small" separator="top" align-items="center">
                         {loading ? (
                             <custom-h-stack gap="small" align-items="center">
                                 <LoadingCircle size="Small"></LoadingCircle>
