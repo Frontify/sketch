@@ -115,6 +115,7 @@ export function MediaLibrariesView({ type }) {
                     query: query,
                 });
         }
+        console.log(result);
 
         let library = result.data.project;
         if (!library?.assets) {
@@ -157,11 +158,13 @@ export function MediaLibrariesView({ type }) {
     }
 
     const selectLibrary = (library) => {
-        context.actions.setLibrariesForBrand({
-            ...context.selection.libraries,
-            [type]: library,
-        });
-        reset();
+        if (selectedLibrary.id != library.id) {
+            context.actions.setLibrariesForBrand({
+                ...context.selection.libraries,
+                [type]: library,
+            });
+            reset();
+        }
     };
 
     // React to changes of the library type
@@ -185,6 +188,8 @@ export function MediaLibrariesView({ type }) {
             <custom-h-stack stretch-children padding-x="large" padding-bottom="medium">
                 <custom-combo-field>
                     <SearchField
+                        disabled={loading}
+                        placeholder={t('general.search') + ' ' + selectedLibrary?.name}
                         onInput={(value) => {
                             setQuery(value);
                         }}
@@ -203,6 +208,7 @@ export function MediaLibrariesView({ type }) {
                     <div style={{ flex: 0 }}>
                         {libraries.length ? (
                             <LibrariesSwitcher
+                                disabled={loading}
                                 type={type}
                                 libraries={libraries}
                                 selection={selectedLibrary}
@@ -220,12 +226,18 @@ export function MediaLibrariesView({ type }) {
             <custom-line></custom-line>
 
             <custom-scroll-view padding-x="large" padding-top="medium" padding-bottom="small" flex>
-                <GridView
-                    images={images}
-                    thumbWidth="320"
-                    onIntersect={handleIntersect}
-                    onSelect={handleSelect}
-                ></GridView>
+                {images.length ? (
+                    <GridView
+                        images={images}
+                        thumbWidth="320"
+                        onIntersect={handleIntersect}
+                        onSelect={handleSelect}
+                    ></GridView>
+                ) : loading ? (
+                    <EmptyState title={t('emptyStates.loading_items')}></EmptyState>
+                ) : (
+                    <EmptyState title={t('emptyStates.no_items')}></EmptyState>
+                )}
             </custom-scroll-view>
 
             <custom-status-bar padding="small" padding-x="large" separator="top">

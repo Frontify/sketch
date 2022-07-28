@@ -4,15 +4,16 @@ import { TextInput, IconSearch } from '@frontify/fondue';
 
 import { useTranslation } from 'react-i18next';
 
-export function SearchField({ onInput, onChange = () => {} }) {
+export function SearchField({ disabled, placeholder, onInput, onChange = () => {} }) {
     const [query, setQuery] = useState('');
     const { t, i18n } = useTranslation();
 
     return (
         <TextInput
+            disabled={disabled}
             type="text"
             clearable="true"
-            placeholder={t('general.search')}
+            placeholder={placeholder || t('general.search')}
             decorator={<IconSearch />}
             value={query}
             spellcheck={false}

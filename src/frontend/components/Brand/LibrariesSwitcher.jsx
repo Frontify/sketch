@@ -2,7 +2,7 @@ import React from 'react';
 import { useState } from 'react';
 import { Button, Switch, Flyout, MenuItem, Text, IconImageLibrary } from '@frontify/fondue';
 
-export function LibrariesSwitcher({ libraries, selection, onChange }) {
+export function LibrariesSwitcher({ disabled, libraries, selection, onChange }) {
     const [open, setOpen] = useState(false);
 
     return (
@@ -14,6 +14,7 @@ export function LibrariesSwitcher({ libraries, selection, onChange }) {
             legacyFooter={false}
             trigger={
                 <Button
+                    disabled={disabled}
                     border-radius="none"
                     icon={<IconImageLibrary />}
                     inverted={true}
