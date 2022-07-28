@@ -1,12 +1,23 @@
 import React, { useState, useEffect } from 'react';
 
 // Components
-import { IconSketch, LoadingCircle, Text } from '@frontify/fondue';
+import { Badge, IconArrowRight, IconFrequentlyUsed, IconSketch, LoadingCircle, Text } from '@frontify/fondue';
 
 import { timeAgo } from '../utils';
 import { SourceAction } from './SourceAction';
 
-export function SourceFileEntry({ document, file, path = '', name, onClick, loading = false, title = '', children }) {
+export function SourceFileEntry({
+    document,
+    file,
+    path = '',
+    name,
+    onClick,
+    loading = false,
+    selected = false,
+    title = '',
+    recent = true,
+    children,
+}) {
     const [breadcrumbs, setBreadcrumbs] = useState([]);
 
     useEffect(() => {
@@ -17,6 +28,8 @@ export function SourceFileEntry({ document, file, path = '', name, onClick, load
     }, [path]);
     return (
         <custom-palette-item
+            selectable="true"
+            selected={selected}
             title={title}
             padding-y="medium"
             padding-x="large"
@@ -25,7 +38,14 @@ export function SourceFileEntry({ document, file, path = '', name, onClick, load
             }}
         >
             <custom-h-stack align-items="center" gap="large">
-                <IconSketch size="Size24" style={{ flexShrink: 0 }}></IconSketch>
+                {selected ? (
+                    <IconArrowRight size="Size24" style={{ flexShrink: 0 }}></IconArrowRight>
+                ) : recent ? (
+                    <IconFrequentlyUsed size="Size24" style={{ flexShrink: 0 }}></IconFrequentlyUsed>
+                ) : (
+                    <IconSketch size="Size24" style={{ flexShrink: 0 }}></IconSketch>
+                )}
+
                 <custom-h-stack style={{ width: '100%' }} gap="x-small" align-items="center">
                     <custom-v-stack gap="xx-small" overflow="hidden">
                         <custom-breadcrumbs>

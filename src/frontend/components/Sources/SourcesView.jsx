@@ -48,7 +48,13 @@ export function SourcesView() {
 
         let array = Object.keys(database).map((key) => database[key]);
 
-        let sorted = array.sort((a, b) => (a.remote?.modifiedAt < b.remote?.modifiedAt ? 1 : -1));
+        let sorted = array.sort((a, b) => {
+            return new Date(a.remote?.modifiedAt || a.timestamp).getTime() <
+                new Date(b.remote?.modifiedAt || b.timestamp).getTime()
+                ? 1
+                : -1;
+        });
+
         // convert object map to an array
 
         setTrackedDocuments(sorted);
@@ -145,7 +151,7 @@ export function SourcesView() {
                                 Open Files
                             </Text>
                             <custom-spacer></custom-spacer>
-                            {/* <div style={{ marginRight: '-0.5rem' }}>
+                            <div style={{ marginRight: '-0.5rem' }}>
                                 <Flyout
                                     trigger={
                                         <Button inverted="true" size="small">
@@ -158,15 +164,17 @@ export function SourcesView() {
                                         </Button>
                                     }
                                 ></Flyout>
-                            </div> */}
+                            </div>
                         </custom-h-stack>
 
                         {openDocuments.length ? (
                             openDocuments.map((openDocument, index) => {
                                 return (
                                     <SourceFileEntry
+                                        recent={false}
+                                        selected={context.currentDocument.uuid == openDocument.uuid}
                                         title={context.debug ? JSON.stringify(openDocument, null, 2) : ''}
-                                        key={document.id || index}
+                                        key={openDocument.id || index}
                                         document={openDocument}
                                         path={openDocument.normalizedRelativePath}
                                         name={openDocument.name}
