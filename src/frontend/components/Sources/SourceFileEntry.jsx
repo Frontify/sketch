@@ -5,6 +5,7 @@ import { Badge, IconArrowRight, IconFrequentlyUsed, IconSketch, LoadingCircle, T
 
 import { timeAgo } from '../utils';
 import { SourceAction } from './SourceAction';
+import { SourceFileInfoText } from './SourceFileInfo';
 
 export function SourceFileEntry({
     document,
@@ -48,30 +49,11 @@ export function SourceFileEntry({
 
                 <custom-h-stack style={{ width: '100%' }} gap="x-small" align-items="center">
                     <custom-v-stack gap="xx-small" overflow="hidden">
-                        <custom-breadcrumbs>
-                            {breadcrumbs.map((breadcrumb, index) => (
-                                <custom-h-stack gap="x-small" key={index} overflow="hidden">
-                                    <Text color="weak" size="small" key={index} overflow="ellipsis" whitespace="nowrap">
-                                        {breadcrumb}
-                                    </Text>
-                                    {index < breadcrumbs.length - 1 && (
-                                        <Text color="weak">
-                                            <span style={{ opacity: 0.5 }}>/</span>
-                                        </Text>
-                                    )}
-                                </custom-h-stack>
-                            ))}
-                        </custom-breadcrumbs>
-                        <custom-h-stack gap="xx-small" justify-content="space-between">
-                            <custom-v-stack gap="xx-small">
-                                <Text padding="small" weight="strong" overflow="ellipsis" whitespace="nowrap">
-                                    {name}
-                                </Text>
-                                <Text size="small" color="weak">
-                                    {timeAgo(new Date(document.remote?.modifiedAt || document.timestamp))}
-                                </Text>
-                            </custom-v-stack>
-                        </custom-h-stack>
+                        <SourceFileInfoText source={document}>
+                            <Text size="small" color="weak">
+                                {timeAgo(new Date(document.remote?.modifiedAt || document.timestamp))}
+                            </Text>
+                        </SourceFileInfoText>
 
                         {/* <pre>{document.remote?.modifiedAt}</pre>
                         <pre>{document.local?.localModifiedFromRemote}</pre> */}

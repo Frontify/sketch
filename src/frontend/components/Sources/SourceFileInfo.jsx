@@ -104,7 +104,7 @@ function UnsavedSource({ source }) {
 function RemovedSource({ source }) {
     const { t } = useTranslation();
     return (
-        <custom-v-stack gap="xx-small" cursor="pointer">
+        <custom-v-stack gap="xx-small" cursor="default">
             <Tooltip
                 hoverDelay={0}
                 withArrow
@@ -124,7 +124,26 @@ function RemovedSource({ source }) {
         </custom-v-stack>
     );
 }
-
+export function SourceFileInfoText({ source, children }) {
+    return (
+        <custom-v-stack gap="xx-small" overflow="hidden">
+            <custom-h-stack gap="xx-small" align-items="center" style={{ overflow: 'hidden', width: '100%' }}>
+                {/* No open file detected */}
+                {!source && <NoSource></NoSource>}
+                {source && source.state == 'asset-not-found' && <RemovedSource source={source}></RemovedSource>}
+                {/* Tracked remote file */}
+                {source && source.remote && source.refs?.remote_id && <RemoteSource source={source}></RemoteSource>}
+                {/* Untracked */}
+                {source && source.filename && !source.refs?.remote_id && (
+                    <UntrackedSource source={source}></UntrackedSource>
+                )}
+                {/* Unsaved document */}
+                {source && !source.filename && <UnsavedSource source={source}></UnsavedSource>}
+            </custom-h-stack>
+            {children}
+        </custom-v-stack>
+    );
+}
 export function SourceFileInfo({ status, source, transferMap, loading }) {
     const { t } = useTranslation();
 
@@ -140,23 +159,7 @@ export function SourceFileInfo({ status, source, transferMap, loading }) {
                     <Button inverted="true" icon={<IconArrowLeft size="Size24"></IconArrowLeft>}></Button>
                 </Link>
 
-                <custom-h-stack gap="xx-small" align-items="center" style={{ overflow: 'hidden', width: '100%' }}>
-                    {/* No open file detected */}
-                    {!source && <NoSource></NoSource>}
-
-                    {source && source.state == 'asset-not-found' && <RemovedSource source={source}></RemovedSource>}
-
-                    {/* Tracked remote file */}
-                    {source && source.remote && source.refs?.remote_id && <RemoteSource source={source}></RemoteSource>}
-
-                    {/* Untracked */}
-                    {source && source.filename && !source.refs?.remote_id && (
-                        <UntrackedSource source={source}></UntrackedSource>
-                    )}
-
-                    {/* Unsaved document */}
-                    {source && !source.filename && <UnsavedSource source={source}></UnsavedSource>}
-                </custom-h-stack>
+                <SourceFileInfoText source={source}></SourceFileInfoText>
             </custom-h-stack>
         </custom-h-stack>
     );

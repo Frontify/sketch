@@ -396,6 +396,10 @@ button svg * {
 [cursor='pointer'] * {
     cursor: pointer !important;
 }
+[cursor='default'],
+[cursor='default'] * {
+    cursor: default !important;
+}
 
 /* Sync Button */
 
@@ -413,11 +417,14 @@ custom-sync-button[disabled='true'] {
 }
 custom-sync-button[variant='add'] {
     background: #2d3232;
-    color: white;
+    background: rgb(234, 235, 235);
+
+    /* color: white; */
     border-radius: 40px;
 }
 custom-sync-button[variant='add']:hover {
     background: #4a5252;
+    background: rgb(213, 214, 214);
 }
 
 /* Variant: Same */
