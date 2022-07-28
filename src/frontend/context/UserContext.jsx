@@ -386,6 +386,7 @@ export const UserContextProvider = ({ children }) => {
             setBrands(blueprints.brands);
 
             actions.selectBrand(null);
+            useSketch('logout');
         },
         clearErrors() {
             setErrors([]);
@@ -434,7 +435,10 @@ export const UserContextProvider = ({ children }) => {
 
                         resolve(data);
                     } catch (error) {
-                        console.log('oops');
+                        this.handleError({
+                            title: 'Error',
+                            description: 'Could not load data about you and your brands from the API.',
+                        });
                         console.error(error);
                     }
                 } else {
