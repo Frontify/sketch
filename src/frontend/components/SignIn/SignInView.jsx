@@ -63,7 +63,7 @@ export function SignInView() {
         if (validDomain) {
             domain = sanitizeURL(domain);
             navigate('/signin-pending');
-            window.postMessage('beginOauthFlow', domain);
+            useSketch('beginOAuthFlow', { domain });
         }
     }
 
@@ -96,6 +96,7 @@ export function SignInView() {
                                 setDomain(event.target.value);
                                 handleSignIn(event.target.value);
                             }}
+                            spellcheck={false}
                             type="email"
                             placeholder={placeholders.domain}
                             value={domain}

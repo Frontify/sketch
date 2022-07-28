@@ -42,18 +42,27 @@ class OAuth {
         let hasError = false;
         let error = null;
 
-        const response = await fetch(url, options);
-        const json = await response.json();
-        this.sessionId = json.data.key;
-        await this.getSecretAndChallengeCode();
-        this.openBrowser();
+        try {
+            const response = await fetch(url, options);
+            const json = await response.json();
+            this.sessionId = json.data.key;
+            await this.getSecretAndChallengeCode();
+            this.openBrowser();
+        } catch (error) {
+            return {
+                hasError: true,
+                error: 'invalid domain',
+            };
+        }
 
         try {
             const authorizationCode = await this.pollAuthorizationCode();
             this.accessToken = await this.getAccessTokenByAuthorizationCode(authorizationCode);
         } catch (errorMessage) {
-            hasError = true;
-            error = errorMessage;
+            return {
+                hasError: true,
+                error: 'polling failed',
+            };
         }
 
         return {

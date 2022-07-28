@@ -118,26 +118,6 @@ export default function (context, view) {
         OAuth.cancelAuthorizationPolling();
     });
 
-    webview.on('beginOauthFlow', (domain) => {
-        OAuth.authorize(domain).then((authData) => {
-            if (authData.hasError) {
-                console.log(authData.error);
-                return;
-            }
-
-            user.login({
-                access_token: authData.accessToken,
-                domain: domain,
-            }).then(
-                function () {
-                    // I guess this re-starts the plugin, which will then have the access token available?
-                    frontend.send('user.authentication', { access_token: authData.accessToken, domain: domain });
-                    // runCommand(context);
-                }.bind(this)
-            );
-        });
-    });
-
     // Load tab if webview ready
     webview.on('did-finish-load', () => {
         // console.log('did-finish-load');
@@ -160,11 +140,6 @@ export default function (context, view) {
             threadDictionary.removeObjectForKey('frontifywindow');
         }.bind(this)
     );
-
-    // Handlers called from webview
-    webview.on('logout', function () {
-        user.logout().then();
-    });
 
     webview.on('memorizeDomain', function (url) {
         domain = url;
@@ -305,6 +280,45 @@ export default function (context, view) {
                     console.log(error);
                     payload = { status: 'error' };
                 }
+                break;
+            case 'beginOAuthFlow':
+                let domain = args.domain;
+                let _payload = {};
+                OAuth.authorize(domain).then((authData) => {
+                    console.log({ authData });
+                    if (authData.hasError) {
+                        console.log(authData.error);
+                        _payload = { success: false, error: authData.error };
+                        return;
+                    }
+                    console.log('continues');
+
+                    if (!authData.hasError) {
+                        user.login({
+                            access_token: authData.accessToken,
+                            domain: domain,
+                        })
+                            .then(
+                                function () {
+                                    // I guess this re-starts the plugin, which will then have the access token available?
+                                    frontend.send('user.authentication', {
+                                        access_token: authData.accessToken,
+                                        domain: domain,
+                                    });
+                                    // runCommand(context);
+                                    console.log('success');
+                                    _payload = { success: true };
+                                }.bind(this)
+                            )
+                            .catch((error) => {
+                                console.error(error);
+                                _payload = { success: false, error };
+                            });
+                    }
+                });
+                console.log(_payload);
+                payload = _payload;
+
                 break;
             case 'cancelArtboardUpload':
                 artboard.cancelUpload();
@@ -509,6 +523,9 @@ export default function (context, view) {
                 } catch (error) {
                     payload = { success: false, error };
                 }
+                break;
+            case 'logout':
+                user.logout().then();
                 break;
             case 'openUrl':
                 let url = args.url;
