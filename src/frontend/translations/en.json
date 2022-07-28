@@ -2,6 +2,7 @@
     "translation": {
         "emptyStates": {
             "no_items": "No Assets Found",
+            "folder_empty": "This folder is empty",
             "loading_items": "Loading …",
             "no_guidelines": "No Guidelines Found",
             "no_libraries": "No Libraries Found",

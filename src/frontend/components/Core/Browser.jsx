@@ -448,7 +448,15 @@ export function Browser({
     /**
      * Case 2: No projects exist for this user
      */
-    if (projects.length == 0) return <EmptyState title={t('emptyStates.no_projects')}></EmptyState>;
+    if (projects.length == 0)
+        return (
+            <custom-v-stack stretch overflow="hidden">
+                <custom-h-stack padding="medium" separator="bottom">
+                    <Text weight="strong">{context.selection.brand.name}</Text>
+                </custom-h-stack>{' '}
+                <EmptyState title={t('emptyStates.no_projects')}></EmptyState>
+            </custom-v-stack>
+        );
 
     /**
      * Case 3: No project has been selected
@@ -519,11 +527,7 @@ export function Browser({
                         <custom-v-stack stretch>
                             {!files.length && !folders.length && (
                                 <custom-v-stack stretch align-items="center" justify-content="center">
-                                    {!folder && <Text color="weak">This project has no folders</Text>}
-                                    {folder && !folder.name && <Text color="weak">This folder is empty</Text>}
-                                    {folders.length == 0 && files.length == 0 && (
-                                        <Text color="weak">This folder has no files.</Text>
-                                    )}
+                                    <EmptyState title={t('emptyStates.folder_empty')}></EmptyState>
                                 </custom-v-stack>
                             )}
                             {folders.map((folder) => {
@@ -546,7 +550,7 @@ export function Browser({
                                 );
                             })}
                             {createFolder && (
-                                <custom-palette-item selectable tabindex="-1">
+                                <custom-palette-item selectable tabindex="-1" padding-x="medium" padding-y="xx-small">
                                     <custom-h-stack gap="small" align-items="center">
                                         <IconFolder size="Size20"></IconFolder>
                                         <CustomInlineTextInput
