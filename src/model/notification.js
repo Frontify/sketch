@@ -27,6 +27,9 @@ class Notification {
 
         return fetch('/v1/account/environment').then(
             function (data) {
+                // ATTENTION: PUSHED MIGHT BE DISABLED
+                console.log(data);
+                if (!data) return;
                 if (data['pusher']['enabled']) {
                     if (data['pusher']['region'] != 'us') {
                         this.pusher = PTPusher.pusherWithKey_delegate_encrypted_cluster(
