@@ -17,7 +17,6 @@ export function Toolbar() {
     const [contextMenuOpen, setContextMenuOpen] = useState(false);
     function logout() {
         context.actions.logout();
-        window.postMessage('logout');
     }
     return (
         <div>
