@@ -1,23 +1,17 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import {
     Button,
     Flyout,
     IconFolder,
-    IconUploadAlternative,
     LoadingCircle,
     Text,
     IconFrequentlyUsed,
     IconAdd,
     IconCrossCircle,
-    IconCheckMarkCircle,
-    IconLayers,
-    IconMore,
-    Badge,
 } from '@frontify/fondue';
 
-import { UploadDestinationPicker } from '../Core/UploadDestinationPicker';
 import { CustomDialog } from '../Core/CustomDialog';
-import { useState, useEffect, useCallback, useContext } from 'react';
+import { Browser, BrowserHeader } from '../Core/Browser';
 
 // Context
 import { UserContext } from '../../context/UserContext';
@@ -204,10 +198,8 @@ function ArtboardToolbar({
                                     }
                                 >
                                     <custom-v-stack stretch>
-                                        <custom-h-stack padding="small" separator="bottom">
-                                            <Text weight="strong">Browse</Text>
-                                        </custom-h-stack>
-                                        <UploadDestinationPicker
+                                        <BrowserHeader></BrowserHeader>
+                                        <Browser
                                             allowfiles={false}
                                             paths={uploadDestination ? [uploadDestination] : []}
                                             onInput={(value) => {
@@ -224,8 +216,8 @@ function ArtboardToolbar({
                                             onCancelCreateFolder={() => {
                                                 setCreateFolder(false);
                                             }}
-                                        ></UploadDestinationPicker>
-                                        <custom-h-stack padding="small" gap="small" separator="top">
+                                        ></Browser>
+                                        <custom-h-stack padding="medium" gap="small" separator="top">
                                             <Button
                                                 style="Secondary"
                                                 disabled={!temporaryUploadDestination}
