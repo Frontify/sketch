@@ -58,7 +58,7 @@ export function SourceFileEntry({ document, file, path = '', name, onClick, load
                         {children}
                     </custom-v-stack>
                     <custom-spacer></custom-spacer>
-                    <div pointer-events="none">
+                    <div custom-pointer-events="none">
                         <SourceAction status={document.state} actions={{}}></SourceAction>
                     </div>
                 </custom-h-stack>

@@ -536,6 +536,6 @@ input[variant='naked']:focus {
     font-feature-settings: 'tnum';
 }
 
-[pointer-events='none'] {
+[custom-pointer-events='none'] {
     pointer-events: none;
 }
