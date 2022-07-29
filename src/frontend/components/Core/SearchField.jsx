@@ -1,12 +1,10 @@
 import React from 'react';
-import { useState } from 'react';
 import { TextInput, IconSearch } from '@frontify/fondue';
 
 import { useTranslation } from 'react-i18next';
 
-export function SearchField({ disabled, placeholder, onInput, onChange = () => {} }) {
-    const [query, setQuery] = useState('');
-    const { t, i18n } = useTranslation();
+export function SearchField({ disabled, placeholder, onInput, onChange = () => {}, value }) {
+    const { t } = useTranslation();
 
     return (
         <TextInput
@@ -15,11 +13,10 @@ export function SearchField({ disabled, placeholder, onInput, onChange = () => {
             clearable="true"
             placeholder={placeholder || t('general.search')}
             decorator={<IconSearch />}
-            value={query}
+            value={value}
             spellcheck={false}
             autocomplete={false}
             onChange={(value) => {
-                setQuery(value);
                 onInput(value);
                 if (value == '') onChange('');
             }}
@@ -27,7 +24,6 @@ export function SearchField({ disabled, placeholder, onInput, onChange = () => {
                 onChange(event.target.value);
             }}
             onClear={() => {
-                setQuery('');
                 onChange('');
             }}
         ></TextInput>

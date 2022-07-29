@@ -80,6 +80,7 @@ export function TypographyView({ guidelines, palettes }) {
             <custom-h-stack stretch-children padding-x="large" padding-bottom="medium">
                 <custom-combo-field>
                     <SearchField
+                        value={query}
                         onInput={(value) => {
                             setQuery(value);
                         }}

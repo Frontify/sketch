@@ -70,6 +70,7 @@ export function PalettesView({ palettes, guidelines }) {
             <custom-h-stack stretch-children padding-x="large" padding-bottom="medium">
                 <custom-combo-field>
                     <SearchField
+                        value={query}
                         onInput={(value) => {
                             setQuery(value);
                         }}

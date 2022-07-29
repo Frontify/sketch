@@ -437,7 +437,8 @@ export const UserContextProvider = ({ children }) => {
                     } catch (error) {
                         this.handleError({
                             title: 'Error',
-                            description: 'Could not load data about you and your brands from the API.',
+                            description:
+                                'Could not load data about you and your brands from the API. This can happen when you reload the plugin too many times. Please wait a few minutes and try again.',
                         });
                         console.error(error);
                     }

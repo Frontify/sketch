@@ -26,6 +26,7 @@ import { useDebounce } from '../../hooks/useDebounce';
 
 // Context
 import { UserContext } from '../../context/UserContext';
+import { LoadingIndicator } from '../Core/LoadingIndicator';
 
 export function MediaLibrariesView({ type, useResolutions = false }) {
     const context = useContext(UserContext);
@@ -65,7 +66,7 @@ export function MediaLibrariesView({ type, useResolutions = false }) {
 
     // Query is used for the search field
     let [query, setQuery] = useState('');
-    const debouncedQuery = useDebounce(query, 500);
+    const debouncedQuery = useDebounce(query, 250);
 
     useEffect(() => {
         setSelectedLibrary(context.selection.libraries[type] || libraries[0]);
@@ -75,7 +76,15 @@ export function MediaLibrariesView({ type, useResolutions = false }) {
     useEffect(() => {
         document.scrollingElement.scrollTop = 0;
         reset();
-    }, [selectedLibrary]);
+        setQuery('');
+    }, [selectedLibrary, type]);
+
+    useEffect(() => {
+        if (query == '') {
+            reset();
+        }
+        setPage(1);
+    }, [query]);
 
     const reset = () => {
         setLoading(false);
@@ -90,8 +99,6 @@ export function MediaLibrariesView({ type, useResolutions = false }) {
         console.log('load more fn', selectedLibrary);
 
         let mode = query == '' ? 'browse' : 'search';
-
-        if (mode == 'search' && query.length < 3) return;
 
         if (!selectedLibrary) return;
 
@@ -248,10 +255,10 @@ export function MediaLibrariesView({ type, useResolutions = false }) {
             <custom-h-stack stretch-children padding-x="large" padding-bottom="medium">
                 <custom-combo-field>
                     <SearchField
+                        value={query}
                         placeholder={t('general.search') + ' ' + selectedLibrary?.name}
                         onInput={(value) => {
-                            console.log('onInput');
-                            reset();
+                            setLoading(true);
                             setQuery(value);
                         }}
                         onClear={() => {
@@ -344,7 +351,7 @@ export function MediaLibrariesView({ type, useResolutions = false }) {
                                         await useSketch('resizeLayer', {
                                             width: desiredResolution || selection[0].width,
                                         });
-                                        applyAsset();
+                                        await applyAsset();
                                     }
                                     break;
                                 case 'selection':
@@ -362,7 +369,8 @@ export function MediaLibrariesView({ type, useResolutions = false }) {
                         }}
                     ></GridView>
                 ) : loading ? (
-                    <EmptyState title={t('emptyStates.loading_items')}></EmptyState>
+                    // <EmptyState title={t('emptyStates.loading_items')}></EmptyState>
+                    <LoadingIndicator></LoadingIndicator>
                 ) : (
                     <EmptyState title={t('emptyStates.no_items')}></EmptyState>
                 )}
