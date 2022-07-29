@@ -1,7 +1,18 @@
 import React, { useState, useContext, useEffect } from 'react';
 
 // Components
-import { Dropdown, IconQuestionMarkCircle, LoadingCircle, Text, Tooltip } from '@frontify/fondue';
+import {
+    Button,
+    Flyout,
+    IconCaretDown,
+    IconCheck,
+    IconImage,
+    IconQuestionMarkCircle,
+    LoadingCircle,
+    Text,
+    Tooltip,
+    MenuItem,
+} from '@frontify/fondue';
 
 import { EmptyState } from '../Core/EmptyState';
 import { GridView } from './GridView';
@@ -10,6 +21,7 @@ import { SearchField } from '../Core/SearchField';
 
 // Hooks
 import { useTranslation } from 'react-i18next';
+import { useSketch } from '../../hooks/useSketch';
 
 // Context
 import { UserContext } from '../../context/UserContext';
@@ -36,11 +48,19 @@ export function MediaLibrariesView({ type }) {
     let [totalImages, setTotalImages] = useState(Infinity);
     let [page, setPage] = useState(1);
 
+    // Resolutions Flyout
+    let [open, setOpen] = useState(false);
+
     // Image selection
     let [selection, setSelection] = useState([]);
+    let [selectedFrame, setSelectedFrame] = useState(null);
+    let [sketchSelectionChanged, setSketchSelectionChanged] = useState(null);
 
     // We can use the mode to indicate "browse" or "search"
     let [mode, setMode] = useState('browse');
+
+    let resolutions = [256, 512, 768, 1024, 1536, 2048];
+    let [desiredResolution, setDesiredResolution] = useState(null);
 
     // Query is used for the search field
     let [query, setQuery] = useState('');
@@ -167,6 +187,38 @@ export function MediaLibrariesView({ type }) {
         }
     };
 
+    /**
+     * Subscription
+     */
+
+    useEffect(() => {
+        let handler = async (event) => {
+            let { type, payload } = event.detail.data;
+
+            switch (type) {
+                case 'selection-changed':
+                    setSketchSelectionChanged(true);
+                    break;
+            }
+        };
+
+        window.addEventListener('message-from-sketch', handler);
+
+        return () => {
+            window.removeEventListener('message-from-sketch', handler);
+        };
+    }, []);
+
+    const restoreFrameAfterDrop = async () => {
+        if (selectedFrame) {
+            await useSketch('resizeLayer', { width: selectedFrame.width, height: selectedFrame.height });
+        }
+    };
+
+    const applyDesiredResolution = async () => {
+        await useSketch('applyLibraryAsset', { asset: selection[0], width: desiredResolution || selection[0].width });
+    };
+
     // React to changes of the library type
     useEffect(async () => {
         let libraries = await context.actions.getLibrariesByType(type);
@@ -232,6 +284,72 @@ export function MediaLibrariesView({ type }) {
                         thumbWidth="320"
                         onIntersect={handleIntersect}
                         onSelect={handleSelect}
+                        onApply={async () => {
+                            await applyDesiredResolution();
+                        }}
+                        onDrop={async () => {
+                            let dropTarget = sketchSelectionChanged ? 'canvas' : 'selection';
+
+                            switch (dropTarget) {
+                                case 'canvas':
+                                    /**
+                                     * Drops the image in Sketch at a higher resolution than the thumbnail.
+                                     *
+                                     * The default behavior is that the preview image (small resolution thumbnail) would be
+                                     * placed in Sketch. What we want though is a higher resolution:
+                                     *
+                                     * 1. The small thumbnail is placed in Sketch (e.g. 320 x 240)
+                                     * 2. The layer is resized to the desired size (e.g. 1920 x 1080)
+                                     * 3. The desired resolution is applied to the layer.
+                                     *
+                                     * The effect is that the thumbnails shows up briefly, is resized at low resolution and
+                                     * after the download of the image is finished, the layer will be upgraded with the high resolution.
+                                     */
+
+                                    await useSketch('resizeLayer', { width: desiredResolution || selection[0].width });
+                                    applyDesiredResolution();
+                                    break;
+                                case 'selection':
+                                    // Drop on selection
+                                    // replace existing image layer
+                                    await restoreFrameAfterDrop();
+                                    await applyDesiredResolution();
+                                    break;
+                            }
+
+                            setSketchSelectionChanged(false);
+                        }}
+                        onDragStart={async () => {
+                            /**
+                             * This is trickery way to figure out if an image has been dropped
+                             * onto the canvas.
+                             *
+                             * What happens on drag & drop?
+                             *
+                             * 1. The image is dropped in the original size (e.g. 320 x 240)
+                             * 2. The new image layer is selected (-> selectionChanged)
+                             * 3. The dragEnd event is fired
+                             *
+                             * We assume that in between dragStart and dragEnd, it is unlikely
+                             * that the selection in Sketch changes.
+                             *
+                             * That means that if the selection changes in between drag start end end
+                             * we know that this must be a layer that Sketch created (the placed image).
+                             *
+                             * Whenever the selection changes, we ask Sketch for the frame (x, y, width, height).
+                             *
+                             * When we then detect that the selection in between drag start and end did not change.
+                             *
+                             */
+
+                            let { frames } = await useSketch('getSelectedLayerFrames');
+                            if (frames && frames.length == 1) {
+                                setSelectedFrame(frames[0]);
+                            } else {
+                                setSelectedFrame(null);
+                            }
+                            setSketchSelectionChanged(false);
+                        }}
                     ></GridView>
                 ) : loading ? (
                     <EmptyState title={t('emptyStates.loading_items')}></EmptyState>
@@ -241,36 +359,106 @@ export function MediaLibrariesView({ type }) {
             </custom-scroll-view>
 
             <custom-status-bar padding="small" padding-x="large" separator="top">
-                <custom-h-stack align-items="center" justify-content="center">
-                    <Tooltip
-                        position="top"
-                        content={t('libraries.help')}
-                        withArrow
-                        hoverDelay={0}
-                        triggerElement={
-                            <div>
-                                <IconQuestionMarkCircle></IconQuestionMarkCircle>
-                            </div>
-                        }
-                    ></Tooltip>
-                    <div style={{ width: '24px' }}></div>
-                    {images ? (
+                <custom-h-stack align-items="center">
+                    {selection && selection.length == 0 && (
+                        <Tooltip
+                            position="top"
+                            content={t('libraries.help')}
+                            withArrow
+                            hoverDelay={0}
+                            triggerElement={
+                                <div>
+                                    <IconQuestionMarkCircle></IconQuestionMarkCircle>
+                                </div>
+                            }
+                        ></Tooltip>
+                    )}
+
+                    {images && selection.length == 0 ? (
                         <custom-h-stack style={{ width: '100%' }} justify-content="center">
                             {totalImages != Infinity && (
                                 <Text size="x-small">
-                                    {selection && selection.length == 1
-                                        ? selection[0].title
-                                        : `${images.length} / ${totalImages}`}
+                                    {images.length} / {totalImages}
                                 </Text>
                             )}
                         </custom-h-stack>
                     ) : (
                         ''
                     )}
+                    {selection && selection.length > 0 && (
+                        <Text size="x-small" overflow="ellipsis" whitespace="nowrap" title={selection[0].title}>
+                            {selection[0].title}
+                        </Text>
+                    )}
+                    <custom-spacer></custom-spacer>
 
                     <div style={{ display: 'flex', justifyContent: 'flex-end', width: '24px' }}>
-                        {loading && <LoadingCircle size="ExtraSmall" />}
+                        {loading ? <LoadingCircle size="ExtraSmall" /> : ''}
                     </div>
+                    {selection && selection.length > 0 && (
+                        <custom-h-stack gap="xx-small">
+                            <Flyout
+                                hug={false}
+                                fitContent={true}
+                                isOpen={open}
+                                onOpenChange={(isOpen) => setOpen(isOpen)}
+                                legacyFooter={false}
+                                trigger={
+                                    <custom-h-stack>
+                                        <Button
+                                            style="Secondary"
+                                            hugWidth={false}
+                                            size="Small"
+                                            onClick={() => setOpen((open) => !open)}
+                                        >
+                                            <custom-h-stack gap="xx-small">
+                                                <Text whitespace="pre" size="x-small">
+                                                    {selection && selection.length > 0 && desiredResolution
+                                                        ? desiredResolution + 'w'
+                                                        : selection[0].width + ' × ' + selection[0].height}
+                                                </Text>
+                                                <IconCaretDown></IconCaretDown>
+                                            </custom-h-stack>
+                                        </Button>
+                                    </custom-h-stack>
+                                }
+                            >
+                                <custom-v-stack>
+                                    {resolutions.map((resolution) => {
+                                        return (
+                                            <div
+                                                key={resolution}
+                                                tabIndex={0}
+                                                role="menuitem"
+                                                aria-label={t('libraries.apply_image_resolution')}
+                                                onClick={() => {
+                                                    setDesiredResolution(resolution);
+                                                    setOpen(false);
+                                                }}
+                                            >
+                                                <MenuItem decorator={<IconImage />} title={resolution + 'w'}></MenuItem>
+                                            </div>
+                                        );
+                                    })}
+                                    <custom-line> </custom-line>
+                                    <div
+                                        tabIndex={0}
+                                        role="menuitem"
+                                        aria-label={t('libraries.apply_image_resolution')}
+                                        onClick={() => {
+                                            setDesiredResolution(null);
+                                            setOpen(false);
+                                        }}
+                                    >
+                                        <MenuItem
+                                            decorator={<IconImage />}
+                                            title={selection[0].width + ' × ' + selection[0].height}
+                                        ></MenuItem>
+                                    </div>
+                                </custom-v-stack>
+                            </Flyout>
+                        </custom-h-stack>
+                    )}
                 </custom-h-stack>
             </custom-status-bar>
         </custom-v-stack>

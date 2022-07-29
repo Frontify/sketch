@@ -273,7 +273,8 @@ export default function (context, view) {
                 break;
             case 'applyLibraryAsset':
                 try {
-                    await asset.applyImage(args.asset);
+                    let width = args.width || null;
+                    await asset.applyImage(args.asset, width);
                     // -> Message that we’re done
                     payload = { sucess: 'true' };
                 } catch (error) {
@@ -524,6 +525,18 @@ export default function (context, view) {
                     payload = { success: false, error };
                 }
                 break;
+            case 'getSelectedLayerFrames':
+                let document = sketch3.getSelectedDocument();
+
+                let frames = [];
+                document.selectedLayers.forEach((layer) => {
+                    if (layer.type != 'Artboard' && layer.style) {
+                        frames.push(layer.frame);
+                    }
+                });
+
+                payload = { success: true, frames };
+                break;
             case 'logout':
                 user.logout().then();
                 break;
@@ -560,6 +573,10 @@ export default function (context, view) {
             case 'requestUpdate':
                 refresh();
 
+                break;
+            case 'resizeLayer':
+                await asset.resize(args.width, args.height);
+                payload = { success: true };
                 break;
             case 'pullSource':
                 try {

@@ -24,13 +24,36 @@ class Asset {
         return fetch(url, { method: 'GET' });
     }
 
-    applyImage(data) {
+    resize(width, height) {
+        let currentDocument = Document.fromNative(sketch.getDocument());
+
+        currentDocument.selectedLayers.forEach((layer) => {
+            let originalWidth = layer.frame.width;
+            let originalHeight = layer.frame.height;
+            let originalRatio = originalWidth / originalHeight;
+
+            // check whether layer is a shape
+            if (layer.type != 'Artboard' && layer.style) {
+                layer.frame.width = width;
+                if (height) {
+                    layer.frame.height = height;
+                } else {
+                    layer.frame.height = width / originalRatio;
+                }
+                layer.frame.x = layer.frame.x - layer.frame.width / 2 + originalWidth / 2;
+                layer.frame.y = layer.frame.y - layer.frame.height / 2 + originalHeight / 2;
+            }
+        });
+    }
+
+    applyImage(data, desiredWidth) {
         return new Promise((resolve, reject) => {
             if (data.previewUrl && data.extension) {
-                let url = data.previewUrl.replace('{width}', 2000);
+                let url = `${data.previewUrl}?width=${desiredWidth || 2000}`;
                 let ext = data.extension;
 
                 let currentDocument = Document.fromNative(sketch.getDocument());
+                if (!currentDocument) reject();
 
                 if (ext !== 'svg') {
                     let image = NSImage.alloc().initWithContentsOfURL(NSURL.URLWithString(url));
@@ -84,10 +107,8 @@ class Asset {
 
                             imageLayer.selected = true;
                             currentDocument.centerOnLayer(imageLayer);
-                            currentDocument.sketchObject.eventHandlerManager().currentHandler().zoomToSelection();
+                            // currentDocument.sketchObject.eventHandlerManager().currentHandler().zoomToSelection();
                         }
-
-                        // app.refreshCurrentDocument();
 
                         resolve();
                     }

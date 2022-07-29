@@ -4,16 +4,29 @@ import { useSketch } from '../../hooks/useSketch';
 
 import { Observer } from './Observer';
 
-export function GridView({ images, limit = 25, onIntersect, onSelect, thumbWidth }) {
+export function GridView({
+    sketchSelectionChanged,
+    desiredResolution,
+    onApply,
+    onDragStart,
+    onDrop,
+
+    images,
+    limit = 25,
+    onIntersect,
+    onSelect,
+    thumbWidth,
+}) {
     let ref = useRef(null);
     let [recentlyApplied, setRecentlyApplied] = useState(null);
     let [loading, setLoading] = useState(false);
+    let [dragging, setDragging] = useState(false);
 
     useEffect(() => {
         deselect();
     }, [images]);
 
-    const applyAsset = async (asset) => {
+    const runCallbackAfterLoad = async (asset, callback = onApply, immediate = false) => {
         setLoading(true);
         setRecentlyApplied([]);
         setTimeout(() => {
@@ -23,30 +36,21 @@ export function GridView({ images, limit = 25, onIntersect, onSelect, thumbWidth
         // We’re using a timeout here so that the animation can finish without
         // being interrupted by the blocking fetch request.
 
-        setTimeout(async () => {
-            try {
-                await useSketch('applyLibraryAsset', { asset });
-            } catch (error) {}
+        setTimeout(
+            async () => {
+                try {
+                    await callback();
+                } catch (error) {}
 
-            setLoading(false);
-        }, 250);
+                setLoading(false);
+            },
+            immediate ? 0 : 250
+        );
     };
 
     const deselect = () => {
         setRecentlyApplied([]);
         onSelect([]);
-    };
-
-    const getBase64Image = async (url) => {
-        const response = await fetch(url);
-        const blob = await response.blob();
-        const reader = new FileReader();
-        await new Promise((resolve, reject) => {
-            reader.onload = resolve;
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
-        });
-        return reader.result.replace(/^data:.+;base64,/, '');
     };
 
     return (
@@ -73,20 +77,16 @@ export function GridView({ images, limit = 25, onIntersect, onSelect, thumbWidth
                             onFocus={(event) => {
                                 onSelect([image]);
                             }}
-                            onClick={(event) => {
-                                if (event.detail == 2) {
-                                    applyAsset(image);
-                                }
+                            onDoubleClick={(event) => {
+                                runCallbackAfterLoad(image, onApply, false);
                             }}
-                            onDragEnd={(event) => {}}
+                            onDragEnd={async (event) => {
+                                runCallbackAfterLoad(image, onDrop, true);
+                                setDragging(false);
+                            }}
                             onDragStart={async (event) => {
-                                // By default, images can be drag & dropped into Sketch.
-                                // The problem: they will have the same size as the preview.
-                                // But because we don’t want to display high resolution previews
-                                // the dropped images will be too small to be useful.
-                                // A workaround could be to overlay the selected image with an
-                                // invisible high res <img>. But this wouldn’t support multi-select …
-                                // event.preventDefault();
+                                onDragStart();
+                                setDragging(true);
                             }}
                         >
                             {image.downloadUrl && (

@@ -112,6 +112,7 @@ export function onDocumentChanged(context) {
  */
 
 export function selectionChangedCommand(context) {
+    frontend.send('selection-changed');
     if (activeDocumentDidChange()) refresh();
 }
 

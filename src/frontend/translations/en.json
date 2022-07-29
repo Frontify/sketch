@@ -75,7 +75,8 @@
             "uploads": "Uploads"
         },
         "libraries": {
-            "help": "Drag & drop to place a preview. Double click to place best quality."
+            "apply_image_resolution": "Apply image with that width.",
+            "help": "Drag & drop on layers with image fills. Double click to apply image fill to any layer."
         },
         "sources": {
             "all_tracked_files": "All Tracked Files",
@@ -127,9 +128,6 @@
             "wait_for_authorization": "Waiting for your authorization. Please authorize the app in the opened browser window.",
             "complete_notice": "Please complete the login process in your browser first",
             "ready": "Ready"
-        },
-        "tips": {
-            "dragDropGrid": "<strong >Drag & drop</strong> items to the canvas or <strong >double click</strong> an item to replace selected layers."
         }
     }
 }
