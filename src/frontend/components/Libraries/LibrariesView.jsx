@@ -28,7 +28,7 @@ import { useDebounce } from '../../hooks/useDebounce';
 import { UserContext } from '../../context/UserContext';
 import { LoadingIndicator } from '../Core/LoadingIndicator';
 
-export function MediaLibrariesView({ type, useResolutions = false }) {
+export function LibrariesView({ type, useResolutions = false }) {
     const context = useContext(UserContext);
     const [selectedLibrary, setSelectedLibrary] = useState(null);
     const [libraries, setLibraries] = useState([]);
@@ -43,7 +43,7 @@ export function MediaLibrariesView({ type, useResolutions = false }) {
     const THUMB_WIDTH = 320;
 
     // Loading state
-    let [loading, setLoading] = useState(false);
+    let [loading, setLoading] = useState(true);
 
     // Images, total, current page
     let [images, setImages] = useState([]);
@@ -87,7 +87,7 @@ export function MediaLibrariesView({ type, useResolutions = false }) {
     }, [query]);
 
     const reset = () => {
-        setLoading(false);
+        setLoading(true);
         setTotalImages(Infinity);
         setPage(1);
         setImages([]);
@@ -96,8 +96,6 @@ export function MediaLibrariesView({ type, useResolutions = false }) {
     // Depending on the {newMode}, we’ll load more assets, either by
     // either using {loadMediaLibrary} or {searchMediaLibrary}.
     useEffect(async () => {
-        console.log('load more fn', selectedLibrary);
-
         let mode = query == '' ? 'browse' : 'search';
 
         if (!selectedLibrary) return;

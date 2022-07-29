@@ -253,7 +253,6 @@ custom-palette-item[border='true'] * {
 
 custom-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     grid-template-columns: repeat(3, 1fr);
 }
 
@@ -265,12 +264,18 @@ custom-grid-item {
     border: 1px solid #eaebeb;
     border-radius: 4px;
 
-    height: calc((100vw - 128px) / 3);
+    /* 
+        Just setting "height" causes a visible glitch after initial render.
+        So we’re brute-forcing it.
+     */
+    min-height: calc((100vw - 128px) / 3);
+    max-height: calc((100vw - 128px) / 3);
+
     animation: fade-in 0.25s both;
     user-select: none;
     -webkit-user-select: none;
     position: relative;
-    z-index: 0;
+
     padding: var(--space-s);
 
     justify-content: center;
@@ -512,6 +517,7 @@ custom-combo-field:focus-within {
 custom-combo-field > div:first-child {
     border: none !important;
     outline: none;
+    width: 100%;
 }
 custom-combo-field > * + * {
     border-left: 1px solid rgba(0, 0, 0, 0.12);

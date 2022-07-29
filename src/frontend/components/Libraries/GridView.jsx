@@ -1,8 +1,7 @@
 import { LoadingCircle } from '@frontify/fondue';
 import React, { useEffect, useState, useRef } from 'react';
-import { useSketch } from '../../hooks/useSketch';
 
-import { Observer } from './Observer';
+import { Observer } from '../Core/Observer';
 
 export function GridView({
     sketchSelectionChanged,
@@ -38,15 +37,9 @@ export function GridView({
         setTimeout(
             async () => {
                 try {
-                    console.log('callback', callback);
-                    try {
-                        await callback();
-                    } catch (error) {
-                        console.log('error', error);
-                    }
-                    console.log('response');
+                    await callback();
                 } catch (error) {
-                    console.error(error);
+                    console.log('error', error);
                 }
 
                 setLoading(false);

@@ -5,7 +5,9 @@ import { ArtboardsView } from './Artboards/ArtboardsView';
 
 // Brand
 import { BrandView } from './Brand/BrandView';
-import { MediaLibrariesView } from './Brand/MediaLibrariesView';
+import { IconLibrariesView } from './Libraries/IconLibrariesView';
+import { MediaLibrariesView } from './Libraries/MediaLibrariesView';
+import { LogoLibrariesView } from './Libraries/LogoLibrariesView';
 import { PalettesView } from './Brand/PalettesView';
 import { TypographyView } from './Brand/TypographyView';
 
@@ -97,18 +99,9 @@ export function PluginRoutes() {
                     ></Route>
 
                     <Route path="symbols"></Route>
-                    <Route
-                        path="icons"
-                        element={<MediaLibrariesView type="IconLibrary" useResolutions={false} />}
-                    ></Route>
-                    <Route
-                        path="media"
-                        element={<MediaLibrariesView type="MediaLibrary" useResolutions={true} />}
-                    ></Route>
-                    <Route
-                        path="logos"
-                        element={<MediaLibrariesView type="LogoLibrary" useResolutions={false} />}
-                    ></Route>
+                    <Route path="icons" element={<IconLibrariesView />}></Route>
+                    <Route path="media" element={<MediaLibrariesView />}></Route>
+                    <Route path="logos" element={<LogoLibrariesView />}></Route>
 
                     <Route
                         path="*"
