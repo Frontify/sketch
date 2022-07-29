@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useCallback, useContext, useEffect } from 'react';
 
 // Components
 import {
@@ -22,6 +22,7 @@ import { SearchField } from '../Core/SearchField';
 // Hooks
 import { useTranslation } from 'react-i18next';
 import { useSketch } from '../../hooks/useSketch';
+import { useDebounce } from '../../hooks/useDebounce';
 
 // Context
 import { UserContext } from '../../context/UserContext';
@@ -64,12 +65,16 @@ export function MediaLibrariesView({ type, useResolutions = false }) {
 
     // Query is used for the search field
     let [query, setQuery] = useState('');
+    const debouncedQuery = useDebounce(query, 500);
+
+    useEffect(() => {
+        setSelectedLibrary(context.selection.libraries[type] || libraries[0]);
+    }, []);
 
     // When the {project} prop changes, load fresh data
     useEffect(() => {
         document.scrollingElement.scrollTop = 0;
         reset();
-        loadMore('browse');
     }, [selectedLibrary]);
 
     const reset = () => {
@@ -81,16 +86,15 @@ export function MediaLibrariesView({ type, useResolutions = false }) {
 
     // Depending on the {newMode}, we’ll load more assets, either by
     // either using {loadMediaLibrary} or {searchMediaLibrary}.
-    const loadMore = async (newMode) => {
+    useEffect(async () => {
+        console.log('load more fn', selectedLibrary);
+
+        let mode = query == '' ? 'browse' : 'search';
+
+        if (mode == 'search' && query.length < 3) return;
+
         if (!selectedLibrary) return;
-        let nextPage = page;
-        if (newMode != mode) {
-            setPage(1);
-            nextPage = 1;
-            setMode(newMode);
-            // clear items
-            setImages([]);
-        }
+
         setLoading(true);
 
         let result = null;
@@ -102,7 +106,7 @@ export function MediaLibrariesView({ type, useResolutions = false }) {
             id: selectedLibrary.id,
             libraryType: selectedLibrary.__typename,
             limit: LIMIT,
-            page: nextPage,
+            page: page,
         };
 
         // Add placeholder items
@@ -123,7 +127,7 @@ export function MediaLibrariesView({ type, useResolutions = false }) {
             return state.concat(placeholders);
         });
 
-        switch (newMode) {
+        switch (mode) {
             case 'browse':
                 result = await actions.loadMediaLibrary({
                     ...sharedRequestParameters,
@@ -135,7 +139,6 @@ export function MediaLibrariesView({ type, useResolutions = false }) {
                     query: query,
                 });
         }
-        console.log(result);
 
         let library = result.data.project;
         if (!library?.assets) {
@@ -150,6 +153,8 @@ export function MediaLibrariesView({ type, useResolutions = false }) {
         setImages((state) => {
             // Merge new images
 
+            if (page == 1) state = [];
+
             let oldState = state.filter((entry) => entry.__typename != 'placeholder');
 
             let newState = oldState.concat(items || []);
@@ -160,17 +165,17 @@ export function MediaLibrariesView({ type, useResolutions = false }) {
         });
 
         setLoading(false);
-        setPage((page) => page + 1);
-    };
+    }, [mode, page, debouncedQuery, selectedLibrary]);
 
     function handleIntersect() {
+        console.log('intersect', images.length, totalImages);
         if (loading) return;
 
         if (images.length >= totalImages) {
             return;
         }
         setLoading(true);
-        loadMore(mode);
+        setPage(page + 1);
     }
 
     function handleSelect(selection) {
@@ -243,20 +248,15 @@ export function MediaLibrariesView({ type, useResolutions = false }) {
             <custom-h-stack stretch-children padding-x="large" padding-bottom="medium">
                 <custom-combo-field>
                     <SearchField
-                        disabled={loading}
                         placeholder={t('general.search') + ' ' + selectedLibrary?.name}
                         onInput={(value) => {
-                            setQuery(value);
-                        }}
-                        onChange={(value) => {
-                            let newMode = value != '' ? 'search' : 'browse';
+                            console.log('onInput');
                             reset();
                             setQuery(value);
-                            loadMore(newMode);
                         }}
                         onClear={() => {
                             setQuery('');
-                            loadMore('browse');
+                            setPage(1);
                         }}
                     ></SearchField>
 
