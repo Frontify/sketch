@@ -26,7 +26,7 @@ import { useSketch } from '../../hooks/useSketch';
 // Context
 import { UserContext } from '../../context/UserContext';
 
-export function MediaLibrariesView({ type }) {
+export function MediaLibrariesView({ type, useResolutions = false }) {
     const context = useContext(UserContext);
     const [selectedLibrary, setSelectedLibrary] = useState(null);
     const [libraries, setLibraries] = useState([]);
@@ -109,8 +109,8 @@ export function MediaLibrariesView({ type }) {
 
         setImages((state) => {
             if (totalImages == Infinity) return state;
-
-            let placeholders = Array(Math.min(LIMIT, totalImages - images.length))
+            let count = Math.max(0, Math.min(LIMIT, totalImages - images.length));
+            let placeholders = Array(count)
                 .fill(0)
                 .map((entry) => {
                     return {
@@ -215,8 +215,11 @@ export function MediaLibrariesView({ type }) {
         }
     };
 
-    const applyDesiredResolution = async () => {
-        await useSketch('applyLibraryAsset', { asset: selection[0], width: desiredResolution || selection[0].width });
+    const applyAsset = async () => {
+        await useSketch('applyLibraryAsset', {
+            asset: selection[0],
+            width: useResolutions ? desiredResolution || selection[0].width : null,
+        });
     };
 
     // React to changes of the library type
@@ -285,39 +288,7 @@ export function MediaLibrariesView({ type }) {
                         onIntersect={handleIntersect}
                         onSelect={handleSelect}
                         onApply={async () => {
-                            await applyDesiredResolution();
-                        }}
-                        onDrop={async () => {
-                            let dropTarget = sketchSelectionChanged ? 'canvas' : 'selection';
-
-                            switch (dropTarget) {
-                                case 'canvas':
-                                    /**
-                                     * Drops the image in Sketch at a higher resolution than the thumbnail.
-                                     *
-                                     * The default behavior is that the preview image (small resolution thumbnail) would be
-                                     * placed in Sketch. What we want though is a higher resolution:
-                                     *
-                                     * 1. The small thumbnail is placed in Sketch (e.g. 320 x 240)
-                                     * 2. The layer is resized to the desired size (e.g. 1920 x 1080)
-                                     * 3. The desired resolution is applied to the layer.
-                                     *
-                                     * The effect is that the thumbnails shows up briefly, is resized at low resolution and
-                                     * after the download of the image is finished, the layer will be upgraded with the high resolution.
-                                     */
-
-                                    await useSketch('resizeLayer', { width: desiredResolution || selection[0].width });
-                                    applyDesiredResolution();
-                                    break;
-                                case 'selection':
-                                    // Drop on selection
-                                    // replace existing image layer
-                                    await restoreFrameAfterDrop();
-                                    await applyDesiredResolution();
-                                    break;
-                            }
-
-                            setSketchSelectionChanged(false);
+                            await applyAsset();
                         }}
                         onDragStart={async () => {
                             /**
@@ -348,6 +319,45 @@ export function MediaLibrariesView({ type }) {
                             } else {
                                 setSelectedFrame(null);
                             }
+                            setSketchSelectionChanged(false);
+                        }}
+                        onDrop={async () => {
+                            let dropTarget = sketchSelectionChanged ? 'canvas' : 'selection';
+
+                            switch (dropTarget) {
+                                case 'canvas':
+                                    /**
+                                     * Drops the image in Sketch at a higher resolution than the thumbnail.
+                                     *
+                                     * The default behavior is that the preview image (small resolution thumbnail) would be
+                                     * placed in Sketch. What we want though is a higher resolution:
+                                     *
+                                     * 1. The small thumbnail is placed in Sketch (e.g. 320 x 240)
+                                     * 2. The layer is resized to the desired size (e.g. 1920 x 1080)
+                                     * 3. The desired resolution is applied to the layer.
+                                     *
+                                     * The effect is that the thumbnails shows up briefly, is resized at low resolution and
+                                     * after the download of the image is finished, the layer will be upgraded with the high resolution.
+                                     */
+
+                                    if (useResolutions) {
+                                        await useSketch('resizeLayer', {
+                                            width: desiredResolution || selection[0].width,
+                                        });
+                                        applyAsset();
+                                    }
+                                    break;
+                                case 'selection':
+                                    // Drop on selection
+                                    // replace existing image layer
+                                    if (useResolutions) {
+                                        await restoreFrameAfterDrop();
+                                        await applyAsset();
+                                    }
+
+                                    break;
+                            }
+
                             setSketchSelectionChanged(false);
                         }}
                     ></GridView>
@@ -385,17 +395,22 @@ export function MediaLibrariesView({ type }) {
                     ) : (
                         ''
                     )}
+                    {!useResolutions && <custom-spacer></custom-spacer>}
                     {selection && selection.length > 0 && (
                         <Text size="x-small" overflow="ellipsis" whitespace="nowrap" title={selection[0].title}>
                             {selection[0].title}
                         </Text>
                     )}
-                    <custom-spacer></custom-spacer>
 
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', width: '24px' }}>
-                        {loading ? <LoadingCircle size="ExtraSmall" /> : ''}
-                    </div>
-                    {selection && selection.length > 0 && (
+                    <custom-spacer></custom-spacer>
+                    {loading ? (
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', width: '24px' }}>
+                            <LoadingCircle size="ExtraSmall" />
+                        </div>
+                    ) : (
+                        ''
+                    )}
+                    {useResolutions && selection && selection.length > 0 && (
                         <custom-h-stack gap="xx-small">
                             <Flyout
                                 hug={false}

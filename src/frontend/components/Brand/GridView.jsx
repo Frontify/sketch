@@ -10,7 +10,6 @@ export function GridView({
     onApply,
     onDragStart,
     onDrop,
-
     images,
     limit = 25,
     onIntersect,
@@ -39,8 +38,16 @@ export function GridView({
         setTimeout(
             async () => {
                 try {
-                    await callback();
-                } catch (error) {}
+                    console.log('callback', callback);
+                    try {
+                        await callback();
+                    } catch (error) {
+                        console.log('error', error);
+                    }
+                    console.log('response');
+                } catch (error) {
+                    console.error(error);
+                }
 
                 setLoading(false);
             },
@@ -74,17 +81,17 @@ export function GridView({
                                 animationDelay: `${(index % limit) * 10}ms`,
                                 zIndex: recentlyApplied && recentlyApplied.id == image.id ? 2 : 1,
                             }}
-                            onFocus={(event) => {
+                            onFocus={() => {
                                 onSelect([image]);
                             }}
-                            onDoubleClick={(event) => {
+                            onDoubleClick={() => {
                                 runCallbackAfterLoad(image, onApply, false);
                             }}
-                            onDragEnd={async (event) => {
+                            onDragEnd={async () => {
                                 runCallbackAfterLoad(image, onDrop, true);
                                 setDragging(false);
                             }}
-                            onDragStart={async (event) => {
+                            onDragStart={async () => {
                                 onDragStart();
                                 setDragging(true);
                             }}

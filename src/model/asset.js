@@ -1,10 +1,7 @@
-import target from './target';
 import fetch from '../helpers/fetch';
 import sketch from './sketch';
-import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
 
 let sketch3 = require('sketch');
-let DOM = require('sketch/dom');
 
 import { Document, Image, Style } from 'sketch/dom';
 
@@ -26,7 +23,7 @@ class Asset {
 
     resize(width, height) {
         let currentDocument = Document.fromNative(sketch.getDocument());
-
+        if (!currentDocument) return;
         currentDocument.selectedLayers.forEach((layer) => {
             let originalWidth = layer.frame.width;
             let originalHeight = layer.frame.height;
@@ -49,7 +46,11 @@ class Asset {
     applyImage(data, desiredWidth) {
         return new Promise((resolve, reject) => {
             if (data.previewUrl && data.extension) {
-                let url = `${data.previewUrl}?width=${desiredWidth || 2000}`;
+                let url = data.previewUrl;
+
+                if (desiredWidth) {
+                    url += `?width=${desiredWidth || null}`;
+                }
                 let ext = data.extension;
 
                 let currentDocument = Document.fromNative(sketch.getDocument());
@@ -113,55 +114,87 @@ class Asset {
                         resolve();
                     }
                 } else {
-                    fetch(url, { cdn: true })
-                        .then((blob) => {
-                            // SVG as Base 64 String
-                            let svgString = NSString.stringWithString(blob);
-
-                            // Import the SVG
-                            const group = sketch3.createLayerFromData(svgString, 'svg');
-
-                            // Change the name of the group
-                            group.name = data.title || 'SVG';
-
-                            // Here we’ll figure out, to which existing layer we’ll add the imported SVG to:
-                            let parent = null;
-
-                            // If the current selection contains an Artboard, we’ll use that…
-                            currentDocument.selectedLayers.forEach((selectedLayer) => {
-                                if (!parent && selectedLayer.type == 'Artboard') {
-                                    parent = selectedLayer;
-                                }
-                            });
-
-                            // Otherwise, we’ll use the current page.
-                            if (!parent) {
-                                parent = currentDocument.selectedPage;
-                            }
-
-                            // Add the SVG to the parent
-                            group.parent = parent;
-
-                            // Deselect the parent
-                            parent.selected = false;
-
-                            // Select the group
-                            group.selected = true;
-                            currentDocument.centerOnLayer(group);
-                            // currentDocument.sketchObject.eventHandlerManager().currentHandler().zoomToSelection();
-
-                            // Todo: Figure out why we used this?
-                            // Problem: If we call this, the Promise won’t resolve afterwards
-                            // app.refreshCurrentDocument();
-
+                    this.applySVG(url, data.title, currentDocument)
+                        .then(() => {
                             resolve();
                         })
-                        .catch((e) => {
-                            console.error('failed to fetch svg', e);
-                            reject(e);
+                        .catch((error) => {
+                            reject(error);
                         });
                 }
             }
+        });
+    }
+
+    applySVG(url, title, document) {
+        console.log('applySVG');
+        return new Promise((resolve, reject) => {
+            fetch(url, { cdn: true })
+                .then((blob) => {
+                    // SVG as Base 64 String
+                    let svgString = NSString.stringWithString(blob);
+
+                    // Import the SVG
+                    const group = sketch3.createLayerFromData(svgString, 'svg');
+
+                    // Change the name of the group
+                    group.name = title || 'SVG';
+
+                    // Here we’ll figure out, to which existing layer we’ll add the imported SVG to:
+                    let parent = document.selectedPage;
+
+                    // If the current selection contains an Artboard, we’ll use that…
+                    document.selectedLayers.forEach((selectedLayer) => {
+                        if (selectedLayer.type == 'Artboard') {
+                            parent = selectedLayer;
+                        }
+                    });
+
+                    /**
+                     * In this case, a single layer is selected.
+                     * The selection will be replaced by the SVG.
+                     * This is useful with icons. When icons have the same size
+                     * the replacement can be used to "swap" icons.
+                     */
+
+                    if (parent.type != 'Artboard' && document.selectedLayers.length) {
+                        // replace selection
+                        var selection = document.selectedLayers.layers[0];
+                        parent = selection;
+
+                        // Position the SVG at the frame of the selection
+                        group.frame.x = selection.frame.x;
+                        group.frame.y = selection.frame.y;
+
+                        // Assign new parent
+                        group.parent = selection.parent;
+                        group.index = selection.index;
+
+                        // Remove the selected layer
+                        selection.remove();
+                    } else {
+                        // Add the SVG to the parent
+                        group.parent = parent;
+
+                        // Deselect the parent
+                        parent.selected = false;
+                    }
+
+                    // Select the group
+                    group.selected = true;
+                    document.centerOnLayer(group);
+                    // currentDocument.sketchObject.eventHandlerManager().currentHandler().zoomToSelection();
+
+                    // Todo: Figure out why we used this?
+                    // Problem: If we call this, the Promise won’t resolve afterwards
+                    // app.refreshCurrentDocument();
+
+                    resolve();
+                })
+                .catch((e) => {
+                    console.error('failed to fetch svg', e);
+                    reject(e);
+                });
         });
     }
 }

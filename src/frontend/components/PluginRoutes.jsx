@@ -97,9 +97,18 @@ export function PluginRoutes() {
                     ></Route>
 
                     <Route path="symbols"></Route>
-                    <Route path="icons" element={<MediaLibrariesView type="IconLibrary" selected="" />}></Route>
-                    <Route path="media" element={<MediaLibrariesView type="MediaLibrary" selected="" />}></Route>
-                    <Route path="logos" element={<MediaLibrariesView type="LogoLibrary" selected="" />}></Route>
+                    <Route
+                        path="icons"
+                        element={<MediaLibrariesView type="IconLibrary" useResolutions={false} />}
+                    ></Route>
+                    <Route
+                        path="media"
+                        element={<MediaLibrariesView type="MediaLibrary" useResolutions={true} />}
+                    ></Route>
+                    <Route
+                        path="logos"
+                        element={<MediaLibrariesView type="LogoLibrary" useResolutions={false} />}
+                    ></Route>
 
                     <Route
                         path="*"
