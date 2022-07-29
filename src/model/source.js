@@ -1,10 +1,9 @@
-import readJSON from '../helpers/readJSON';
 import shaFile from '../helpers/shaFile';
 import fetch from '../helpers/fetch';
+// import notification from './notification';
 import target from './target';
 import sketch from './sketch';
 import filemanager from './filemanager';
-import createFolder from '../helpers/createFolder';
 
 // Message helper
 import { frontend } from '../helpers/ipc';
@@ -55,29 +54,32 @@ class Source {
     }
 
     opened() {
-        console.log('opened');
         frontend.send('document-opened');
-        // Todo: Don’t rely on fetching data here but instead just open the file and resolve it
 
         sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'dirty', false);
         this.pushRecent();
 
-        // ‼️ Temporarily disabled Pusher
+        return this.getCurrentAsset()
+            .then(async (asset) => {
+                if (asset) {
+                    // notification.showNotification({
+                    //     title: 'Frontify',
+                    //     description: 'We’ll notify you if someone else opens this file. Happy working!',
+                    //     image: 'https://cdn-assets-eu.frontify.com/s3/frontify-enterprise-files-eu/eyJwYXRoIjoid2VhcmVcL2FjY291bnRzXC82ZVwvNDAwMDM4OFwvcHJvamVjdHNcLzkyMVwvYXNzZXRzXC83NFwvMTEwMzQzXC9lZjA3ZGE2MGI5YmIwZTdlZWI1NmE3ZGFiOTFhZmQ1Zi0xNjM0MDMwMzI0LnBuZyJ9:weare:cO3TsrBLHegCTSZAfM76U3PMAV28aqMoBYHCWzOso2U?width=2400',
+                    // });
 
-        return new Promise((resolve, reject) => {
-            resolve();
-        });
+                    return fetch('/v1/screen/activity/' + asset.id, {
+                        method: 'POST',
+                        body: JSON.stringify({ activity: 'OPEN' }),
+                    });
+                }
 
-        // return this.getCurrentAsset().then(function (asset) {
-        //     if (asset) {
-        //         return fetch('/v1/screen/activity/' + asset.id, {
-        //             method: 'POST',
-        //             body: JSON.stringify({ activity: 'OPEN' }),
-        //         });
-        //     }
-
-        //     return null;
-        // });
+                return null;
+            })
+            .catch((error) => {
+                // no asset found in database …
+                // fail silently since this might be a new file or an untracked file
+            });
     }
 
     async getAssetForAssetID(assetID) {
@@ -263,68 +265,61 @@ class Source {
         let filename = filePath.split('/');
         filename = filename[filename.length - 1];
 
-        let sha = '' + shaFile(filePath);
+        let newSHA = '' + shaFile(filePath);
 
         this.pushRecent();
 
         await filemanager.refreshAsset(wrappedDocument.id);
 
-        filemanager.updateAssetDatabase({
-            action: 'saved',
-            filename: filename,
-            uuid: wrappedDocument.id,
-            sha: sha,
-            saved: { sha: sha, timestamp: '' + new Date().toISOString() },
-            dirty: true,
-            path: filePath,
-            relativePath: this.getRelativePath(filePath),
+        return this.getCurrentAsset().then(async (asset) => {
+            filemanager.updateAssetDatabase({
+                action: 'saved',
+                filename: filename,
+                uuid: wrappedDocument.id,
+                sha: newSHA,
+                saved: { sha: newSHA, timestamp: '' + new Date().toISOString() },
+                dirty: true,
+                path: filePath,
+                relativePath: this.getRelativePath(filePath),
+            });
+
+            // Mark as dirty, so that it can be pushed
+            sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'dirty', true);
+
+            frontend.send('document-saved');
+
+            if (asset) {
+                if (newSHA != asset.sha) {
+                    let result = await fetch('/v1/screen/activity/' + asset.id, {
+                        method: 'POST',
+                        body: JSON.stringify({ activity: 'LOCAL_CHANGE' }),
+                    });
+
+                    return result;
+                }
+            }
+
+            return null;
         });
-
-        // Mark as dirty, so that it can be pushed
-        sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'dirty', true);
-
-        frontend.send('document-saved');
-
-        // ‼️ Temporarily disabled Pusher
-
-        return new Promise((resolve, reject) => {
-            resolve();
-        });
-
-        // return this.getCurrentAsset().then(async (asset) => {
-        //     if (asset) {
-        //         if (sha != asset.sha) {
-        //             let result = await fetch('/v1/screen/activity/' + asset.id, {
-        //                 method: 'POST',
-        //                 body: JSON.stringify({ activity: 'LOCAL_CHANGE' }),
-        //             });
-
-        //             return result;
-        //         }
-        //     }
-
-        //     return null;
-        // });
     }
 
     closed() {
         frontend.send('document-closed');
 
-        // ‼️ Temporarily disabled Pusher
+        return this.getCurrentAsset()
+            .then(function (asset) {
+                if (asset) {
+                    return fetch('/v1/screen/activity/' + asset.id, {
+                        method: 'DELETE',
+                    });
+                }
 
-        return new Promise((resolve, reject) => {
-            resolve();
-        });
-
-        // return this.getCurrentAsset().then(function (asset) {
-        //     if (asset) {
-        //         return fetch('/v1/screen/activity/' + asset.id, {
-        //             method: 'DELETE',
-        //         });
-        //     }
-
-        //     return null;
-        // });
+                return null;
+            })
+            .catch((error) => {
+                // no asset found in database …
+                // fail silently since this might be a new file or an untracked file
+            });
     }
 
     updateUploadProgress(options, progress) {
@@ -403,6 +398,7 @@ class Source {
             action: 'pulled',
             filename: filename,
             uuid: source.id_external,
+            id: source.id,
             sha: source.sha,
             pulled: { sha: source.sha, timestamp: '' + new Date().toISOString() },
             previous: {
@@ -639,17 +635,17 @@ class Source {
      */
 
     getCurrentAsset() {
-        console.log('get current asset');
-        let currentFilename = this.getCurrentFilename();
+        return new Promise((resolve, reject) => {
+            let database = filemanager.getAssetDatabaseFile();
+            let selectedDocument = sketch3.Document.getSelectedDocument();
+            let entry = database[selectedDocument.id];
 
-        return this.getRemoteSourceFiles().then(
-            function (assets) {
-                if (!assets) return null;
-                return assets.find(function (asset) {
-                    return asset.filename == currentFilename;
-                });
-            }.bind(this)
-        );
+            if (entry) {
+                resolve(entry);
+            } else {
+                reject('No asset found in database');
+            }
+        });
     }
     /**
      * Returns the filename (e.g. Landing Page.sketch) of the current document.

@@ -21,15 +21,13 @@ class Notification {
     }
 
     connect() {
+        console.log('⚡️ Pusher :: connect');
         if (this.pusher) {
             return Promise.resolve(this.pusher);
         }
 
         return fetch('/v1/account/environment').then(
             function (data) {
-                // ATTENTION: PUSHED MIGHT BE DISABLED
-                console.log(data);
-                if (!data) return;
                 if (data['pusher']['enabled']) {
                     if (data['pusher']['region'] != 'us') {
                         this.pusher = PTPusher.pusherWithKey_delegate_encrypted_cluster(
@@ -68,6 +66,7 @@ class Notification {
     }
 
     showNotification(data) {
+        console.log('⚡️ Pusher :: Show Notification');
         let notification = NSUserNotification.alloc().init();
         notification.title = data.title;
         notification.contentImage = NSImage.alloc().initByReferencingURL(NSURL.URLWithString(data.image));
@@ -78,6 +77,7 @@ class Notification {
     }
 
     subscribe(project) {
+        console.log('⚡️ Pusher :: subscribe');
         if (this.pusher) {
             this.channel = this.pusher.subscribeToPresenceChannelNamed_delegate('project-' + project, nil);
             threadDictionary['frontifynotificationchannel'] = this.channel;
@@ -85,6 +85,7 @@ class Notification {
     }
 
     unsubscribe() {
+        console.log('⚡️ Pusher :: unsubscribe');
         if (this.pusher) {
             if (this.channel) {
                 this.channel.unsubscribe();
@@ -95,6 +96,7 @@ class Notification {
     }
 
     on(event, callback) {
+        console.log('⚡️ Pusher :: on');
         if (this.pusher) {
             let delegate = new MochaJSDelegate({
                 'didReceiveChannelEventNotification:': function (notification) {
@@ -118,7 +120,7 @@ class Notification {
     }
 
     listen() {
-        console.log('listen');
+        console.log('⚡️ Pusher :: listen');
         return this.connect()
             .then(
                 function () {

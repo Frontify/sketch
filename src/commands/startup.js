@@ -8,7 +8,7 @@ import user from '../model/user';
 export default function (context) {
     loadFramework('pusher', 'PTPusher', context);
 
-    if(user.isAuthenticated()) {
+    if (user.isAuthenticated()) {
         notification.listen();
     }
 }
@@ -16,7 +16,10 @@ export default function (context) {
 function loadFramework(name, checkClassName, context) {
     if (NSClassFromString(checkClassName) == null) {
         let mocha = Mocha.sharedRuntime();
-        return mocha.loadFrameworkWithName_inDirectory(name, context.scriptPath.stringByDeletingLastPathComponent() + '/frameworks');
+        return mocha.loadFrameworkWithName_inDirectory(
+            name,
+            context.scriptPath.stringByDeletingLastPathComponent() + '/frameworks'
+        );
     } else {
         return true;
     }

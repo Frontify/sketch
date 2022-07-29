@@ -40,23 +40,6 @@ class Typography {
         );
     }
 
-    getFontStyles(project) {
-        // load typography styles
-        return fetch('/v1/typography/styles/' + project).then(
-            function (data) {
-                this.colors = data.colors;
-
-                // only include installable fonts
-                data.fonts = data.fonts || [];
-                data.fonts = data.fonts.filter(function (font) {
-                    return !!font.install_name;
-                });
-
-                return data;
-            }.bind(this)
-        );
-    }
-
     applyFontStyle(fontStyle) {
         let currentDocument = sketch3.getSelectedDocument();
         let selection = currentDocument.selectedLayers;
@@ -302,24 +285,6 @@ class Typography {
         for (let i = 0; i < filteredLayers.length; i++) {
             filteredLayers[i].style = style;
         }
-    }
-
-    showTypography() {
-        target.getAssetSourcesForType('typography').then(
-            function (assetSources) {
-                if (assetSources && assetSources.selected) {
-                    this.getFontStyles(assetSources.selected.id).then(
-                        function (data) {
-                            if (isWebviewPresent('frontifymain')) {
-                                data.project = assetSources.selected;
-                                sendToWebview('frontifymain', 'showAssetSources(' + JSON.stringify(assetSources) + ')');
-                                sendToWebview('frontifymain', 'showTypography(' + JSON.stringify(data) + ')');
-                            }
-                        }.bind(this)
-                    );
-                }
-            }.bind(this)
-        );
     }
 }
 

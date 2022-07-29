@@ -141,22 +141,6 @@ export default function (context, view) {
         }.bind(this)
     );
 
-    webview.on('memorizeDomain', function (url) {
-        domain = url;
-    });
-
-    webview.on('openUrl', function (url, absolute) {
-        if (absolute) {
-            NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString(url));
-        } else {
-            target.getDomain().then(
-                function (data) {
-                    NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString(data + url));
-                }.bind(this)
-            );
-        }
-    });
-
     webview.on('openFinder', function () {
         target.getTarget('sources').then(
             function (data) {
@@ -165,23 +149,6 @@ export default function (context, view) {
                 }
             }.bind(this)
         );
-    });
-
-    webview.on('addFolder', function (name, set) {
-        project.addFolder(name, set).then(
-            function () {
-                project.showFolderChooser(set, view);
-            }.bind(this)
-        );
-    });
-
-    webview.on('showColors', function () {
-        view = 'colors';
-        color.showColors();
-    });
-
-    webview.on('applyColor', (data) => {
-        color.applyColor(data);
     });
 
     webview.on('addDocumentColors', function (colors) {
@@ -207,10 +174,6 @@ export default function (context, view) {
 
     webview.on('addFontStyles', function (styles) {
         typography.addFontStyles(styles);
-    });
-
-    webview.on('applyFontStyle', function (style) {
-        typography.applyFontStyle(style);
     });
 
     webview.on('downloadFonts', function () {
@@ -712,11 +675,6 @@ export default function (context, view) {
         }
 
         frontend.send('response', { responseUUID: requestUUID, ...payload });
-    }
-
-    // workarounds
-    function getURL() {
-        return '' + webview.getNativeWebview().URL();
     }
 
     return win;

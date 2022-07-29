@@ -24,9 +24,7 @@ class Target {
     setBrand(brandID) {
         this.setValueForKey('brand', brandID);
     }
-    getBrand() {
-        readJSON('target');
-    }
+
     getPathToSyncFolder() {
         return `${NSHomeDirectory()}/Frontify`;
     }
@@ -77,27 +75,11 @@ class Target {
             });
     }
 
-    getSimpleTarget() {
+    getDomain() {
         let target = readJSON('target');
 
-        if (!target) {
-            return Promise.resolve(false);
-        }
-
-        if (target.project) {
-            let set = readJSON('set-' + target.project) || {};
-            target.set = set.set || 0;
-            target.set_sources = set.set_sources || 0;
-        }
-
-        return Promise.resolve(target);
-    }
-
-    getDomain() {
-        let token = readJSON('token');
-
-        if (token && token.domain) {
-            return Promise.resolve(token.domain);
+        if (target && target.domain) {
+            return Promise.resolve(target.domain);
         }
 
         return Promise.resolve('https://app.frontify.com');
@@ -138,149 +120,6 @@ class Target {
                 writeJSON('target', target);
 
                 return target;
-            }.bind(this)
-        );
-    }
-
-    showTarget() {
-        this.getTarget().then(
-            function (data) {
-                if (!data) {
-                    if (isWebviewPresent('frontifymain')) {
-                        sendToWebview('frontifymain', 'showNoProjects()');
-                    }
-                } else {
-                    if (data.target_changed) {
-                        project.showFolderChooser();
-                    }
-
-                    // write target to JSON
-                    let target = readJSON('target') || {};
-                    target.brand = data.brand.id;
-                    target.project = data.project.id;
-                    writeJSON('target', target);
-
-                    if (isWebviewPresent('frontifymain')) {
-                        sendToWebview('frontifymain', 'showTarget(' + JSON.stringify(data) + ')');
-                    }
-                }
-            }.bind(this)
-        );
-    }
-
-    getAssetSourcesForType(type) {
-        return this.getSimpleTarget()
-            .then(
-                function (target) {
-                    return fetch('/v1/brand/' + target.brand + '/projects').then(
-                        function (data) {
-                            if (data.success == false) {
-                                return false;
-                            }
-
-                            let sources = [];
-                            let selection = readJSON('assetsources-' + target.brand) || {};
-                            let selected = null;
-
-                            switch (type) {
-                                case 'colors':
-                                    sources = data.data.styleguides || [];
-                                    break;
-                                case 'typography':
-                                    sources = data.data.styleguides || [];
-                                    break;
-                                case 'images':
-                                    sources = data.data.libraries.filter(
-                                        function (library) {
-                                            return library.project_type == 'MEDIALIBRARY';
-                                        }.bind(this)
-                                    );
-                                    break;
-                                case 'logos':
-                                    sources = data.data.libraries.filter(
-                                        function (library) {
-                                            return library.project_type == 'LOGOLIBRARY';
-                                        }.bind(this)
-                                    );
-                                    break;
-                                case 'icons':
-                                    sources = data.data.libraries.filter(
-                                        function (library) {
-                                            return library.project_type == 'ICONLIBRARY';
-                                        }.bind(this)
-                                    );
-                                    break;
-                            }
-
-                            if (sources.length == 0) {
-                                throw new Error('No asset sources found for type ' + type);
-                            }
-
-                            if (selection[type]) {
-                                selected = sources.find(
-                                    function (source) {
-                                        return source.id == selection[type].id;
-                                    }.bind(this)
-                                );
-                            }
-
-                            if (!selected) {
-                                selected = sources[0];
-                            }
-
-                            // set or refresh asset source
-                            return this.switchAssetSourceForType(type, selected).then(
-                                function () {
-                                    return { sources: sources, selected: selected, type: type };
-                                }.bind(this)
-                            );
-                        }.bind(this)
-                    );
-                }.bind(this)
-            )
-            .catch(
-                function (e) {
-                    if (isWebviewPresent('frontifymain')) {
-                        this.getTarget().then(
-                            function (target) {
-                                let data = target;
-                                data.type = type;
-                                sendToWebview('frontifymain', 'showBlankSlate(' + JSON.stringify(data) + ')');
-                            }.bind(this)
-                        );
-                    }
-
-                    return null;
-                }.bind(this)
-            );
-    }
-
-    getSelectedAssetSourceForType(type) {
-        return this.getSimpleTarget()
-            .then(
-                function (target) {
-                    let assetSources = readJSON('assetsources-' + target.brand) || {};
-                    if (assetSources[type]) {
-                        return assetSources[type];
-                    }
-
-                    throw new TypeError('No selected source for type ' + type + ' found');
-                }.bind(this)
-            )
-            .catch(function (e) {
-                console.error(e);
-            });
-    }
-
-    switchAssetSourceForType(type, assetSource) {
-        return this.getSimpleTarget().then(
-            function (target) {
-                // write new source id to JSON
-                let assetSources = readJSON('assetsources-' + target.brand) || {};
-                assetSources[type] = assetSource;
-                writeJSON('assetsources-' + target.brand, assetSources);
-
-                return true;
             }.bind(this)
         );
     }

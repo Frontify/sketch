@@ -98,15 +98,6 @@ function activeDocumentDidChange() {
 }
 
 /**
- * Document changed
- * ----------------------------------------------------------------------------
- */
-
-export function onDocumentChanged(context) {
-    // mark documnt as dirty?
-}
-
-/**
  * Selection changed
  * ----------------------------------------------------------------------------
  */
