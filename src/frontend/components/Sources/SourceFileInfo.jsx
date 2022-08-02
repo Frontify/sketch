@@ -78,7 +78,7 @@ function UntrackedSource({ source }) {
                 {t('sources.untracked')}
             </Text>
             <Text weight="strong" whitespace="nowrap" overflow="ellipsis">
-                {source.filename?.replace('.sketch', '')}
+                {source.name}
             </Text>
         </custom-v-stack>
     );
@@ -134,11 +134,12 @@ export function SourceFileInfoText({ source, children }) {
                 {/* Tracked remote file */}
                 {source && source.remote && source.refs?.remote_id && <RemoteSource source={source}></RemoteSource>}
                 {/* Untracked */}
-                {source && source.filename && !source.refs?.remote_id && (
+                {source && source.name && !source.refs?.remote_id && (
                     <UntrackedSource source={source}></UntrackedSource>
                 )}
+
                 {/* Unsaved document */}
-                {source && !source.filename && <UnsavedSource source={source}></UnsavedSource>}
+                {source && !source.name && !source.filename && <UnsavedSource source={source}></UnsavedSource>}
             </custom-h-stack>
             {children}
         </custom-v-stack>
