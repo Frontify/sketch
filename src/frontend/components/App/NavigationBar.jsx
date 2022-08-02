@@ -160,6 +160,7 @@ export function NavigationBar() {
     const refresh = async () => {
         setLoading(true);
         setStatus('FETCHING');
+        console.log('refresh');
         await context.actions.getCurrentDocument();
         setStatus('PENDING');
 

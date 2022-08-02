@@ -63,6 +63,12 @@ export const UserContextProvider = ({ children }) => {
             let id = payload?.id || payload?.id_external;
 
             switch (type) {
+                case 'error':
+                    actions.handleError({
+                        title: 'Plugin Error',
+                        description: payload.error,
+                    });
+                    break;
                 case 'tick':
                     setTick(payload.value);
                     break;
@@ -76,7 +82,6 @@ export const UserContextProvider = ({ children }) => {
                                 // Cleanup eventual uploads that had to be tracked by artboard id
                                 delete state[payload.target?.for];
                                 return { ...state, [id]: payload };
-                                return { ...state };
                             });
                             break;
                         case 'upload-complete':
@@ -90,6 +95,7 @@ export const UserContextProvider = ({ children }) => {
                             });
 
                             break;
+
                         default:
                             setTransferMap((state) => {
                                 return { ...state, [id]: payload };
@@ -314,13 +320,11 @@ export const UserContextProvider = ({ children }) => {
             }
 
             setRefreshing(true);
-
             setLastFetched(new Date().getTime());
 
             let { currentDocument } = await useSketch('getCurrentDocument');
 
             setCurrentDocument(currentDocument);
-
             setRefreshing(false);
         },
         async refresh(payload) {
@@ -344,7 +348,9 @@ export const UserContextProvider = ({ children }) => {
             setRefreshing(false);
         },
         selectBrand(brand) {
-            useSketch('setBrand', { brand });
+            console.log('selectBrand', brand);
+            console.log('use sketch', 'setBrand', '' + brand.id);
+            useSketch('setBrand', { brandID: '' + brand.id });
             setSelection((state) => {
                 return { ...state, brand };
             });
@@ -398,7 +404,6 @@ export const UserContextProvider = ({ children }) => {
             return new Promise(async (resolve, reject) => {
                 if (credentials && credentials.domain && credentials.token) {
                     try {
-                        console.log('await query');
                         let data = null;
                         let errors = null;
                         try {
@@ -412,7 +417,7 @@ export const UserContextProvider = ({ children }) => {
                             });
                             reject();
                         }
-                        console.log('done query');
+
                         if (errors) {
                             console.error(
                                 'Could not load user data from GraphQL, because errors were returned',

@@ -1,9 +1,8 @@
-import target from './target';
-import fetch from '../helpers/fetch';
-import sketch from './sketch';
-import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
+// Sketch API
+let sketch = require('sketch');
 
-let sketch3 = require('sketch');
+// Helpers
+import fetch from '../helpers/fetch';
 
 class Color {
     constructor() {}
@@ -13,9 +12,7 @@ class Color {
     }
 
     applyColor(color) {
-        // let selection = sketch.getSelection();
-
-        let currentDocument = sketch3.getSelectedDocument();
+        let currentDocument = sketch.getSelectedDocument();
         let selection = currentDocument.selectedLayers;
 
         selection.layers.forEach((layer) => {
@@ -47,7 +44,7 @@ class Color {
     }
 
     addColorsToDocumentScope(colors, replaceCurrentColors = false) {
-        let selectedDocument = sketch3.getSelectedDocument();
+        let selectedDocument = sketch.getSelectedDocument();
 
         if (selectedDocument) {
             if (replaceCurrentColors) {
@@ -56,7 +53,7 @@ class Color {
 
             colors.forEach((color) => {
                 selectedDocument.swatches.push(
-                    sketch3.Swatch.from({
+                    sketch.Swatch.from({
                         name: color.name,
                         color: color.css_value_hex,
                     })
@@ -69,7 +66,7 @@ class Color {
      * @deprecated Should only be used in sketch version 68 and older! Use 'addColorsToDocumentScope' instead.
      */
     addColorsToDocumentScopeLegacy(colors, replaceCurrentColors = false) {
-        let selectedDocument = sketch3.getSelectedDocument();
+        let selectedDocument = sketch.getSelectedDocument();
 
         if (selectedDocument) {
             if (replaceCurrentColors) {
@@ -147,7 +144,7 @@ class Color {
                 layer.style.fills = [
                     {
                         color: mscolor,
-                        fillType: sketch3.Style.FillType.Color,
+                        fillType: sketch.Style.FillType.Color,
                     },
                 ];
                 break;
@@ -157,32 +154,14 @@ class Color {
                 layer.style.fills = [
                     {
                         color: mscolor,
-                        fillType: sketch3.Style.FillType.Color,
+                        fillType: sketch.Style.FillType.Color,
                     },
                 ];
         }
     }
 
-    showColors() {
-        target.getAssetSourcesForType('colors').then(
-            function (assetSources) {
-                if (assetSources && assetSources.selected) {
-                    this.getColors(assetSources.selected.id).then(
-                        function (data) {
-                            if (isWebviewPresent('frontifymain')) {
-                                data.project = assetSources.selected;
-                                sendToWebview('frontifymain', 'showAssetSources(' + JSON.stringify(assetSources) + ')');
-                                sendToWebview('frontifymain', 'showColors(' + JSON.stringify(data) + ')');
-                            }
-                        }.bind(this)
-                    );
-                }
-            }.bind(this)
-        );
-    }
-
     getSketchVersion() {
-        return sketch3.Settings.version.sketch;
+        return sketch.Settings.version.sketch;
     }
 }
 

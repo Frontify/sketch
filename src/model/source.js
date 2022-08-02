@@ -1,19 +1,21 @@
-import shaFile from '../helpers/shaFile';
+// Sketch API
+
+import { Document } from 'sketch/dom';
+import { Settings } from 'sketch';
+
+// Helpers
+import { getDocument } from '../helpers/sketch';
+
 import fetch from '../helpers/fetch';
-// import notification from './notification';
-import target from './target';
-import sketch from './sketch';
-import filemanager from './filemanager';
+import shaFile from '../helpers/shaFile';
 
-// Message helper
+// Models
+import Target from './target';
+import FileManager from './filemanager';
+
+// IPC
 import { frontend } from '../helpers/ipc';
-
-import recentFiles from '../model/recent';
-
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
-
-let sketch3 = require('sketch');
-let Document = require('sketch/dom').Document;
 
 class Source {
     constructor() {}
@@ -50,14 +52,13 @@ class Source {
     }
 
     openSourceAtPath(path) {
-        filemanager.openFile(path);
+        FileManager.openFile(path);
     }
 
     opened() {
         frontend.send('document-opened');
 
-        sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'dirty', false);
-        this.pushRecent();
+        Settings.setDocumentSettingForKey(getDocument(), 'dirty', false);
 
         return this.getCurrentAsset()
             .then(async (asset) => {
@@ -195,50 +196,10 @@ class Source {
         let response = await fetch(url, options);
         return response.data?.asset?.id;
     }
-    async pushRecent() {
-        let document = sketch3.Document.fromNative(sketch.getDocument());
-        let nativeSketchDocument = sketch.getDocument();
 
-        let refs = {
-            remote_id: sketch3.Settings.documentSettingForKey(sketch.getDocument(), 'remote_id'),
-            remote_project_id: sketch3.Settings.documentSettingForKey(sketch.getDocument(), 'remote_project_id'),
-            remote_graphql_id: sketch3.Settings.documentSettingForKey(sketch.getDocument(), 'remote_graphql_id'),
-            remote_brand_id: sketch3.Settings.documentSettingForKey(sketch.getDocument(), 'remote_brand_id'),
-        };
-
-        /**
-         * Do we have the GraphQL ID? If not, let’s fetch it first.
-         */
-
-        if (!refs.remote_graphql_id || typeof refs.remote_graphql_id != 'string') {
-            let id = await this.getGraphQLIDForLegacyAssetID(refs.remote_id);
-
-            sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'remote_graphql_id', id);
-            refs.remote_graphql_id = id;
-        }
-
-        if (nativeSketchDocument && nativeSketchDocument.fileURL()) {
-            let base = target.getPathToSyncFolder();
-            let path = '' + nativeSketchDocument.fileURL().path();
-            let filename = path.split('/');
-            let relativePath = path.replace(base + '/', '');
-
-            recentFiles.push({
-                uuid: document.id,
-                path,
-                relativePath,
-                filename: filename[filename.length - 1],
-                localModifiedFromRemote: sketch3.Settings.documentSettingForKey(
-                    sketch.getDocument(),
-                    'remote_modified'
-                ),
-                refs,
-            });
-        }
-    }
     getRelativePath(path) {
         if (!path) return null;
-        let base = target.getPathToSyncFolder();
+        let base = Target.getPathToSyncFolder();
 
         let relativePath = `/${path.replace(base, '').split('/').splice(3).join('/')}`;
 
@@ -246,12 +207,11 @@ class Source {
     }
     async saved(context) {
         let nativeDocument = context.actionContext.document;
-        let wrappedDocument = sketch3.Document.fromNative(context.actionContext.document);
+        let wrappedDocument = Document.fromNative(context.actionContext.document);
 
         // Is this asset tracked?
-        let database = filemanager.getAssetDatabaseFile();
-        let isTracked =
-            sketch3.Settings.documentSettingForKey(wrappedDocument, 'remote_id') || database[wrappedDocument.id];
+        let database = FileManager.getAssetDatabaseFile();
+        let isTracked = Settings.documentSettingForKey(wrappedDocument, 'remote_id') || database[wrappedDocument.id];
 
         // Return early
         if (!isTracked) {
@@ -267,12 +227,10 @@ class Source {
 
         let newSHA = '' + shaFile(filePath);
 
-        this.pushRecent();
-
-        await filemanager.refreshAsset(wrappedDocument.id);
+        await FileManager.refreshAsset(wrappedDocument.id);
 
         return this.getCurrentAsset().then(async (asset) => {
-            filemanager.updateAssetDatabase({
+            FileManager.updateAssetDatabase({
                 action: 'saved',
                 filename: filename,
                 uuid: wrappedDocument.id,
@@ -284,7 +242,7 @@ class Source {
             });
 
             // Mark as dirty, so that it can be pushed
-            sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'dirty', true);
+            Settings.setDocumentSettingForKey(getDocument(), 'dirty', true);
 
             frontend.send('document-saved');
 
@@ -353,8 +311,7 @@ class Source {
 
         let uri = `/v1/screen/download/${source.id}`;
 
-        return filemanager
-            .downloadFile(uri, path, sourceProgress)
+        return FileManager.downloadFile(uri, path, sourceProgress)
             .then(
                 function (path) {
                     if (path == null) {
@@ -382,6 +339,37 @@ class Source {
                 }.bind(this)
             );
     }
+
+    async checkout(source, path) {
+        let base = Target.getPathToSyncFolder();
+        let folder = `${base}/${path}`;
+        let finalPath = `${folder}/${source.name}`;
+
+        let result = await this.pullSource(source, finalPath);
+
+        if (!result) {
+            return { success: false };
+        } else {
+            // Open path
+            let document = await this.openSketchFile(finalPath);
+
+            let uuid = document.id;
+            let remoteId = Settings.documentSettingForKey(document, 'remote_id');
+            // If the file has been uploaded through the old plugin, it won’t have an ID stored.
+            // To make the file savable, we’ll add one.
+            if (!remoteId) {
+                Settings.setDocumentSettingForKey(document, 'remote_id', source.id);
+            }
+
+            let remote = await this.getAssetForLegacyAssetID(source.id);
+
+            this.checkoutSource({ id_external: uuid, ...source, remote }, finalPath);
+
+            frontend.send('document-pulled');
+
+            return { result };
+        }
+    }
     /**
      * Check out a source file from remote.
      *
@@ -394,7 +382,7 @@ class Source {
         let filename = path.split('/');
         filename = filename[filename.length - 1];
 
-        filemanager.updateAssetDatabase({
+        FileManager.updateAssetDatabase({
             action: 'pulled',
             filename: filename,
             uuid: source.id_external,
@@ -424,8 +412,7 @@ class Source {
      */
     async pullSource(source, path) {
         return this.downloadSource(source, path).then(async (path) => {
-            // downloaded
-
+            console.log('downloaded', path);
             return path;
         });
     }
@@ -473,8 +460,7 @@ class Source {
             100
         );
 
-        return filemanager
-            .uploadFile(file, sourceProgress)
+        return FileManager.uploadFile(file, sourceProgress)
             .then(async (data) => {
                 // Payload of the response: {filesize, id, ext, modifier, filename, type, sha, modified, token}
 
@@ -504,11 +490,11 @@ class Source {
                     });
                 }
 
-                filemanager.updateAssetStatus(target.project.id, data);
+                FileManager.updateAssetStatus(target.project.id, data);
 
                 let sha = '' + shaFile(file.path);
 
-                filemanager.updateAssetDatabase({
+                FileManager.updateAssetDatabase({
                     action: 'pushed',
                     uuid: file.id_external,
                     sha: sha,
@@ -562,18 +548,16 @@ class Source {
                 // This will be the new location of the file
                 let filePath = uploadTarget.path + source.filename;
 
-                console.log('pass it on to filemanager', file);
-                filemanager
-                    .uploadFile(file, sourceProgress)
+                FileManager.uploadFile(file, sourceProgress)
                     .then(async (data) => {
                         console.log('then');
                         clearInterval(polling);
                         data.modified = data.created;
-                        // filemanager.updateAssetStatus(target.project.id, data);
+                        // FileManager.updateAssetStatus(target.project.id, data);
 
                         let dataFromGraphQL = await this.getAssetForLegacyAssetID(data.id);
                         let sha = '' + shaFile(file.path);
-                        filemanager.updateAssetDatabase({
+                        FileManager.updateAssetDatabase({
                             action: 'added',
                             dirty: false,
                             id: data.id,
@@ -615,8 +599,8 @@ class Source {
     }
 
     addCurrentFile() {
-        if (!filemanager.isCurrentSaved()) {
-            if (filemanager.saveCurrent()) {
+        if (!FileManager.isCurrentSaved()) {
+            if (FileManager.saveCurrent()) {
                 if (isWebviewPresent('frontifymain')) {
                     sendToWebview('frontifymain', 'refresh()');
                 }
@@ -636,8 +620,8 @@ class Source {
 
     getCurrentAsset() {
         return new Promise((resolve, reject) => {
-            let database = filemanager.getAssetDatabaseFile();
-            let selectedDocument = sketch3.Document.getSelectedDocument();
+            let database = FileManager.getAssetDatabaseFile();
+            let selectedDocument = Document.getSelectedDocument();
             let entry = database[selectedDocument.id];
 
             if (entry) {
@@ -655,7 +639,7 @@ class Source {
      * Thus, we need to split the path and extract the last part:
      */
     getCurrentFilename() {
-        let doc = sketch.getDocument();
+        let doc = getDocument();
         let currentFilename = '';
 
         if (doc && doc.fileURL()) {

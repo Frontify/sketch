@@ -21,7 +21,9 @@ export function ErrorView({ title, description, errors }) {
                             <Logo size="148"></Logo>
                             <custom-spacer></custom-spacer>
                             <Heading size="xx-large">{title}</Heading>
-                            <Text>{description}</Text>
+                            <Text>
+                                <code>{description}</code>
+                            </Text>
                             <custom-h-stack gap="small">
                                 <Button
                                     hugWidth={true}

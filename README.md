@@ -93,7 +93,6 @@ There’s another file `utilities.css` with custom attributes that are mainly us
 **artboard changed**
 
 -   Notify React about the new artboards
--   Updates are throttled (1000 ms) so that excessive selections don’t cause too much blocking of the application
 
 ## Storage
 

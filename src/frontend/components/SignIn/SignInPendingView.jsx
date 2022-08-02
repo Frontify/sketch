@@ -40,6 +40,7 @@ export function SignInPendingView() {
     };
 
     function cancel() {
+        useSketch('cancelOauthFlow');
         navigate('/signin');
     }
 

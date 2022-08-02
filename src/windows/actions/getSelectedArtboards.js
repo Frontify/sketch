@@ -1,6 +1,8 @@
-import sketch from '../../model/sketch';
-let sketch3 = require('sketch');
-let Settings = require('sketch/settings');
+// Sketch API
+import sketch, { Settings } from 'sketch';
+
+// Helpers
+import { getDocument } from '../../helpers/sketch';
 import { sha1 } from '../../helpers/sha1';
 
 /**
@@ -20,7 +22,7 @@ const SHA_KEY = 'com.frontify.artboard.sha';
 const DESTINATION_KEY = 'com.frontify.artboard.destinations';
 
 export function patchDestinations(artboardID, destination) {
-    let layer = sketch3.find(`[id="${artboardID}"]`)[0];
+    let layer = sketch.find(`[id="${artboardID}"]`)[0];
     let destinations = Settings.layerSettingForKey(layer, DESTINATION_KEY);
     let patchedDestinations = destinations.map((original) => {
         if (
@@ -39,12 +41,12 @@ export function patchDestinations(artboardID, destination) {
 }
 
 export function removeDestinations(artboard) {
-    let layer = sketch3.find(`[id="${artboard.id}"]`)[0];
+    let layer = sketch.find(`[id="${artboard.id}"]`)[0];
     Settings.setLayerSettingForKey(layer, DESTINATION_KEY, []);
 }
 
 export function removeDestination(artboard, destination) {
-    let layer = sketch3.find(`[id="${artboard.id}"]`)[0];
+    let layer = sketch.find(`[id="${artboard.id}"]`)[0];
     let destinations = Settings.layerSettingForKey(layer, DESTINATION_KEY);
     let patchedDestinations = destinations.filter((original) => {
         if (
@@ -71,12 +73,12 @@ export function setDestinations(artboard, brandID) {
         };
     });
 
-    let layer = sketch3.find(`[id="${artboard.id}"]`)[0];
+    let layer = sketch.find(`[id="${artboard.id}"]`)[0];
     Settings.setLayerSettingForKey(layer, DESTINATION_KEY, destinations);
 }
 
 function shaForArtboard(artboard) {
-    let layer = sketch3.find(`[id="${artboard.id}"]`)[0];
+    let layer = sketch.find(`[id="${artboard.id}"]`)[0];
 
     return shaForLayer(layer);
 }
@@ -105,7 +107,7 @@ export function computedSHA(artboard) {
     return shaForArtboard(artboard);
 }
 export function setSHA(artboard) {
-    let layer = sketch3.find(`[id="${artboard.id}"]`)[0];
+    let layer = sketch.find(`[id="${artboard.id}"]`)[0];
 
     let sha = shaForLayer(layer);
 
@@ -163,11 +165,11 @@ export function getSelectedArtboards(brandID) {
     // remember the brand
 
     if (brandID) {
-        Settings.setSessionVariable('com.frontify.sketch.recent.brand.id', brandID);
+        Settings.setSessionVariable('com.frontify.sketch.recent.brand.id', '' + brandID);
     }
 
     try {
-        let currentDocument = sketch3.Document.fromNative(sketch.getDocument());
+        let currentDocument = sketch.Document.fromNative(getDocument());
         if (!currentDocument)
             return {
                 artboards: [],

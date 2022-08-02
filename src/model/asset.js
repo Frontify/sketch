@@ -1,9 +1,10 @@
-import fetch from '../helpers/fetch';
-import sketch from './sketch';
-
-let sketch3 = require('sketch');
-
+// Sketch API
+import sketch from 'sketch';
 import { Document, Image, Style } from 'sketch/dom';
+
+// Helpers
+import { getDocument } from '../helpers/sketch';
+import fetch from '../helpers/fetch';
 
 class Asset {
     constructor() {}
@@ -17,12 +18,12 @@ class Asset {
     }
 
     import(assetId) {
-        const url = '/v1/inspect/import/' + assetId;
+        let url = '/v1/inspect/import/' + assetId;
         return fetch(url, { method: 'GET' });
     }
 
     resize(width, height) {
-        let currentDocument = Document.fromNative(sketch.getDocument());
+        let currentDocument = Document.fromNative(getDocument());
         if (!currentDocument) return;
         currentDocument.selectedLayers.forEach((layer) => {
             let originalWidth = layer.frame.width;
@@ -53,7 +54,7 @@ class Asset {
                 }
                 let ext = data.extension;
 
-                let currentDocument = Document.fromNative(sketch.getDocument());
+                let currentDocument = Document.fromNative(getDocument());
                 if (!currentDocument) reject();
 
                 if (ext !== 'svg') {
@@ -127,7 +128,6 @@ class Asset {
     }
 
     applySVG(url, title, document) {
-        console.log('applySVG');
         return new Promise((resolve, reject) => {
             fetch(url, { cdn: true })
                 .then((blob) => {
@@ -135,7 +135,7 @@ class Asset {
                     let svgString = NSString.stringWithString(blob);
 
                     // Import the SVG
-                    const group = sketch3.createLayerFromData(svgString, 'svg');
+                    let group = sketch.createLayerFromData(svgString, 'svg');
 
                     // Change the name of the group
                     group.name = title || 'SVG';

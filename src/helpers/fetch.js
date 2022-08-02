@@ -4,9 +4,10 @@ import fetch from 'sketch-polyfill-fetch';
 import user from '../model/user';
 let sketch3 = require('sketch');
 
-export default function (uri, options) {
+export default function (uri, options, optionalAuth) {
     // get token
-    let { token, domain } = user.getAuthentication();
+
+    let { token, domain } = optionalAuth || user.getAuthentication();
 
     let defaults = {
         method: 'GET',

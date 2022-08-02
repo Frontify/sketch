@@ -1,12 +1,14 @@
+// Sketch API
+import sketch from 'sketch';
+
+// Models
 import target from './target';
 import color from './color';
-import sketch from './sketch';
 import filemanager from './filemanager';
-import fetch from '../helpers/fetch';
-import createFolder from '../helpers/createFolder';
-import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
 
-const sketch3 = require('sketch');
+// Helpers
+import { findLayers, getDocument } from '../helpers/sketch';
+import createFolder from '../helpers/createFolder';
 
 class Typography {
     constructor() {
@@ -41,7 +43,7 @@ class Typography {
     }
 
     applyFontStyle(fontStyle) {
-        let currentDocument = sketch3.getSelectedDocument();
+        let currentDocument = sketch.getSelectedDocument();
         let selection = currentDocument.selectedLayers;
 
         selection.layers.forEach((layer) => {
@@ -55,7 +57,7 @@ class Typography {
             }
         });
 
-        let doc = sketch.getDocument();
+        let doc = getDocument();
         if (doc) {
             doc.reloadInspector();
         }
@@ -230,7 +232,7 @@ class Typography {
 
     addFontStyles(fontStyles) {
         let app = NSApp.delegate();
-        let doc = sketch.getDocument();
+        let doc = getDocument();
         if (doc) {
             let msstyles = this.convertFontStyles(fontStyles);
             let sharedStyles = doc.documentData().layerTextStyles();
@@ -279,7 +281,7 @@ class Typography {
 
         while ((currentStyle = loopStyles.nextObject())) {
             let predicate = NSPredicate.predicateWithFormat('style.sharedObjectID == %@', currentStyle.objectID());
-            filteredLayers = filteredLayers.arrayByAddingObjectsFromArray(sketch.findLayers(predicate));
+            filteredLayers = filteredLayers.arrayByAddingObjectsFromArray(findLayers(predicate));
         }
 
         for (let i = 0; i < filteredLayers.length; i++) {

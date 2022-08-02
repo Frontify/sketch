@@ -1,9 +1,10 @@
+// Models
+import Notification from './notification';
+
+// Helpers
 import readJSON from '../helpers/readJSON';
 import fetch from '../helpers/fetch';
 import writeJSON from '../helpers/writeJSON';
-import project from './project';
-import notification from './notification';
-import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
 
 class Target {
     readTarget() {
@@ -23,6 +24,9 @@ class Target {
     }
     setBrand(brandID) {
         this.setValueForKey('brand', brandID);
+    }
+    getBrand() {
+        this.getValueForKey('brand');
     }
 
     getPathToSyncFolder() {
@@ -92,8 +96,8 @@ class Target {
 
                 // handle pusher channel subscription if project changes
                 if (target.project >= 0 && data.project >= 0 && target.project != data.project) {
-                    notification.unsubscribe(target.project);
-                    notification.subscribe(data.project);
+                    Notification.unsubscribe(target.project);
+                    Notification.subscribe(data.project);
                 }
 
                 // update target

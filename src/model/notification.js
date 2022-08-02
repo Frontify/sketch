@@ -2,6 +2,9 @@ import fetch from '../helpers/fetch';
 import target from './target';
 import source from './source';
 import user from './user';
+import { loadFramework } from '../commands/startup';
+import writeJSON from '../helpers/writeJSON';
+import writeLog from '../helpers/writeLog';
 
 let MochaJSDelegate = require('mocha-js-delegate');
 let threadDictionary = NSThread.mainThread().threadDictionary();
@@ -22,14 +25,22 @@ class Notification {
 
     connect() {
         console.log('⚡️ Pusher :: connect');
+        writeLog('⚡️ Pusher :: connect');
         if (this.pusher) {
+            writeLog('⚡️ Pusher :: return already available instance');
             return Promise.resolve(this.pusher);
         }
 
+        writeLog('⚡️ Pusher :: Fetch environement');
+
         return fetch('/v1/account/environment').then(
             function (data) {
+                writeLog('⚡️ Pusher :: Received Data, ' + JSON.stringify(data));
+                console.log('⚡️ Received Data', data);
                 if (data['pusher']['enabled']) {
                     if (data['pusher']['region'] != 'us') {
+                        writeLog('⚡️ Pusher :: enabled and region is not US');
+
                         this.pusher = PTPusher.pusherWithKey_delegate_encrypted_cluster(
                             data['pusher']['key'],
                             nil,
@@ -37,13 +48,19 @@ class Notification {
                             data['pusher']['region']
                         );
                     } else {
+                        writeLog('⚡️ Pusher :: Region is US');
                         this.pusher = PTPusher.pusherWithKey_delegate_encrypted(data['pusher']['key'], nil, true);
                     }
 
                     this.pusher.authorizationURL = NSURL.URLWithString(data['domain'] + '/api/pusher/auth');
+                    writeLog('⚡️ Pusher :: Authorization URL ' + this.pusher.authorizationURL());
+
+                    writeLog('⚡️ Pusher :: Connect');
+
                     this.pusher.connect();
 
                     threadDictionary['frontifynotificationpusher'] = this.pusher;
+                    writeLog('⚡️ Pusher :: Return');
                     return this.pusher;
                 }
 
@@ -53,6 +70,7 @@ class Notification {
     }
 
     disconnect() {
+        console.log('⚡️ Pusher :: Disconnect');
         if (this.pusher) {
             if (this.channel) {
                 this.unsubscribe();
@@ -77,7 +95,7 @@ class Notification {
     }
 
     subscribe(project) {
-        console.log('⚡️ Pusher :: subscribe');
+        writeLog('⚡️ Pusher :: subscribe to project: ' + project);
         if (this.pusher) {
             this.channel = this.pusher.subscribeToPresenceChannelNamed_delegate('project-' + project, nil);
             threadDictionary['frontifynotificationchannel'] = this.channel;
@@ -85,7 +103,7 @@ class Notification {
     }
 
     unsubscribe() {
-        console.log('⚡️ Pusher :: unsubscribe');
+        writeLog('⚡️ Pusher :: unsubscribe');
         if (this.pusher) {
             if (this.channel) {
                 this.channel.unsubscribe();
@@ -96,7 +114,7 @@ class Notification {
     }
 
     on(event, callback) {
-        console.log('⚡️ Pusher :: on');
+        console.log('⚡️ Pusher :: on', event);
         if (this.pusher) {
             let delegate = new MochaJSDelegate({
                 'didReceiveChannelEventNotification:': function (notification) {
@@ -116,6 +134,7 @@ class Notification {
                 'PTPusherEventReceivedNotification',
                 this.pusher
             );
+            console.log('⚡️ event listener set up');
         }
     }
 
@@ -125,25 +144,45 @@ class Notification {
             .then(
                 function () {
                     // subscribe to current chosen project
-                    return target.getTarget().then(
-                        function (target) {
-                            if (target.project) {
-                                this.subscribe(target.project.id);
+                    return source.getCurrentAsset().then(
+                        function (source) {
+                            writeLog('⚡️ Pusher :: Received current asset: ' + source.id || source.refs.remote_id);
+
+                            if (source.refs.remote_project_id) {
+                                this.subscribe(source.refs.remote_project_id);
+
+                                writeLog('⚡️ Pusher :: Subscribe to: ' + source.refs.remote_project_id);
 
                                 // bind events
                                 this.on(
                                     'screen-activity',
                                     function (event) {
+                                        writeLog('⚡️ Pusher :: Event: ' + JSON.stringify(event.data()));
+                                        console.log(event.data());
+
+                                        // Filter relevant activities from the event’s data
                                         let possibleActivities = ['OPEN', 'LOCAL_CHANGE', 'CLOSE'];
                                         let eventData = event.data();
                                         if (possibleActivities.indexOf('' + eventData.type) > -1) {
+                                            /**
+                                             * In general, notifications are fired on a per-project basis.
+                                             * When we receive an event, we need to figure out if it is related to
+                                             * the current asset and wether it’s from a different user.
+                                             *
+                                             * 1. Compare asset id of current asset and the asset from the event
+                                             * 2. Compare the user id’s to figure out if the activity was from a different user
+                                             */
                                             source
                                                 .getCurrentAsset()
                                                 .then(
                                                     function (asset) {
+                                                        console.log('on :: ', asset);
+                                                        console.log('on :: ', eventData);
                                                         if (asset && '' + asset.id == '' + eventData.screen) {
+                                                            console.log('on :: ', 'same');
                                                             user.getUser().then(
                                                                 function (userData) {
+                                                                    console.log('on :: user');
                                                                     if ('' + eventData.actor.id != '' + userData.id) {
                                                                         this.showNotification({
                                                                             title: 'You are not alone',

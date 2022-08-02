@@ -31,10 +31,6 @@ export function RecentDocumentsView({ onInput, onChange, trackedDocuments }) {
         navigate(`/source/artboards/`);
     };
 
-    useEffect(() => {
-        useSketch('requestUpdate');
-    }, []);
-
     if (!trackedDocuments) {
         return (
             <custom-v-stack flex padding="small" align-items="center" justify-content="center">

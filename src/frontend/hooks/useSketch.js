@@ -10,7 +10,7 @@ export async function useSketch(type, args) {
             (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)
         );
 
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
         const requestUUID = UUIDGeneratorBrowser();
 
         window.postMessage('request', { type, requestUUID, args });

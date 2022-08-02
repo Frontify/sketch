@@ -173,7 +173,6 @@ export function LibrariesView({ type, useResolutions = false }) {
     }, [mode, page, debouncedQuery, selectedLibrary]);
 
     function handleIntersect() {
-        console.log('intersect', images.length, totalImages);
         if (loading) return;
 
         if (images.length >= totalImages) {

@@ -1,19 +1,24 @@
+// Sketch API
+import sketch, { Document, Settings } from 'sketch';
+
+// Helpers
 import fetch from '../helpers/fetch';
 import shaFile from '../helpers/shaFile';
 import writeJSON from '../helpers/writeJSON';
-import sketch from './sketch';
+import { findFirstLayer, getDocument } from '../helpers/sketch';
+
+import asset from './asset';
 import target from './target';
 import filemanager from './filemanager';
-import asset from './asset';
+
+// IPC
 import { isWebviewPresent } from 'sketch-module-web-view/remote';
-import { patchDestinations, setDestinations } from '../windows/actions/getSelectedArtboards';
 import { frontend } from '../helpers/ipc';
 
-import { Error } from './error';
+import { patchDestinations } from '../windows/actions/getSelectedArtboards';
 
-let API = require('sketch');
-let DOM = require('sketch/dom');
-let Settings = require('sketch/settings');
+// Error
+import { Error } from './error';
 
 class Artboard {
     constructor() {
@@ -94,7 +99,7 @@ class Artboard {
 
                         // get artboards
                         let artboards = [];
-                        let doc = sketch.getDocument();
+                        let doc = getDocument();
 
                         if (doc) {
                             let mspage = doc.currentPage();
@@ -146,7 +151,7 @@ class Artboard {
 
                             // compare with selected artboards
                             let selectedArtboards = [];
-                            let jsdoc = DOM.Document.fromNative(sketch.getDocument());
+                            let jsdoc = Document.fromNative(getDocument());
                             jsdoc.selectedLayers.forEach(
                                 function (layer) {
                                     if (layer.type == 'Artboard' || layer.type == 'SymbolMaster') {
@@ -180,7 +185,7 @@ class Artboard {
             function (resolve) {
                 let files = [];
                 let predicate = NSPredicate.predicateWithFormat('objectID == %@', artboard.id_external);
-                let msartboard = sketch.findFirstLayer(predicate, nil, MSArtboardGroup, doc);
+                let msartboard = findFirstLayer(predicate, nil, MSArtboardGroup, doc);
 
                 // Export artboard image -> traditional MSExportRequest for better naming control
                 let imageFormat = MSExportFormat.alloc().init();
@@ -207,10 +212,10 @@ class Artboard {
                 });
 
                 // Export artboard structure -> via JS API as its not possible to export JSON with MSExportRequest
-                let jsartboard = DOM.Artboard.fromNative(msartboard);
+                let jsartboard = sketch.Artboard.fromNative(msartboard);
 
                 // Export the artboard's data first to preprocess and optimize data
-                let artboardExport = DOM.export(jsartboard, {
+                let artboardExport = sketch.export(jsartboard, {
                     formats: 'json',
                     output: false,
                 });
@@ -218,13 +223,13 @@ class Artboard {
                 // Export formats -> traditional MSExportRequest for better naming control
                 files = files.concat(this.exportFormats(doc, jsartboard));
                 // Save origin info
-                let jsdoc = DOM.Document.fromNative(doc);
+                let jsdoc = Document.fromNative(doc);
 
                 // This metadata appears to be required for the Inspect / Import API.
                 let meta = {
                     document: { id: jsdoc.id, path: jsdoc.path },
                     page: { id: jsdoc.selectedPage.id, name: jsdoc.selectedPage.name },
-                    sketch: { version: '' + API.version.sketch, api: API.version.api },
+                    sketch: { version: '' + sketch.version.sketch, api: sketch.version.api },
                     // converting 'sketch.version' to string is needed to not lose it at JSON.stringify
                 };
 
@@ -362,7 +367,7 @@ class Artboard {
      */
 
     getDetachedGroupByExportedSymbolLayer(exportedLayer) {
-        const document = DOM.getSelectedDocument();
+        const document = Document.getSelectedDocument();
         const layerId = exportedLayer.do_objectID;
         const originalSymbolInstance = document.getLayerWithID(layerId);
 
@@ -374,7 +379,7 @@ class Artboard {
         const detachedGroup = this.recursivelyDetachSymbols(duplicatedSymbolInstance);
 
         // Get data of the symbolInstance duplicate
-        const detachedGroupExport = DOM.export(detachedGroup, {
+        const detachedGroupExport = sketch.export(detachedGroup, {
             formats: 'json',
             output: false,
         });
@@ -418,7 +423,7 @@ class Artboard {
             return;
         }
 
-        const document = DOM.getSelectedDocument();
+        const document = Document.getSelectedDocument();
         const originalSymbolMaster = document.getSymbolMasterWithID(layer.symbolId);
 
         if (!originalSymbolMaster) {
@@ -468,7 +473,7 @@ class Artboard {
             fallbackLayerProperties[property] = symbolLayer[property];
         }
 
-        const fallbackLayer = new DOM.Group(fallbackLayerProperties);
+        const fallbackLayer = new Document.Group(fallbackLayerProperties);
 
         return fallbackLayer;
     }
@@ -533,7 +538,7 @@ class Artboard {
          *
          */
 
-        let doc = sketch.getDocument();
+        let doc = getDocument();
         if (!doc) {
             throw new Error('No document found');
         } else {

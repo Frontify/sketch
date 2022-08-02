@@ -1,21 +1,29 @@
+// Sketch API
+import sketch from 'sketch';
+
+// Browser Window
 import BrowserWindow from 'sketch-module-web-view';
-import artboard from '../model/artboard';
-import project from '../model/project';
-import filemanager from '../model/filemanager';
+
+// Models
+import Artboard from '../model/artboard';
+import Asset from '../model/asset';
+import Color from '../model/color';
+import FileManager from '../model/FileManager';
 import OAuth from '../model/oauth';
-import source from '../model/source';
-import target from '../model/target';
-import sketch from '../model/sketch';
-import color from '../model/color';
-import typography from '../model/typography';
-import user from '../model/user';
+import Project from '../model/project';
+import Source from '../model/source';
+import Target from '../model/target';
+import Typography from '../model/typography';
+import User from '../model/user';
+
+// Helpers
+import { getDocument } from '../helpers/sketch';
 import createFolder from '../helpers/createFolder';
 import shaFile from '../helpers/shaFile';
-import fetch from '../helpers/fetch';
-import executeSafely from '../helpers/executeSafely';
 
-// Message helper
+// IPC
 import { frontend } from '../helpers/ipc';
+import executeSafely from '../helpers/executeSafely';
 
 /**
  * Actions that can be called from React via the useSketch() hook.
@@ -24,19 +32,7 @@ import { frontend } from '../helpers/ipc';
  */
 import { addSource, getSelectedArtboards, removeDestination, removeDestinations, uploadArtboards } from './actions/';
 
-import recentFiles from '../model/recent';
-
-let DOM = require('sketch/dom');
-let sketch3 = require('sketch');
-
-export function getPluginState() {
-    let payload = {
-        currentDocument: null,
-        recentDocuments: recentFiles.get(),
-        localDocuments: [],
-    };
-    return payload;
-}
+// ------------------------------------------------------------------------
 
 // Identifier for the plugin window that we can use for message passing
 const IDENTIFIER = 'frontifymain';
@@ -55,23 +51,6 @@ function pathInsidePluginBundle(url) {
     return `file://${
         context.scriptPath.split('.sketchplugin/Contents/Sketch')[0]
     }.sketchplugin/Contents/Resources/${url}`;
-}
-
-let state = {};
-
-function refresh() {
-    /**
-     * Gather environment data
-     *
-     * 1. Current Document
-     * 2. Recent Document
-     * 3. Local Documents
-     *
-     */
-
-    let payload = getPluginState();
-
-    frontend.send('refresh', payload);
 }
 
 export default function (context, view) {
@@ -95,28 +74,18 @@ export default function (context, view) {
     });
 
     let webview = win.webContents;
-    // Load initial url
 
-    /**
-     * Here, we used to load viewData.url, but I don’t understand where that URL comes from.
-     * Is it the previously seen URL and we use it to restore the most recent view that the user
-     * has seen? For now, the mainURL will be loaded which will be the entry point for React.
-     */
-
-    // webview.loadURL(viewData.url);
+    // ------------------------------------------------------------------------
 
     webview.loadURL(mainURL);
 
     // Show window if ready
     win.once('ready-to-show', () => {
         console.log('👋 Frontify Plugin is now running. NODE_ENV: ', process.env.NODE_ENV);
-
         win.show();
     });
 
-    webview.on('cancelOauthFlow', () => {
-        OAuth.cancelAuthorizationPolling();
-    });
+    // ------------------------------------------------------------------------
 
     // Load tab if webview ready
     webview.on('did-finish-load', () => {
@@ -127,12 +96,6 @@ export default function (context, view) {
         console.log('did-fail-load', { isDev, baseURL, mainURL }, error);
     });
 
-    webview.on('nativeLog', function (s) {
-        sketch.UI.message(s);
-
-        return 'result';
-    });
-
     win.on(
         'close',
         function () {
@@ -141,44 +104,33 @@ export default function (context, view) {
         }.bind(this)
     );
 
-    webview.on('openFinder', function () {
-        target.getTarget('sources').then(
-            function (data) {
-                if (createFolder(data.path)) {
-                    NSWorkspace.sharedWorkspace().openFile(data.path);
-                }
-            }.bind(this)
-        );
-    });
+    // ------------------------------------------------------------------------
 
     webview.on('addDocumentColors', function (colors) {
-        color.addDocumentColors(colors);
+        Color.addDocumentColors(colors);
     });
 
     webview.on('replaceDocumentColors', function (colors) {
-        color.replaceDocumentColors(colors);
+        Color.replaceDocumentColors(colors);
     });
 
     webview.on('addGlobalColors', function (colors) {
-        color.addGlobalColors(colors);
+        Color.addGlobalColors(colors);
     });
 
     webview.on('replaceGlobalColors', function (colors) {
-        color.replaceGlobalColors(colors);
-    });
-
-    webview.on('showTypography', function () {
-        view = 'typography';
-        typography.showTypography();
+        Color.replaceGlobalColors(colors);
     });
 
     webview.on('addFontStyles', function (styles) {
-        typography.addFontStyles(styles);
+        Typography.addFontStyles(styles);
     });
 
     webview.on('downloadFonts', function () {
-        typography.downloadFonts();
+        Typography.downloadFonts();
     });
+
+    // ------------------------------------------------------------------------
 
     /**
      * Used to hard-refresh using the "refresh" icon in the toolbar of the plugin
@@ -187,12 +139,18 @@ export default function (context, view) {
         webview.reload();
     });
 
+    // ------------------------------------------------------------------------
+
     /**
      *
      * @returns Requests that can be received from the Frontend
      */
     webview.off('request', handleRequestFromFrontend);
     webview.on('request', handleRequestFromFrontend);
+
+    async function handleRequestFromFrontend({ type = '', requestUUID = null, args = {} }) {
+        await frontend.fire(type, { requestUUID, ...args });
+    }
 
     /**
      * Todo: Refactor each case into one action file.
@@ -206,497 +164,488 @@ export default function (context, view) {
         uploadArtboards,
     };
 
-    async function handleRequestFromFrontend({ type = '', requestUUID = null, args = {} }) {
-        let payload = {};
+    // ------------------------------------------------------------------------
 
-        switch (type) {
-            case 'simulate-change-by-collaborator':
-                console.log('simulate-change-by-collaborator', args);
-                console.log('go fetch');
-                var asset = args.asset;
-                if (asset) {
-                    console.log('has asset', '/v1/screen/activity/' + asset.id);
-                    let result = await fetch(
-                        '/v1/screen/activity/' + asset.id,
-                        {
-                            method: 'POST',
-                            body: JSON.stringify({ activity: 'LOCAL_CHANGE' }),
-                        },
-                        args.auth
-                    );
-                    console.log('made post request', '/v1/screen/activity/' + asset.id, args);
-                    console.log(result);
-                    return result;
+    frontend.on('addSource', async (args) => {
+        let response = await actions['addSource'](args);
+        return response;
+    });
+
+    // ------------------------------------------------------------------------
+
+    frontend.on('applyColor', (color) => {
+        executeSafely(context, () => {
+            Color.applyColor(color);
+        });
+    });
+
+    // ------------------------------------------------------------------------
+
+    frontend.on('getCurrentDocument', () => {
+        try {
+            let database = FileManager.getAssetDatabaseFile();
+            let selectedDocument = sketch.Document.getSelectedDocument();
+            let entry = database[selectedDocument.id];
+
+            if (!entry) {
+                if (!FileManager.isCurrentSaved()) {
+                    entry = {
+                        state: 'unsaved',
+                    };
                 }
-                console.log('done');
-                payload = { success: true };
-                break;
-            case 'addCurrentFile':
-                try {
-                    await source.addCurrentFile();
-                    payload = { success: true };
-                } catch (error) {
-                    payload = { success: false, error };
+
+                if (FileManager.isCurrentSaved()) {
+                    let nativeSketchDocument = getDocument();
+                    let filePath = '' + nativeSketchDocument.fileURL().path();
+                    let base = Target.getPathToSyncFolder();
+                    let relativePath = filePath.replace(base + '/', '');
+
+                    entry = {
+                        state: 'untracked',
+                        uuid: selectedDocument.id,
+                        filename: Source.getCurrentFilename(),
+                        path: filePath,
+                        relativePath: relativePath,
+                        sha: '' + shaFile(filePath),
+                    };
                 }
-                break;
-            case 'addSource':
-                payload = await actions['addSource'](args);
-                break;
-            case 'applyColor':
-                executeSafely(context, () => {
-                    color.applyColor(args);
-                });
-                break;
-            case 'applyFontStyleWithColor':
-                try {
-                    await typography.applyFontStyle(args.textStyle, args.color);
-                    payload = { sucess: 'true' };
-                } catch (error) {
-                    payload = { sucess: 'false' };
+            }
+
+            // Get the latest remote info:
+            return { currentDocument: entry };
+        } catch (error) {
+            console.error(error);
+        }
+    });
+
+    // ------------------------------------------------------------------------
+
+    frontend.on('applyFontStyleWithColor', async ({ textStyle, color }) => {
+        try {
+            await tyTography.applyFontStyle(textStyle, color);
+            return { sucess: 'true' };
+        } catch (error) {
+            return { sucess: 'false' };
+        }
+    });
+
+    // ------------------------------------------------------------------------
+
+    frontend.on('applyLibraryAsset', async ({ asset, width }) => {
+        try {
+            await Asset.applyImage(asset, width || null);
+        } catch (error) {
+            throw new Error('Could not apply library asset.');
+        }
+    });
+
+    // ------------------------------------------------------------------------
+
+    frontend.on('beginOAuthFlow', async (args) => {
+        let domain = args.domain;
+        let payload = {};
+        OAuth.authorize(domain).then((authData) => {
+            console.log({ authData });
+            if (authData.hasError) {
+                console.log(authData.error);
+                payload = { success: false, error: authData.error };
+                return;
+            }
+
+            if (!authData.hasError) {
+                User.login({
+                    access_token: authData.accessToken,
+                    domain: domain,
+                })
+                    .then(
+                        function () {
+                            // I guess this re-starts the plugin, which will then have the access token available?
+                            frontend.send('user.authentication', {
+                                access_token: authData.accessToken,
+                                domain: domain,
+                            });
+                            // runCommand(context);
+                            console.log('success');
+                            payload = { success: true };
+                        }.bind(this)
+                    )
+                    .catch((error) => {
+                        console.error(error);
+                        payload = { success: false, error };
+                    });
+            }
+            return payload;
+        });
+    });
+
+    // ------------------------------------------------------------------------
+
+    frontend.on('cancelOauthFlow', () => {
+        try {
+            OAuth.cancelAuthorizationPolling();
+        } catch (error) {
+            throw new Error('Could not cancel polling.');
+        }
+    });
+
+    // ------------------------------------------------------------------------
+
+    frontend.on('cancelArtboardUpload', () => {
+        Artboard.cancelUpload();
+    });
+
+    // ------------------------------------------------------------------------
+
+    frontend.on('checkout', async ({ source, path }) => {
+        try {
+            return await Source.checkout(source, path);
+        } catch (error) {
+            throw new Error('Could not checkout source.');
+        }
+    });
+
+    // ------------------------------------------------------------------------
+
+    frontend.on('refreshCurrentAsset', async () => {
+        try {
+            let database = FileManager.getAssetDatabaseFile();
+            let selectedDocument = sketch.Document.getSelectedDocument();
+            let entry = database[selectedDocument.id];
+
+            // Fetch GraphQL
+            if (entry) {
+                entry = await FileManager.refreshAsset(entry.uuid);
+
+                return { currentDocument: entry };
+            }
+        } catch (error) {
+            throw new Error('Could not refresh current asset.');
+        }
+    });
+
+    // ------------------------------------------------------------------------
+
+    frontend.on('createFolder', async (args) => {
+        try {
+            let response = await Project.addFolder({ ...args });
+            return { success: true, response };
+        } catch (error) {
+            throw new Error('Could not create folder.');
+        }
+    });
+
+    // ------------------------------------------------------------------------
+
+    frontend.on('getProjectsForBrand', async (args) => {
+        try {
+            let projects = await Project.getProjectsForBrand(args.brand);
+            return { success: true, projects };
+        } catch (error) {
+            throw Error('Could not get projects for brand.');
+        }
+    });
+
+    // ------------------------------------------------------------------------
+    frontend.on('getProjectFolders', async (args) => {
+        try {
+            let { folder, folders } = await Project.getProjectFolders(args.project, args.folder);
+            return { success: true, folder, folders };
+        } catch (error) {
+            throw Error('Could not get project folders.');
+        }
+    });
+
+    // ------------------------------------------------------------------------
+
+    frontend.on('getFilesAndFoldersForProjectAndFolder', async (args) => {
+        try {
+            let { folder, folders, files } = await Project.getFilesAndFoldersForProjectAndFolder(
+                args.legacyProjectID,
+                args.legacyFolderID
+            );
+            return { success: true, folder, folders, files };
+        } catch (error) {
+            throw Error('Could not get files and folders.');
+        }
+    });
+
+    // ------------------------------------------------------------------------
+    frontend.on('getSelectedArtboards', async ({ brandID }) => {
+        try {
+            let payload = actions['getSelectedArtboards'](brandID);
+            return payload;
+        } catch (error) {
+            throw new Error('Could not get selected artboards.');
+        }
+    });
+
+    // ------------------------------------------------------------------------
+    frontend.on('getAssetDatabase', async () => {
+        return { database: FileManager.getAssetDatabase() };
+    });
+
+    // ------------------------------------------------------------------------
+    frontend.on('getOpenDocuments', async () => {
+        var documents = sketch.getDocuments();
+        return { documents };
+    });
+
+    // ------------------------------------------------------------------------
+    frontend.on('getOpenDocumentsMeta', async () => {
+        let openDocuments = sketch.getDocuments();
+        let database = FileManager.getAssetDatabase();
+
+        let openDocumentsMeta = openDocuments
+            .filter((document) => document.path)
+            .map((document) => {
+                let relativePath = Source.getRelativePath(document.path);
+
+                let transformedDocument = {
+                    uuid: document.id,
+                    filename: relativePath.split('/').pop().replaceAll('%20', ' '),
+                    path: document.path,
+                    relativePath: relativePath,
+                    normalizedPath: document.path.replaceAll('%20', ' '),
+                    normalizedRelativePath: relativePath.replaceAll('%20', ' '),
+                    remote_modified: sketch.Settings.documentSettingForKey(document, 'remote_modified'),
+                    ...database[document.id],
+                };
+
+                return transformedDocument;
+            })
+            .sort((a, b) => (a.name > b.name ? 1 : -1));
+
+        return { success: true, documents: openDocumentsMeta };
+    });
+
+    // ------------------------------------------------------------------------
+    frontend.on('getAuth', async () => {
+        let auth = User.getAuthentication();
+
+        if (auth) {
+            return { success: true, auth };
+        } else {
+            return { success: false, error: 'Could not read crendetials from Sketch' };
+        }
+    });
+
+    // ------------------------------------------------------------------------
+    frontend.on('getLocalAndRemoteSourceFiles', async () => {
+        try {
+            let sources = await Source.getLocalAndRemoteSourceFiles();
+            return { success: true, sources };
+        } catch (error) {
+            return { success: false, error };
+        }
+    });
+
+    // ------------------------------------------------------------------------
+    frontend.on('getSelectedLayerFrames', async () => {
+        let document = sketch.getSelectedDocument();
+
+        let frames = [];
+        document.selectedLayers.forEach((layer) => {
+            if (layer.type != 'Artboard' && layer.style) {
+                frames.push(layer.frame);
+            }
+        });
+
+        return { success: true, frames };
+    });
+
+    // ------------------------------------------------------------------------
+    frontend.on('logout', async () => {
+        User.logout().then();
+    });
+
+    // ------------------------------------------------------------------------
+    frontend.on('openUrl', async ({ absolute = true, url }) => {
+        try {
+            if (absolute) {
+                NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString(url));
+                return { success: true };
+            } else {
+                Target.getDomain().then(
+                    function (data) {
+                        NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString(data + url));
+                        return { success: true };
+                    }.bind(this)
+                );
+            }
+        } catch (error) {
+            throw new Error('Could not open URL.');
+        }
+    });
+
+    // ------------------------------------------------------------------------
+    frontend.on('moveCurrent', async ({ brand, project, folder }) => {
+        try {
+            await FileManager.moveCurrent(brand, project, folder);
+            return { success: true };
+        } catch (error) {
+            throw new Error('Could not move file.');
+        }
+    });
+
+    // ------------------------------------------------------------------------
+    frontend.on('openSource', async ({ path }) => {
+        try {
+            await Source.openSourceAtPath(path);
+            return { success: true };
+        } catch (error) {
+            throw new Error('Could not open source file.');
+        }
+    });
+
+    // ------------------------------------------------------------------------
+    frontend.on('resizeLayer', async ({ width, height }) => {
+        try {
+            await Asset.resize(width, height);
+        } catch (error) {
+            throw new Error('Could not resize layer.');
+        }
+    });
+
+    // ------------------------------------------------------------------------
+    frontend.on('pullSource', async ({ source, path }) => {
+        try {
+            /**
+             * 1. Checkout file
+             */
+
+            // Patch the id. Better: use a consistent payload
+            source.id = source.refs?.remote_id;
+
+            let result = await Source.pullSource(source, path);
+
+            // Close outdated document
+            let openDocuments = sketch.getDocuments();
+            openDocuments.forEach((document) => {
+                if (document.id == source.uuid) {
+                    //close
+                    document.close();
                 }
-                break;
-            case 'applyLibraryAsset':
+            });
+            // Open path
+            let document = await Source.openSketchFile(path);
+
+            let uuid = document.id;
+            let remoteId = sketch.Settings.documentSettingForKey(document, 'remote_id');
+            // If the file has been uploaded through the old plugin, it won’t have an ID stored.
+            // To make the file savable, we’ll add one.
+            if (!remoteId) {
+                sketch.Settings.setDocumentSettingForKey(document, 'remote_id', source.id);
+            }
+
+            let remote = await Source.getAssetForLegacyAssetID(source.id);
+
+            Source.checkoutSource({ id_external: uuid, ...source, remote }, path);
+
+            return { success: true, result };
+        } catch (error) {
+            throw new Error('Could not pull source file.');
+        }
+    });
+
+    // ------------------------------------------------------------------------
+    frontend.on('pushSource', async ({ source, target }) => {
+        try {
+            let result = await Source.pushSource(source, target);
+
+            sketch.Settings.setDocumentSettingForKey(getDocument(), 'remote_modified', result.modified);
+
+            // Mark document as clean, because there are no untracked changes
+            sketch.Settings.setDocumentSettingForKey(getDocument(), 'dirty', false);
+
+            return { success: true };
+        } catch (error) {
+            throw new Error('Could not push source file.');
+        }
+    });
+
+    // ------------------------------------------------------------------------
+    frontend.on('removeAllDestinations', async ({ id, brandID }) => {
+        try {
+            removeDestinations({ id: id });
+
+            let artboardsAfterRemovingAllDestinations = getSelectedArtboards(brandID);
+
+            frontend.send('artboards-changed', artboardsAfterRemovingAllDestinations);
+
+            return { success: true };
+        } catch (error) {
+            throw new Error('Could not remove upload destinations.');
+        }
+    });
+
+    // ------------------------------------------------------------------------
+    frontend.on('removeDestination', async ({ id, destination, brandID }) => {
+        try {
+            removeDestination({ id: id }, destination);
+
+            let artboardsAfterRemovingDestination = getSelectedArtboards(brandID);
+
+            frontend.send('artboards-changed', artboardsAfterRemovingDestination);
+
+            return { success: true };
+        } catch (error) {
+            throw new Error('Could not remove upload destination.');
+        }
+    });
+
+    // ------------------------------------------------------------------------
+    frontend.on('reveal', async ({ path }) => {
+        try {
+            if (createFolder(path)) {
                 try {
-                    let width = args.width || null;
-                    await asset.applyImage(args.asset, width);
-                    // -> Message that we’re done
-                    payload = { sucess: 'true' };
+                    NSWorkspace.sharedWorkspace().openFile(path);
                 } catch (error) {
                     console.log(error);
-                    payload = { status: 'error' };
                 }
-                break;
-            case 'beginOAuthFlow':
-                let domain = args.domain;
-                let _payload = {};
-                OAuth.authorize(domain).then((authData) => {
-                    console.log({ authData });
-                    if (authData.hasError) {
-                        console.log(authData.error);
-                        _payload = { success: false, error: authData.error };
-                        return;
-                    }
-                    console.log('continues');
-
-                    if (!authData.hasError) {
-                        user.login({
-                            access_token: authData.accessToken,
-                            domain: domain,
-                        })
-                            .then(
-                                function () {
-                                    // I guess this re-starts the plugin, which will then have the access token available?
-                                    frontend.send('user.authentication', {
-                                        access_token: authData.accessToken,
-                                        domain: domain,
-                                    });
-                                    // runCommand(context);
-                                    console.log('success');
-                                    _payload = { success: true };
-                                }.bind(this)
-                            )
-                            .catch((error) => {
-                                console.error(error);
-                                _payload = { success: false, error };
-                            });
-                    }
-                });
-                console.log(_payload);
-                payload = _payload;
-
-                break;
-            case 'cancelArtboardUpload':
-                artboard.cancelUpload();
-                break;
-            case 'checkout':
-                try {
-                    /**
-                     * 1. Checkout file
-                     */
-
-                    let base = target.getPathToSyncFolder();
-                    let folder = `${base}/${args.path}`;
-                    let path = `${folder}/${args.source.name}`;
-
-                    let result = await source.pullSource(args.source, path);
-
-                    if (!result) {
-                        payload = { success: false };
-                    } else {
-                        // Open path
-                        let document = await source.openSketchFile(path);
-
-                        let uuid = document.id;
-                        let remoteId = sketch3.Settings.documentSettingForKey(document, 'remote_id');
-                        // If the file has been uploaded through the old plugin, it won’t have an ID stored.
-                        // To make the file savable, we’ll add one.
-                        if (!remoteId) {
-                            sketch3.Settings.setDocumentSettingForKey(document, 'remote_id', args.source.id);
-                        }
-
-                        let remote = await source.getAssetForLegacyAssetID(args.source.id);
-
-                        source.checkoutSource({ id_external: uuid, ...args.source, remote }, path);
-
-                        frontend.send('document-pulled');
-
-                        payload = { success: true, result };
-                    }
-                } catch (error) {
-                    console.error(error);
-                    payload = { success: false, error };
-                }
-
-                break;
-
-            case 'refreshCurrentAsset':
-                try {
-                    let database = filemanager.getAssetDatabaseFile();
-                    let selectedDocument = sketch3.Document.getSelectedDocument();
-                    let entry = database[selectedDocument.id];
-
-                    // Fetch GraphQL
-                    if (entry) {
-                        entry = await filemanager.refreshAsset(entry.uuid);
-
-                        payload = { success: true, currentDocument: entry };
-                    }
-                } catch (error) {
-                    payload = { success: false };
-                }
-
-                break;
-
-            case 'getCurrentDocument':
-                try {
-                    let database = filemanager.getAssetDatabaseFile();
-                    let selectedDocument = sketch3.Document.getSelectedDocument();
-                    let entry = database[selectedDocument.id];
-
-                    if (!entry) {
-                        if (!filemanager.isCurrentSaved()) {
-                            entry = {
-                                state: 'unsaved',
-                            };
-                        }
-
-                        if (filemanager.isCurrentSaved()) {
-                            let nativeSketchDocument = sketch.getDocument();
-                            let filePath = '' + nativeSketchDocument.fileURL().path();
-                            let base = target.getPathToSyncFolder();
-                            let relativePath = filePath.replace(base + '/', '');
-
-                            entry = {
-                                state: 'untracked',
-                                uuid: selectedDocument.id,
-                                filename: source.getCurrentFilename(),
-                                path: filePath,
-                                relativePath: relativePath,
-                                sha: '' + shaFile(filePath),
-                            };
-                        }
-                    }
-
-                    // Get the latest remote info:
-
-                    payload = { currentDocument: entry };
-                } catch (error) {
-                    console.error(error);
-                }
-
-                break;
-
-            case 'getRecentFiles':
-                try {
-                    let files = recentFiles.get();
-
-                    payload = { success: true, files };
-                } catch (error) {
-                    payload = { success: false, error };
-                }
-                break;
-
-            case 'createFolder':
-                try {
-                    console.log(args);
-                    let response = await project.addFolder({ ...args });
-                    payload = { success: true, response };
-                } catch (error) {
-                    payload = { success: false, error };
-                }
-                break;
-
-            case 'getProjectsForBrand':
-                try {
-                    let projects = await project.getProjectsForBrand(args.brand);
-                    payload = { success: true, projects };
-                } catch (error) {
-                    payload = { success: false, error };
-                }
-                break;
-            case 'getProjectFolders':
-                try {
-                    let { folder, folders } = await project.getProjectFolders(args.project, args.folder);
-                    payload = { success: true, folder, folders };
-                } catch (error) {
-                    console.error(error);
-                    payload = { success: false, error };
-                }
-                break;
-            case 'getFilesAndFoldersForProjectAndFolder':
-                try {
-                    let { folder, folders, files } = await project.getFilesAndFoldersForProjectAndFolder(
-                        args.legacyProjectID,
-                        args.legacyFolderID
-                    );
-                    payload = { success: true, folder, folders, files };
-                } catch (error) {
-                    console.error(error);
-                    payload = { success: false, error };
-                }
-                break;
-
-            case 'getSelectedArtboards':
-                payload = actions['getSelectedArtboards'](args);
-                break;
-            case 'getAssetDatabase':
-                payload = { database: filemanager.getAssetDatabase() };
-                break;
-            case 'getOpenDocuments':
-                var documents = DOM.getDocuments();
-                payload = { documents };
-                break;
-            case 'getOpenDocumentsMeta':
-                let openDocuments = DOM.getDocuments();
-                let database = filemanager.getAssetDatabase();
-
-                let openDocumentsMeta = openDocuments
-                    .filter((document) => document.path)
-                    .map((document) => {
-                        let relativePath = source.getRelativePath(document.path);
-
-                        let transformedDocument = {
-                            uuid: document.id,
-                            filename: relativePath.split('/').pop().replaceAll('%20', ' '),
-                            path: document.path,
-                            relativePath: relativePath,
-                            normalizedPath: document.path.replaceAll('%20', ' '),
-                            normalizedRelativePath: relativePath.replaceAll('%20', ' '),
-                            remote_modified: sketch3.Settings.documentSettingForKey(document, 'remote_modified'),
-                            ...database[document.id],
-                        };
-
-                        return transformedDocument;
-                    })
-                    .sort((a, b) => (a.name > b.name ? 1 : -1));
-
-                payload = { success: true, documents: openDocumentsMeta };
-                break;
-            case 'getAuth':
-                let auth = user.getAuthentication();
-
-                if (auth) {
-                    payload = { auth };
-                } else {
-                    payload = { error: 'Could not read crendetials from Sketch' };
-                }
-                break;
-            case 'getLocalAndRemoteSourceFiles':
-                try {
-                    let sources = await source.getLocalAndRemoteSourceFiles();
-                    payload = { success: true, sources };
-                } catch (error) {
-                    payload = { success: false, error };
-                }
-                break;
-            case 'getSelectedLayerFrames':
-                let document = sketch3.getSelectedDocument();
-
-                let frames = [];
-                document.selectedLayers.forEach((layer) => {
-                    if (layer.type != 'Artboard' && layer.style) {
-                        frames.push(layer.frame);
-                    }
-                });
-
-                payload = { success: true, frames };
-                break;
-            case 'logout':
-                user.logout().then();
-                break;
-            case 'openUrl':
-                let url = args.url;
-                let absolute = args.absolute || true;
-
-                if (absolute) {
-                    NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString(url));
-                } else {
-                    target.getDomain().then(
-                        function (data) {
-                            NSWorkspace.sharedWorkspace().openURL(NSURL.URLWithString(data + url));
-                        }.bind(this)
-                    );
-                }
-                break;
-            case 'moveCurrent':
-                try {
-                    await filemanager.moveCurrent(args.brand, args.project, args.folder);
-                    payload = { success: true };
-                } catch (error) {
-                    payload = { success: false, error };
-                }
-                break;
-            case 'openSource':
-                try {
-                    await source.openSourceAtPath(args.path);
-                    payload = { success: true };
-                } catch (error) {
-                    payload = { success: false, error };
-                }
-                break;
-            case 'requestUpdate':
-                refresh();
-
-                break;
-            case 'resizeLayer':
-                await asset.resize(args.width, args.height);
-                payload = { success: true };
-                break;
-            case 'pullSource':
-                try {
-                    /**
-                     * 1. Checkout file
-                     */
-
-                    // Patch the id. Better: use a consistent payload
-                    args.source.id = args.source.refs?.remote_id;
-
-                    let result = await source.pullSource(args.source, args.path);
-
-                    // Close outdated document
-                    let openDocuments = DOM.getDocuments();
-                    openDocuments.forEach((document) => {
-                        if (document.id == args.source.uuid) {
-                            //close
-                            document.close();
-                        }
-                    });
-                    // Open path
-                    let document = await source.openSketchFile(args.path);
-
-                    let uuid = document.id;
-                    let remoteId = sketch3.Settings.documentSettingForKey(document, 'remote_id');
-                    // If the file has been uploaded through the old plugin, it won’t have an ID stored.
-                    // To make the file savable, we’ll add one.
-                    if (!remoteId) {
-                        sketch3.Settings.setDocumentSettingForKey(document, 'remote_id', args.source.id);
-                    }
-
-                    let remote = await source.getAssetForLegacyAssetID(args.source.id);
-
-                    source.checkoutSource({ id_external: uuid, ...args.source, remote }, args.path);
-
-                    payload = { success: true, result };
-                } catch (error) {
-                    console.error(error);
-                    payload = { success: false, error };
-                }
-
-                break;
-            case 'pushSource':
-                try {
-                    let result = await source.pushSource(args.source, args.target);
-
-                    /**
-                     * Check if the document has a modified date from a previous fetch request.
-                     * If not, then set it by using the remote modified date and store it the file.
-                     * We can later use that information to compare local/remote changes.
-                     *
-                     * Good to know:
-                     *
-                     * The "modified" inside the file will also be mutated in other places, for example,
-                     * after opening a file.
-                     */
-
-                    // compare SHA
-                    let localAndRemoteAreEqual = true;
-                    if (localAndRemoteAreEqual) {
-                        sketch3.Settings.setDocumentSettingForKey(
-                            sketch.getDocument(),
-                            'remote_modified',
-                            result.modified
-                        );
-
-                        // Mark document as clean, because there are no untracked changes
-                        sketch3.Settings.setDocumentSettingForKey(sketch.getDocument(), 'dirty', false);
-                    }
-
-                    payload = { success: true };
-                } catch (error) {
-                    payload = { success: false, error };
-                }
-                break;
-            case 'removeAllDestinations':
-                removeDestinations({ id: args.id });
-
-                let artboardsAfterRemovingAllDestinations = getSelectedArtboards(args.brandID);
-
-                frontend.send('artboards-changed', artboardsAfterRemovingAllDestinations);
-
-                payload = { success: true };
-
-                break;
-            case 'removeDestination':
-                removeDestination({ id: args.id }, args.destination);
-
-                let artboardsAfterRemovingDestination = getSelectedArtboards(args.brandID);
-
-                frontend.send('artboards-changed', artboardsAfterRemovingDestination);
-
-                payload = { success: true };
-
-                break;
-            case 'reveal':
-                if (createFolder(args.path)) {
-                    try {
-                        NSWorkspace.sharedWorkspace().openFile(args.path);
-                    } catch (error) {
-                        console.log(error);
-                    }
-                }
-                break;
-            case 'revealFrontifyFolder':
-                let brand = args.brand;
-                let base = target.getPathToSyncFolder();
-                let path = brand ? `${base}/${brand.name}` : base;
-                if (createFolder(path)) {
-                    try {
-                        NSWorkspace.sharedWorkspace().openFile(path);
-                    } catch (error) {
-                        console.log(error);
-                    }
-                }
-                break;
-            case 'setBrand':
-                try {
-                    let id = args.brand?.id;
-                    target.setBrand(id);
-                    frontend.send('brand-changed');
-                } catch (error) {
-                    console.error(error);
-                }
-                break;
-            case 'uploadArtboards':
-                try {
-                    actions['uploadArtboards'](args);
-                } catch (error) {
-                    console.error(error);
-                }
-                break;
+            }
+        } catch (error) {
+            throw new Error('Could not reveal folder.');
         }
+    });
 
-        frontend.send('response', { responseUUID: requestUUID, ...payload });
-    }
+    // ------------------------------------------------------------------------
+    frontend.on('revealFrontifyFolder', async ({ brand }) => {
+        try {
+            let base = Target.getPathToSyncFolder();
+            let path = brand ? `${base}/${brand.name}` : base;
+            if (createFolder(path)) {
+                try {
+                    NSWorkspace.sharedWorkspace().openFile(path);
+                } catch (error) {
+                    console.log(error);
+                }
+            }
+        } catch (error) {
+            throw new Error('Could not reveal Frontify folder.');
+        }
+    });
+
+    // ------------------------------------------------------------------------
+    frontend.on('setBrand', async ({ brandID }) => {
+        console.log('set brand', brandID);
+        try {
+            Target.setBrand(brandID);
+            frontend.send('brand-changed');
+        } catch (error) {
+            throw new Error('Changing brand failed.');
+        }
+    });
+
+    // ------------------------------------------------------------------------
+    frontend.on('uploadArtboards', async ({ artboards, brandID }) => {
+        try {
+            actions['uploadArtboards']({ artboards, brandID });
+        } catch (error) {
+            throw new Error('Uploading artboards failed.');
+        }
+    });
+
+    // ------------------------------------------------------------------------
 
     return win;
 }

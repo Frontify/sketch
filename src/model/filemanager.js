@@ -1,20 +1,25 @@
-import readJSON from '../helpers/readJSON';
-import writeJSON from '../helpers/writeJSON';
-import createFolder from '../helpers/createFolder';
+// Sketcg API
+let sketch = require('sketch');
+
+// Models
 import target from './target';
 import source from './source';
-import sketch from './sketch';
 import user from './user';
+
+// Polyfills
 import FormData from 'sketch-polyfill-fetch/lib/form-data';
 
+// Helpers
+import { getDocument } from '../helpers/sketch';
+import createFolder from '../helpers/createFolder';
 import extend from '../helpers/extend';
+import readJSON from '../helpers/readJSON';
 import response from '../helpers/response';
-
-import { Error } from './error';
-
-let sketch3 = require('sketch');
-
 import shaFile from '../helpers/shaFile';
+import writeJSON from '../helpers/writeJSON';
+
+// Error
+import { Error } from './error';
 
 /**
  * Merge two objects. A bit smarter than Objects.assign(). Can deal with nested keys, too.
@@ -36,8 +41,8 @@ class FileManager {
     }
 
     isCurrentSaved() {
-        if (!sketch.getDocument()) return false;
-        return !!sketch.getDocument().fileURL();
+        if (!getDocument()) return false;
+        return !!getDocument().fileURL();
     }
 
     saveCurrent() {
@@ -55,7 +60,7 @@ class FileManager {
 
                     if (clicked == NSOKButton) {
                         let url = dialog.URL();
-                        let doc = sketch.getDocument();
+                        let doc = getDocument();
 
                         if (doc) {
                             doc.saveToURL_ofType_forSaveOperation_error_(
@@ -82,8 +87,8 @@ class FileManager {
         let path = `${base}/${folder}/`;
 
         if (createFolder(path)) {
-            let doc = sketch.getDocument();
-            let selectedDocument = sketch3.Document.getSelectedDocument();
+            let doc = getDocument();
+            let selectedDocument = sketch.Document.getSelectedDocument();
             let sha = '' + shaFile(selectedDocument.path);
 
             if (doc) {
@@ -278,7 +283,6 @@ class FileManager {
     }
 
     uploadFile(info, overallProgress) {
-        console.log('filemanager.uploadfile', info);
         // remap slashes in filename to folders
         let filenameParts = info.filename.split('/');
         let filename = filenameParts.pop();
@@ -478,7 +482,6 @@ class FileManager {
 
     // uri: /v1/...
     downloadFile(uri, path, overallProgress) {
-        console.log('download: ', uri, path);
         let folder = path.split('/').slice(0, -1).join('/');
 
         if (!createFolder(folder)) {
@@ -498,8 +501,6 @@ class FileManager {
             },
         };
 
-        console.log('full uri', uri, options);
-
         if (!uri) {
             return Promise.reject('Missing URL');
         }
@@ -513,7 +514,6 @@ class FileManager {
 
         return new Promise(
             function (resolve, reject) {
-                console.log('inside promise');
                 var url = NSURL.alloc().initWithString(uri);
                 var request = NSMutableURLRequest.requestWithURL(url);
                 request.setHTTPMethod('GET');
@@ -556,8 +556,6 @@ class FileManager {
                                 console.error(error);
                                 return reject(error);
                             }
-
-                            console.log('resolve targeturl.path', res, res.statusCode());
 
                             return resolve(targetUrl.path());
                         }

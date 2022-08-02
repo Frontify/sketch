@@ -638,7 +638,7 @@ export function ArtboardsView() {
     };
 
     const requestArtboards = async () => {
-        let response = await useSketch('getSelectedArtboards', context.selection.brand.id);
+        let response = await useSketch('getSelectedArtboards', { brandID: context.selection.brand.id });
 
         setArtboards(response.artboards);
         setDocumentArtboards(response.documentArtboards);
@@ -936,7 +936,7 @@ export function ArtboardsView() {
     };
 
     useEffect(async () => {
-        let response = await useSketch('getSelectedArtboards', context.selection.brand.id);
+        let response = await useSketch('getSelectedArtboards', { brandID: context.selection.brand.id });
 
         setArtboards(response.artboards);
         setDocumentArtboards(response.documentArtboards);

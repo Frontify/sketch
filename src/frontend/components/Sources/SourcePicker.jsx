@@ -38,9 +38,9 @@ export function SourcePicker() {
     const checkoutSource = async ({ path, file }) => {
         setLoading(true);
 
-        let { success } = await useSketch('checkout', { source: file, path });
+        let response = await useSketch('checkout', { source: file, path });
 
-        if (success) {
+        if (response.success) {
             setLoading(false);
             setShowDestinationPicker(false);
             // redirect

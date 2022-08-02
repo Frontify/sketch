@@ -1,14 +1,19 @@
-import main from '../windows/main';
-import executeSafely from '../helpers/executeSafely';
-import source from '../model/source';
-import { isWebviewPresent } from 'sketch-module-web-view/remote';
-const sketch3 = require('sketch');
+// Sketch API
+import sketch from 'sketch';
 
+// Windows
+import main from '../windows/main';
+
+// Models
+import Notification from '../model/notification';
+import Source from '../model/source';
+
+// IPC
 import { frontend } from '../helpers/ipc';
+import executeSafely from '../helpers/executeSafely';
+import { isWebviewPresent } from 'sketch-module-web-view/remote';
 
 import { getSelectedArtboards, setSHA } from '../windows/actions/getSelectedArtboards';
-
-import { getPluginState } from '../windows/main';
 
 /**
  * Run
@@ -37,7 +42,9 @@ export function openCommand(context) {
         let interval = setInterval(function () {
             if (context.actionContext.document.documentWindow()) {
                 clearInterval(interval);
-                source.opened().then(function () {
+                Source.opened().then(function () {
+                    Notification.disconnect();
+                    Notification.listen();
                     refresh();
                 });
             }
@@ -52,7 +59,7 @@ export function openCommand(context) {
 
 export function savedCommand(context) {
     executeSafely(context, function () {
-        source.saved(context).then(function () {
+        Source.saved(context).then(function () {
             refresh();
         });
     });
@@ -67,7 +74,7 @@ export function closeCommand(context) {
     executeSafely(context, function () {
         let interval = setInterval(function () {
             clearInterval(interval);
-            source.closed().then(function () {
+            Source.closed().then(function () {
                 refresh();
             });
         }, 200);
@@ -81,13 +88,13 @@ export function closeCommand(context) {
 
 function activeDocumentDidChange() {
     let key = 'com.frontify.sketch.recent.document';
-    let oldDocumentID = sketch3.Settings.sessionVariable(key);
+    let oldDocumentID = sketch.Settings.sessionVariable(key);
 
-    let newDocument = sketch3.Document.getSelectedDocument();
+    let newDocument = sketch.Document.getSelectedDocument();
 
     if (newDocument) {
         let newDocumentID = newDocument.id;
-        sketch3.Settings.setSessionVariable(key, newDocumentID);
+        sketch.Settings.setSessionVariable(key, newDocumentID);
 
         if (oldDocumentID != newDocumentID) {
             // refresh
@@ -113,12 +120,12 @@ export function selectionChangedCommand(context) {
  */
 
 export function artboardChangedCommand(context) {
-    let newArtboard = sketch3.fromNative(context.actionContext.newArtboard);
+    let newArtboard = sketch.fromNative(context.actionContext.newArtboard);
 
     // Update the SHA of the artboard
     setSHA(newArtboard);
 
-    let threshold = 1000;
+    let threshold = 0;
 
     /**
      * We’re throttling this action to improve performance. Otherwise, quickly selecting artboards over
@@ -145,11 +152,11 @@ export function artboardChangedCommand(context) {
 
     // set uuid
     let actionUUID = '' + NSUUID.UUID().UUIDString();
-    sketch3.Settings.setSessionVariable(keyForMostRecentAction, actionUUID);
+    sketch.Settings.setSessionVariable(keyForMostRecentAction, actionUUID);
 
     setTimeout(() => {
-        let mostRecentUUID = sketch3.Settings.sessionVariable(keyForMostRecentAction);
-        let mostRecentBrandID = sketch3.Settings.sessionVariable(recentBrand);
+        let mostRecentUUID = sketch.Settings.sessionVariable(keyForMostRecentAction);
+        let mostRecentBrandID = sketch.Settings.sessionVariable(recentBrand);
         if (mostRecentUUID == actionUUID) {
             executeSafely(context, function () {
                 if (isWebviewPresent('frontifymain')) {
@@ -166,25 +173,13 @@ export function artboardChangedCommand(context) {
  */
 
 function refresh() {
-    /**
-     * Gather environment data
-     *
-     * 1. Current Document
-     * 2. Recent Document
-     * 3. Local Documents
-     *
-     */
-
-    let payload = getPluginState();
+    let recentBrand = 'com.frontify.sketch.recent.brand.id';
+    let mostRecentBrandID = sketch.Settings.sessionVariable(recentBrand);
 
     if (isWebviewPresent('frontifymain')) {
-        frontend.send('refresh', payload);
+        frontend.send('refresh');
     }
-    // Send artboard information, if there is a document
-    // If no document is open, then do nothing.
 
-    let recentBrand = 'com.frontify.sketch.recent.brand.id';
-    let mostRecentBrandID = sketch3.Settings.sessionVariable(recentBrand);
     sendSelection(mostRecentBrandID);
 }
 
