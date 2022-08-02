@@ -78,7 +78,7 @@ function UntrackedSource({ source }) {
                 {t('sources.untracked')}
             </Text>
             <Text weight="strong" whitespace="nowrap" overflow="ellipsis">
-                {source.name}
+                {source.filename?.replace('.sketch', '')}
             </Text>
         </custom-v-stack>
     );
@@ -127,19 +127,23 @@ function RemovedSource({ source }) {
 export function SourceFileInfoText({ source, children }) {
     return (
         <custom-v-stack gap="xx-small" overflow="hidden">
-            <custom-h-stack gap="xx-small" align-items="center" style={{ overflow: 'hidden', width: '100%' }}>
+            <custom-h-stack
+                gap="xx-small"
+                align-items="center"
+                style={{ overflow: 'hidden', width: '100%' }}
+                title={JSON.stringify(source, null, 2)}
+            >
                 {/* No open file detected */}
                 {!source && <NoSource></NoSource>}
                 {source && source.state == 'asset-not-found' && <RemovedSource source={source}></RemovedSource>}
                 {/* Tracked remote file */}
                 {source && source.remote && source.refs?.remote_id && <RemoteSource source={source}></RemoteSource>}
                 {/* Untracked */}
-                {source && source.name && !source.refs?.remote_id && (
+                {source && source.filename && !source.refs?.remote_id && (
                     <UntrackedSource source={source}></UntrackedSource>
                 )}
-
                 {/* Unsaved document */}
-                {source && !source.name && !source.filename && <UnsavedSource source={source}></UnsavedSource>}
+                {source && !source.filename && <UnsavedSource source={source}></UnsavedSource>}
             </custom-h-stack>
             {children}
         </custom-v-stack>

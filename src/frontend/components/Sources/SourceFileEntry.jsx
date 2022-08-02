@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 // Components
-import { Badge, IconArrowRight, IconFrequentlyUsed, IconSketch, LoadingCircle, Text } from '@frontify/fondue';
+import { IconArrowRight, IconFrequentlyUsed, IconSketch, LoadingCircle, Text } from '@frontify/fondue';
 
 import { timeAgo } from '../utils';
 import { SourceAction } from './SourceAction';
@@ -9,9 +9,7 @@ import { SourceFileInfoText } from './SourceFileInfo';
 
 export function SourceFileEntry({
     document,
-    file,
     path = '',
-    name,
     onClick,
     loading = false,
     selected = false,

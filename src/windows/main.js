@@ -8,10 +8,10 @@ import target from '../model/target';
 import sketch from '../model/sketch';
 import color from '../model/color';
 import typography from '../model/typography';
-import asset from '../model/asset';
 import user from '../model/user';
 import createFolder from '../helpers/createFolder';
 import shaFile from '../helpers/shaFile';
+import fetch from '../helpers/fetch';
 import executeSafely from '../helpers/executeSafely';
 
 // Message helper
@@ -210,6 +210,27 @@ export default function (context, view) {
         let payload = {};
 
         switch (type) {
+            case 'simulate-change-by-collaborator':
+                console.log('simulate-change-by-collaborator', args);
+                console.log('go fetch');
+                var asset = args.asset;
+                if (asset) {
+                    console.log('has asset', '/v1/screen/activity/' + asset.id);
+                    let result = await fetch(
+                        '/v1/screen/activity/' + asset.id,
+                        {
+                            method: 'POST',
+                            body: JSON.stringify({ activity: 'LOCAL_CHANGE' }),
+                        },
+                        args.auth
+                    );
+                    console.log('made post request', '/v1/screen/activity/' + asset.id, args);
+                    console.log(result);
+                    return result;
+                }
+                console.log('done');
+                payload = { success: true };
+                break;
             case 'addCurrentFile':
                 try {
                     await source.addCurrentFile();

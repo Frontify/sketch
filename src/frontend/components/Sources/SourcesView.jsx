@@ -177,7 +177,6 @@ export function SourcesView() {
                                         key={openDocument.id || index}
                                         document={openDocument}
                                         path={openDocument.normalizedRelativePath}
-                                        name={openDocument.name}
                                         onClick={() => {
                                             openFile(openDocument);
                                         }}
