@@ -476,8 +476,8 @@ export default function (context, view) {
                         let relativePath = source.getRelativePath(document.path);
 
                         let transformedDocument = {
-                            id: document.id,
-                            name: relativePath.split('/').pop().replace('.sketch', '').replaceAll('%20', ' '),
+                            uuid: document.id,
+                            filename: relativePath.split('/').pop().replaceAll('%20', ' '),
                             path: document.path,
                             relativePath: relativePath,
                             normalizedPath: document.path.replaceAll('%20', ' '),
