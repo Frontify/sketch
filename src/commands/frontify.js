@@ -42,9 +42,11 @@ export function openCommand(context) {
         let interval = setInterval(function () {
             if (context.actionContext.document.documentWindow()) {
                 clearInterval(interval);
-                Source.opened().then(function () {
-                    Notification.disconnect();
-                    Notification.listen();
+
+                Source.opened().then(function (asset) {
+                    // Notification.disconnect();
+                    // Notification.listen();
+                    Notification.subscribe(asset.refs.remote_project_id);
                     refresh();
                 });
             }

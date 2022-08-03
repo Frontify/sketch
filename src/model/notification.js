@@ -24,14 +24,14 @@ class Notification {
     }
 
     connect() {
-        console.log('⚡️ Pusher :: connect');
-        writeLog('⚡️ Pusher :: connect');
+        writeLog('⚡️ Pusher :: Connect');
+
         if (this.pusher) {
             writeLog('⚡️ Pusher :: return already available instance');
             return Promise.resolve(this.pusher);
         }
 
-        writeLog('⚡️ Pusher :: Fetch environement');
+        writeLog('⚡️ Pusher :: Fetch Environment');
 
         return fetch('/v1/account/environment').then(
             function (data) {
@@ -55,8 +55,6 @@ class Notification {
                     this.pusher.authorizationURL = NSURL.URLWithString(data['domain'] + '/api/pusher/auth');
                     writeLog('⚡️ Pusher :: Authorization URL ' + this.pusher.authorizationURL());
 
-                    writeLog('⚡️ Pusher :: Connect');
-
                     this.pusher.connect();
 
                     threadDictionary['frontifynotificationpusher'] = this.pusher;
@@ -70,7 +68,7 @@ class Notification {
     }
 
     disconnect() {
-        console.log('⚡️ Pusher :: Disconnect');
+        writeLog('⚡️ Pusher :: Disconnect');
         if (this.pusher) {
             if (this.channel) {
                 this.unsubscribe();
@@ -95,10 +93,10 @@ class Notification {
     }
 
     subscribe(project) {
-        writeLog('⚡️ Pusher :: subscribe to project: ' + project);
         if (this.pusher) {
             this.channel = this.pusher.subscribeToPresenceChannelNamed_delegate('project-' + project, nil);
             threadDictionary['frontifynotificationchannel'] = this.channel;
+            writeLog('⚡️ Pusher :: subscribe to project: ' + project);
         }
     }
 
@@ -141,77 +139,60 @@ class Notification {
     listen() {
         console.log('⚡️ Pusher :: listen');
         return this.connect()
-            .then(
-                function () {
-                    // subscribe to current chosen project
-                    return source.getCurrentAsset().then(
-                        function (source) {
-                            writeLog('⚡️ Pusher :: Received current asset: ' + source.id || source.refs.remote_id);
+            .then(() => {
+                // bind events
+                this.on(
+                    'screen-activity',
+                    function (event) {
+                        writeLog('⚡️ Pusher :: Event: ' + JSON.stringify(event.data()));
+                        console.log(event.data());
 
-                            if (source.refs.remote_project_id) {
-                                this.subscribe(source.refs.remote_project_id);
-
-                                writeLog('⚡️ Pusher :: Subscribe to: ' + source.refs.remote_project_id);
-
-                                // bind events
-                                this.on(
-                                    'screen-activity',
-                                    function (event) {
-                                        writeLog('⚡️ Pusher :: Event: ' + JSON.stringify(event.data()));
-                                        console.log(event.data());
-
-                                        // Filter relevant activities from the event’s data
-                                        let possibleActivities = ['OPEN', 'LOCAL_CHANGE', 'CLOSE'];
-                                        let eventData = event.data();
-                                        if (possibleActivities.indexOf('' + eventData.type) > -1) {
-                                            /**
-                                             * In general, notifications are fired on a per-project basis.
-                                             * When we receive an event, we need to figure out if it is related to
-                                             * the current asset and wether it’s from a different user.
-                                             *
-                                             * 1. Compare asset id of current asset and the asset from the event
-                                             * 2. Compare the user id’s to figure out if the activity was from a different user
-                                             */
-                                            source
-                                                .getCurrentAsset()
-                                                .then(
-                                                    function (asset) {
-                                                        console.log('on :: ', asset);
-                                                        console.log('on :: ', eventData);
-                                                        if (asset && '' + asset.id == '' + eventData.screen) {
-                                                            console.log('on :: ', 'same');
-                                                            user.getUser().then(
-                                                                function (userData) {
-                                                                    console.log('on :: user');
-                                                                    if ('' + eventData.actor.id != '' + userData.id) {
-                                                                        this.showNotification({
-                                                                            title: 'You are not alone',
-                                                                            image: eventData.actor.image,
-                                                                            description:
-                                                                                eventData.actor.name +
-                                                                                ' is currently working on ' +
-                                                                                asset.filename +
-                                                                                '. This might lead to conflicts.',
-                                                                        });
-                                                                    }
-                                                                }.bind(this)
-                                                            );
-                                                        }
-                                                    }.bind(this)
-                                                )
-                                                .catch((error) => {
-                                                    console.error(error);
-                                                });
+                        // Filter relevant activities from the event’s data
+                        let possibleActivities = ['OPEN', 'LOCAL_CHANGE', 'CLOSE'];
+                        let eventData = event.data();
+                        if (possibleActivities.indexOf('' + eventData.type) > -1) {
+                            /**
+                             * In general, notifications are fired on a per-project basis.
+                             * When we receive an event, we need to figure out if it is related to
+                             * the current asset and wether it’s from a different user.
+                             *
+                             * 1. Compare asset id of current asset and the asset from the event
+                             * 2. Compare the user id’s to figure out if the activity was from a different user
+                             */
+                            source
+                                .getCurrentAsset()
+                                .then(
+                                    function (asset) {
+                                        console.log('on :: ', asset);
+                                        console.log('on :: ', eventData);
+                                        if (asset && '' + asset.id == '' + eventData.screen) {
+                                            console.log('on :: ', 'same');
+                                            user.getUser().then(
+                                                function (userData) {
+                                                    console.log('on :: user');
+                                                    if ('' + eventData.actor.id != '' + userData.id) {
+                                                        this.showNotification({
+                                                            title: 'You are not alone',
+                                                            image: eventData.actor.image,
+                                                            description:
+                                                                eventData.actor.name +
+                                                                ' is currently working on ' +
+                                                                asset.filename +
+                                                                '. This might lead to conflicts.',
+                                                        });
+                                                    }
+                                                }.bind(this)
+                                            );
                                         }
                                     }.bind(this)
-                                );
-
-                                return true;
-                            }
-                        }.bind(this)
-                    );
-                }.bind(this)
-            )
+                                )
+                                .catch((error) => {
+                                    console.error(error);
+                                });
+                        }
+                    }.bind(this)
+                );
+            })
             .catch(
                 function (e) {
                     console.error(e);
