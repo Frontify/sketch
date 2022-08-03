@@ -37,7 +37,6 @@ class Target {
     }
 
     getTarget(view) {
-        console.log('get target');
         // load brand and project name
         let target = readJSON('target') || {};
 

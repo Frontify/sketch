@@ -412,7 +412,6 @@ class Source {
      */
     async pullSource(source, path) {
         return this.downloadSource(source, path).then(async (path) => {
-            console.log('downloaded', path);
             return path;
         });
     }
@@ -550,7 +549,6 @@ class Source {
 
                 FileManager.uploadFile(file, sourceProgress)
                     .then(async (data) => {
-                        console.log('then');
                         clearInterval(polling);
                         data.modified = data.created;
                         // FileManager.updateAssetStatus(target.project.id, data);

@@ -1,5 +1,22 @@
 {
     "translation": {
+        "artboards": {
+            "no_selection_title": "Select Some Artboards.",
+            "no_selection_description": "You haven’t uploaded any artboards from this file yet. Try selecting some artboards in Sketch.",
+            "upload_selected_title": "Press “Upload Selected”",
+            "upload_selected_description": "You’ll be asked to select a destination for the artboards you’ve selected.",
+            "upload_selected": "Upload Selected",
+            "update_all": "Update All",
+            "used_folders": "Used In This Document",
+            "view_on_frontify": "View on Frontify"
+        },
+        "brand": {
+            "colors": "Colors",
+            "icons": "Icons",
+            "media": "Images",
+            "logos": "Logos",
+            "typography": "Typography"
+        },
         "emptyStates": {
             "no_items": "No Assets Found",
             "folder_empty": "This folder is empty",
@@ -30,16 +47,6 @@
             "get_access_token": "We could not sign you in. Did you grant access too long ago?",
             "poll_access_token": "We could not sign you in. Did you already grant access in your browser?",
             "upload_failed": "Upload Failed"
-        },
-        "artboards": {
-            "no_selection_title": "Select Some Artboards.",
-            "no_selection_description": "You haven’t uploaded any artboards from this file yet. Try selecting some artboards in Sketch.",
-            "upload_selected_title": "Press “Upload Selected”",
-            "upload_selected_description": "You’ll be asked to select a destination for the artboards you’ve selected.",
-            "upload_selected": "Upload Selected",
-            "update_all": "Update All",
-            "used_folders": "Used In This Document",
-            "view_on_frontify": "View on Frontify"
         },
         "general": {
             "artboards": "Artboards",
@@ -91,6 +98,10 @@
             "apply_image_resolution": "Apply image with that width.",
             "help": "Drag & drop on layers with image fills. Double click to apply image fill to any layer."
         },
+        "offline": {
+            "title": "Oh noes!",
+            "description": "Looks like you’re offline and can’t access your Frontify assets right now."
+        },
         "sources": {
             "all_tracked_files": "All Tracked Files",
             "browse": "Browse",
@@ -99,7 +110,6 @@
             "no_open_document": "No File",
             "no_open_files": "No Open Files",
             "no_open_document_description": "Open a Sketch File or Refresh",
-
             "no_tracked_files_title": "No Tracked Files",
             "no_tracked_files_description": "Files that you upload or download through the plugin will be displayed here.",
             "local": "Local",
@@ -119,14 +129,6 @@
             "update_artboards": "Update Artboards",
             "upload_selection": "Upload Selected to …",
             "view_revisions": "View Revisions"
-        },
-        "offline": {
-            "title": "Oh noes!",
-            "description": "Looks like you’re offline and can’t access your Frontify assets right now."
-        },
-        "snippets": {
-            "title": "Text Snippets",
-            "description": "Bring your text snippets from Frontify directly into your Figma designs."
         },
         "signin": {
             "create_account_title": "Create an Account",

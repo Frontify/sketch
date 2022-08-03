@@ -15,33 +15,24 @@ class Typography {
         this.colors = {};
     }
 
-    downloadFonts() {
+    downloadFonts(projectID) {
         target.getTarget().then(
             function (target) {
                 // let folder = '' + NSHomeDirectory() + '/Frontify/' + target.brand.name + '/Fonts';
-
                 let folder = '' + NSHomeDirectory() + '/Downloads/';
-                console.log(folder);
+
                 if (createFolder(folder)) {
-                    let path = folder + '/' + target.project.name + '.zip';
+                    let path = folder + projectID + '.zip';
                     var downloadProgress = NSProgress.progressWithTotalUnitCount(10);
                     downloadProgress.setCompletedUnitCount(0);
 
-                    console.log(target);
+                    let uri = '/v1/font/download/' + projectID;
 
-                    return filemanager
-                        .downloadFile(
-                            {
-                                uri: '/v1/font/download/' + target.project.hub_project_id,
-                                path: path,
-                            },
-                            downloadProgress
-                        )
-                        .then(
-                            function () {
-                                filemanager.openFile(path); // open and extract
-                            }.bind(this)
-                        );
+                    return filemanager.downloadFile(uri, path, downloadProgress).then(
+                        function () {
+                            filemanager.openFile(path); // open and extract
+                        }.bind(this)
+                    );
                 }
             }.bind(this)
         );
@@ -74,8 +65,6 @@ class Typography {
         let document = Document.getSelectedDocument();
 
         let name = prefix ? `${prefix}/${newStyle.name()}` : newStyle.name();
-        console.log(name);
-        console.log(document.sharedTextStyles);
 
         let existingStyle = document.sharedTextStyles.find((sharedStyle) => sharedStyle.name == name);
 
@@ -104,7 +93,6 @@ class Typography {
     }
 
     convertFontStyle(fontStyle) {
-        console.log('convertFontStyle');
         let fontManager = NSFontManager.sharedFontManager();
         let msstyles = [];
 
@@ -122,14 +110,10 @@ class Typography {
             }
         }
 
-        console.log('105');
-
         // Make sure that we have at least a default color that we can apply
         if (colors.length == 0) {
             colors.push({ name: 'Default', r: 0, g: 0, b: 0, alpha: 255, css_value: 'rgba(0, 0, 0, 1)' });
         }
-
-        console.log('122');
 
         colors.forEach(
             function (colorValue) {
@@ -192,8 +176,6 @@ class Typography {
                     font = fontManager.fontWithFamily_traits_weight_size('Times', null, 5, 75);
                 }
 
-                console.log('175');
-
                 msstyle.fontPostscriptName = font.fontName();
 
                 if (fontStyle.align) {
@@ -250,25 +232,20 @@ class Typography {
                     }
                 }
 
-                console.log('231');
-
                 msstyles.push(msstyle);
             }.bind(this)
         );
-        console.log(msstyles);
 
         return msstyles;
     }
 
     addFontStyles(fontStyles) {
-        let app = NSApp.delegate();
+        // let app = NSApp.delegate();
         let doc = getDocument();
-        console.log('doc');
+
         if (doc) {
             let msstyles = this.convertFontStyles(fontStyles);
             let sharedStyles = doc.documentData().layerTextStyles();
-
-            console.log('shared styles', sharedStyles);
 
             msstyles.forEach(
                 function (msstyle) {

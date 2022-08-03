@@ -225,7 +225,8 @@ custom-palette-item[disabled='true'] {
 [show-on-hover='true'] {
     opacity: 0;
 }
-custom-palette-item:hover [show-on-hover='true'] {
+custom-palette-item:hover > [show-on-hover='true'],
+custom-h-stack:hover > [show-on-hover='true'] {
     opacity: 1;
 }
 
@@ -553,4 +554,8 @@ input[variant='naked']:focus {
 
 [custom-pointer-events='none'] {
     pointer-events: none;
+}
+
+code {
+    line-height: 1.5;
 }

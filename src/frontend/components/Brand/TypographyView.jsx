@@ -20,6 +20,7 @@ import {
     MenuItem,
     IconTypography,
     IconDownloadAlternative,
+    IconExternalLink,
 } from '@frontify/fondue';
 
 import { GuidelineSwitcher } from './GuidelineSwitcher';
@@ -28,7 +29,6 @@ import { SearchField } from '../Core/SearchField';
 import { TextStyleColorsFlyout } from './TextStyleColorsFlyout';
 
 export function TypographyView({ guidelines, palettes }) {
-    console.log(guidelines, palettes);
     const { actions, colorMap, selection } = useContext(UserContext);
 
     const { t } = useTranslation();
@@ -103,7 +103,7 @@ export function TypographyView({ guidelines, palettes }) {
                 {filteredPalettes &&
                     filteredPalettes.map((palette) => {
                         if (query == '' || palette.styles.length) {
-                            return <Palette colorMap={colorMap} palette={palette}></Palette>;
+                            return <Palette key={palette.id} colorMap={colorMap} palette={palette}></Palette>;
                         }
                     })}
             </custom-scroll-view>
@@ -114,6 +114,7 @@ export function TypographyView({ guidelines, palettes }) {
 function Palette({ colorMap, palette }) {
     const { t } = useTranslation();
 
+    const context = useContext(UserContext);
     const [open, setOpen] = useLocalStorage('cache.palette-' + palette.id, true);
     const [contextMenuOpen, setContextMenuOpen] = useState(false);
     const [fontsMenuOpen, setFontsMenuOpen] = useState(false);
@@ -156,7 +157,7 @@ function Palette({ colorMap, palette }) {
                 </div>
 
                 <custom-breadcrumbs overflow="hidden" flex>
-                    <custom-h-stack gap="x-small" overflow="hidden">
+                    <custom-h-stack gap="x-small" overflow="hidden" align-items="center">
                         <Text color="weak" size="small" overflow="ellipsis" whitespace="nowrap">
                             {palette.project_name}
                         </Text>
@@ -170,6 +171,15 @@ function Palette({ colorMap, palette }) {
                                 </Text>
                             </custom-h-stack>
                         )}
+
+                        <div show-on-hover="true" cursor="pointer">
+                            <IconExternalLink
+                                title={t('artboards.view_on_frontify')}
+                                onClick={() => {
+                                    useSketch('openUrl', { url: context.auth.domain + palette.project_link });
+                                }}
+                            />
+                        </div>
                     </custom-h-stack>
                 </custom-breadcrumbs>
 
@@ -201,23 +211,9 @@ function Palette({ colorMap, palette }) {
                                         ></MenuItem>
                                     </div>
                                     <custom-line></custom-line>
-                                    <div padding="small">
-                                        <Button
-                                            hugWidth={true}
-                                            style="Secondary"
-                                            icon={<IconDownloadAlternative></IconDownloadAlternative>}
-                                            onClick={() => {
-                                                useSketch('downloadFonts', { fonts: palette.fonts });
-                                                setFontsMenuOpen(false);
-                                            }}
-                                        >
-                                            Download Fonts
-                                        </Button>
-                                    </div>
-                                    <custom-line></custom-line>
-
                                     {palette.fonts
-                                        .sort((a, b) => (a.name > b.name ? 1 : -1))
+                                        .filter((font) => font.install_name)
+
                                         .map((font) => {
                                             return (
                                                 <div
@@ -240,6 +236,23 @@ function Palette({ colorMap, palette }) {
                                                 </div>
                                             );
                                         })}
+                                    <custom-line></custom-line>
+
+                                    <div padding="small">
+                                        <Button
+                                            hugWidth={true}
+                                            style="Secondary"
+                                            icon={<IconDownloadAlternative></IconDownloadAlternative>}
+                                            onClick={() => {
+                                                useSketch('downloadFonts', {
+                                                    projectID: palette.project_id,
+                                                });
+                                                setFontsMenuOpen(false);
+                                            }}
+                                        >
+                                            Download Fonts
+                                        </Button>
+                                    </div>
                                 </div>
                             </custom-v-stack>
                         </Flyout>

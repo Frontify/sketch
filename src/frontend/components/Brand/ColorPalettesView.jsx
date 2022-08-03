@@ -7,6 +7,7 @@ import {
     IconArrowSwap,
     IconCaretDown,
     IconCaretRight,
+    IconExternalLink,
     IconMore,
     IconPlus,
     MenuItem,
@@ -28,7 +29,7 @@ import { useSketch } from '../../hooks/useSketch';
 import { useTranslation } from 'react-i18next';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 
-export function PalettesView({ palettes, guidelines }) {
+export function ColorPalettesView({ palettes, guidelines }) {
     const { actions, selection } = useContext(UserContext);
     const [query, setQuery] = useState('');
     const [filteredPalettes, setFilteredPalettes] = useState(palettes);
@@ -97,7 +98,7 @@ export function PalettesView({ palettes, guidelines }) {
                 {!filteredPalettes.length ? <EmptyState title={t('emptyStates.no_palettes')}></EmptyState> : ''}
                 {filteredPalettes.map((palette) => {
                     if (query == '' || palette.colors.length) {
-                        return <Palette palette={palette}></Palette>;
+                        return <Palette key={palette.id} palette={palette}></Palette>;
                     }
                 })}
             </custom-scroll-view>
@@ -107,6 +108,8 @@ export function PalettesView({ palettes, guidelines }) {
 
 function Palette({ palette }) {
     const { t } = useTranslation();
+
+    const context = useContext(UserContext);
 
     const [open, setOpen] = useLocalStorage('cache.palette-' + palette.id, true);
     const [contextMenuOpen, setContextMenuOpen] = useState(false);
@@ -141,7 +144,7 @@ function Palette({ palette }) {
                 </div>
 
                 <custom-breadcrumbs overflow="hidden" flex>
-                    <custom-h-stack gap="x-small" overflow="hidden">
+                    <custom-h-stack gap="x-small" overflow="hidden" align-items="center">
                         <Text color="weak" size="small" overflow="ellipsis" whitespace="nowrap">
                             {palette.project_name}
                         </Text>
@@ -155,6 +158,14 @@ function Palette({ palette }) {
                                 </Text>
                             </custom-h-stack>
                         )}
+                        <div show-on-hover="true" cursor="pointer">
+                            <IconExternalLink
+                                title={t('artboards.view_on_frontify')}
+                                onClick={() => {
+                                    useSketch('openUrl', { url: context.auth.domain + palette.project_link });
+                                }}
+                            />
+                        </div>
                     </custom-h-stack>
                 </custom-breadcrumbs>
 

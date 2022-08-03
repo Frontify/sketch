@@ -9,40 +9,41 @@ import { useNavigate, Outlet } from 'react-router-dom';
 // Context
 import { useState, useEffect, useContext } from 'react';
 import { UserContext } from '../../context/UserContext';
+
 // i18n
-import { useLocalStorage } from '../../hooks/useLocalStorage';
-
-// Library scopes
-const libraryScopes = [
-    {
-        key: 'colors',
-        title: 'Colors',
-    },
-    {
-        key: 'typography',
-        title: 'Typography',
-    },
-
-    {
-        key: 'icons',
-        title: 'Icons',
-    },
-    {
-        key: 'media',
-        title: 'Images',
-    },
-    {
-        key: 'logos',
-        title: 'Logos',
-    },
-];
+import { useTranslation } from 'react-i18next';
 
 export function BrandView() {
-    let [activeScope, setActiveScope] = useLocalStorage('cache.activeScope', 'colors');
-
     const context = useContext(UserContext);
 
+    let { t } = useTranslation();
+
     const navigate = useNavigate();
+
+    // Library scopes
+    const libraryScopes = [
+        {
+            key: 'colors',
+            title: t('brand.colors'),
+        },
+        {
+            key: 'typography',
+            title: t('brand.typography'),
+        },
+
+        {
+            key: 'icons',
+            title: t('brand.icons'),
+        },
+        {
+            key: 'media',
+            title: t('brand.media'),
+        },
+        {
+            key: 'logos',
+            title: t('brand.logos'),
+        },
+    ];
 
     // Make sure to refresh brand guidelines when loading this view
     useEffect(async () => {
@@ -62,11 +63,13 @@ export function BrandView() {
                         return (
                             <Badge
                                 key={scope.key}
-                                emphasis={activeScope == scope.key ? 'Strong' : ''}
-                                style={activeScope == scope.key ? 'Progress' : 'Primary'}
+                                emphasis={context.activeLibrary == scope.key ? 'Strong' : ''}
+                                style={context.activeLibrary == scope.key ? 'Progress' : 'Primary'}
                                 onClick={() => {
-                                    navigate('/source/brand/' + scope.key);
-                                    setActiveScope(scope.key);
+                                    context.setActiveLibrary(scope.key);
+                                    setTimeout(() => {
+                                        navigate('/source/brand/' + scope.key);
+                                    });
                                 }}
                             >
                                 <span style={{ textTransform: 'capitalize' }}>{scope.title}</span>

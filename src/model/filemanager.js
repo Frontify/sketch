@@ -482,6 +482,7 @@ class FileManager {
 
     // uri: /v1/...
     downloadFile(uri, path, overallProgress) {
+        console.log(uri, path, overallProgress);
         let folder = path.split('/').slice(0, -1).join('/');
 
         if (!createFolder(folder)) {

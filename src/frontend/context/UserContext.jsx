@@ -22,6 +22,7 @@ export const UserContextProvider = ({ children }) => {
      * Poorman’s TypeScript replacement. Sorry!
      */
     const blueprints = {
+        activeLibrary: '',
         auth: {
             domain: '',
             token: '',
@@ -47,10 +48,19 @@ export const UserContextProvider = ({ children }) => {
         user: { name: '', id: null, email: null, avatar: null },
     };
 
+    // Active Library Tab
+    const [activeLibrary, setActiveLibrary] = useState(blueprints.activeLibrary);
+
+    // Debug
     const [debug, setDebug] = useState(blueprints.debug);
+
+    // Tick
     let [tick, setTick] = useState(0);
+
+    // Keep track of uploads in the background
     let [transferMap, setTransferMap] = useState(blueprints.transferMap);
 
+    // Refreshing
     let [refreshing, setRefreshing] = useState(false);
 
     useEffect(() => {
@@ -165,6 +175,9 @@ export const UserContextProvider = ({ children }) => {
 
             palettes.forEach((palette) => {
                 palette.colors = palette.colors.reverse();
+                palette.project_id = guideline.project_id;
+                palette.project_name = guideline.name;
+                palette.project_link = guideline.project_link;
             });
             resolve(palettes);
         });
@@ -187,12 +200,16 @@ export const UserContextProvider = ({ children }) => {
             // Convert API Object to Array
             let palettes = Object.keys(groups).map((key) => {
                 // Mixin "guideline.name" which is missing from the API, but necessary for the UI
-
-                let palette = { ...groups[key], project_name: guideline.name };
+                let palette = {
+                    ...groups[key],
+                    project_id: guideline.project_id,
+                    project_name: guideline.name,
+                    project_link: guideline.project_link,
+                };
                 return palette;
             });
 
-            resolve({ palettes, colors, fonts });
+            resolve({ palettes, colors, fonts, guideline });
         });
     }
 
@@ -348,8 +365,6 @@ export const UserContextProvider = ({ children }) => {
             setRefreshing(false);
         },
         selectBrand(brand) {
-            console.log('selectBrand', brand);
-            console.log('use sketch', 'setBrand', '' + brand.id);
             useSketch('setBrand', { brandID: '' + brand.id });
             setSelection((state) => {
                 return { ...state, brand };
@@ -384,6 +399,7 @@ export const UserContextProvider = ({ children }) => {
                 console.warn('Trying to call setAuth without authData');
             }
         },
+
         logout() {
             // Reset state and cached localStorage
             setSelection(blueprints.selection);
@@ -463,6 +479,7 @@ export const UserContextProvider = ({ children }) => {
 
     let context = {
         actions,
+        activeLibrary,
         auth,
         brands,
         colorMap,
@@ -476,6 +493,7 @@ export const UserContextProvider = ({ children }) => {
         refreshing,
         recentDocuments,
         selection,
+        setActiveLibrary,
         sources,
         textStylePalettes,
         tick,

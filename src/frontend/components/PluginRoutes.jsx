@@ -8,7 +8,7 @@ import { BrandView } from './Brand/BrandView';
 import { IconLibrariesView } from './Libraries/IconLibrariesView';
 import { MediaLibrariesView } from './Libraries/MediaLibrariesView';
 import { LogoLibrariesView } from './Libraries/LogoLibrariesView';
-import { PalettesView } from './Brand/PalettesView';
+import { ColorPalettesView } from './Brand/ColorPalettesView';
 import { TypographyView } from './Brand/TypographyView';
 
 // Sign In
@@ -82,7 +82,7 @@ export function PluginRoutes() {
                     <Route
                         path="colors"
                         element={
-                            <PalettesView
+                            <ColorPalettesView
                                 palettes={context && context.colorPalettes}
                                 guidelines={context && context.guidelines}
                             />

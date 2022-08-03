@@ -177,7 +177,6 @@ export default function (context, view) {
 
     frontend.on('addDocumentColors', ({ colors }) => {
         try {
-            console.log('add document colors');
             Color.addDocumentColors(colors);
         } catch (error) {
             throw new Error('Could not add document colors.');
@@ -206,10 +205,9 @@ export default function (context, view) {
 
     // ------------------------------------------------------------------------
 
-    frontend.on('downloadFonts', ({ fonts }) => {
-        console.log('downloadFonts');
+    frontend.on('downloadFonts', ({ projectID }) => {
         try {
-            Typography.downloadFonts(fonts);
+            Typography.downloadFonts(projectID);
         } catch (error) {
             throw new Error('Could not download fonts.');
         }
@@ -291,7 +289,6 @@ export default function (context, view) {
         let domain = args.domain;
         let payload = {};
         OAuth.authorize(domain).then((authData) => {
-            console.log({ authData });
             if (authData.hasError) {
                 console.log(authData.error);
                 payload = { success: false, error: authData.error };
@@ -311,7 +308,7 @@ export default function (context, view) {
                                 domain: domain,
                             });
                             // runCommand(context);
-                            console.log('success');
+
                             payload = { success: true };
                         }.bind(this)
                     )
@@ -673,7 +670,6 @@ export default function (context, view) {
 
     // ------------------------------------------------------------------------
     frontend.on('setBrand', async ({ brandID }) => {
-        console.log('set brand', brandID);
         try {
             Target.setBrand(brandID);
             frontend.send('brand-changed');
