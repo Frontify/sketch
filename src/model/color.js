@@ -86,7 +86,7 @@ class Color {
         let mscolors = this.convertColors(colors);
         assets.addColorAssets(mscolors);
 
-        app.refreshCurrentDocument();
+        // app.refreshCurrentDocument();
     }
 
     replaceGlobalColors(colors) {
@@ -97,7 +97,7 @@ class Color {
         assets.setColorAssets([]);
         assets.addColorAssets(mscolors);
 
-        app.refreshCurrentDocument();
+        // app.refreshCurrentDocument();
     }
 
     convertColors(colors) {

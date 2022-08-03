@@ -9,7 +9,7 @@ import { findFirstLayer, getDocument } from '../helpers/sketch';
 
 import asset from './asset';
 import target from './target';
-import filemanager from './filemanager';
+import FileManager from './FileManager';
 
 // IPC
 import { isWebviewPresent } from 'sketch-module-web-view/remote';
@@ -192,7 +192,7 @@ class Artboard {
                 imageFormat.setFileFormat('png');
                 imageFormat.setScale(this.pixelRatio); // @2x
 
-                let path = filemanager.getExportPath() + artboard.name + '.png';
+                let path = FileManager.getExportPath() + artboard.name + '.png';
                 let exportRequest = MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(
                     msartboard,
                     [imageFormat],
@@ -255,7 +255,7 @@ class Artboard {
                  * The Frontify API expects a "data.json" for the inspect/import feature.
                  */
                 const uniqueExportName = `data-${artboard.id}`;
-                const exportPath = filemanager.getExportPath();
+                const exportPath = FileManager.getExportPath();
 
                 writeJSON(uniqueExportName, artboardExport, exportPath);
 
@@ -494,7 +494,7 @@ class Artboard {
             }
 
             const timeStamp = Date.now();
-            const path = filemanager.getExportPath() + timeStamp + '-' + name + '.' + format.fileFormat;
+            const path = FileManager.getExportPath() + timeStamp + '-' + name + '.' + format.fileFormat;
             const layerSizeAsScaleNumber = this.getLayerScaleNumberFromSizeString(format.size, layer.frame);
             const layerFormat = MSExportFormat.alloc().init();
 
@@ -583,21 +583,20 @@ class Artboard {
                                                             if (artboard.sha != artboard.target.sha) {
                                                                 artboardChanged = true;
 
-                                                                return filemanager
-                                                                    .uploadFile(
-                                                                        {
-                                                                            path: file.path,
-                                                                            filename: file.name + '.' + file.ext,
-                                                                            name: file.name,
-                                                                            id: file.id,
-                                                                            id_external: file.id_external,
-                                                                            pixel_ratio: this.pixelRatio,
-                                                                            folder: artboard.target.remote_path,
-                                                                            project: artboard.target.remote_project_id,
-                                                                            type: file.type,
-                                                                        },
-                                                                        artboardProgress
-                                                                    )
+                                                                return FileManager.uploadFile(
+                                                                    {
+                                                                        path: file.path,
+                                                                        filename: file.name + '.' + file.ext,
+                                                                        name: file.name,
+                                                                        id: file.id,
+                                                                        id_external: file.id_external,
+                                                                        pixel_ratio: this.pixelRatio,
+                                                                        folder: artboard.target.remote_path,
+                                                                        project: artboard.target.remote_project_id,
+                                                                        type: file.type,
+                                                                    },
+                                                                    artboardProgress
+                                                                )
                                                                     .then(
                                                                         function (data) {
                                                                             // Uploaded
@@ -619,7 +618,7 @@ class Artboard {
                                                                                 destination
                                                                             );
                                                                             // 3. Handle the response from the API
-                                                                            filemanager.deleteFile(file.path);
+                                                                            FileManager.deleteFile(file.path);
 
                                                                             // Patch artboard id
                                                                             artboard.target.remote_id = data.id;
@@ -650,7 +649,7 @@ class Artboard {
                                                                     artboardProgress.completedUnitCount() + 10
                                                                 );
                                                                 this.updateProgress(artboard, artboardProgress);
-                                                                filemanager.deleteFile(file.path);
+                                                                FileManager.deleteFile(file.path);
                                                                 artboard.nochanges = true;
                                                                 return artboard.id;
                                                             }
@@ -678,22 +677,21 @@ class Artboard {
                                                                         file.ext;
                                                                 }
 
-                                                                return filemanager
-                                                                    .uploadFile(
-                                                                        {
-                                                                            path: file.path,
-                                                                            filename: filename,
-                                                                            name: file.name,
-                                                                            id_external: file.id_external,
-                                                                            type: file.type,
-                                                                            asset_id: assetId,
-                                                                            pixel_ratio: file.pixel_ratio,
-                                                                        },
-                                                                        artboardProgress
-                                                                    )
+                                                                return FileManager.uploadFile(
+                                                                    {
+                                                                        path: file.path,
+                                                                        filename: filename,
+                                                                        name: file.name,
+                                                                        id_external: file.id_external,
+                                                                        type: file.type,
+                                                                        asset_id: assetId,
+                                                                        pixel_ratio: file.pixel_ratio,
+                                                                    },
+                                                                    artboardProgress
+                                                                )
                                                                     .then(
                                                                         function (data) {
-                                                                            filemanager.deleteFile(file.path);
+                                                                            FileManager.deleteFile(file.path);
 
                                                                             this.updateProgress(
                                                                                 artboard,
@@ -711,7 +709,7 @@ class Artboard {
                                                                         );
                                                                     });
                                                             } else {
-                                                                filemanager.deleteFile(file.path);
+                                                                FileManager.deleteFile(file.path);
                                                                 artboardProgress.setCompletedUnitCount(
                                                                     artboardProgress.completedUnitCount() + 10
                                                                 );

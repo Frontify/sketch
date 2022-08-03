@@ -3,20 +3,32 @@ import React, { useState, useEffect, useContext } from 'react';
 // Hooks
 import { useSketch } from '../../hooks/useSketch';
 import { useTranslation } from 'react-i18next';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 // Context
 import { UserContext } from '../../context/UserContext';
 
 // Components
-import { Button, IconCaretDown, IconCaretRight, Flyout, Text, IconMore, MenuItem } from '@frontify/fondue';
+import {
+    Button,
+    IconArrowSwap,
+    IconCaretDown,
+    IconCaretRight,
+    Flyout,
+    Text,
+    IconMore,
+    MenuItem,
+    IconTypography,
+    IconDownloadAlternative,
+} from '@frontify/fondue';
 
 import { GuidelineSwitcher } from './GuidelineSwitcher';
 import { EmptyState } from '../Core/EmptyState';
 import { SearchField } from '../Core/SearchField';
-import { Swatch } from './Swatch';
 import { TextStyleColorsFlyout } from './TextStyleColorsFlyout';
 
 export function TypographyView({ guidelines, palettes }) {
+    console.log(guidelines, palettes);
     const { actions, colorMap, selection } = useContext(UserContext);
 
     const { t } = useTranslation();
@@ -29,11 +41,6 @@ export function TypographyView({ guidelines, palettes }) {
 
     const [query, setQuery] = useState('');
     const [filteredPalettes, setFilteredPalettes] = useState(palettes);
-
-    const [open, setOpen] = useState(true);
-
-    const onClose = () => {};
-    const onOpen = () => {};
 
     useEffect(() => {
         if (!palettes) return;
@@ -64,17 +71,6 @@ export function TypographyView({ guidelines, palettes }) {
         );
     }, [selection, palettes, query]);
 
-    const applyTextStyle = async (textStyle, color) => {
-        await useSketch('applyFontStyleWithColor', { textStyle });
-        if (color) {
-            await useSketch('applyColor', {
-                r: color.r,
-                g: color.g,
-                b: color.b,
-                a: color.alpha,
-            });
-        }
-    };
     return (
         <custom-v-stack overflow="hidden" stretch="true">
             <custom-h-stack stretch-children padding-x="large" padding-bottom="medium">
@@ -106,98 +102,244 @@ export function TypographyView({ guidelines, palettes }) {
                 {!filteredPalettes.length ? <EmptyState title={t('emptyStates.no_textstyles')}></EmptyState> : ''}
                 {filteredPalettes &&
                     filteredPalettes.map((palette) => {
-                        return (
-                            <custom-v-stack key={palette.id} padding-y="x-small">
-                                <custom-h-stack
-                                    gap="x-small"
-                                    align-items="center"
-                                    style={{ marginLeft: '16px' }}
-                                    padding="xx-small"
-                                >
-                                    <div>
-                                        {open ? (
-                                            <Button
-                                                inverted={false}
-                                                style="Secondary"
-                                                solid={false}
-                                                size="Small"
-                                                icon={<IconCaretDown></IconCaretDown>}
-                                                onClick={() => onClose(palette.id)}
-                                            ></Button>
-                                        ) : (
-                                            <Button
-                                                inverted={false}
-                                                style="Secondary"
-                                                solid={false}
-                                                size="Small"
-                                                icon={<IconCaretRight></IconCaretRight>}
-                                                onClick={() => onOpen(palette.id)}
-                                            ></Button>
-                                        )}
-                                    </div>
-
-                                    <custom-breadcrumbs overflow="hidden" flex>
-                                        <custom-h-stack gap="x-small" overflow="hidden">
-                                            <Text color="weak" size="small" overflow="ellipsis" whitespace="nowrap">
-                                                {palette.project_name}
-                                            </Text>
-                                            {palette.title && (
-                                                <custom-h-stack gap="x-small" overflow="hidden">
-                                                    <Text color="weak">
-                                                        <span style={{ opacity: 0.5 }}>/</span>
-                                                    </Text>
-                                                    <Text size="small" overflow="ellipsis" whitespace="nowrap">
-                                                        {palette.title}
-                                                    </Text>
-                                                </custom-h-stack>
-                                            )}
-                                        </custom-h-stack>
-                                    </custom-breadcrumbs>
-                                </custom-h-stack>
-
-                                <custom-v-stack>
-                                    {palette.styles.map((textStyle) => {
-                                        return (
-                                            <custom-palette-item
-                                                key={textStyle.id}
-                                                title={JSON.stringify(textStyle)}
-                                                onClick={() => {
-                                                    applyTextStyle(textStyle, null);
-                                                }}
-                                                padding-x="large"
-                                            >
-                                                <custom-h-stack>
-                                                    <custom-v-stack>
-                                                        <span>{textStyle.name}</span>
-                                                        <Text size="x-small">
-                                                            {textStyle.family || 'Default'} / {textStyle.size} /{' '}
-                                                            {textStyle.line_height}
-                                                        </Text>
-                                                    </custom-v-stack>
-                                                    <custom-spacer></custom-spacer>
-
-                                                    {textStyle.colors?.foreground && colorMap ? (
-                                                        <div style={{ marginRight: '-8px' }}>
-                                                            <TextStyleColorsFlyout
-                                                                colorMap={colorMap}
-                                                                textStyle={textStyle}
-                                                                onChange={(value) => {
-                                                                    applyTextStyle(textStyle, value);
-                                                                }}
-                                                            ></TextStyleColorsFlyout>
-                                                        </div>
-                                                    ) : (
-                                                        ''
-                                                    )}
-                                                </custom-h-stack>
-                                            </custom-palette-item>
-                                        );
-                                    })}
-                                </custom-v-stack>
-                            </custom-v-stack>
-                        );
+                        if (query == '' || palette.styles.length) {
+                            return <Palette colorMap={colorMap} palette={palette}></Palette>;
+                        }
                     })}
             </custom-scroll-view>
+        </custom-v-stack>
+    );
+}
+
+function Palette({ colorMap, palette }) {
+    const { t } = useTranslation();
+
+    const [open, setOpen] = useLocalStorage('cache.palette-' + palette.id, true);
+    const [contextMenuOpen, setContextMenuOpen] = useState(false);
+    const [fontsMenuOpen, setFontsMenuOpen] = useState(false);
+
+    const applyTextStyle = async (textStyle, color) => {
+        await useSketch('applyFontStyleWithColor', { textStyle, prefix: palette.title });
+        if (color) {
+            await useSketch('applyColor', {
+                r: color.r,
+                g: color.g,
+                b: color.b,
+                a: color.alpha,
+            });
+        }
+    };
+
+    return (
+        <custom-v-stack key={palette.id} padding-y="x-small">
+            <custom-h-stack gap="x-small" align-items="center" style={{ marginLeft: '16px' }} padding="xx-small">
+                <div>
+                    {open ? (
+                        <Button
+                            inverted={false}
+                            style="Secondary"
+                            solid={false}
+                            size="Small"
+                            icon={<IconCaretDown></IconCaretDown>}
+                            onClick={() => setOpen(false)}
+                        ></Button>
+                    ) : (
+                        <Button
+                            inverted={false}
+                            style="Secondary"
+                            solid={false}
+                            size="Small"
+                            icon={<IconCaretRight></IconCaretRight>}
+                            onClick={() => setOpen(true)}
+                        ></Button>
+                    )}
+                </div>
+
+                <custom-breadcrumbs overflow="hidden" flex>
+                    <custom-h-stack gap="x-small" overflow="hidden">
+                        <Text color="weak" size="small" overflow="ellipsis" whitespace="nowrap">
+                            {palette.project_name}
+                        </Text>
+                        {palette.title && (
+                            <custom-h-stack gap="x-small" overflow="hidden">
+                                <Text color="weak">
+                                    <span style={{ opacity: 0.5 }}>/</span>
+                                </Text>
+                                <Text size="small" overflow="ellipsis" whitespace="nowrap">
+                                    {palette.title}
+                                </Text>
+                            </custom-h-stack>
+                        )}
+                    </custom-h-stack>
+                </custom-breadcrumbs>
+
+                {palette.fonts && palette.fonts.length ? (
+                    <div show-on-hover="false">
+                        <Flyout
+                            hug={false}
+                            fitContent={true}
+                            isOpen={fontsMenuOpen}
+                            onOpenChange={(isOpen) => setFontsMenuOpen(isOpen)}
+                            legacyFooter={false}
+                            trigger={
+                                <Button
+                                    style="Secondary"
+                                    solid={false}
+                                    inverted={false}
+                                    icon={<IconTypography />}
+                                    onClick={() => setFontsMenuOpen((open) => !open)}
+                                ></Button>
+                            }
+                        >
+                            <custom-v-stack gap="xx-small">
+                                <div>
+                                    <div tabIndex={0} role="menuitem" aria-label={t('guidelines.document_text_styles')}>
+                                        <MenuItem
+                                            active={true}
+                                            selectionIndicator="None"
+                                            title={t('guidelines.fonts')}
+                                        ></MenuItem>
+                                    </div>
+                                    <custom-line></custom-line>
+                                    <div padding="small">
+                                        <Button
+                                            hugWidth={true}
+                                            style="Secondary"
+                                            icon={<IconDownloadAlternative></IconDownloadAlternative>}
+                                            onClick={() => {
+                                                useSketch('downloadFonts', { fonts: palette.fonts });
+                                                setFontsMenuOpen(false);
+                                            }}
+                                        >
+                                            Download Fonts
+                                        </Button>
+                                    </div>
+                                    <custom-line></custom-line>
+
+                                    {palette.fonts
+                                        .sort((a, b) => (a.name > b.name ? 1 : -1))
+                                        .map((font) => {
+                                            return (
+                                                <div
+                                                    key={font.id}
+                                                    tabIndex={0}
+                                                    role="menuitem"
+                                                    aria-label={t('guidelines.add_text_styles')}
+                                                    onClick={() => {
+                                                        setContextMenuOpen(false);
+                                                        useSketch('importFontStyles', {
+                                                            styles: palette.styles,
+                                                            prefix: palette.title,
+                                                        });
+                                                    }}
+                                                >
+                                                    <MenuItem
+                                                        decorator={<IconTypography></IconTypography>}
+                                                        title={`${font.name} ${font.font_weight}`}
+                                                    ></MenuItem>
+                                                </div>
+                                            );
+                                        })}
+                                </div>
+                            </custom-v-stack>
+                        </Flyout>
+                    </div>
+                ) : (
+                    ''
+                )}
+
+                <div show-on-hover="false" style={{ marginRight: '8px' }}>
+                    <Flyout
+                        hug={false}
+                        fitContent={true}
+                        isOpen={contextMenuOpen}
+                        onOpenChange={(isOpen) => setContextMenuOpen(isOpen)}
+                        legacyFooter={false}
+                        trigger={
+                            <Button
+                                style="Secondary"
+                                solid={false}
+                                inverted={false}
+                                icon={<IconMore />}
+                                onClick={() => setContextMenuOpen((open) => !open)}
+                            ></Button>
+                        }
+                    >
+                        <custom-v-stack gap="xx-small">
+                            <div>
+                                <div tabIndex={0} role="menuitem" aria-label={t('guidelines.document_text_styles')}>
+                                    <MenuItem
+                                        active={true}
+                                        selectionIndicator="None"
+                                        title={t('guidelines.document_text_styles')}
+                                    ></MenuItem>
+                                </div>
+                                <div
+                                    tabIndex={0}
+                                    role="menuitem"
+                                    aria-label={t('guidelines.add_text_styles')}
+                                    onClick={() => {
+                                        setContextMenuOpen(false);
+                                        useSketch('importFontStyles', {
+                                            styles: palette.styles,
+                                            prefix: palette.title,
+                                        });
+                                    }}
+                                >
+                                    <MenuItem
+                                        decorator={<IconArrowSwap></IconArrowSwap>}
+                                        title={t('guidelines.add_text_styles')}
+                                    ></MenuItem>
+                                </div>
+                            </div>
+                        </custom-v-stack>
+                    </Flyout>
+                </div>
+            </custom-h-stack>
+
+            <custom-v-stack>
+                {palette.styles
+                    .sort((a, b) => (a.name > b.name ? 1 : -1))
+                    .map((textStyle) => {
+                        return (
+                            open && (
+                                <custom-palette-item
+                                    key={textStyle.id}
+                                    title={JSON.stringify(textStyle)}
+                                    onClick={() => {
+                                        applyTextStyle(textStyle, null);
+                                    }}
+                                    padding-x="large"
+                                >
+                                    <custom-h-stack>
+                                        <custom-v-stack>
+                                            <span>{textStyle.name}</span>
+                                            <Text size="x-small">
+                                                {textStyle.family || 'Default'} / {textStyle.size} /{' '}
+                                                {textStyle.line_height}
+                                            </Text>
+                                        </custom-v-stack>
+                                        <custom-spacer></custom-spacer>
+
+                                        {textStyle.colors?.foreground && colorMap ? (
+                                            <div style={{ marginRight: '-24px' }}>
+                                                <TextStyleColorsFlyout
+                                                    colorMap={colorMap}
+                                                    textStyle={textStyle}
+                                                    onChange={(value) => {
+                                                        applyTextStyle(textStyle, value);
+                                                    }}
+                                                ></TextStyleColorsFlyout>
+                                            </div>
+                                        ) : (
+                                            ''
+                                        )}
+                                    </custom-h-stack>
+                                </custom-palette-item>
+                            )
+                        );
+                    })}
+            </custom-v-stack>
         </custom-v-stack>
     );
 }

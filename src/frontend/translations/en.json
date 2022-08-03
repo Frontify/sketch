@@ -11,6 +11,7 @@
             "no_logolibraries": "No Logo Libraries Found",
             "no_palettes": "No Color Palettes Found",
             "no_projects": "No Projects",
+            "no_search_results": "No Search Results",
             "no_textstyles": "No Text Styles Found",
             "untitled": "Untitled",
             "untitled_palette": "Untitled Palette"
@@ -73,6 +74,18 @@
             "untitled_collection": "Untitled Collection",
             "untitled": "Untitled",
             "uploads": "Uploads"
+        },
+        "guidelines": {
+            "add_to_document_colors": "Add to Document Colors",
+            "add_to_global_colors": "Add to Global Colors",
+            "add_text_styles": "Import / Update",
+            "document_colors": "Document Colors",
+            "document_text_styles": "Document Text Styles",
+            "download_fonts": "Download Fonts",
+            "fonts": "Fonts",
+            "global_colors": "Global Colors",
+            "replace_document_colors": "Replace Document Colors",
+            "replace_global_colors": "Replace Global Colors"
         },
         "libraries": {
             "apply_image_resolution": "Apply image with that width.",

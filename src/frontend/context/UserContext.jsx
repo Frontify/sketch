@@ -182,7 +182,7 @@ export const UserContextProvider = ({ children }) => {
                     Authorization: 'Bearer ' + auth.token,
                 }),
             });
-            let { colors, groups } = await response.json();
+            let { colors, fonts, groups } = await response.json();
 
             // Convert API Object to Array
             let palettes = Object.keys(groups).map((key) => {
@@ -192,7 +192,7 @@ export const UserContextProvider = ({ children }) => {
                 return palette;
             });
 
-            resolve({ palettes, colors });
+            resolve({ palettes, colors, fonts });
         });
     }
 
@@ -289,9 +289,9 @@ export const UserContextProvider = ({ children }) => {
                 // Fetch Text Style Palettes
                 Promise.all(
                     guidelines.map(async (guideline) => {
-                        let { palettes, colors } = await getTextStylePalettesForGuideline(guideline);
+                        let { palettes, colors, fonts } = await getTextStylePalettesForGuideline(guideline);
                         palettes = palettes.map((palette) => {
-                            return { ...palette, project: guideline.project_id };
+                            return { ...palette, project: guideline.project_id, fonts };
                         });
 
                         guidelineTextStylePalettes = guidelineTextStylePalettes.concat(palettes);

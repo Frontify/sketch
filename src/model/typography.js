@@ -1,10 +1,10 @@
 // Sketch API
-import sketch from 'sketch';
+import sketch, { Document, SharedStyle, UI } from 'sketch';
 
 // Models
 import target from './target';
 import color from './color';
-import filemanager from './filemanager';
+import filemanager from './FileManager';
 
 // Helpers
 import { findLayers, getDocument } from '../helpers/sketch';
@@ -18,11 +18,16 @@ class Typography {
     downloadFonts() {
         target.getTarget().then(
             function (target) {
-                let folder = '' + NSHomeDirectory() + '/Frontify/' + target.brand.name + '/Fonts';
+                // let folder = '' + NSHomeDirectory() + '/Frontify/' + target.brand.name + '/Fonts';
+
+                let folder = '' + NSHomeDirectory() + '/Downloads/';
+                console.log(folder);
                 if (createFolder(folder)) {
                     let path = folder + '/' + target.project.name + '.zip';
                     var downloadProgress = NSProgress.progressWithTotalUnitCount(10);
                     downloadProgress.setCompletedUnitCount(0);
+
+                    console.log(target);
 
                     return filemanager
                         .downloadFile(
@@ -42,7 +47,7 @@ class Typography {
         );
     }
 
-    applyFontStyle(fontStyle) {
+    applyFontStyle(fontStyle, color, prefix) {
         let currentDocument = sketch.getSelectedDocument();
         let selection = currentDocument.selectedLayers;
 
@@ -50,10 +55,10 @@ class Typography {
             if (layer.layers) {
                 let children = layer.layers;
                 children.forEach((child) => {
-                    this.applyFontStyleToLayer(child, fontStyle);
+                    this.applyFontStyleToLayer(child, fontStyle, prefix);
                 });
             } else {
-                this.applyFontStyleToLayer(layer, fontStyle);
+                this.applyFontStyleToLayer(layer, fontStyle, prefix);
             }
         });
 
@@ -63,11 +68,26 @@ class Typography {
         }
     }
 
-    applyFontStyleToLayer(layer, fontStyle) {
-        let msstyle = this.convertFontStyle(fontStyle)[0];
+    applyFontStyleToLayer(layer, fontStyle, prefix) {
+        let newStyle = this.convertFontStyle(fontStyle)[0];
+
+        let document = Document.getSelectedDocument();
+
+        let name = prefix ? `${prefix}/${newStyle.name()}` : newStyle.name();
+        console.log(name);
+        console.log(document.sharedTextStyles);
+
+        let existingStyle = document.sharedTextStyles.find((sharedStyle) => sharedStyle.name == name);
 
         if (layer.type == 'Text') {
-            layer.style = msstyle.style();
+            if (existingStyle) {
+                // Apply a Shared Style from the Library
+                layer.sharedStyle = existingStyle;
+                layer.style = newStyle.style();
+            } else {
+                // Apply style properties
+                layer.style = newStyle.style();
+            }
         }
     }
 
@@ -84,6 +104,7 @@ class Typography {
     }
 
     convertFontStyle(fontStyle) {
+        console.log('convertFontStyle');
         let fontManager = NSFontManager.sharedFontManager();
         let msstyles = [];
 
@@ -101,10 +122,14 @@ class Typography {
             }
         }
 
+        console.log('105');
+
         // Make sure that we have at least a default color that we can apply
         if (colors.length == 0) {
             colors.push({ name: 'Default', r: 0, g: 0, b: 0, alpha: 255, css_value: 'rgba(0, 0, 0, 1)' });
         }
+
+        console.log('122');
 
         colors.forEach(
             function (colorValue) {
@@ -167,6 +192,8 @@ class Typography {
                     font = fontManager.fontWithFamily_traits_weight_size('Times', null, 5, 75);
                 }
 
+                console.log('175');
+
                 msstyle.fontPostscriptName = font.fontName();
 
                 if (fontStyle.align) {
@@ -223,9 +250,12 @@ class Typography {
                     }
                 }
 
+                console.log('231');
+
                 msstyles.push(msstyle);
             }.bind(this)
         );
+        console.log(msstyles);
 
         return msstyles;
     }
@@ -233,13 +263,17 @@ class Typography {
     addFontStyles(fontStyles) {
         let app = NSApp.delegate();
         let doc = getDocument();
+        console.log('doc');
         if (doc) {
             let msstyles = this.convertFontStyles(fontStyles);
             let sharedStyles = doc.documentData().layerTextStyles();
 
+            console.log('shared styles', sharedStyles);
+
             msstyles.forEach(
                 function (msstyle) {
                     this.updateMatchingSharedStyles(
+                        Document.fromNative(doc),
                         sharedStyles,
                         sharedStyles.objects(),
                         msstyle.name(),
@@ -249,11 +283,73 @@ class Typography {
                 }.bind(this)
             );
 
-            app.refreshCurrentDocument();
+            // app.refreshCurrentDocument();
         }
     }
 
-    updateMatchingSharedStyles(sharedStyles, existingTextObjects, styleName, style) {
+    importFontStyles(styles, prefix) {
+        let document = Document.getSelectedDocument();
+
+        // Alert that will ask for permission to update layers
+        let dialogDidShow = false;
+        let confirmed = false;
+        const alert = NSAlert.alloc().init();
+
+        styles.forEach((style) => {
+            let convertedStyles = this.convertFontStyle(style);
+            let newStyle = convertedStyles[0];
+
+            // Prefix the style name (e.g. My Guideline/Title)
+            let name = prefix ? `${prefix}/${newStyle.name()}` : newStyle.name();
+
+            // Check if a style with the name already exists
+            let existingStyle = document.sharedTextStyles.find((sharedStyle) => sharedStyle.name == name);
+
+            if (!existingStyle) {
+                // Create a new Shared Style
+                SharedStyle.fromStyle({
+                    name: name,
+                    style: newStyle.style(),
+                    document: document,
+                });
+            } else {
+                // Find layers with the existing style and update them with the new style from Frontify
+                let layers = existingStyle.getAllInstancesLayers();
+
+                if (!dialogDidShow) {
+                    alert.addButtonWithTitle('Update');
+                    alert.addButtonWithTitle('Cancel');
+                    // alert.setMessageText(`Update ${layers.length} Text Layer${layers.length > 1 ? 's' : ''}?`);
+                    alert.setMessageText(`Update Text Layers?`);
+                    alert.setInformativeText('Some layers have a Shared Style that will get updated after the import.');
+
+                    // let imageURL = NSURL.fileURLWithPath("/Users/Kski/Downloads/myImage.png")
+                    // let image = NSImage.alloc().initWithContentsOfURL(imageURL)
+                    // alert.setIcon(image)
+
+                    if (alert.runModal() == NSAlertFirstButtonReturn) {
+                        confirmed = true;
+                        dialogDidShow = true;
+                    } else {
+                        confirmed = false;
+                        dialogDidShow = true;
+                        // console.log('Canceled or clicked no');
+                    }
+                }
+
+                if (confirmed) {
+                    layers.forEach((layer) => {
+                        layer.style = newStyle.style();
+                    });
+
+                    // Update the Shared Style in Sketch
+                    existingStyle.style = newStyle.style();
+                }
+            }
+        });
+    }
+
+    updateMatchingSharedStyles(doc, sharedStyles, existingTextObjects, styleName, style) {
         styleName = '' + styleName;
         if (existingTextObjects.count() != 0) {
             for (let i = 0; i < existingTextObjects.count(); i++) {

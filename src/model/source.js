@@ -11,7 +11,7 @@ import shaFile from '../helpers/shaFile';
 
 // Models
 import Target from './target';
-import FileManager from './filemanager';
+import FileManager from './FileManager';
 
 // IPC
 import { frontend } from '../helpers/ipc';

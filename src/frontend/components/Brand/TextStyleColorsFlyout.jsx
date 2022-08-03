@@ -50,10 +50,8 @@ export function TextStyleColorsFlyout({ onChange, textStyle, colors, colorMap })
                         >
                             <MenuItem
                                 title={colorMap[key]?.name}
-                                decorator={<Swatch color={colorMap[key]?.css_value}></Swatch>}
-                            >
-                                {colorMap[key]?.name}
-                            </MenuItem>
+                                decorator={<Swatch color={colorMap[key]?.css_value} swatchSize="Small"></Swatch>}
+                            ></MenuItem>
                         </div>
                     ))}
             </custom-v-stack>

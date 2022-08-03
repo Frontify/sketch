@@ -106,32 +106,6 @@ export default function (context, view) {
 
     // ------------------------------------------------------------------------
 
-    webview.on('addDocumentColors', function (colors) {
-        Color.addDocumentColors(colors);
-    });
-
-    webview.on('replaceDocumentColors', function (colors) {
-        Color.replaceDocumentColors(colors);
-    });
-
-    webview.on('addGlobalColors', function (colors) {
-        Color.addGlobalColors(colors);
-    });
-
-    webview.on('replaceGlobalColors', function (colors) {
-        Color.replaceGlobalColors(colors);
-    });
-
-    webview.on('addFontStyles', function (styles) {
-        Typography.addFontStyles(styles);
-    });
-
-    webview.on('downloadFonts', function () {
-        Typography.downloadFonts();
-    });
-
-    // ------------------------------------------------------------------------
-
     /**
      * Used to hard-refresh using the "refresh" icon in the toolbar of the plugin
      */
@@ -181,6 +155,78 @@ export default function (context, view) {
 
     // ------------------------------------------------------------------------
 
+    frontend.on('addGlobalColors', ({ colors }) => {
+        try {
+            Color.addGlobalColors(colors);
+        } catch (error) {
+            throw new Error('Could not add global colors.');
+        }
+    });
+
+    // ------------------------------------------------------------------------
+
+    frontend.on('replaceGlobalColors', ({ colors }) => {
+        try {
+            Color.replaceGlobalColors(colors);
+        } catch (error) {
+            throw new Error('Could not replace global colors.');
+        }
+    });
+
+    // ------------------------------------------------------------------------
+
+    frontend.on('addDocumentColors', ({ colors }) => {
+        try {
+            console.log('add document colors');
+            Color.addDocumentColors(colors);
+        } catch (error) {
+            throw new Error('Could not add document colors.');
+        }
+    });
+
+    // ------------------------------------------------------------------------
+
+    frontend.on('replaceDocumentColors', ({ colors }) => {
+        try {
+            Color.replaceDocumentColors(colors);
+        } catch (error) {
+            throw new Error('Could not replace document colors.');
+        }
+    });
+
+    // ------------------------------------------------------------------------
+
+    frontend.on('addFontStyles', ({ styles }) => {
+        try {
+            Typography.addFontStyles(styles);
+        } catch (error) {
+            throw new Error('Could not add text styles.');
+        }
+    });
+
+    // ------------------------------------------------------------------------
+
+    frontend.on('downloadFonts', ({ fonts }) => {
+        console.log('downloadFonts');
+        try {
+            Typography.downloadFonts(fonts);
+        } catch (error) {
+            throw new Error('Could not download fonts.');
+        }
+    });
+
+    // ------------------------------------------------------------------------
+
+    frontend.on('importFontStyles', ({ styles, prefix }) => {
+        try {
+            Typography.importFontStyles(styles, prefix);
+        } catch (error) {
+            throw new Error('Could not add text styles.');
+        }
+    });
+
+    // ------------------------------------------------------------------------
+
     frontend.on('getCurrentDocument', () => {
         try {
             let database = FileManager.getAssetDatabaseFile();
@@ -220,9 +266,9 @@ export default function (context, view) {
 
     // ------------------------------------------------------------------------
 
-    frontend.on('applyFontStyleWithColor', async ({ textStyle, color }) => {
+    frontend.on('applyFontStyleWithColor', async ({ textStyle, color, prefix }) => {
         try {
-            await tyTography.applyFontStyle(textStyle, color);
+            await Typography.applyFontStyle(textStyle, color, prefix);
             return { sucess: 'true' };
         } catch (error) {
             return { sucess: 'false' };
