@@ -69,13 +69,12 @@ class Source {
                     //     image: 'https://cdn-assets-eu.frontify.com/s3/frontify-enterprise-files-eu/eyJwYXRoIjoid2VhcmVcL2FjY291bnRzXC82ZVwvNDAwMDM4OFwvcHJvamVjdHNcLzkyMVwvYXNzZXRzXC83NFwvMTEwMzQzXC9lZjA3ZGE2MGI5YmIwZTdlZWI1NmE3ZGFiOTFhZmQ1Zi0xNjM0MDMwMzI0LnBuZyJ9:weare:cO3TsrBLHegCTSZAfM76U3PMAV28aqMoBYHCWzOso2U?width=2400',
                     // });
 
-                    return fetch('/v1/screen/activity/' + asset.id, {
+                    fetch('/v1/screen/activity/' + asset.id, {
                         method: 'POST',
                         body: JSON.stringify({ activity: 'OPEN' }),
                     });
+                    return asset;
                 }
-
-                return null;
             })
             .catch((error) => {
                 // no asset found in database …

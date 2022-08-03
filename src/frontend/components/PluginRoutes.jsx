@@ -54,6 +54,18 @@ export function PluginRoutes() {
     window.addEventListener('online', () => {
         navigate('/source/artboards');
     });
+
+    // Redirect after the webview has loaded
+    // Somehow we can’t load urls with # in them through the native WebView loadURL()
+    // That’s why we need this roundtrip so that React router can make the redirect
+    window.addEventListener('message-from-sketch', (event) => {
+        if (event.detail?.data) {
+            let { type } = event.detail.data;
+            if (type == 'did-finish-load') {
+                navigate('/source/artboards');
+            }
+        }
+    });
     return (
         <Routes>
             <Route path="/offline" element={<OfflineView></OfflineView>}></Route>

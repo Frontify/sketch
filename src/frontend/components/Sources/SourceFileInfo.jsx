@@ -127,12 +127,7 @@ function RemovedSource({ source }) {
 export function SourceFileInfoText({ source, children }) {
     return (
         <custom-v-stack gap="xx-small" overflow="hidden">
-            <custom-h-stack
-                gap="xx-small"
-                align-items="center"
-                style={{ overflow: 'hidden', width: '100%' }}
-                title={JSON.stringify(source, null, 2)}
-            >
+            <custom-h-stack gap="xx-small" align-items="center" style={{ overflow: 'hidden', width: '100%' }}>
                 {/* No open file detected */}
                 {!source && <NoSource></NoSource>}
                 {source && source.state == 'asset-not-found' && <RemovedSource source={source}></RemovedSource>}

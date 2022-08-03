@@ -318,7 +318,6 @@ function Palette({ colorMap, palette }) {
                             open && (
                                 <custom-palette-item
                                     key={textStyle.id}
-                                    title={JSON.stringify(textStyle)}
                                     onClick={() => {
                                         applyTextStyle(textStyle, null);
                                     }}

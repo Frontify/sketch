@@ -53,9 +53,10 @@ function pathInsidePluginBundle(url) {
     }.sketchplugin/Contents/Resources/${url}`;
 }
 
-export default function (context, view) {
+export default function (context) {
+    // We’ll first load the base url because that will work in a file:/// context.
+    // The frontend will redirect to a different route once the webview is loaded.
     let baseURL = isDev ? 'http://localhost:3000' : pathInsidePluginBundle('index.html');
-    let mainURL = `${baseURL}/#/source/artboards`;
 
     // create window and webview
     let win = new BrowserWindow({
@@ -77,7 +78,7 @@ export default function (context, view) {
 
     // ------------------------------------------------------------------------
 
-    webview.loadURL(mainURL);
+    webview.loadURL(baseURL);
 
     // Show window if ready
     win.once('ready-to-show', () => {
@@ -87,9 +88,9 @@ export default function (context, view) {
 
     // ------------------------------------------------------------------------
 
-    // Load tab if webview ready
     webview.on('did-finish-load', () => {
-        // console.log('did-finish-load');
+        // Notify the frontend that the webview has loaded which will trigger a redirect.
+        frontend.send('did-finish-load');
     });
 
     webview.on('did-fail-load', (error) => {
@@ -99,7 +100,6 @@ export default function (context, view) {
     win.on(
         'close',
         function () {
-            console.log('close');
             threadDictionary.removeObjectForKey('frontifywindow');
         }.bind(this)
     );
