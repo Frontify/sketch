@@ -240,7 +240,7 @@ function Palette({ colorMap, palette }) {
 
                                     <div padding="small">
                                         <Button
-                                            hugWidth={true}
+                                            hugWidth={false}
                                             style="Secondary"
                                             icon={<IconDownloadAlternative></IconDownloadAlternative>}
                                             onClick={() => {
@@ -250,7 +250,7 @@ function Palette({ colorMap, palette }) {
                                                 setFontsMenuOpen(false);
                                             }}
                                         >
-                                            Download Fonts
+                                            {t('guidelines.download_fonts')}
                                         </Button>
                                     </div>
                                 </div>
