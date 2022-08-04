@@ -52,7 +52,7 @@ class Source {
     }
 
     openSourceAtPath(path) {
-        FileManager.openFile(path);
+        return FileManager.openFile(path);
     }
 
     opened() {
@@ -488,7 +488,7 @@ class Source {
                     });
                 }
 
-                FileManager.updateAssetStatus(target.project.id, data);
+                // FileManager.updateAssetStatus(target.project.id, data);
 
                 let sha = '' + shaFile(file.path);
 

@@ -117,10 +117,10 @@ class Target {
                         set.set_sources = data.set_sources;
                     }
 
-                    writeJSON('set-' + target.project, set);
+                    // writeJSON('set-' + target.project, set);
                 }
 
-                writeJSON('target', target);
+                // writeJSON('target', target);
 
                 return target;
             }.bind(this)

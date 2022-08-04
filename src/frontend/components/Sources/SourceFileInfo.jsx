@@ -95,7 +95,7 @@ function UnsavedSource({ source }) {
                 Unsaved File
             </Text>
             <Text weight="strong" whitespace="nowrap" overflow="ellipsis">
-                (No information available)
+                Untitled
             </Text>
         </custom-v-stack>
     );

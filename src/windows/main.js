@@ -185,6 +185,17 @@ export default function (context) {
 
     // ------------------------------------------------------------------------
 
+    frontend.on('clearMenu', () => {
+        console.log('clearMenu');
+        try {
+            FileManager.deleteAssetDatabase();
+        } catch (error) {
+            throw new Error('Could not delete menu database.');
+        }
+    });
+
+    // ------------------------------------------------------------------------
+
     frontend.on('replaceDocumentColors', ({ colors }) => {
         try {
             Color.replaceDocumentColors(colors);
@@ -439,9 +450,16 @@ export default function (context) {
         let database = FileManager.getAssetDatabase();
 
         let openDocumentsMeta = openDocuments
-            .filter((document) => document.path)
+
             .map((document) => {
                 let relativePath = Source.getRelativePath(document.path);
+
+                if (!relativePath) {
+                    return {
+                        uuid: document.id,
+                        path: '',
+                    };
+                }
 
                 let transformedDocument = {
                     uuid: document.id,
@@ -534,7 +552,6 @@ export default function (context) {
     frontend.on('openSource', async ({ path }) => {
         try {
             await Source.openSourceAtPath(path);
-            return { success: true };
         } catch (error) {
             throw new Error('Could not open source file.');
         }

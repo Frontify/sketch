@@ -192,7 +192,7 @@ export function SourcesView() {
 
                     <custom-line></custom-line>
 
-                    <custom-v-stack flex class="tw-bg-black-0">
+                    <custom-v-stack flex class="tw-bg-black-000">
                         {trackedDocuments.length ? (
                             <custom-h-stack
                                 padding="large"

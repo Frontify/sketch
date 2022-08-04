@@ -124,13 +124,13 @@ class FileManager {
     }
 
     updateAssetStatus(project, asset) {
-        let status = readJSON('sources-' + project) || {};
-        status.assets = status.assets || {};
-        status.assets[asset.id] = status[asset.id] || {};
-        status.assets[asset.id].id = asset.id;
-        status.assets[asset.id].modified = asset.modified;
-        status.assets[asset.id].sha = asset.sha;
-        writeJSON('sources-' + project, status);
+        // let status = readJSON('sources-' + project) || {};
+        // status.assets = status.assets || {};
+        // status.assets[asset.id] = status[asset.id] || {};
+        // status.assets[asset.id].id = asset.id;
+        // status.assets[asset.id].modified = asset.modified;
+        // status.assets[asset.id].sha = asset.sha;
+        // writeJSON('sources-' + project, status);
     }
 
     async fetchRemoteState(entry) {
@@ -215,6 +215,10 @@ class FileManager {
     }
     getAssetDatabase() {
         return this.validateAssetDatabase();
+    }
+    deleteAssetDatabase() {
+        let id = target.getValueForKey('brand');
+        writeJSON(`brand-${id}`, {});
     }
 
     refreshAssetDatabase() {

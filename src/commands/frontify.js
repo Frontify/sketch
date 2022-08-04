@@ -46,7 +46,9 @@ export function openCommand(context) {
                 Source.opened().then(function (asset) {
                     // Notification.disconnect();
                     // Notification.listen();
-                    Notification.subscribe(asset.refs.remote_project_id);
+                    if (asset && asset.refs) {
+                        Notification.subscribe(asset.refs.remote_project_id);
+                    }
                     refresh();
                 });
             }

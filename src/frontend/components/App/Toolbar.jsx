@@ -2,7 +2,7 @@ import React, { useEffect, useReducer } from 'react';
 import { useContext, useState } from 'react';
 import { UserContext } from '../../context/UserContext';
 
-import { MenuItem, Text, IconMore, IconLogout, IconArrowOutLogout, IconView } from '@frontify/fondue';
+import { MenuItem, Text, IconMore, IconLogout, IconArrowOutLogout, IconView, IconEraser } from '@frontify/fondue';
 import { Button, Flyout, IconCaretDown, IconCheck, IconRefresh } from '@frontify/fondue';
 
 // Hooks
@@ -102,35 +102,50 @@ export function Toolbar() {
                             ></Button>
                         }
                     >
-                        <custom-v-stack>
-                            <div
-                                tabIndex={0}
-                                role="menuitem"
-                                aria-label={t('general.reveal')}
-                                onClick={() => {
-                                    // We only have access to the full path including the filename.
-                                    // But macOS Finder can only reveal folders. So we need to strip
-                                    // the filename and only send the folder to the handler on the
-                                    // Sketch side of things.
-                                    useSketch('revealFrontifyFolder', { brand: context.selection.brand });
-                                    // Close the Flyout
-                                    setOpen(false);
-                                }}
-                            >
-                                <MenuItem decorator={<IconView />} title={t('general.reveal')}></MenuItem>
+                        <custom-v-stack gap="xx-small" padding-y="xx-small">
+                            <div>
+                                <div
+                                    tabIndex={0}
+                                    role="menuitem"
+                                    aria-label={t('general.reveal')}
+                                    onClick={() => {
+                                        // We only have access to the full path including the filename.
+                                        // But macOS Finder can only reveal folders. So we need to strip
+                                        // the filename and only send the folder to the handler on the
+                                        // Sketch side of things.
+                                        useSketch('revealFrontifyFolder', { brand: context.selection.brand });
+                                        // Close the Flyout
+                                        setOpen(false);
+                                    }}
+                                >
+                                    <MenuItem decorator={<IconView />} title={t('general.reveal')}></MenuItem>
+                                </div>
+                                <div
+                                    tabIndex={0}
+                                    role="menuitem"
+                                    aria-label={`Reload Plugin`}
+                                    onClick={() => {
+                                        window.postMessage('reload');
+                                        setOpen(false);
+                                    }}
+                                >
+                                    <MenuItem decorator={<IconRefresh />} title={'Reload Plugin'}></MenuItem>
+                                </div>
                             </div>
+
+                            {/* <custom-line></custom-line>
                             <div
                                 tabIndex={0}
                                 role="menuitem"
-                                aria-label={`Reload Plugin`}
+                                aria-label={`Clear Menu`}
                                 onClick={() => {
+                                    useSketch('clearMenu');
                                     window.postMessage('reload');
                                     setOpen(false);
                                 }}
                             >
-                                <MenuItem decorator={<IconRefresh />} title={'Reload Plugin'}></MenuItem>
-                            </div>
-
+                                <MenuItem decorator={<IconEraser />} title={'Clear Menu'}></MenuItem>
+                            </div> */}
                             <custom-line></custom-line>
                             <div
                                 tabIndex={0}
