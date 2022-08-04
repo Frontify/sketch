@@ -45,6 +45,7 @@ class Color {
 
     addColorsToDocumentScope(colors, replaceCurrentColors = false) {
         let selectedDocument = sketch.getSelectedDocument();
+        let swatches = selectedDocument.swatches;
 
         if (selectedDocument) {
             if (replaceCurrentColors) {
@@ -52,12 +53,16 @@ class Color {
             }
 
             colors.forEach((color) => {
-                selectedDocument.swatches.push(
-                    sketch.Swatch.from({
-                        name: color.name,
-                        color: color.css_value_hex,
-                    })
-                );
+                if (swatches.find((swatch) => swatch.name == color.name)) {
+                    // Swatch already exists, don’t create a duplicate
+                } else {
+                    selectedDocument.swatches.push(
+                        sketch.Swatch.from({
+                            name: color.name,
+                            color: this.convertColor(color, 'MSColor'),
+                        })
+                    );
+                }
             });
         }
     }
@@ -134,29 +139,52 @@ class Color {
         }
     }
 
+    applyColorVariableToLayer(layer, color) {
+        let selectedDocument = sketch.getSelectedDocument();
+        let swatches = selectedDocument.swatches;
+
+        let swatch = swatches.find((swatch) => swatch.name == color.name);
+
+        if (swatch) {
+            layer.style.fills[0].color = swatch.referencingColor;
+        }
+    }
+
+    isColorVariable(name) {
+        let selectedDocument = sketch.getSelectedDocument();
+        let swatches = selectedDocument.swatches;
+        return swatches.find((swatch) => swatch.name == name);
+    }
+
     applyColorToLayer(layer, color) {
         let mscolor = MSColor.colorWithRed_green_blue_alpha(color.r / 255, color.g / 255, color.b / 255, color.a / 255);
 
-        let layerType = layer.type;
+        // Apply color as color variable
+        if (this.isColorVariable(color.name)) {
+            this.applyColorVariableToLayer(layer, { name: color.name, value: mscolor });
+        } else {
+            // Apply color as plain style
+            let layerType = layer.type;
 
-        switch (layerType) {
-            case 'Text':
-                layer.style.fills = [
-                    {
-                        color: mscolor,
-                        fillType: sketch.Style.FillType.Color,
-                    },
-                ];
-                break;
-            case 'Shape':
-            case 'ShapePath':
-                // Todo: Make the fill replacement less destructive. For example, keep existing fills and only replace the first one.
-                layer.style.fills = [
-                    {
-                        color: mscolor,
-                        fillType: sketch.Style.FillType.Color,
-                    },
-                ];
+            switch (layerType) {
+                case 'Text':
+                    layer.style.fills = [
+                        {
+                            color: mscolor,
+                            fillType: sketch.Style.FillType.Color,
+                        },
+                    ];
+                    break;
+                case 'Shape':
+                case 'ShapePath':
+                    // Todo: Make the fill replacement less destructive. For example, keep existing fills and only replace the first one.
+                    layer.style.fills = [
+                        {
+                            color: mscolor,
+                            fillType: sketch.Style.FillType.Color,
+                        },
+                    ];
+            }
         }
     }
 

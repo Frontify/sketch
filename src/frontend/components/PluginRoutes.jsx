@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 // Artboards
 import { ArtboardsView } from './Artboards/ArtboardsView';
@@ -10,6 +10,9 @@ import { MediaLibrariesView } from './Libraries/MediaLibrariesView';
 import { LogoLibrariesView } from './Libraries/LogoLibrariesView';
 import { ColorPalettesView } from './Brand/ColorPalettesView';
 import { TypographyView } from './Brand/TypographyView';
+
+// Empty State
+import { EmptyState } from './Core/EmptyState';
 
 // Sign In
 import { OfflineView } from './SignIn/OfflineView';
@@ -35,6 +38,7 @@ export function PluginRoutes() {
     let context = useContext(UserContext);
     let { t } = useTranslation();
     let navigate = useNavigate();
+    const [didLoad, setDidLoad] = useState(false);
 
     // Initial refresh will load the user, brand, etc.
     useEffect(() => {
@@ -55,6 +59,14 @@ export function PluginRoutes() {
         navigate('/source/artboards');
     });
 
+    useEffect(() => {
+        if (didLoad) navigate('/source/artboards');
+    }, [didLoad]);
+
+    useEffect(() => {
+        navigate('/source/artboards');
+    }, []);
+
     // Redirect after the webview has loaded
     // Somehow we can’t load urls with # in them through the native WebView loadURL()
     // That’s why we need this roundtrip so that React router can make the redirect
@@ -62,7 +74,7 @@ export function PluginRoutes() {
         if (event.detail?.data) {
             let { type } = event.detail.data;
             if (type == 'did-finish-load') {
-                navigate('/source/artboards');
+                setDidLoad(true);
             }
         }
     });
@@ -115,14 +127,7 @@ export function PluginRoutes() {
                     <Route path="media" element={<MediaLibrariesView />}></Route>
                     <Route path="logos" element={<LogoLibrariesView />}></Route>
 
-                    <Route
-                        path="*"
-                        element={
-                            <main style={{ padding: '1rem' }}>
-                                <p>{t('emptyStates.no_items')}</p>
-                            </main>
-                        }
-                    />
+                    <Route path="*" element={<EmptyState title={t('emptyStates.no_items')}></EmptyState>} />
                 </Route>
             </Route>
             <Route path="/" element={<SignInView />} />

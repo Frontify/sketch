@@ -83,7 +83,7 @@
             "uploads": "Uploads"
         },
         "guidelines": {
-            "add_to_document_colors": "Add to Document Colors",
+            "add_to_document_colors": "Add to Color Variables",
             "add_to_global_colors": "Add to Global Colors",
             "add_text_styles": "Import / Update",
             "document_colors": "Document Colors",
@@ -91,7 +91,7 @@
             "download_fonts": "Download Fonts",
             "fonts": "Fonts",
             "global_colors": "Global Colors",
-            "replace_document_colors": "Replace Document Colors",
+            "replace_document_colors": "Replace Color Variables",
             "replace_global_colors": "Replace Global Colors"
         },
         "libraries": {

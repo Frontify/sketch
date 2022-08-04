@@ -3,19 +3,9 @@ import React, { useEffect, useState, useRef } from 'react';
 
 import { Observer } from '../Core/Observer';
 
-export function GridView({
-    sketchSelectionChanged,
-    desiredResolution,
-    onApply,
-    onDragStart,
-    onDrop,
-    images,
-    limit = 25,
-    onIntersect,
-    onSelect,
-    thumbWidth,
-}) {
+export function GridView({ onApply, onDragStart, onDrop, images, limit = 25, onIntersect, onSelect, thumbWidth }) {
     let ref = useRef(null);
+
     let [recentlyApplied, setRecentlyApplied] = useState(null);
     let [loading, setLoading] = useState(false);
     let [dragging, setDragging] = useState(false);
@@ -80,7 +70,7 @@ export function GridView({
                             onDoubleClick={() => {
                                 runCallbackAfterLoad(image, onApply, false);
                             }}
-                            onDragEnd={async () => {
+                            onDragEnd={async (event) => {
                                 runCallbackAfterLoad(image, onDrop, true);
                                 setDragging(false);
                             }}

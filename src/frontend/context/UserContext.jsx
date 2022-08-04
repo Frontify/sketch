@@ -22,7 +22,7 @@ export const UserContextProvider = ({ children }) => {
      * Poorman’s TypeScript replacement. Sorry!
      */
     const blueprints = {
-        activeLibrary: '',
+        activeLibrary: 'colors',
         auth: {
             domain: '',
             token: '',
@@ -73,9 +73,6 @@ export const UserContextProvider = ({ children }) => {
             let id = payload?.id || payload?.id_external;
 
             switch (type) {
-                case 'did-finish-load':
-                    console.log('did finish load', payload.mainURL);
-                    break;
                 case 'error':
                     actions.handleError({
                         title: 'Plugin Error',

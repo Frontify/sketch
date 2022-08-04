@@ -233,7 +233,7 @@ function Palette({ palette }) {
 
                             {/* Global Colors */}
 
-                            <div>
+                            {/* <div>
                                 <div tabIndex={0} role="menuitem" aria-label={t('guidelines.global_colors')}>
                                     <MenuItem
                                         active={true}
@@ -271,7 +271,7 @@ function Palette({ palette }) {
                                         title={t('guidelines.replace_global_colors')}
                                     ></MenuItem>
                                 </div>
-                            </div>
+                            </div> */}
                         </custom-v-stack>
                     </Flyout>
                 </div>
@@ -292,6 +292,7 @@ function Palette({ palette }) {
                                                 g: color.g,
                                                 b: color.b,
                                                 a: color.alpha,
+                                                name: color.name,
                                             });
                                         }}
                                     >
