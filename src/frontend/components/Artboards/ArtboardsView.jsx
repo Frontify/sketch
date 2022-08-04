@@ -575,19 +575,22 @@ export function ArtboardsView() {
     };
 
     useEffect(async () => {
+        console.log(context.selection.brand);
         let { projects } = await useSketch('getProjectsForBrand', { brand: context.selection.brand });
 
         let map = {};
-        projects.forEach((project) => {
-            map[project.id] = project;
-        });
+        if (projects) {
+            projects.forEach((project) => {
+                map[project.id] = project;
+            });
 
-        // if (context.selection?.workspaceProjects) {
-        //     context.selection.workspaceProjects.forEach((workspaceProject) => {
-        //         projectMap[workspaceProject.id] = workspaceProject;
-        //     });
-        // }
-        setProjectMap(map);
+            // if (context.selection?.workspaceProjects) {
+            //     context.selection.workspaceProjects.forEach((workspaceProject) => {
+            //         projectMap[workspaceProject.id] = workspaceProject;
+            //     });
+            // }
+            setProjectMap(map);
+        }
     }, []);
 
     const [uploadDestination, setUploadDestination] = useState({});

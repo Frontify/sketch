@@ -390,9 +390,9 @@ export default function (context) {
 
     // ------------------------------------------------------------------------
 
-    frontend.on('getProjectsForBrand', async (args) => {
+    frontend.on('getProjectsForBrand', async ({ brand }) => {
         try {
-            let projects = await Project.getProjectsForBrand(args.brand);
+            let projects = await Project.getProjectsForBrand(brand);
             return { success: true, projects };
         } catch (error) {
             throw Error('Could not get projects for brand.');
