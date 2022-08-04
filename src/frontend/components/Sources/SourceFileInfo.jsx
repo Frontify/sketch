@@ -149,6 +149,7 @@ export function SourceFileInfo({ status, source, transferMap, loading }) {
 
     return (
         <custom-h-stack flex style={{ height: '100%' }} align-items="center" stretch-children-height="true">
+            <custom-focus-trap tabindex="1"></custom-focus-trap>
             <custom-h-stack
                 padding-x="small"
                 gap="medium"
