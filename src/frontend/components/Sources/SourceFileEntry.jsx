@@ -58,8 +58,9 @@ export function SourceFileEntry({
                         {children}
                     </custom-v-stack>
                     <custom-spacer></custom-spacer>
+
                     <div custom-pointer-events="none">
-                        <SourceAction status={document.state} actions={{}}></SourceAction>
+                        <SourceAction status={document.state} actions={{}} interactive={false}></SourceAction>
                     </div>
                 </custom-h-stack>
 

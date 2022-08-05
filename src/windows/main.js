@@ -458,6 +458,7 @@ export default function (context) {
                     return {
                         uuid: document.id,
                         path: '',
+                        state: 'unsaved',
                     };
                 }
 

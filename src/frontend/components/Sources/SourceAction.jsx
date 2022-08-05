@@ -26,12 +26,10 @@ import {
     LoadingCircle,
     Text,
     Tooltip,
-    IconQuestion,
-    IconQuestionMark,
     IconQuestionMarkCircle,
 } from '@frontify/fondue';
 
-export function SourceAction({ status, actions, loading }) {
+export function SourceAction({ status, actions, loading, interactive = true }) {
     let context = useContext(UserContext);
 
     // i18n
@@ -111,78 +109,85 @@ export function SourceAction({ status, actions, loading }) {
                 />
             );
 
+        case 'unsaved':
+            return '';
         default:
         case 'untracked':
-            return (
-                <CustomDialog
-                    open={showDestinationPicker}
-                    trigger={
-                        <Tooltip
-                            content={t('sources.status_untracked')}
-                            withArrow
-                            hoverDelay={0}
-                            triggerElement={
-                                <custom-sync-button variant="add" onClick={() => setShowDestinationPicker(true)}>
-                                    <IconPlus size="Size24" />
-                                </custom-sync-button>
-                            }
-                        />
-                    }
-                >
-                    <custom-v-stack stretch>
-                        <BrowserHeader></BrowserHeader>
-                        <Browser
-                            createFolder={createFolder}
-                            onCreateFolder={async (folder) => {
-                                setCreateFolder(false);
-                                await onCreateFolder(folder);
-                            }}
-                            onCancelCreateFolder={() => {
-                                setCreateFolder(false);
-                            }}
-                            allowfiles={false}
-                            paths={uploadDestination ? [uploadDestination] : []}
-                            onInput={(value) => {
-                                setTemporaryUploadDestination(value);
-                            }}
-                            onChange={(value) => {
-                                setUploadDestination(value);
-                            }}
-                        ></Browser>
-                        <custom-h-stack padding="medium" gap="small" separator="top">
-                            <Button
-                                style="Secondary"
-                                disabled={!temporaryUploadDestination}
-                                icon={<IconAdd></IconAdd>}
-                                onClick={() => {
-                                    setCreateFolder(true);
+            if (interactive) {
+                return (
+                    <CustomDialog
+                        open={showDestinationPicker}
+                        trigger={
+                            <Tooltip
+                                content={t('sources.status_untracked')}
+                                withArrow
+                                hoverDelay={0}
+                                triggerElement={
+                                    <custom-sync-button variant="add" onClick={() => setShowDestinationPicker(true)}>
+                                        <IconPlus size="Size24" />
+                                    </custom-sync-button>
+                                }
+                            />
+                        }
+                    >
+                        <custom-v-stack stretch>
+                            <BrowserHeader></BrowserHeader>
+                            <Browser
+                                createFolder={createFolder}
+                                onCreateFolder={async (folder) => {
+                                    setCreateFolder(false);
+                                    await onCreateFolder(folder);
                                 }}
-                            >
-                                New folder
-                            </Button>
-                            <custom-spacer></custom-spacer>
-                            <Button
-                                style="Secondary"
-                                onClick={() => {
-                                    setShowDestinationPicker(false);
+                                onCancelCreateFolder={() => {
+                                    setCreateFolder(false);
                                 }}
-                            >
-                                Cancel
-                            </Button>
-                            <Button
-                                disabled={uploadDestination == null}
-                                onClick={() => {
-                                    setShowDestinationPicker(false);
-                                    setUploadDestination(uploadDestination);
-                                    actions.publish(uploadDestination);
+                                allowfiles={false}
+                                paths={uploadDestination ? [uploadDestination] : []}
+                                onInput={(value) => {
+                                    setTemporaryUploadDestination(value);
                                 }}
-                            >
-                                Publish
-                            </Button>
-                        </custom-h-stack>
-                    </custom-v-stack>
-                </CustomDialog>
-            );
+                                onChange={(value) => {
+                                    setUploadDestination(value);
+                                }}
+                            ></Browser>
+                            <custom-h-stack padding="medium" gap="small" separator="top">
+                                <Button
+                                    style="Secondary"
+                                    disabled={!temporaryUploadDestination}
+                                    icon={<IconAdd></IconAdd>}
+                                    onClick={() => {
+                                        setCreateFolder(true);
+                                    }}
+                                >
+                                    New folder
+                                </Button>
+                                <custom-spacer></custom-spacer>
+                                <Button
+                                    style="Secondary"
+                                    onClick={() => {
+                                        setShowDestinationPicker(false);
+                                    }}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    disabled={uploadDestination == null}
+                                    onClick={() => {
+                                        setShowDestinationPicker(false);
+                                        actions.publish(uploadDestination);
+                                        setUploadDestination(null);
+                                    }}
+                                >
+                                    Publish
+                                </Button>
+                            </custom-h-stack>
+                        </custom-v-stack>
+                    </CustomDialog>
+                );
+            } else {
+                return '';
+            }
+
         case 'same':
             return (
                 <Tooltip
