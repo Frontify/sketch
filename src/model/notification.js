@@ -93,10 +93,14 @@ class Notification {
     }
 
     subscribe(project) {
-        if (this.pusher) {
-            this.channel = this.pusher.subscribeToPresenceChannelNamed_delegate('project-' + project, nil);
-            threadDictionary['frontifynotificationchannel'] = this.channel;
-            writeLog('⚡️ Pusher :: subscribe to project: ' + project);
+        if (project) {
+            if (this.pusher) {
+                this.channel = this.pusher.subscribeToPresenceChannelNamed_delegate('project-' + project, nil);
+                threadDictionary['frontifynotificationchannel'] = this.channel;
+                writeLog('⚡️ Pusher :: subscribe to project: ' + project);
+            }
+        } else {
+            writeLog('⚡️ Pusher :: Failed to subscribe to project: ' + project);
         }
     }
 
