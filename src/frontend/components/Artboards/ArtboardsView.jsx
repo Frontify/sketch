@@ -460,9 +460,10 @@ export function ArtboardDestinationItem({
                                         setOpen(false);
                                     }}
                                 >
-                                    <MenuItem decorator={<IconMinusCircle />} title={'Remove'}>
-                                        Remove
-                                    </MenuItem>
+                                    <MenuItem
+                                        decorator={<IconMinusCircle />}
+                                        title={t('artboards.stop_tracking')}
+                                    ></MenuItem>
                                 </div>
                             </custom-v-stack>
                         </Flyout>
