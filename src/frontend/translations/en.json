@@ -3,6 +3,7 @@
         "artboards": {
             "no_selection_title": "Select Some Artboards.",
             "no_selection_description": "You haven’t uploaded any artboards from this file yet. Try selecting some artboards in Sketch.",
+            "stop_tracking": "Untrack",
             "upload_selected_title": "Press “Upload Selected”",
             "upload_selected_description": "You’ll be asked to select a destination for the artboards you’ve selected.",
             "upload_selected": "Upload Selected",
