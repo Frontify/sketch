@@ -54,7 +54,6 @@ export function Browser({
     let [files, setFiles] = useState([]);
     let [folder, setFolder] = useState(null);
     let [temporaryNewFolderName, setTemporaryNewFolderName] = useState('New Folder');
-    let [newFolderName, setNewFolderName] = useState('');
 
     let [breadcrumbs, setBreadcrumbs] = useState([]);
 
@@ -106,6 +105,7 @@ export function Browser({
         if (!useLegacyAPI) {
             if (project) fetchProjectFolders(project);
         }
+        onChange(wrappedFolder(folder));
     }, [project]);
 
     useEffect(async () => {
@@ -380,14 +380,6 @@ export function Browser({
 
         setFolder(root);
         setProject(project);
-
-        onChange(wrappedFolder(root));
-    };
-    const focusFolder = (newFolder) => {
-        if (onInput) {
-            onInput(wrappedFolder(newFolder));
-            onChange(wrappedFolder(newFolder));
-        }
     };
 
     const enterFolder = (newFolder) => {
