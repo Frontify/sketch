@@ -426,7 +426,7 @@ export default function (context) {
     // ------------------------------------------------------------------------
     frontend.on('getSelectedArtboards', async ({ brandID }) => {
         try {
-            let payload = actions['getSelectedArtboards'](brandID);
+            let payload = actions['getSelectedArtboards'](brandID, false);
             return payload;
         } catch (error) {
             throw new Error('Could not get selected artboards.');
@@ -629,7 +629,7 @@ export default function (context) {
         try {
             removeDestinations({ id: id });
 
-            let artboardsAfterRemovingAllDestinations = getSelectedArtboards(brandID);
+            let artboardsAfterRemovingAllDestinations = getSelectedArtboards(brandID, false);
 
             frontend.send('artboards-changed', artboardsAfterRemovingAllDestinations);
 
@@ -644,7 +644,7 @@ export default function (context) {
         try {
             removeDestination({ id: id }, destination);
 
-            let artboardsAfterRemovingDestination = getSelectedArtboards(brandID);
+            let artboardsAfterRemovingDestination = getSelectedArtboards(brandID, false);
 
             frontend.send('artboards-changed', artboardsAfterRemovingDestination);
 

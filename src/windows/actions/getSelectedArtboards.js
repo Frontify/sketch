@@ -128,21 +128,28 @@ export function getDestinations(artboard, brandID) {
 
     return destinationsForBrand;
 }
-export function getSHA(artboard) {
+export function getCachedSHA(artboard) {
     return Settings.layerSettingForKey(artboard, SHA_KEY) || [];
 }
 
-export function getSelectedArtboardsFromSelection(brandID, selection, total, hasSelection) {
+export function getSelectedArtboardsFromSelection(brandID, selection, total, hasSelection, useCache = true) {
     let artboards = [];
     try {
         selection.forEach((layer) => {
             if (layer.type == 'Artboard') {
                 // read the metadata
+
+                if (!useCache) setSHA(layer);
+
                 artboards.push({
                     // Calculate sha1 of the current state of the artboard.
                     // After we upload an artboard, we save that sha1 to the destination.
                     // Later, we can compare changes to an artboard.
-                    sha: getSHA(layer),
+                    // Here we used to return a cached version but this caused
+                    // some out-of-sync states where changes wouldn’t show up.
+                    // Since we don’t request artboards that often, it might be okay to compute
+                    // the SHA with every request?
+                    sha: getCachedSHA(layer),
                     type: layer.type,
                     name: layer.name,
                     id: layer.id,
@@ -161,7 +168,7 @@ export function getSelectedArtboardsFromSelection(brandID, selection, total, has
     }
 }
 
-export function getSelectedArtboards(brandID) {
+export function getSelectedArtboards(brandID, useCache = true) {
     // remember the brand
 
     if (brandID) {
@@ -186,7 +193,9 @@ export function getSelectedArtboards(brandID) {
         // allArtboards
         currentDocument.pages.forEach((page) => {
             page.layers.forEach((layer) => {
-                if (layer.type == 'Artboard') allArtboards.push(layer);
+                if (layer.type == 'Artboard') {
+                    allArtboards.push(layer);
+                }
             });
         });
         // selectedArtboards
@@ -201,14 +210,15 @@ export function getSelectedArtboards(brandID) {
         // If there is a selection, but it doesn’t contain artboards: return all layers of type artboard
         // Else: return selected artboards
 
-        let all = getSelectedArtboardsFromSelection(brandID, allArtboards, total, hasSelection);
+        let all = getSelectedArtboardsFromSelection(brandID, allArtboards, total, hasSelection, useCache);
         let documentArtboards = all.artboards;
 
         if (selection.length == 0) return { ...all, documentArtboards };
         if (selectedArtboards.length == 0) return { ...all, documentArtboards };
 
+        // Always use cache here
         return {
-            ...getSelectedArtboardsFromSelection(brandID, currentDocument.selectedLayers, total, hasSelection),
+            ...getSelectedArtboardsFromSelection(brandID, currentDocument.selectedLayers, total, hasSelection, true),
             documentArtboards,
         };
     } catch (error) {

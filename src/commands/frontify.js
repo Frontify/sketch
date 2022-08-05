@@ -129,7 +129,7 @@ export function artboardChangedCommand(context) {
     // Update the SHA of the artboard
     setSHA(newArtboard);
 
-    let threshold = 0;
+    let threshold = 1000;
 
     /**
      * We’re throttling this action to improve performance. Otherwise, quickly selecting artboards over
@@ -195,7 +195,7 @@ function refresh() {
 function sendSelection(brandID) {
     if (activeDocumentDidChange()) refresh();
 
-    let payload = getSelectedArtboards(brandID);
+    let payload = getSelectedArtboards(brandID, true);
 
     frontend.send('artboards-changed', payload);
 }
