@@ -102,7 +102,7 @@ Tc.Module.MediaChooser = Tc.Module.extend({
 
     onTabSwitched(data) {
         if (data.id === this.type) {
-            this.$assets.html('');
+            this.$assets.html(window.tpl.loaderspinner());
             window.postMessage('showLibrary', this.type);
         }
     }
