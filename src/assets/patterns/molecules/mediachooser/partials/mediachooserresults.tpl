@@ -1,4 +1,7 @@
 {{? it.items.length > 0 }}
+    {{? it.items.length < it.total}}
+        <div class="m-mediachooser__asset-limitation-message">Displaying {{= it.items.length }} out of {{= it.total}} items, please narrow down your search.</div>
+    {{?}}
     {{~ it.items :asset:index }}
     <div
         class="m-mediachooser__asset-item js-m-mediachooser__asset-item"

@@ -40,7 +40,7 @@ class Asset {
                     if (isWebviewPresent('frontifymain')) {
                         sendToWebview(
                             'frontifymain',
-                            'showLibraryAssets(' + JSON.stringify({ type: type, assets: data.data }) + ')'
+                            'showLibraryAssets(' + JSON.stringify({ type: type, assets: data.data, total: data.total }) + ')'
                         );
                     }
                 }

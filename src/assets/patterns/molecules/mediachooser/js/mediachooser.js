@@ -70,11 +70,11 @@ Tc.Module.MediaChooser = Tc.Module.extend({
                 this.shuffle(assets);
             }
 
-            this.$assets.html(window.tpl.mediachooserresults({ items: assets, type: this.type }));
+            this.$assets.html(window.tpl.mediachooserresults({ items: assets, type: this.type, total: data.total }));
             this.applyFlexImages(this.rowHeight);
         }
         else {
-            this.$assets.html(window.tpl.mediachooserresults({ items: assets, type: this.type }));
+            this.$assets.html(window.tpl.mediachooserresults({ items: assets, type: this.type, total: data.total }));
         }
     },
 

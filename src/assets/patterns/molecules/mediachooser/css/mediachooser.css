@@ -81,6 +81,13 @@
     filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0, StartColorStr='#000000', EndColorStr='#000000');
 }
 
+.m-mediachooser__asset-limitation-message {
+    font-size: 10px;
+    padding: 10px 16px;
+    line-height: 1.4;
+    color: rgba(57, 64, 77, 0.5);
+}
+
 /* Icons */
 .m-mediachooser--icons .m-mediachooser__asset-list {
     padding: 10px 16px;
