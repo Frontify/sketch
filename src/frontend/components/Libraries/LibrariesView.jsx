@@ -328,7 +328,7 @@ export function LibrariesView({ type, useResolutions = false }) {
                         }}
                         onDrop={async () => {
                             let dropTarget = sketchSelectionChanged ? 'canvas-or-layer' : 'image';
-
+                            console.log(dropTarget);
                             switch (dropTarget) {
                                 case 'canvas-or-layer':
                                     /**
@@ -346,7 +346,11 @@ export function LibrariesView({ type, useResolutions = false }) {
                                      */
 
                                     if (useResolutions) {
-                                        if (selectedFrame && selectedFrame.type == 'ShapePath') {
+                                        if (
+                                            selectedFrame &&
+                                            selectedFrame.type == 'ShapePath' &&
+                                            !selectedFrame.hasImageFill
+                                        ) {
                                             // Special case: a shape had been selected
                                             // Sketch will create an image by default, but we want to fill the shape instead
                                             await useSketch('removeSelectedLayers');

@@ -555,7 +555,12 @@ export default function (context) {
         let frames = [];
         document.selectedLayers.forEach((layer) => {
             if (layer.type != 'Artboard' && layer.style) {
-                frames.push({ ...layer.frame, type: layer.type, id: layer.id });
+                frames.push({
+                    ...layer.frame,
+                    type: layer.type,
+                    id: layer.id,
+                    hasImageFill: layer.style.fills.find((fill) => fill.pattern?.image),
+                });
             }
         });
 
@@ -587,6 +592,7 @@ export default function (context) {
     });
 
     // ------------------------------------------------------------------------
+
     frontend.on('moveCurrent', async ({ brand, project, folder }) => {
         try {
             await FileManager.moveCurrent(brand, project, folder);
@@ -597,6 +603,7 @@ export default function (context) {
     });
 
     // ------------------------------------------------------------------------
+
     frontend.on('openSource', async ({ path }) => {
         try {
             await Source.openSourceAtPath(path);
