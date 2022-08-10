@@ -59,6 +59,17 @@
         },
 
         {
+            "name": "LayerRenamed",
+            "identifier": "layer-renamed",
+            "script": "./commands/frontify.js",
+            "handlers": {
+                "actions": {
+                    "RenameLayer": "layerRenamedCommand"
+                }
+            }
+        },
+
+        {
             "name": "SelectionChanged",
             "identifier": "selection-changed",
             "script": "./commands/frontify.js",

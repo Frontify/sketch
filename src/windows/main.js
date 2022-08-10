@@ -31,6 +31,7 @@ import executeSafely from '../helpers/executeSafely';
  * function. The parameters are defined using the spread operator.
  */
 import { addSource, getSelectedArtboards, removeDestination, removeDestinations, uploadArtboards } from './actions/';
+import { refresh } from '../commands/frontify';
 
 // ------------------------------------------------------------------------
 
@@ -84,6 +85,12 @@ export default function (context) {
     win.once('ready-to-show', () => {
         console.log('👋 Frontify Plugin is now running. NODE_ENV: ', process.env.NODE_ENV);
         win.show();
+    });
+
+    // ------------------------------------------------------------------------
+
+    win.on('focus', () => {
+        refresh();
     });
 
     // ------------------------------------------------------------------------

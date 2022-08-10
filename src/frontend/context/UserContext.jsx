@@ -91,6 +91,7 @@ export const UserContextProvider = ({ children }) => {
                                 delete state[id];
                                 // Cleanup eventual uploads that had to be tracked by artboard id
                                 delete state[payload.target?.for];
+                                delete state[payload.id_external];
                                 return { ...state, [id]: payload };
                             });
                             break;
@@ -100,7 +101,7 @@ export const UserContextProvider = ({ children }) => {
                                 delete state[id];
                                 // Cleanup eventual uploads that had to be tracked by artboard id
                                 delete state[payload.target?.for];
-
+                                delete state[payload.id_external];
                                 return { ...state };
                             });
 

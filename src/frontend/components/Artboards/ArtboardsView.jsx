@@ -817,12 +817,14 @@ export function ArtboardsView() {
         documentArtboards.forEach((artboard) => {
             if (!artboard.destinations) return;
             artboard.destinations.forEach((destination) => {
-                let parts = destination.remote_path.split('/');
+                if (destination.remote_folder_id) {
+                    let parts = destination.remote_path.split('/');
 
-                usedFolders.set(`${destination.remote_project_id}${destination.remote_path}`, {
-                    ...destination,
-                    name: parts[parts.length - 2],
-                });
+                    usedFolders.set(`${destination.remote_project_id}${destination.remote_path}`, {
+                        ...destination,
+                        name: parts[parts.length - 2],
+                    });
+                }
             });
 
             setUsedFolders(usedFolders);
@@ -831,10 +833,29 @@ export function ArtboardsView() {
         if (documentArtboards.length) fetchArtboardsFromAPI(documentArtboards);
     }, [documentArtboards]);
 
+    const findExistingAsset = (artboard, uploadDestination) => {
+        return uploadDestination.files.find((file) => file.name.replace('.png', '') == artboard.name);
+    };
+
     /**
      * This function overrides any existing destinations
      */
-    const uploadArtboardsToDestination = (artboards) => {
+    const uploadArtboardsToDestination = async (artboards) => {
+        if (!uploadDestination.files) {
+            console.log('fetch files', uploadDestination.project.id, uploadDestination.folder.id);
+            // fetch first
+
+            let legacy = await useSketch('getFilesAndFoldersForProjectAndFolder', {
+                legacyProjectID: uploadDestination.project.id,
+                legacyFolderID: uploadDestination.folder.id,
+            });
+            console.log(legacy);
+            setUploadDestination((state) => {
+                return { ...state, files: legacy.files };
+            });
+            uploadDestination.files = legacy.files;
+        }
+
         let patchedArtboards = artboards.map((artboard) => {
             /**
              * 2 possible scenarios:
@@ -847,11 +868,23 @@ export function ArtboardsView() {
              *          -> different: replace the existing destinations with the new destination
              */
 
+            // Replace artboard if it has the same name
+
+            let existingAsset = findExistingAsset(artboard, uploadDestination);
+            console.log({ existingAsset });
+
+            let remote_id = existingAsset ? existingAsset.id : null;
+
             let newDestination = {
                 remote_project_id: uploadDestination.project.id,
-                remote_id: null,
+                remote_id: remote_id,
+                remote_folder_id: uploadDestination.folder.id,
                 remote_path: `/${uploadDestination.folderPath}/`,
             };
+            // force override, because another artboard with that name already exists remotely
+            if (remote_id) {
+                artboard.destinations = [newDestination];
+            }
 
             // By default, we assign a single new destination.
             // But in case that we find an existing destination, we’ll use the original destinations.
@@ -893,12 +926,13 @@ export function ArtboardsView() {
                     // patchedDestinations.push(...artboard.destinations);
                 }
             }
+            console.log(patchedDestinations);
             return {
                 ...artboard,
                 destinations: patchedDestinations,
             };
         });
-
+        console.log('upload', patchedArtboards);
         uploadArtboards(patchedArtboards);
         requestArtboards();
     };

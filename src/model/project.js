@@ -28,7 +28,9 @@ class Project {
                         files: result.files,
                     });
                 })
-                .catch((error) => reject(error));
+                .catch((error) => {
+                    reject(error);
+                });
         });
     }
 

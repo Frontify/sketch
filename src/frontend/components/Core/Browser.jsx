@@ -274,7 +274,13 @@ export function Browser({
         });
         setFiles(newFiles);
 
+        onChangeWithFiles(folder, newFiles);
+
         setLoading(false);
+    };
+
+    const onChangeWithFiles = (folder, files) => {
+        onChange({ ...wrappedFolder(folder), files });
     };
 
     useEffect(async () => {

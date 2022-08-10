@@ -109,6 +109,7 @@ function ArtboardToolbar({
 
     // Callback function that starts the upload after pressing the "upload" button in the toolbar
     const performUpload = useCallback(() => {
+        console.log('perform upload', uploadDestination);
         // uploadDestination?
         let overrideDestination = uploadDestination && uploadDestination.folderPath;
         if (overrideDestination) {
@@ -224,7 +225,7 @@ function ArtboardToolbar({
                                         <custom-h-stack padding="medium" gap="small" separator="top">
                                             <Button
                                                 style="Secondary"
-                                                disabled={!temporaryUploadDestination}
+                                                disabled={!uploadDestination}
                                                 icon={<IconAdd></IconAdd>}
                                                 onClick={() => {
                                                     setCreateFolder(true);
@@ -245,7 +246,9 @@ function ArtboardToolbar({
                                                 Cancel
                                             </Button>
                                             <Button
-                                                disabled={temporaryUploadDestination == null}
+                                                disabled={
+                                                    temporaryUploadDestination == null || !uploadDestination.files
+                                                }
                                                 onClick={() => {
                                                     setShowDestinationPicker(false);
                                                     setShowRecentDestinations(false);
@@ -318,16 +321,20 @@ function ArtboardToolbar({
                                 {[...sortedUsedFolders.keys()].map((key) => (
                                     <li key={key}>
                                         <custom-palette-item
-                                            title={key}
+                                            title={JSON.stringify(sortedUsedFolders.get(key), null, 2)}
                                             selectable
                                             tabindex="-1"
                                             onFocus={() => {
                                                 let folder = sortedUsedFolders.get(key);
+                                                console.log(folder);
                                                 setUploadDestination({
                                                     project: {
                                                         id: folder.remote_project_id,
                                                     },
                                                     name: folder.name,
+                                                    folder: {
+                                                        id: folder.remote_folder_id,
+                                                    },
                                                     folderPath: folder.remote_path.substring(
                                                         1,
                                                         folder.remote_path.length - 1
@@ -386,7 +393,12 @@ function ArtboardToolbar({
                     </Button>
                 </custom-h-stack>
             ) : (
-                <custom-h-stack align-items="center" gap="large" style={{ width: '100%' }}>
+                <custom-h-stack
+                    align-items="center"
+                    gap="large"
+                    style={{ width: '100%' }}
+                    title={JSON.stringify(context.transferMap, null, 2)}
+                >
                     <LoadingCircle size="Small"></LoadingCircle>
                     <Text>
                         {canCancel ? 'Uploading' : 'Canceling…'}{' '}

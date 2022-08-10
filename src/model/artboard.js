@@ -606,11 +606,14 @@ class Artboard {
                                                                                 remote_project_id:
                                                                                     artboard.target.remote_project_id,
                                                                                 remote_id: data.id,
+                                                                                remote_folder_id:
+                                                                                    artboard.target.remote_folder_id,
                                                                                 remote_path:
                                                                                     artboard.target.remote_path,
                                                                                 // This will store the SHA1 of the artboard that has just been uploaded
                                                                                 sha: artboard.sha,
                                                                                 for: artboard.id_external,
+                                                                                // for: artboard.id,
                                                                             };
 
                                                                             patchDestinations(

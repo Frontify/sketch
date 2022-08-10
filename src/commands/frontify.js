@@ -175,8 +175,12 @@ export function artboardChangedCommand(context) {
  * Function: Refresh
  * ----------------------------------------------------------------------------
  */
-
-function refresh() {
+export function layerRenamedCommand(context) {
+    console.log('layer renmaed');
+    refresh();
+}
+export function refresh() {
+    console.log('refresh');
     let recentBrand = 'com.frontify.sketch.recent.brand.id';
     let mostRecentBrandID = sketch.Settings.sessionVariable(recentBrand);
 
