@@ -347,11 +347,19 @@ export function LibrariesView({ type, useResolutions = false }) {
                                      */
 
                                     if (useResolutions) {
-                                        await useSketch('convertBitmapToShape', {});
-                                        await useSketch('resizeLayer', {
-                                            width: desiredResolution || selection[0].width,
-                                        });
-                                        await applyAsset();
+                                        if (selectedFrame && selectedFrame.type == 'ShapePath') {
+                                            // Special case: a shape had been selected
+                                            // Sketch will create an image by default, but we want to fill the shape instead
+                                            await useSketch('removeSelectedLayers');
+                                            await useSketch('selectLayer', { id: selectedFrame.id });
+                                            await applyAsset();
+                                        } else {
+                                            await useSketch('convertBitmapToShape', {});
+                                            await useSketch('resizeLayer', {
+                                                width: desiredResolution || selection[0].width,
+                                            });
+                                            await applyAsset();
+                                        }
                                     }
                                     break;
                                 case 'image':

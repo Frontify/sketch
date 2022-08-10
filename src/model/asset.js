@@ -69,7 +69,6 @@ class Asset {
     }
 
     applyImage(data, desiredWidth) {
-        console.log('applyImage');
         return new Promise((resolve, reject) => {
             if (data.previewUrl && data.extension) {
                 let url = data.previewUrl;
@@ -230,7 +229,6 @@ class Asset {
                     resolve();
                 })
                 .catch((e) => {
-                    console.error('failed to fetch svg', e);
                     reject(e);
                 });
         });

@@ -509,13 +509,37 @@ export default function (context) {
     });
 
     // ------------------------------------------------------------------------
+    frontend.on('removeSelectedLayers', async () => {
+        let document = sketch.getSelectedDocument();
+
+        document.selectedLayers.forEach((layer) => {
+            layer.remove();
+        });
+
+        return { success: true };
+    });
+
+    // ------------------------------------------------------------------------
+    frontend.on('selectLayer', async ({ id }) => {
+        let document = sketch.getSelectedDocument();
+
+        document.selectedLayers.forEach((layer) => {
+            layer.selected = false;
+        });
+        let layer = sketch.find(`[id="${id}"]`)[0];
+        layer.selected = true;
+
+        return { success: true };
+    });
+
+    // ------------------------------------------------------------------------
     frontend.on('getSelectedLayerFrames', async () => {
         let document = sketch.getSelectedDocument();
 
         let frames = [];
         document.selectedLayers.forEach((layer) => {
             if (layer.type != 'Artboard' && layer.style) {
-                frames.push({ ...layer.frame, type: layer.type });
+                frames.push({ ...layer.frame, type: layer.type, id: layer.id });
             }
         });
 
@@ -579,7 +603,6 @@ export default function (context) {
         let currentDocument = sketch.getSelectedDocument();
         let selection = currentDocument.selectedLayers.layers;
 
-        console.log(selection);
         if (selection) {
             let layer = selection[0];
             try {
