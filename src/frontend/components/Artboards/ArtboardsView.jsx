@@ -282,7 +282,8 @@ export function ArtboardDestinationItem({
 
                 <custom-artboard-thumbnail
                     title={t('artboards.view_on_frontify')}
-                    onClick={() => {
+                    onClick={(event) => {
+                        event.stopPropagation();
                         openExternal(frontifyUrl);
                         setOpen(false);
                     }}
@@ -443,7 +444,8 @@ export function ArtboardDestinationItem({
                                     tabIndex={0}
                                     role="menuitem"
                                     aria-label={t('artboards.view_on_frontify')}
-                                    onClick={() => {
+                                    onClick={(event) => {
+                                        event.stopPropagation();
                                         openExternal(frontifyUrl);
                                         setOpen(false);
                                     }}
@@ -459,6 +461,7 @@ export function ArtboardDestinationItem({
                                     role="menuitem"
                                     aria-label={`Remove`}
                                     onClick={() => {
+                                        event.stopPropagation();
                                         useSketch('removeDestination', {
                                             id: artboard.id,
                                             brandID: context.selection.brand.id,
