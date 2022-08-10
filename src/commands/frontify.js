@@ -176,11 +176,10 @@ export function artboardChangedCommand(context) {
  * ----------------------------------------------------------------------------
  */
 export function layerRenamedCommand(context) {
-    console.log('layer renmaed');
+    // doesn’t work
     refresh();
 }
 export function refresh() {
-    console.log('refresh');
     let recentBrand = 'com.frontify.sketch.recent.brand.id';
     let mostRecentBrandID = sketch.Settings.sessionVariable(recentBrand);
 
@@ -198,10 +197,8 @@ export function refresh() {
 
 function sendSelection(brandID) {
     if (activeDocumentDidChange()) refresh();
-    console.log(sketch.getSelectedDocument().id);
-    let payload = getSelectedArtboards(brandID, true);
 
-    console.log('sendSelection', payload);
+    let payload = getSelectedArtboards(brandID, true);
 
     frontend.send('artboards-changed', payload);
 }

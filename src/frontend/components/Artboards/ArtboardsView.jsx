@@ -586,7 +586,6 @@ export function ArtboardsView() {
     };
 
     useEffect(async () => {
-        console.log(context.selection.brand);
         let { projects } = await useSketch('getProjectsForBrand', { brand: context.selection.brand });
 
         let map = {};
@@ -852,14 +851,13 @@ export function ArtboardsView() {
      */
     const uploadArtboardsToDestination = async (artboards) => {
         if (!uploadDestination.files) {
-            console.log('fetch files', uploadDestination.project.id, uploadDestination.folder.id);
             // fetch first
 
             let legacy = await useSketch('getFilesAndFoldersForProjectAndFolder', {
                 legacyProjectID: uploadDestination.project.id,
                 legacyFolderID: uploadDestination.folder.id,
             });
-            console.log(legacy);
+
             setUploadDestination((state) => {
                 return { ...state, files: legacy.files };
             });
@@ -881,7 +879,6 @@ export function ArtboardsView() {
             // Replace artboard if it has the same name
 
             let existingAsset = findExistingAsset(artboard, uploadDestination);
-            console.log({ existingAsset });
 
             let remote_id = existingAsset ? existingAsset.id : null;
 
@@ -936,13 +933,13 @@ export function ArtboardsView() {
                     // patchedDestinations.push(...artboard.destinations);
                 }
             }
-            console.log(patchedDestinations);
+
             return {
                 ...artboard,
                 destinations: patchedDestinations,
             };
         });
-        console.log('upload', patchedArtboards);
+
         uploadArtboards(patchedArtboards);
         requestArtboards();
     };

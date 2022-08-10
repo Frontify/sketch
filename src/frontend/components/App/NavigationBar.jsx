@@ -99,6 +99,43 @@ export function NavigationBar() {
         setLoading(false);
     };
 
+    const replaceSource = async ({ remoteAsset, uploadDestination }) => {
+        setLoading(true);
+        setStatus('PUSHING');
+
+        let source = {
+            id: remoteAsset.id, // this allows us to use the "addSource" and by passing an ID, have the API replace it
+            filename: remoteAsset.name,
+            refs: {
+                remote_id: remoteAsset.id,
+            },
+            uuid: context.currentDocument.uuid,
+        };
+
+        let target = {
+            path: context.currentDocument.path,
+            set: {
+                path: uploadDestination.folderPath,
+            },
+            project: {
+                id: remoteAsset.project,
+            },
+        };
+
+        // 1. Replace source by adding it (including an ID)
+        await useSketch('addSource', { source, target });
+
+        // 2. Move the current file to the local Frontify folder
+        await useSketch('moveCurrent', {
+            brand: context.selection.brand,
+            project: uploadDestination.project,
+            folder: uploadDestination.folderPath,
+        });
+
+        // 3. Refresh
+        context.actions.refresh();
+        setLoading(false);
+    };
     const pushSource = async ({ force = false }) => {
         setLoading(true);
         setStatus('PUSHING');
@@ -107,7 +144,7 @@ export function NavigationBar() {
         let target = {
             set: { path: '' },
             path: context.currentDocument.path,
-            project: { id: context.currentDocument.refs.remote_id },
+            project: { id: context.currentDocument.refs.remote_project_id },
         };
 
         let source = {
@@ -317,7 +354,7 @@ export function NavigationBar() {
                     <SourceAction
                         style={{ flex: 0 }}
                         status={context.currentDocument.state}
-                        actions={{ pushSource, refresh, fetchAndRefresh, publish, pullSource }}
+                        actions={{ pushSource, refresh, fetchAndRefresh, publish, pullSource, replaceSource }}
                         loading={loading}
                     ></SourceAction>
                 )}

@@ -85,7 +85,6 @@ export const UserContextProvider = ({ children }) => {
                 case 'progress':
                     switch (payload.status) {
                         case 'upload-failed':
-                            console.log(payload);
                             setTransferMap((state) => {
                                 // Remove the entry from transferMap
                                 delete state[id];

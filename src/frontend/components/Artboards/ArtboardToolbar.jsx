@@ -109,7 +109,6 @@ function ArtboardToolbar({
 
     // Callback function that starts the upload after pressing the "upload" button in the toolbar
     const performUpload = useCallback(() => {
-        console.log('perform upload', uploadDestination);
         // uploadDestination?
         let overrideDestination = uploadDestination && uploadDestination.folderPath;
         if (overrideDestination) {
@@ -326,7 +325,7 @@ function ArtboardToolbar({
                                             tabindex="-1"
                                             onFocus={() => {
                                                 let folder = sortedUsedFolders.get(key);
-                                                console.log(folder);
+
                                                 setUploadDestination({
                                                     project: {
                                                         id: folder.remote_project_id,

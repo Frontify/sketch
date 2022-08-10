@@ -530,7 +530,7 @@ class Source {
                     path: uploadTarget.path,
                     filename: source.filename,
                     name: source.filename,
-                    id: null,
+                    id: source.id, // we usually don’t have an ID unless we’re replacing an asset
                     id_external: source.uuid, // source id is the Sketch ID
                     folder: uploadTarget.set.path,
                     project: uploadTarget.project.id,

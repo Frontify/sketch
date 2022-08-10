@@ -7,7 +7,7 @@ import { computedSHA, getSelectedArtboards, removeDestination, setDestinations, 
  */
 export function uploadArtboards({ artboards, brandID }) {
     let { documentArtboards } = getSelectedArtboards(brandID, false);
-    console.log('uploadArtboards', documentArtboards, artboards);
+
     let queue = [];
 
     artboards.forEach((artboard) => {
@@ -37,7 +37,6 @@ export function uploadArtboards({ artboards, brandID }) {
                 a.destinations.forEach((d) => {
                     if (d.remote_id == destination.remote_id) {
                         removeDestination(a, d);
-                        console.log('removed dest');
                     }
                 });
             });

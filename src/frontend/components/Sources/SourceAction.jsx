@@ -56,6 +56,31 @@ export function SourceAction({ status, actions, loading, interactive = true }) {
         useSketch('openUrl', { url });
     };
 
+    const findExistingAsset = (source, uploadDestination) => {
+        return uploadDestination.files.find((file) => file.name == source.filename);
+    };
+
+    const publishOrPush = async (uploadDestination) => {
+        let legacy = await useSketch('getFilesAndFoldersForProjectAndFolder', {
+            legacyProjectID: uploadDestination.project.id,
+            legacyFolderID: uploadDestination.folder.id,
+        });
+
+        setUploadDestination((state) => {
+            return { ...state, files: legacy.files };
+        });
+        uploadDestination.files = legacy.files;
+
+        let existingSourceFile = findExistingAsset(context.currentDocument, uploadDestination);
+        if (existingSourceFile) {
+            // patch currentDocument with refs from the existing file
+
+            actions.replaceSource({ remoteAsset: existingSourceFile, uploadDestination });
+        } else {
+            actions.publish(uploadDestination);
+        }
+    };
+
     // create folder
     const [createFolder, setCreateFolder] = useState(false);
 
@@ -174,7 +199,7 @@ export function SourceAction({ status, actions, loading, interactive = true }) {
                                     disabled={uploadDestination == null}
                                     onClick={() => {
                                         setShowDestinationPicker(false);
-                                        actions.publish(uploadDestination);
+                                        publishOrPush(uploadDestination);
                                         setUploadDestination(null);
                                     }}
                                 >

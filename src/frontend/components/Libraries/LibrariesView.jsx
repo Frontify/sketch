@@ -328,7 +328,6 @@ export function LibrariesView({ type, useResolutions = false }) {
                         }}
                         onDrop={async () => {
                             let dropTarget = sketchSelectionChanged ? 'canvas-or-layer' : 'image';
-                            console.log(dropTarget);
 
                             switch (dropTarget) {
                                 case 'canvas-or-layer':
