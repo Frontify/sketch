@@ -132,14 +132,14 @@ export function getCachedSHA(artboard) {
     return Settings.layerSettingForKey(artboard, SHA_KEY) || [];
 }
 
-export function getSelectedArtboardsFromSelection(brandID, selection, total, hasSelection, useCache = true) {
+export function getSelectedArtboardsFromSelection(brandID, selection, total, hasSelection, useCachedSHA = true) {
     let artboards = [];
     try {
         selection.forEach((layer) => {
             if (layer.type == 'Artboard') {
                 // read the metadata
 
-                if (!useCache) setSHA(layer);
+                if (!useCachedSHA) setSHA(layer);
 
                 artboards.push({
                     // Calculate sha1 of the current state of the artboard.
@@ -168,15 +168,17 @@ export function getSelectedArtboardsFromSelection(brandID, selection, total, has
     }
 }
 
-export function getSelectedArtboards(brandID, useCache = true) {
+export function getSelectedArtboards(brandID, useCachedSHA = true) {
     // remember the brand
 
     if (brandID) {
         Settings.setSessionVariable('com.frontify.sketch.recent.brand.id', '' + brandID);
     }
+    console.log('getSelectedArtboards', brandID);
 
     try {
-        let currentDocument = sketch.Document.fromNative(getDocument());
+        let currentDocument = sketch.getSelectedDocument();
+
         if (!currentDocument)
             return {
                 artboards: [],
@@ -210,7 +212,7 @@ export function getSelectedArtboards(brandID, useCache = true) {
         // If there is a selection, but it doesn’t contain artboards: return all layers of type artboard
         // Else: return selected artboards
 
-        let all = getSelectedArtboardsFromSelection(brandID, allArtboards, total, hasSelection, useCache);
+        let all = getSelectedArtboardsFromSelection(brandID, allArtboards, total, hasSelection, useCachedSHA);
         let documentArtboards = all.artboards;
 
         if (selection.length == 0) return { ...all, documentArtboards };

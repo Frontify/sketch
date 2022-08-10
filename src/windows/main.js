@@ -341,6 +341,18 @@ export default function (context) {
 
     // ------------------------------------------------------------------------
 
+    frontend.on('zoomToArtboard', ({ id }) => {
+        try {
+            let currentDocument = sketch.getSelectedDocument();
+            let layer = sketch.find(`[id="${id}"]`)[0];
+            currentDocument.centerOnLayer(layer);
+        } catch (error) {
+            throw new Error('Could not cancel polling.');
+        }
+    });
+
+    // ------------------------------------------------------------------------
+
     frontend.on('cancelOauthFlow', () => {
         try {
             OAuth.cancelAuthorizationPolling();

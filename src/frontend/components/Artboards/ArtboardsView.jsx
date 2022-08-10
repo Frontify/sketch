@@ -269,8 +269,15 @@ export function ArtboardDestinationItem({
     const frontifyUrl = `${base}/screens/${destination.remote_id}`;
 
     return (
-        <custom-palette-item hover="off" gap="x-small">
-            <custom-h-stack gap="small" align-items="center" padding-x="small">
+        <custom-palette-item gap="x-small">
+            <custom-h-stack
+                gap="small"
+                align-items="center"
+                padding-x="small"
+                onClick={() => {
+                    useSketch('zoomToArtboard', { id: artboard.id });
+                }}
+            >
                 {/* Modified */}
 
                 <custom-artboard-thumbnail
@@ -293,12 +300,12 @@ export function ArtboardDestinationItem({
                         >
                             {artboard.name}
                         </Text>
-                        <div show-on-hover="true" cursor="pointer">
+                        {/* <div show-on-hover="true" cursor="pointer">
                             <IconExternalLink
                                 title={t('artboards.view_on_frontify')}
                                 onClick={() => openExternal(frontifyUrl)}
                             />
-                        </div>
+                        </div> */}
                     </custom-h-stack>
                     <Text
                         size="small"

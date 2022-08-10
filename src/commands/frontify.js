@@ -198,8 +198,10 @@ export function refresh() {
 
 function sendSelection(brandID) {
     if (activeDocumentDidChange()) refresh();
-
+    console.log(sketch.getSelectedDocument().id);
     let payload = getSelectedArtboards(brandID, true);
+
+    console.log('sendSelection', payload);
 
     frontend.send('artboards-changed', payload);
 }
