@@ -345,6 +345,10 @@ export default function (context) {
         try {
             let currentDocument = sketch.getSelectedDocument();
             let layer = sketch.find(`[id="${id}"]`)[0];
+            let page = layer.parent;
+            let currentPage = currentDocument.selectedPage;
+            currentPage.selected = false;
+            page.selected = true;
             currentDocument.centerOnLayer(layer);
         } catch (error) {
             throw new Error('Could not cancel polling.');
