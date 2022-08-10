@@ -318,6 +318,7 @@ export function LibrariesView({ type, useResolutions = false }) {
                              */
 
                             let { frames } = await useSketch('getSelectedLayerFrames');
+
                             if (frames && frames.length == 1) {
                                 setSelectedFrame(frames[0]);
                             } else {
@@ -326,10 +327,10 @@ export function LibrariesView({ type, useResolutions = false }) {
                             setSketchSelectionChanged(false);
                         }}
                         onDrop={async () => {
-                            let dropTarget = sketchSelectionChanged ? 'canvas' : 'selection';
+                            let dropTarget = sketchSelectionChanged ? 'canvas-or-layer' : 'image';
 
                             switch (dropTarget) {
-                                case 'canvas':
+                                case 'canvas-or-layer':
                                     /**
                                      * Drops the image in Sketch at a higher resolution than the thumbnail.
                                      *
@@ -345,13 +346,19 @@ export function LibrariesView({ type, useResolutions = false }) {
                                      */
 
                                     if (useResolutions) {
+                                        if (selectedFrame.type == 'ShapePath') {
+                                            // apply fill to the original selection
+                                            // 1. Select the previous frame
+                                        }
+
+                                        await useSketch('convertBitmapToShape', {});
                                         await useSketch('resizeLayer', {
                                             width: desiredResolution || selection[0].width,
                                         });
                                         await applyAsset();
                                     }
                                     break;
-                                case 'selection':
+                                case 'image':
                                     // Drop on selection
                                     // replace existing image layer
                                     if (useResolutions) {

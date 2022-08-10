@@ -508,7 +508,7 @@ export default function (context) {
         let frames = [];
         document.selectedLayers.forEach((layer) => {
             if (layer.type != 'Artboard' && layer.style) {
-                frames.push(layer.frame);
+                frames.push({ ...layer.frame, type: layer.type });
             }
         });
 
@@ -564,6 +564,22 @@ export default function (context) {
             await Asset.resize(width, height);
         } catch (error) {
             throw new Error('Could not resize layer.');
+        }
+    });
+
+    // ------------------------------------------------------------------------
+    frontend.on('convertBitmapToShape', async () => {
+        let currentDocument = sketch.getSelectedDocument();
+        let selection = currentDocument.selectedLayers.layers;
+
+        console.log(selection);
+        if (selection) {
+            let layer = selection[0];
+            try {
+                await Asset.convertBitmapToShape(layer);
+            } catch (error) {
+                throw new Error('Could not convert layer.');
+            }
         }
     });
 

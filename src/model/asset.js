@@ -1,6 +1,6 @@
 // Sketch API
 import sketch from 'sketch';
-import { Document, Image, Style } from 'sketch/dom';
+import { Document, Layer, Image, ShapePath, Style } from 'sketch/dom';
 
 // Helpers
 import { getDocument } from '../helpers/sketch';
@@ -44,7 +44,32 @@ class Asset {
         });
     }
 
+    convertBitmapToShape(layer) {
+        if (layer.type == 'Image') {
+            // Replace with the layer you want to create
+            let replacement = new ShapePath({
+                name: layer.name,
+                shapeType: ShapePath.ShapeType.Rectangle,
+            });
+
+            replacement.parent = layer.parent;
+            replacement.index = layer.index;
+
+            // Position the SVG at the frame of the selection
+            replacement.frame.x = layer.frame.x;
+            replacement.frame.y = layer.frame.y;
+            replacement.frame.width = layer.frame.width;
+            replacement.frame.height = layer.frame.height;
+
+            replacement.selected = true;
+
+            layer.remove();
+        }
+        return;
+    }
+
     applyImage(data, desiredWidth) {
+        console.log('applyImage');
         return new Promise((resolve, reject) => {
             if (data.previewUrl && data.extension) {
                 let url = data.previewUrl;
@@ -59,14 +84,27 @@ class Asset {
 
                 if (ext !== 'svg') {
                     let image = NSImage.alloc().initWithContentsOfURL(NSURL.URLWithString(url));
-                    let imageLayer = new Image({ image: image });
+
+                    // Create rectangle with image fill
+                    let imageLayer = new ShapePath({ name: data.title, shapeType: ShapePath.ShapeType.Rectangle });
+
+                    imageLayer.style.fills = [
+                        {
+                            fill: Style.FillType.Pattern,
+                            pattern: {
+                                patternType: Style.PatternFillType.Fill,
+                                image: image,
+                            },
+                        },
+                    ];
+
                     let imageSize = image.size();
 
-                    if (imageLayer && imageLayer.image) {
+                    if (imageLayer) {
                         imageLayer.frame.width = imageSize.width;
                         imageLayer.frame.height = imageSize.height;
 
-                        let imageData = imageLayer.image;
+                        let imageData = image;
 
                         let applied = false;
 
