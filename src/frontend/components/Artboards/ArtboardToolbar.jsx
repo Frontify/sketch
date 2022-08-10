@@ -321,7 +321,7 @@ function ArtboardToolbar({
                                 {[...sortedUsedFolders.keys()].map((key) => (
                                     <li key={key}>
                                         <custom-palette-item
-                                            title={JSON.stringify(sortedUsedFolders.get(key), null, 2)}
+                                            title={key}
                                             selectable
                                             tabindex="-1"
                                             onFocus={() => {
@@ -393,12 +393,7 @@ function ArtboardToolbar({
                     </Button>
                 </custom-h-stack>
             ) : (
-                <custom-h-stack
-                    align-items="center"
-                    gap="large"
-                    style={{ width: '100%' }}
-                    title={JSON.stringify(context.transferMap, null, 2)}
-                >
+                <custom-h-stack align-items="center" gap="large" style={{ width: '100%' }}>
                     <LoadingCircle size="Small"></LoadingCircle>
                     <Text>
                         {canCancel ? 'Uploading' : 'Canceling…'}{' '}

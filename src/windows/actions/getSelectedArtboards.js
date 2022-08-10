@@ -174,7 +174,6 @@ export function getSelectedArtboards(brandID, useCachedSHA = true) {
     if (brandID) {
         Settings.setSessionVariable('com.frontify.sketch.recent.brand.id', '' + brandID);
     }
-    console.log('getSelectedArtboards', brandID);
 
     try {
         let currentDocument = sketch.getSelectedDocument();
