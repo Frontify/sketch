@@ -328,6 +328,7 @@ export function LibrariesView({ type, useResolutions = false }) {
                         }}
                         onDrop={async () => {
                             let dropTarget = sketchSelectionChanged ? 'canvas-or-layer' : 'image';
+                            console.log(dropTarget);
 
                             switch (dropTarget) {
                                 case 'canvas-or-layer':
@@ -346,11 +347,6 @@ export function LibrariesView({ type, useResolutions = false }) {
                                      */
 
                                     if (useResolutions) {
-                                        if (selectedFrame.type == 'ShapePath') {
-                                            // apply fill to the original selection
-                                            // 1. Select the previous frame
-                                        }
-
                                         await useSketch('convertBitmapToShape', {});
                                         await useSketch('resizeLayer', {
                                             width: desiredResolution || selection[0].width,
