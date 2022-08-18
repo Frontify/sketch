@@ -6,6 +6,8 @@ import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
 let API = require('sketch');
 let DOM = require('sketch/dom');
 
+const MAX_ASSETS_TO_REQUEST_FOR_LIBRARY = 999;
+
 class Asset {
     constructor() {}
 
@@ -13,15 +15,16 @@ class Asset {
         return target.getSelectedAssetSourceForType(type).then(
             function (assetSource) {
                 // search assets
+                const cleanedQuery = query === 'q=' ? '' : query; // do not use query if empty
                 let url = '/v1/assets/search/';
                 if (assetSource.implicit_access) {
-                    url += assetSource.connected_document_id + '?' + query;
+                    url += assetSource.connected_document_id + '?' + cleanedQuery;
                 } else {
-                    url += '?project_id=' + assetSource.id + '&' + query;
+                    url += '?project_id=' + assetSource.id + '&' + cleanedQuery;
                 }
 
-                if (query === '') {
-                    url += '&limit=100';
+                if (cleanedQuery === '') {
+                    url += `&limit=${MAX_ASSETS_TO_REQUEST_FOR_LIBRARY}`;
                 }
 
                 return fetch(url).then(

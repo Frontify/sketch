@@ -2,11 +2,13 @@ import fetch from '../helpers/fetch'
 import target from './target';
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote'
 
+const MAX_PROJECTS_TO_REQUEST = 999
+
 class Project {
     constructor() {}
 
     getProjects() {
-        return fetch('/v1/brand/list/?project_limit=999').then(
+        return fetch(`/v1/brand/list/?project_limit=${MAX_PROJECTS_TO_REQUEST}`).then(
             function (data) {
                 return data.brands;
             }.bind(this)
