@@ -1,5 +1,5 @@
 // Sketch API
-import sketch from 'sketch';
+import sketch, { Settings } from 'sketch';
 
 // Windows
 import main from '../windows/main';
@@ -116,6 +116,22 @@ function activeDocumentDidChange() {
 export function selectionChangedCommand(context) {
     frontend.send('selection-changed');
     if (activeDocumentDidChange()) refresh();
+}
+
+export function documentChangedCommand(context) {
+    var changes = context.actionContext;
+    for (var i = 0; i < changes.length; i++) {
+        var change = changes[i];
+        var obj = change.object();
+        let layer = sketch.fromNative(obj);
+        if (layer) {
+            let artboard = layer.getParentArtboard();
+
+            if (artboard) {
+                Settings.setLayerSettingForKey(artboard, 'dirty', true);
+            }
+        }
+    }
 }
 
 /**

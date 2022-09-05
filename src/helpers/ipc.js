@@ -1,10 +1,11 @@
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
-
+import { Profiler } from '../model/Profiler';
 // Identifier for the plugin window that we can use for message passing
 const IDENTIFIER = 'frontifymain';
 /**
  * We can use this helper to make it more convenient to send messages to the webview.
  */
+let profiler = new Profiler();
 export const frontend = {
     listeners: {},
     send(type, payload) {
@@ -14,8 +15,11 @@ export const frontend = {
     },
     on(type, callback) {
         this.listeners[type] = async (args) => {
+            // console.log('⚡️ Frontend request', type, args);
             try {
+                profiler.start(type + '(' + args.requestUUID + ')');
                 let response = await callback(args);
+                profiler.end();
 
                 if (args.requestUUID) {
                     this.send('response', { type, responseUUID: args.requestUUID, success: true, ...response });

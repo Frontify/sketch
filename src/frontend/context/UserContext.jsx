@@ -234,6 +234,9 @@ export const UserContextProvider = ({ children }) => {
      * Actions that can be access via {context.actions}, e.g. context.actions.getUser()
      */
     const actions = {
+        clearTransferMap() {
+            setTransferMap({});
+        },
         getProjectFolders(project) {
             return queryGraphQLWithAuth({ query: browseWorkspaceProject(project), auth });
         },

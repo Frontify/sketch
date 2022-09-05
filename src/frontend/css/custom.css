@@ -114,6 +114,7 @@ custom-artboard-thumbnail {
     padding: 2px;
     display: flex;
     place-items: center;
+    flex-shrink: 0;
 }
 custom-artboard-thumbnail img {
     cursor: pointer !important;

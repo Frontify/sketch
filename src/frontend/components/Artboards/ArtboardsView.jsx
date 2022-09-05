@@ -459,7 +459,7 @@ export function ArtboardDestinationItem({
                                 <div
                                     tabIndex={0}
                                     role="menuitem"
-                                    aria-label={`Remove`}
+                                    aria-label={t('artboards.stop_tracking')}
                                     onClick={() => {
                                         event.stopPropagation();
                                         useSketch('removeDestination', {
@@ -615,7 +615,10 @@ export function ArtboardsView() {
         matchedGroups.forEach((group) => {
             group.children.forEach((artboard) => {
                 artboard.destinations.forEach((destination) => {
-                    if (destination.sha != artboard.sha) {
+                    // if (destination.sha != artboard.sha) {
+                    //     someArtboards.push(artboard);
+                    // }
+                    if (artboard.dirty) {
                         someArtboards.push(artboard);
                     }
                 });
@@ -657,6 +660,10 @@ export function ArtboardsView() {
         setDocumentArtboards(response.documentArtboards);
         setTotal(response.total);
         setHasSelection(response.hasSelection);
+    };
+
+    const cancelAllTransfers = () => {
+        context.actions.clearTransferMap();
     };
 
     /**
@@ -725,7 +732,9 @@ export function ArtboardsView() {
                     artboard.destinations.forEach(async (destination) => {
                         // Pre-select the item for upload based on the diff
 
-                        destination.selected = artboard.sha != destination.sha;
+                        // destination.selected = artboard.sha != destination.sha;
+                        console.log(destination, artboard.dirty);
+                        destination.selected = artboard.dirty;
                         if (destination.remote_id) {
                             destination.api = artboardsMap.get(destination.remote_id);
                         }
@@ -741,7 +750,8 @@ export function ArtboardsView() {
                                 transfer.completed++;
 
                                 // this will mark it with a "check" icon
-                                destination.sha = artboard.sha;
+                                // destination.sha = artboard.sha;
+                                artboard.dirty = false;
                                 // destination.selected = false;
                                 // group.selectionCount--;
 
@@ -1105,7 +1115,10 @@ export function ArtboardsView() {
                 <ArtboardToolbar
                     artboards={artboards}
                     canCancel={canCancel}
-                    onCancel={() => setCanCancel(false)}
+                    onCancel={() => {
+                        setCanCancel(false);
+                        cancelAllTransfers();
+                    }}
                     uploadStatus={uploadStatus}
                     hasSelection={hasSelection}
                     loading={loading}

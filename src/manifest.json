@@ -57,6 +57,16 @@
                 }
             }
         },
+        {
+            "name": "DocumentChanged",
+            "identifier": "document-changed",
+            "script": "./commands/frontify.js",
+            "handlers": {
+                "actions": {
+                    "onDocumentChanged": "documentChangedCommand"
+                }
+            }
+        },
 
         {
             "name": "LayerRenamed",
