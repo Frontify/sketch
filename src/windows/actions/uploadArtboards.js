@@ -1,5 +1,5 @@
 import Artboard from '../../model/artboard';
-import { computedSHA, getSelectedArtboards, removeDestination, setDestinations, setSHA } from './getSelectedArtboards';
+import { getSelectedArtboards, removeDestination, setDestinations, shaForArtboard } from './getSelectedArtboards';
 
 /**
  * uploadArtboards
@@ -14,10 +14,6 @@ export function uploadArtboards({ artboards, brandID }) {
         if (!artboard.destinations) return;
 
         setDestinations(artboard, brandID);
-
-        let sha = computedSHA(artboard);
-
-        setSHA(artboard);
 
         artboard.destinations.forEach((destination) => {
             /**
@@ -46,7 +42,7 @@ export function uploadArtboards({ artboards, brandID }) {
                 name: '' + artboard.name.replace(/\s*\/\s*/g, '/'),
                 dirty: artboard.dirty,
                 ext: 'png',
-                sha: sha,
+                sha: shaForArtboard(artboard),
                 state: 'new',
                 target: destination,
                 modified: null,

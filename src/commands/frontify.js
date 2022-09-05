@@ -125,7 +125,7 @@ export function documentChangedCommand(context) {
         var obj = change.object();
         let layer = sketch.fromNative(obj);
         if (layer) {
-            let artboard = layer.getParentArtboard();
+            let artboard = layer.type == 'Artboard' ? layer : layer.getParentArtboard();
 
             if (artboard) {
                 Settings.setLayerSettingForKey(artboard, 'dirty', true);
@@ -141,9 +141,6 @@ export function documentChangedCommand(context) {
 
 export function artboardChangedCommand(context) {
     let newArtboard = sketch.fromNative(context.actionContext.newArtboard);
-
-    // Update the SHA of the artboard
-    setSHA(newArtboard);
 
     let threshold = 1000;
 

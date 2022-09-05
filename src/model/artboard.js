@@ -15,7 +15,7 @@ import FileManager from './FileManager';
 import { isWebviewPresent } from 'sketch-module-web-view/remote';
 import { frontend } from '../helpers/ipc';
 
-import { patchDestinations } from '../windows/actions/getSelectedArtboards';
+import { patchDestinations, setSHA } from '../windows/actions/getSelectedArtboards';
 
 // Error
 import { Error } from './error';
@@ -582,12 +582,13 @@ class Artboard {
                                                         }
 
                                                         if (file.type === 'artboard') {
-                                                            let artboardDidChange = artboard.sha != artboard.target.sha;
+                                                            let artboardDidChange = shaFile(file.path) != artboard.sha;
                                                             // Proceed if the artboard has changes or if it has never been uploaded
                                                             // If it has changes, the dirty flag will be true
                                                             // If it has never been uploaded, the id will be null
                                                             let proceed = artboard.dirty || !artboard.id;
-                                                            if (proceed) {
+
+                                                            if (proceed && artboardDidChange) {
                                                                 artboardChanged = true;
 
                                                                 return FileManager.uploadFile(
@@ -627,6 +628,17 @@ class Artboard {
                                                                                 file.id_external,
                                                                                 destination
                                                                             );
+
+                                                                            let artboardLayer = sketch.find(
+                                                                                `[id="${artboard.id_external}"]`
+                                                                            )[0];
+                                                                            if (artboardLayer) {
+                                                                                setSHA(
+                                                                                    artboardLayer,
+                                                                                    shaFile(file.path)
+                                                                                );
+                                                                            }
+
                                                                             // 3. Handle the response from the API
                                                                             FileManager.deleteFile(file.path);
 
@@ -709,6 +721,7 @@ class Artboard {
                                                                             );
 
                                                                             status.sha = data.sha;
+
                                                                             return assetId;
                                                                         }.bind(this)
                                                                     )
