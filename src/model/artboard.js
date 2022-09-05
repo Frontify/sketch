@@ -15,7 +15,7 @@ import FileManager from './FileManager';
 import { isWebviewPresent } from 'sketch-module-web-view/remote';
 import { frontend } from '../helpers/ipc';
 
-import { patchDestinations, setSHA } from '../windows/actions/getSelectedArtboards';
+import { patchDestinations, setSHA } from '../windows/actions';
 
 // Error
 import { Error } from './error';

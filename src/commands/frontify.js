@@ -13,7 +13,7 @@ import { frontend } from '../helpers/ipc';
 import executeSafely from '../helpers/executeSafely';
 import { isWebviewPresent } from 'sketch-module-web-view/remote';
 
-import { getSelectedArtboards, setSHA } from '../windows/actions/getSelectedArtboards';
+import { getSelectedArtboards } from '../windows/actions';
 
 /**
  * Run
