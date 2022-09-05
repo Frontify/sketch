@@ -449,7 +449,9 @@ export default function (context) {
     // ------------------------------------------------------------------------
     frontend.on('getSelectedArtboards', async ({ brandID }) => {
         try {
-            let payload = actions['getSelectedArtboards'](brandID, false);
+            // Performance issue: if useCachedSHA = false
+            let useCachedSHA = true;
+            let payload = actions['getSelectedArtboards'](brandID, useCachedSHA);
             return payload;
         } catch (error) {
             throw new Error('Could not get selected artboards.');

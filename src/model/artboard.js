@@ -209,6 +209,7 @@ class Artboard {
                     sha: artboard.sha,
                     path: path,
                     type: 'artboard',
+                    dirty: artboard.dirty,
                 });
 
                 // Export artboard structure -> via JS API as its not possible to export JSON with MSExportRequest
@@ -573,6 +574,7 @@ class Artboard {
                                                 .then(
                                                     function (assetId) {
                                                         // Figure out if the upload has been canceled in the meantime
+
                                                         if (this.uploadInProgress == false) {
                                                             this.failUpload(artboard);
                                                             clearInterval(polling);
@@ -580,7 +582,12 @@ class Artboard {
                                                         }
 
                                                         if (file.type === 'artboard') {
-                                                            if (artboard.sha != artboard.target.sha) {
+                                                            let artboardDidChange = artboard.sha != artboard.target.sha;
+                                                            // Proceed if the artboard has changes or if it has never been uploaded
+                                                            // If it has changes, the dirty flag will be true
+                                                            // If it has never been uploaded, the id will be null
+                                                            let proceed = artboard.dirty || !artboard.id;
+                                                            if (proceed) {
                                                                 artboardChanged = true;
 
                                                                 return FileManager.uploadFile(
@@ -724,7 +731,6 @@ class Artboard {
                                                 )
                                                 .catch(
                                                     function (err) {
-                                                        console.error(err);
                                                         throw err;
                                                     }.bind(this)
                                                 );
@@ -754,6 +760,11 @@ class Artboard {
                                             // Data from attachment?
                                             clearInterval(polling);
                                             if (isWebviewPresent('frontifymain')) {
+                                                // mark artboard as clean
+                                                let artboardLayer = sketch.find(`[id="${artboard.id_external}"]`)[0];
+                                                if (artboardLayer) {
+                                                    Settings.setLayerSettingForKey(artboardLayer, 'dirty', false);
+                                                }
                                                 this.finishUpload(artboard);
                                             }
                                             return true;
@@ -763,6 +774,7 @@ class Artboard {
                                         function (error) {
                                             clearInterval(polling);
                                             if (isWebviewPresent('frontifymain')) {
+                                                console.log('fail upload', error);
                                                 this.failUpload(artboard, error);
                                             }
                                             throw error;

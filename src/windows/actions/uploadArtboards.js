@@ -44,6 +44,7 @@ export function uploadArtboards({ artboards, brandID }) {
                 id: destination.remote_id, // Frontify ID
                 id_external: artboard.id, // Sketch ID
                 name: '' + artboard.name.replace(/\s*\/\s*/g, '/'),
+                dirty: artboard.dirty,
                 ext: 'png',
                 sha: sha,
                 state: 'new',
