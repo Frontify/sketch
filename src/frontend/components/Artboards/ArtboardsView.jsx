@@ -733,7 +733,7 @@ export function ArtboardsView() {
                         // Pre-select the item for upload based on the diff
 
                         // destination.selected = artboard.sha != destination.sha;
-                        console.log(destination, artboard.dirty);
+
                         destination.selected = artboard.dirty;
                         if (destination.remote_id) {
                             destination.api = artboardsMap.get(destination.remote_id);

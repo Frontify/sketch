@@ -109,7 +109,38 @@ export function SourceAction({ status, actions, loading, interactive = true }) {
                     hoverDelay={0}
                     triggerElement={
                         <div>
-                            <LoadingCircle size="Small"></LoadingCircle>
+                            {!context.transferMap[context.currentDocument.refs?.remote_id]?.progress ? (
+                                <LoadingCircle size="Small"></LoadingCircle>
+                            ) : (
+                                <div>
+                                    <svg
+                                        width="18"
+                                        height="18"
+                                        viewBox="0 0 18 18"
+                                        fill="none"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        style={{ transform: 'rotate(-90deg)' }}
+                                    >
+                                        <circle cx="9" cy="9" r="8" stroke="rgba(0,0, 0,0.16)" strokeWidth="2" />
+                                        <circle
+                                            style={{
+                                                transition: 'all 0.25s ease',
+                                                strokeDasharray: `${
+                                                    (context.transferMap[context.currentDocument.refs?.remote_id]
+                                                        ? context.transferMap[context.currentDocument.refs?.remote_id]
+                                                              ?.progress / 100
+                                                        : 0) * 50
+                                                } 50`,
+                                            }}
+                                            cx="9"
+                                            cy="9"
+                                            r="8"
+                                            stroke="var(--box-selected-strong-color)"
+                                            strokeWidth="2"
+                                        />
+                                    </svg>
+                                </div>
+                            )}
                         </div>
                     }
                 />

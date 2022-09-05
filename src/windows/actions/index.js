@@ -7,6 +7,7 @@ import {
     setDestinations,
     getSelectedArtboards,
     getSelectedArtboardsFromSelection,
+    setSHA,
 } from './getSelectedArtboards';
 
 export {
@@ -17,5 +18,6 @@ export {
     removeDestination,
     removeDestinations,
     setDestinations,
+    setSHA,
     uploadArtboards,
 };
