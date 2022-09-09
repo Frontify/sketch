@@ -209,7 +209,7 @@ export function SourceAction({ status, actions, loading, interactive = true }) {
                             <custom-h-stack padding="medium" gap="small" separator="top">
                                 <Button
                                     style="Secondary"
-                                    disabled={!temporaryUploadDestination}
+                                    disabled={!uploadDestination}
                                     icon={<IconAdd></IconAdd>}
                                     onClick={() => {
                                         setCreateFolder(true);

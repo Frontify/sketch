@@ -1,5 +1,5 @@
 export const Error = {
-    UNKNOWN: 'Unknown error',
-    ASSET_NOT_FOUND: 'Asset not found',
-    ATTACHMENT_UPLOAD_FAILED: 'Attachment upload failed',
+    UNKNOWN: 0,
+    ASSET_NOT_FOUND: 1,
+    ATTACHMENT_UPLOAD_FAILED: 2,
 };

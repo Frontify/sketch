@@ -110,7 +110,7 @@ function ArtboardToolbar({
     // Callback function that starts the upload after pressing the "upload" button in the toolbar
     const performUpload = useCallback(() => {
         // uploadDestination?
-        let overrideDestination = uploadDestination && uploadDestination.folderPath;
+        let overrideDestination = uploadDestination && uploadDestination.folderPath != undefined;
         if (overrideDestination) {
             uploadArtboardsToDestination(artboards);
             return;
@@ -245,9 +245,7 @@ function ArtboardToolbar({
                                                 Cancel
                                             </Button>
                                             <Button
-                                                disabled={
-                                                    temporaryUploadDestination == null || !uploadDestination?.files
-                                                }
+                                                disabled={uploadDestination == null}
                                                 onClick={() => {
                                                     setShowDestinationPicker(false);
                                                     setShowRecentDestinations(false);

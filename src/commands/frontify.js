@@ -108,6 +108,7 @@ function activeDocumentDidChange() {
 
         if (oldDocumentID != newDocumentID) {
             // refresh
+
             return true;
         }
     }
@@ -147,6 +148,7 @@ export function artboardChangedFinishCommand(context) {
     frontend.send('artboard-selection-changed', { selection: ids, count: items.length });
 
     if (activeDocumentDidChange()) {
+        frontend.send('getCurrentDocument');
         refresh();
     }
     profiler.end();
@@ -205,7 +207,10 @@ export function documentChangedCommand(context) {
             shouldRefresh = true;
         }
     }
-    if (shouldRefresh) refresh();
+    if (shouldRefresh) {
+        refresh();
+    }
+
     profiler.end();
 }
 

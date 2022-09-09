@@ -58,24 +58,28 @@ export function RecentDocumentsView({ onInput, onChange, trackedDocuments }) {
     return (
         <custom-v-stack>
             {trackedDocuments &&
-                trackedDocuments.map((document) => {
-                    return (
-                        <SourceFileEntry
-                            recent={true}
-                            withTooltip={false}
-                            document={document}
-                            key={document.uuid}
-                            file={document}
-                            path={document.relativePath?.replace(context.selection?.brand?.name, '') || document.path}
-                            name={document.filename?.replace('.sketch', '')}
-                            loading={loading == document.uuid}
-                            onClick={async () => {
-                                await openSource(document);
-                                redirectToDocument(document);
-                            }}
-                        ></SourceFileEntry>
-                    );
-                })}
+                trackedDocuments
+                    .filter((document) => document.state != 'file-not-found')
+                    .map((document) => {
+                        return (
+                            <SourceFileEntry
+                                recent={true}
+                                withTooltip={false}
+                                document={document}
+                                key={document.uuid}
+                                file={document}
+                                path={
+                                    document.relativePath?.replace(context.selection?.brand?.name, '') || document.path
+                                }
+                                name={document.filename?.replace('.sketch', '')}
+                                loading={loading == document.uuid}
+                                onClick={async () => {
+                                    await openSource(document);
+                                    redirectToDocument(document);
+                                }}
+                            ></SourceFileEntry>
+                        );
+                    })}
         </custom-v-stack>
     );
 }
