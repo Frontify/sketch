@@ -175,6 +175,7 @@ export function NavigationBar() {
     };
 
     const pullSource = async () => {
+        context.setBlocked(true);
         setLoading(true);
         setStatus('PULLING');
 
@@ -187,6 +188,7 @@ export function NavigationBar() {
         // await context.actions.refresh();
         setStatus('PENDING');
         setLoading(false);
+        context.setBlocked(false);
     };
 
     const fetchAndRefresh = async () => {
@@ -251,6 +253,7 @@ export function NavigationBar() {
             setDocumentPath(pathArray);
             setMatchedSource(context.sources.find((source) => source.path == context.currentDocument.path));
         }
+        fetchAndRefresh();
     }, [context.currentDocument]);
 
     /**

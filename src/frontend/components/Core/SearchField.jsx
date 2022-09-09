@@ -14,7 +14,7 @@ export function SearchField({ disabled, placeholder, onInput, onChange = () => {
             placeholder={placeholder || t('general.search')}
             decorator={<IconSearch />}
             value={value}
-            spellcheck={false}
+            spellCheck={false}
             autocomplete={false}
             onChange={(value) => {
                 onInput(value);

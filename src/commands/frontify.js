@@ -5,15 +5,19 @@ import sketch, { Settings } from 'sketch';
 import main from '../windows/main';
 
 // Models
+import Artboard from '../model/artboard';
 import Notification from '../model/notification';
 import Source from '../model/source';
+import Target from '../model/target';
 
 // IPC
 import { frontend } from '../helpers/ipc';
 import executeSafely from '../helpers/executeSafely';
 import { isWebviewPresent } from 'sketch-module-web-view/remote';
 
-import { getSelectedArtboards } from '../windows/actions';
+import { Profiler } from '../model/Profiler';
+
+const profiler = new Profiler();
 
 /**
  * Run
@@ -64,7 +68,9 @@ export function openCommand(context) {
 export function savedCommand(context) {
     executeSafely(context, function () {
         Source.saved(context).then(function () {
-            refresh();
+            if (isWebviewPresent('frontifymain')) {
+                frontend.send('refresh');
+            }
         });
     });
 }
@@ -113,75 +119,112 @@ function activeDocumentDidChange() {
  * ----------------------------------------------------------------------------
  */
 
-export function selectionChangedCommand(context) {
-    frontend.send('selection-changed');
-    if (activeDocumentDidChange()) refresh();
-}
-
-export function documentChangedCommand(context) {
-    var changes = context.actionContext;
-    for (var i = 0; i < changes.length; i++) {
-        var change = changes[i];
-        var obj = change.object();
-        let layer = sketch.fromNative(obj);
-        if (layer) {
-            let artboard = layer.type == 'Artboard' ? layer : layer.getParentArtboard();
-
-            if (artboard) {
-                Settings.setLayerSettingForKey(artboard, 'dirty', true);
-            }
+function getSelectedArtboardsAndSymbolsFromDocument(nativeDocument) {
+    let layers = nativeDocument.selectedLayers();
+    let artboardsAndSymbols = [];
+    for (var i = 0; i < layers.count(); i++) {
+        let layer = layers[i];
+        let type = String(layer.class());
+        if (type == 'MSArtboardGroup' || type == 'MSSymbolMaster') {
+            artboardsAndSymbols.push(layer);
         }
     }
+    return artboardsAndSymbols;
+}
+
+export function artboardChangedFinishCommand(context) {
+    // Return early to not degrade performance when the plugin isn’t running, but the action handler is still called
+    if (!isWebviewPresent('frontifymain')) return;
+    profiler.start('selection changed');
+
+    let items = getSelectedArtboardsAndSymbolsFromDocument(context.actionContext.document);
+
+    let ids = [];
+    for (var i = 0; i < items.length; i++) {
+        ids.push(String(items[i].objectID()));
+    }
+
+    frontend.send('artboard-selection-changed', { selection: ids, count: items.length });
+
+    if (activeDocumentDidChange()) {
+        refresh();
+    }
+    profiler.end();
 }
 
 /**
- * Artboard changed
- * ----------------------------------------------------------------------------
+ *
+ * Extracts indices for page and artboard from "internalFullPath" from a "documentChanged" command
+ * e.g. pages[0].layers[1].exportOptions.exportFormats
+ *
+ * @param {*} internalFullPath
+ * @returns Object {page: 0, artboard: 1}
  */
+function getIndicesFromPath(internalFullPath) {
+    let parts = internalFullPath.split('.');
+    let page = parseInt(parts[0].replace('pages[', '').replace(']', ''));
+    let artboard = parseInt(parts[1].replace('layers[', '').replace(']', ''));
+    return {
+        page,
+        artboard,
+    };
+}
 
-export function artboardChangedCommand(context) {
-    let newArtboard = sketch.fromNative(context.actionContext.newArtboard);
+// function markDocumentAsDirtyAfterDocumentChange() {
+//     let document = sketch.getSelectedDocument();
+//     let isDocumentDirty = Settings.documentSettingForKey(document, 'dirty');
+//     if (!isDocumentDirty) {
+//         Source.saved(context);
+//         frontend.fire('getCurrentDocument');
+//     }
+// }
 
-    let threshold = 1000;
+export function documentChangedCommand(context) {
+    // Return early to not degrade performance when the plugin isn’t running, but the action handler is still called
+    if (!isWebviewPresent('frontifymain')) return;
+    profiler.start('documentChangedCommand');
+    var changes = context.actionContext;
+    let shouldRefresh = false;
+    for (var i = 0; i < changes.length; i++) {
+        var change = changes[i];
+        var obj = change.object();
 
-    /**
-     * We’re throttling this action to improve performance. Otherwise, quickly selecting artboards over
-     * and over again could slow down the application.
-     *
-     * # Problem: clearTimeout() not available…
-     *
-     * There’s not really a way (or is it?) to cancel timeouts in Sketch because the previous JavaScript
-     * context is lost when a command runs. That means, we do not have a reference to the timeout anymore.
-     *
-     * That means that the callback of the timeout will in fact always fire.
-     * To prevent the effects of the timeout to run (expensive!), we check if it is the most recent callback
-     * and only then execute the callback and do the expensive calculations.
-     *
-     * # Implementation using UUIDs for every action run
-     *
-     * We’re generating a UUID every time this action runs. We then store it as a session variable.
-     * After the timeout, we can then compare the UUID of the callback with the UUID of the most recent action
-     * that is stored as a session variable.
-     *
-     */
-    let keyForMostRecentAction = 'com.frontify.sketch.recent.action.uuid';
-    let recentBrand = 'com.frontify.sketch.recent.brand.id';
+        let layer = null;
+        layer = sketch.fromNative(obj);
 
-    // set uuid
-    let actionUUID = '' + NSUUID.UUID().UUIDString();
-    sketch.Settings.setSessionVariable(keyForMostRecentAction, actionUUID);
-
-    setTimeout(() => {
-        let mostRecentUUID = sketch.Settings.sessionVariable(keyForMostRecentAction);
-        let mostRecentBrandID = sketch.Settings.sessionVariable(recentBrand);
-        if (mostRecentUUID == actionUUID) {
-            executeSafely(context, function () {
-                if (isWebviewPresent('frontifymain')) {
-                    sendSelection(mostRecentBrandID);
-                }
-            });
+        if (!layer.type) {
+            // If a style, opacity, color, override, export option or similar has changed, then
+            // the JS API can’t convert it. It warns "no mapped wrapper for MSExportOptions".
+            // What we still get is the "internalFullPath", a String, from which we can try to
+            // access to actual layer by getting the page and artboard index by splitting the String.
+            let indices = getIndicesFromPath(change.internalFullPath());
+            layer = sketch.getSelectedDocument().pages[indices.page].layers[indices.artboard];
         }
-    }, threshold);
+        let didFlag = flagParentArtboardAsDirty(layer);
+        if (didFlag) {
+            shouldRefresh = true;
+        }
+    }
+    if (shouldRefresh) refresh();
+    profiler.end();
+}
+
+function flagParentArtboardAsDirty(layer) {
+    if (layer) {
+        // we’re using try/catch here because a layer that has been removed won’t have a method "getParentArtboard()"
+        try {
+            let artboard = layer.type == 'Artboard' ? layer : layer.getParentArtboard();
+
+            if (artboard) {
+                let currentState = Settings.layerSettingForKey(artboard, 'dirty');
+                if (currentState == false) {
+                    Settings.setLayerSettingForKey(artboard, 'dirty', true);
+                    return true;
+                }
+            }
+        } catch (error) {}
+    }
+    return false;
 }
 
 /**
@@ -197,7 +240,7 @@ export function refresh() {
     let mostRecentBrandID = sketch.Settings.sessionVariable(recentBrand);
 
     if (isWebviewPresent('frontifymain')) {
-        frontend.send('refresh');
+        // frontend.send('refresh');
     }
 
     sendSelection(mostRecentBrandID);
@@ -209,9 +252,9 @@ export function refresh() {
  */
 
 function sendSelection(brandID) {
-    if (activeDocumentDidChange()) refresh();
+    // if (activeDocumentDidChange()) refresh();
 
-    let payload = getSelectedArtboards(brandID, true);
+    let payload = Artboard.getTrackedArtboardsAndSymbols(brandID, true);
 
     frontend.send('artboards-changed', payload);
 }

@@ -63,9 +63,10 @@ export function OpenDocumentsView() {
                                   </div>
 
                                   <div
-                                      onClick={() => {
-                                          context.actions.openSource(source);
-                                          navigate('/source/artboards');
+                                      onClick={async () => {
+                                          context.actions.openSource(source).then(() => {
+                                              navigate('/source/artboards');
+                                          });
                                       }}
                                   >
                                       <custom-v-stack key={source.id} style={{ pointerEvents: 'none' }}>

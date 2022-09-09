@@ -309,8 +309,8 @@ export function SourceAction({ status, actions, loading, interactive = true }) {
                         />
                     }
                 >
-                    <custom-v-stack stretch>
-                        <custom-v-stack padding="large" gap="large">
+                    <custom-v-stack stretch overflow="hidden">
+                        <custom-v-stack padding="large" gap="large" overflow="auto">
                             <custom-h-stack align-items="center" gap="small">
                                 <IconAlert size="Size32"></IconAlert>
                                 <Text size="large" weight="strong">
@@ -381,6 +381,7 @@ export function SourceAction({ status, actions, loading, interactive = true }) {
                                 <Text color="interactive">{t('sources.resolve_conflict_link_title')}</Text>
                             </a>
                         </custom-v-stack>
+                        <custom-spacer></custom-spacer>
                         <custom-v-stack separator="top" padding="large">
                             <Button
                                 style="Secondary"

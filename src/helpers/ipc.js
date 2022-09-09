@@ -15,15 +15,12 @@ export const frontend = {
     },
     on(type, callback) {
         this.listeners[type] = async (args) => {
-            // console.log('⚡️ Frontend request', type, args);
             try {
-                profiler.start(type + '(' + args.requestUUID + ')');
+                profiler.start(type + '(' + args?.requestUUID + ')');
                 let response = await callback(args);
                 profiler.end();
 
-                if (args.requestUUID) {
-                    this.send('response', { type, responseUUID: args.requestUUID, success: true, ...response });
-                }
+                this.send('response', { type, responseUUID: args?.requestUUID, success: true, ...response });
             } catch (error) {
                 this.send('response', { type, responseUUID: args.requestUUID, success: false, error: error });
 

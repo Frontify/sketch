@@ -27,6 +27,7 @@ export const UserContextProvider = ({ children }) => {
             domain: '',
             token: '',
         },
+        blocked: false,
         brands: [],
         colorMap: {},
         colorPalettes: [],
@@ -34,6 +35,7 @@ export const UserContextProvider = ({ children }) => {
         debug: false,
         guidelines: [],
         lastFetched: null,
+        log: [],
         recentDocuments: [],
         sources: [],
         selection: {
@@ -54,6 +56,9 @@ export const UserContextProvider = ({ children }) => {
     // Debug
     const [debug, setDebug] = useState(blueprints.debug);
 
+    // Log
+    const [log, setLog] = useState(blueprints.log);
+
     // Tick
     let [tick, setTick] = useState(0);
 
@@ -63,7 +68,18 @@ export const UserContextProvider = ({ children }) => {
     // Refreshing
     let [refreshing, setRefreshing] = useState(false);
 
+    // Blocked
+    let [blocked, setBlocked] = useState(false);
+
     useEffect(() => {
+        // Prevent "enter" key to make it through to Sketch
+        // This is necessary so that the selection doesn’t change when a new folder is created …
+        window.addEventListener('keypress', (event) => {
+            event.stopPropagation();
+            if (event.keyCode == 13) {
+                event.preventDefault();
+            }
+        });
         let handler = (event) => {
             let { type, payload } = event.detail.data;
 
@@ -73,6 +89,9 @@ export const UserContextProvider = ({ children }) => {
             let id = payload?.id || payload?.id_external;
 
             switch (type) {
+                case 'log':
+                    setLog((state) => [payload, ...state]);
+                    break;
                 case 'error':
                     actions.handleError({
                         title: 'Plugin Error',
@@ -82,8 +101,19 @@ export const UserContextProvider = ({ children }) => {
                 case 'tick':
                     setTick(payload.value);
                     break;
+
                 case 'progress':
                     switch (payload.status) {
+                        case 'exporting':
+                            setTransferMap((state) => {
+                                return { ...state, [id]: payload };
+                            });
+                            break;
+                        case 'skipping-upload':
+                            setTransferMap((state) => {
+                                return { ...state, [id]: payload };
+                            });
+                            break;
                         case 'upload-failed':
                             setTransferMap((state) => {
                                 // Remove the entry from transferMap
@@ -112,6 +142,13 @@ export const UserContextProvider = ({ children }) => {
                             });
                     }
 
+                    break;
+                case 'source-downloaded':
+                    setTransferMap((state) => {
+                        // Remove the entry from transferMap
+                        delete state[payload.source.id];
+                        return { ...state };
+                    });
                     break;
                 case 'current-document.changed':
                     break;
@@ -484,6 +521,7 @@ export const UserContextProvider = ({ children }) => {
         actions,
         activeLibrary,
         auth,
+        blocked,
         brands,
         colorMap,
         colorPalettes,
@@ -493,10 +531,12 @@ export const UserContextProvider = ({ children }) => {
         errors,
         guidelines,
         lastFetched,
+        log,
         refreshing,
         recentDocuments,
         selection,
         setActiveLibrary,
+        setBlocked,
         sources,
         textStylePalettes,
         tick,

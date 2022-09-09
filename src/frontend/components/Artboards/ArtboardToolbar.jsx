@@ -246,7 +246,7 @@ function ArtboardToolbar({
                                             </Button>
                                             <Button
                                                 disabled={
-                                                    temporaryUploadDestination == null || !uploadDestination.files
+                                                    temporaryUploadDestination == null || !uploadDestination?.files
                                                 }
                                                 onClick={() => {
                                                     setShowDestinationPicker(false);

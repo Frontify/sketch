@@ -52,7 +52,18 @@ class Source {
     }
 
     openSourceAtPath(path) {
-        return FileManager.openFile(path);
+        return new Promise((resolve, reject) => {
+            Document.open(path, (err, document) => {
+                if (err) {
+                    // oh no, we failed to open the document
+                    reject();
+                }
+                // resolve with the document
+                resolve(document);
+            });
+        });
+
+        // return FileManager.openFile(path);
     }
 
     opened() {
@@ -366,6 +377,8 @@ class Source {
 
             frontend.send('document-pulled');
 
+            frontend.send('refresh');
+
             return { result };
         }
     }
@@ -415,10 +428,10 @@ class Source {
         });
     }
 
-    async openSketchFile(path) {
+    openSketchFile(path) {
         let fileToOpen = path;
 
-        let doc = await new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             try {
                 Document.open(fileToOpen, function (err, document) {
                     if (err) {
@@ -432,8 +445,6 @@ class Source {
                 reject(error);
             }
         });
-
-        return doc;
     }
 
     pushSource(source, target) {

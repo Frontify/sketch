@@ -41,62 +41,20 @@ import { queryGraphQLWithAuth } from '../../graphql/graphql';
 import { timeAgo } from '../utils.js';
 
 /**
- * ⚛️ Artboard Item
- * ----------------------------------------------------------------------------
- */
-export function ArtboardItem({ artboard, showPath = true, requestArtboards, uploadArtboards }) {
-    return (
-        <custom-v-stack>
-            <custom-h-stack gap="small" flex padding="small">
-                <custom-v-stack flex>
-                    <custom-h-stack align-items="center">
-                        <custom-v-stack>
-                            <Text>
-                                <strong>{artboard.name}</strong>
-                                <span>.png</span>
-                            </Text>
-                        </custom-v-stack>
-                    </custom-h-stack>
-
-                    {showPath ? (
-                        <custom-h-stack align-items="center" flex gap="x-small">
-                            {!artboard.destinations.length ? (
-                                <custom-h-stack flex>
-                                    <Text color="weak">Untracked</Text>
-                                    <custom-spacer></custom-spacer>
-                                    <Badge style="Progress" icon={<IconAddSimple></IconAddSimple>}></Badge>
-                                </custom-h-stack>
-                            ) : (
-                                <custom-v-stack flex>
-                                    {artboard.destinations.map((destination, index) => {
-                                        return (
-                                            <ArtboardDestinationItem
-                                                artboard={artboard}
-                                                destination={destination}
-                                                key={destination.remote_id}
-                                                requestArtboards={requestArtboards}
-                                                uploadArtboards={uploadArtboards}
-                                            ></ArtboardDestinationItem>
-                                        );
-                                    })}
-                                </custom-v-stack>
-                            )}
-                        </custom-h-stack>
-                    ) : (
-                        ''
-                    )}
-                </custom-v-stack>
-            </custom-h-stack>
-        </custom-v-stack>
-    );
-}
-
-/**
  * ⚛️ Artboard Group Item
  * ----------------------------------------------------------------------------
  */
 
-function ArtboardGroupItem({ group, uploadGroup, open, onOpen, onClose, requestArtboards, uploadArtboards }) {
+function ArtboardGroupItem({
+    group,
+    uploadGroup,
+    open,
+    onOpen,
+    onClose,
+    requestArtboards,
+    selection,
+    uploadArtboards,
+}) {
     return (
         <custom-v-stack>
             <custom-h-stack gap="x-small" align-items="center" style={{ marginLeft: '16px' }} padding="xx-small">
@@ -186,6 +144,7 @@ function ArtboardGroupItem({ group, uploadGroup, open, onOpen, onClose, requestA
                                           display="artboard"
                                           destination={destination}
                                           key={destination.remote_id}
+                                          highlighted={selection.includes(artboard.id)}
                                           requestArtboards={requestArtboards}
                                           uploadArtboards={uploadArtboards}
                                       ></ArtboardDestinationItem>
@@ -246,6 +205,7 @@ export function ArtboardDestinationStatusIcon({ destination, transfer }) {
 export function ArtboardDestinationItem({
     artboard,
     destination,
+    highlighted,
     display = 'path',
     requestArtboards,
     uploadArtboards,
@@ -269,7 +229,7 @@ export function ArtboardDestinationItem({
     const frontifyUrl = `${base}/screens/${destination.remote_id}`;
 
     return (
-        <custom-palette-item gap="x-small">
+        <custom-palette-item gap="x-small" highlighted={highlighted}>
             <custom-h-stack
                 gap="small"
                 align-items="center"
@@ -291,9 +251,16 @@ export function ArtboardDestinationItem({
                     {destination.api?.previewUrl && <img src={`${destination.api?.previewUrl}?width=96`} alt="" />}
                 </custom-artboard-thumbnail>
 
-                <custom-v-stack gap="xx-small">
-                    <custom-h-stack align-items="center" gap="x-small">
+                <custom-v-stack gap="xx-small" style={{ overflow: 'hidden' }}>
+                    <custom-h-stack
+                        align-items="center"
+                        gap="x-small"
+                        style={{ overflow: 'hidden' }}
+                        title={artboard.name}
+                    >
                         <Text
+                            whitespace="nowrap"
+                            overflow="ellipsis"
                             color={destination.selected ? '' : '    '}
                             weight={
                                 destination.selected && transfer?.status != 'upload-complete' ? 'strong' : 'default'
@@ -301,20 +268,30 @@ export function ArtboardDestinationItem({
                         >
                             {artboard.name}
                         </Text>
-                        {/* <div show-on-hover="true" cursor="pointer">
-                            <IconExternalLink
-                                title={t('artboards.view_on_frontify')}
-                                onClick={() => openExternal(frontifyUrl)}
-                            />
-                        </div> */}
                     </custom-h-stack>
                     <Text
                         size="small"
                         color={destination.selected ? '' : 'weak'}
                         weight={destination.selected && transfer?.status != 'upload-complete' ? 'strong' : 'default'}
                     >
-                        {/* {new Date(destination.api?.modifiedAt).toLocaleString()} */}
-                        {transfer?.status != 'upload-failed' && timeAgo(new Date(destination.api?.modifiedAt))}
+                        <span> </span>
+                        {transfer?.status != 'upload-failed' &&
+                            (transfer?.status ? (
+                                <span>{t(`artboards.${transfer?.status}`)} …</span>
+                            ) : (
+                                <span>
+                                    {destination.api ? (
+                                        timeAgo(new Date(destination.api?.modifiedAt))
+                                    ) : destination.remote_id ? (
+                                        <span>Fetching …</span>
+                                    ) : (
+                                        <custom-h-stack gap="xx-small">
+                                            <IconAlert></IconAlert>
+                                            <span>Upload failed</span>
+                                        </custom-h-stack>
+                                    )}
+                                </span>
+                            ))}
                     </Text>
                     {transfer?.status == 'upload-failed' && transfer?.error && (
                         <Tooltip
@@ -342,14 +319,18 @@ export function ArtboardDestinationItem({
 
                 <custom-spacer></custom-spacer>
 
-                <custom-h-stack align-items="center">
-                    {destination.selected && !transfer && (
+                <custom-h-stack
+                    align-items="center"
+                    style={{ flexShrink: 0, marginRight: '-4px' }}
+                    show-on-hover={!destination.selected}
+                >
+                    {!transfer && (
                         <Button
                             style="Secondary"
                             icon={
                                 <IconUploadAlternative
                                     size="Size20"
-                                    style={{ color: 'var(--box-selected-strong-color)' }}
+                                    style={{ color: destination.selected ? 'var(--box-selected-strong-color)' : '' }}
                                 />
                             }
                             inverted={false}
@@ -360,6 +341,7 @@ export function ArtboardDestinationItem({
                             }}
                         ></Button>
                     )}
+
                     {transfer && transfer.status == 'upload-failed' && (
                         <Tooltip
                             content={t('general.retry')}
@@ -555,9 +537,11 @@ export function ArtboardsView() {
     const [loading, setLoading] = useState(false);
     const [modifiedArtboards, setModifiedArtboards] = useState([]);
     const [open, setOpen] = useState(false);
+    const [selection, setSelection] = useState([]);
+    const [previousSelection, setPreviousSelection] = useState([]);
     const [showRecentDestinations, setShowRecentDestinations] = useState(false);
     const [showDestinationPicker, setShowDestinationPicker] = useState(false);
-    const [total, setTotal] = useState(0);
+
     const [usedFolders, setUsedFolders] = useState(new Map());
     const [uploadStatus, setUploadStatus] = useState({});
 
@@ -654,11 +638,11 @@ export function ArtboardsView() {
     };
 
     const requestArtboards = async () => {
-        let response = await useSketch('getSelectedArtboards', { brandID: context.selection.brand.id });
+        let response = await useSketch('getTrackedArtboardsAndSymbols', { brandID: context.selection.brand.id });
 
         setArtboards(response.artboards);
         setDocumentArtboards(response.documentArtboards);
-        setTotal(response.total);
+
         setHasSelection(response.hasSelection);
     };
 
@@ -852,10 +836,6 @@ export function ArtboardsView() {
         if (documentArtboards.length) fetchArtboardsFromAPI(documentArtboards);
     }, [documentArtboards]);
 
-    const findExistingAsset = (artboard, uploadDestination) => {
-        return uploadDestination.files.find((file) => file.name.replace('.png', '') == artboard.name);
-    };
-
     /**
      * This function overrides any existing destinations
      */
@@ -874,84 +854,10 @@ export function ArtboardsView() {
             uploadDestination.files = legacy.files;
         }
 
-        let patchedArtboards = artboards.map((artboard) => {
-            /**
-             * 2 possible scenarios:
-             *
-             * A) The artboard has no existing destinations:
-             *      -> add the new destination
-             * B) The artboard has existing destinations:
-             *      && the "remote_project_id" and the "remote_path" are:
-             *          -> same: return
-             *          -> different: replace the existing destinations with the new destination
-             */
-
-            // Replace artboard if it has the same name
-
-            let existingAsset = findExistingAsset(artboard, uploadDestination);
-
-            let remote_id = existingAsset ? existingAsset.id : null;
-
-            let newDestination = {
-                remote_project_id: uploadDestination.project.id,
-                remote_id: remote_id,
-                remote_folder_id: uploadDestination.folder.id,
-                remote_path: `/${uploadDestination.folderPath}/`,
-            };
-            // force override, because another artboard with that name already exists remotely
-            if (remote_id) {
-                artboard.destinations = [newDestination];
-            }
-
-            // By default, we assign a single new destination.
-            // But in case that we find an existing destination, we’ll use the original destinations.
-            let patchedDestinations = [newDestination];
-            let existingDestinations = artboard.destinations.length > 0;
-
-            if (existingDestinations) {
-                // Compare
-                let match = false;
-                artboard.destinations.forEach((destination) => {
-                    let sameProject = destination.remote_project_id == uploadDestination.project.id;
-                    let samePath = destination.remote_path == `/${uploadDestination.folderPath}/`;
-                    if (sameProject && samePath) {
-                        // keep it
-                        match = true;
-                        return;
-                    }
-                });
-
-                /**
-                 * If the location already exists, then we keep it -> this will replace the asset
-                 */
-
-                if (match) patchedDestinations = artboard.destinations;
-
-                if (!match) {
-                    /**
-                     * In theory, we could just push the new destination
-                     * This would result in *multiple* destinations.
-                     * The asset would be uploaded to one or more folders.
-                     *
-                     * NOTE: We don’t support multiple destinations right now.
-                     * There are a few open UX questions to be answered and
-                     * it makes everything more complex. The data structure supports it
-                     * (destinations is an Array) and the upload also works.
-                     * The grouping doesn’t work correctly, as the asset will be
-                     * displayed mutiple times per group.
-                     */
-                    // patchedDestinations.push(...artboard.destinations);
-                }
-            }
-
-            return {
-                ...artboard,
-                destinations: patchedDestinations,
-            };
+        useSketch('uploadSelectedArtboards', {
+            destination: uploadDestination,
+            brandID: context.selection.brand.id,
         });
-
-        uploadArtboards(patchedArtboards);
-        requestArtboards();
     };
 
     /**
@@ -991,12 +897,11 @@ export function ArtboardsView() {
     };
 
     useEffect(async () => {
-        let response = await useSketch('getSelectedArtboards', { brandID: context.selection.brand.id });
+        let response = await useSketch('getTrackedArtboardsAndSymbols', { brandID: context.selection.brand.id });
 
         setArtboards(response.artboards);
         setDocumentArtboards(response.documentArtboards);
 
-        setTotal(response.total);
         setHasSelection(response.hasSelection);
     }, []);
 
@@ -1008,7 +913,7 @@ export function ArtboardsView() {
 
         artboards.forEach((artboard) => {
             artboard.destinations.forEach((destination) => {
-                ids.push(destination.remote_id);
+                if (destination.remote_id) ids.push(destination.remote_id);
             });
         });
 
@@ -1020,6 +925,7 @@ export function ArtboardsView() {
 
         if (ids && ids.length) {
             let query = assetsQuery({ ids });
+
             let result = await queryGraphQLWithAuth({ query, auth: context.auth });
 
             result.data.assets.forEach((entry, index) => {
@@ -1039,6 +945,15 @@ export function ArtboardsView() {
             let { type, payload } = event.detail.data;
 
             switch (type) {
+                case 'artboard-selection-changed':
+                    setHasSelection(payload.count > 0);
+
+                    setSelection((state) => {
+                        setPreviousSelection(state);
+                        return payload.selection;
+                    });
+
+                    break;
                 case 'artboards-changed':
                     setShowDestinationPicker(false);
                     setShowRecentDestinations(false);
@@ -1049,7 +964,7 @@ export function ArtboardsView() {
                     // setArtboards(payload.artboards);
                     setArtboards(payload.artboards);
                     setDocumentArtboards(payload.documentArtboards);
-                    setTotal(payload.total);
+
                     setHasSelection(payload.hasSelection);
 
                     // fetchArtboardsFromAPI(payload.documentArtboards);
@@ -1087,6 +1002,7 @@ export function ArtboardsView() {
                                             open={groupsMap[group.key] ? groupsMap[group.key]?.open : true}
                                             group={group}
                                             requestArtboards={requestArtboards}
+                                            selection={selection}
                                             uploadGroup={uploadGroup}
                                             uploadArtboards={uploadArtboards}
                                         ></ArtboardGroupItem>

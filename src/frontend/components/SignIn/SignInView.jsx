@@ -96,7 +96,7 @@ export function SignInView() {
                                 setDomain(event.target.value);
                                 handleSignIn(event.target.value);
                             }}
-                            spellcheck={false}
+                            spellCheck={false}
                             type="email"
                             placeholder={placeholders.domain}
                             value={domain}

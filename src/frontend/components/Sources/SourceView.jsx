@@ -45,7 +45,7 @@ export function SourceView() {
 
     if (context.user?.name) {
         return (
-            <custom-v-stack stretch padding-top="small">
+            <custom-v-stack stretch padding-top="small" blocked={context.blocked}>
                 {/* <Toolbar></Toolbar> */}
                 <NavigationBar></NavigationBar>
 

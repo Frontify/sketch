@@ -15,10 +15,15 @@ import FileManager from './FileManager';
 import { isWebviewPresent } from 'sketch-module-web-view/remote';
 import { frontend } from '../helpers/ipc';
 
-import { patchDestinations, setSHA } from '../windows/actions';
-
 // Error
 import { Error } from './error';
+
+// Profiler
+import { Profiler } from './Profiler';
+const profiler = new Profiler();
+
+const SHA_KEY = 'com.frontify.artboard.sha';
+const DESTINATION_KEY = 'com.frontify.artboard.destinations';
 
 class Artboard {
     constructor() {
@@ -30,47 +35,48 @@ class Artboard {
         this.uploadInProgress = false;
     }
 
+    skipUpload(options, progress) {
+        frontend.send('progress', {
+            state: 'skipping-upload',
+            status: 'skipping-upload',
+            progress: progress.fractionCompleted() * 100,
+            ...options,
+        });
+    }
+
     updateProgress(options, progress) {
-        if (isWebviewPresent('frontifymain')) {
-            frontend.send('progress', {
-                state: 'uploading',
-                status: 'uploading',
-                progress: progress.fractionCompleted() * 100,
-                ...options,
-            });
-        }
+        frontend.send('progress', {
+            state: 'uploading',
+            status: 'uploading',
+            progress: progress.fractionCompleted() * 100,
+            ...options,
+        });
     }
     finishUpload(options) {
-        if (isWebviewPresent('frontifymain')) {
-            frontend.send('progress', {
-                state: 'upload-complete',
-                status: 'upload-complete',
-                progress: 100,
-                ...options,
-            });
-        }
+        frontend.send('progress', {
+            state: 'upload-complete',
+            status: 'upload-complete',
+            progress: 100,
+            ...options,
+        });
     }
     failUpload(options, error) {
-        if (isWebviewPresent('frontifymain')) {
-            frontend.send('progress', {
-                state: 'upload-failed',
-                status: 'upload-failed',
-                progress: 0,
-                error,
-                ...options,
-            });
-        }
+        frontend.send('progress', {
+            state: 'upload-failed',
+            status: 'upload-failed',
+            progress: 0,
+            error,
+            ...options,
+        });
     }
 
     queueUpload(options) {
-        if (isWebviewPresent('frontifymain')) {
-            frontend.send('progress', {
-                state: 'upload-queued',
-                status: 'upload-queued',
-                progress: 0,
-                ...options,
-            });
-        }
+        frontend.send('progress', {
+            state: 'upload-queued',
+            status: 'upload-queued',
+            progress: 0,
+            ...options,
+        });
     }
 
     getArtboards(skipRemote) {
@@ -529,7 +535,7 @@ class Artboard {
         return files;
     }
 
-    uploadArtboards(artboards, brandID) {
+    uploadArtboards(artboards, brandID, force = false) {
         // sequence artboard export and upload
 
         this.uploadInProgress = true;
@@ -549,6 +555,12 @@ class Artboard {
                     return sequence
                         .then(
                             function () {
+                                frontend.send('progress', {
+                                    state: 'exporting',
+                                    status: 'exporting',
+                                    progress: 23,
+                                    ...artboard,
+                                });
                                 return this.exportArtboard(artboard, doc);
                             }.bind(this)
                         )
@@ -587,8 +599,9 @@ class Artboard {
                                                             // If it has changes, the dirty flag will be true
                                                             // If it has never been uploaded, the id will be null
                                                             let proceed = artboard.dirty || !artboard.id;
+                                                            let newAsset = !artboard.id;
 
-                                                            if (proceed && artboardDidChange) {
+                                                            if (force || newAsset || (proceed && artboardDidChange)) {
                                                                 artboardChanged = true;
 
                                                                 return FileManager.uploadFile(
@@ -624,7 +637,7 @@ class Artboard {
                                                                                 // for: artboard.id,
                                                                             };
 
-                                                                            patchDestinations(
+                                                                            this.patchDestinations(
                                                                                 file.id_external,
                                                                                 destination
                                                                             );
@@ -632,8 +645,9 @@ class Artboard {
                                                                             let artboardLayer = sketch.find(
                                                                                 `[id="${artboard.id_external}"]`
                                                                             )[0];
+
                                                                             if (artboardLayer) {
-                                                                                setSHA(
+                                                                                this.setSHA(
                                                                                     artboardLayer,
                                                                                     shaFile(file.path)
                                                                                 );
@@ -670,7 +684,9 @@ class Artboard {
                                                                 artboardProgress.setCompletedUnitCount(
                                                                     artboardProgress.completedUnitCount() + 10
                                                                 );
-                                                                this.updateProgress(artboard, artboardProgress);
+
+                                                                this.skipUpload(artboard, artboardProgress);
+
                                                                 FileManager.deleteFile(file.path);
                                                                 artboard.nochanges = true;
                                                                 return artboard.id;
@@ -736,7 +752,7 @@ class Artboard {
                                                                 artboardProgress.setCompletedUnitCount(
                                                                     artboardProgress.completedUnitCount() + 10
                                                                 );
-                                                                this.updateProgress(artboard, artboardProgress);
+                                                                this.skipUpload(artboard, artboardProgress);
                                                                 return assetId;
                                                             }
                                                         }
@@ -774,7 +790,9 @@ class Artboard {
                                             clearInterval(polling);
                                             if (isWebviewPresent('frontifymain')) {
                                                 // mark artboard as clean
+
                                                 let artboardLayer = sketch.find(`[id="${artboard.id_external}"]`)[0];
+
                                                 if (artboardLayer) {
                                                     Settings.setLayerSettingForKey(artboardLayer, 'dirty', false);
                                                 }
@@ -787,7 +805,6 @@ class Artboard {
                                         function (error) {
                                             clearInterval(polling);
                                             if (isWebviewPresent('frontifymain')) {
-                                                console.log('fail upload', error);
                                                 this.failUpload(artboard, error);
                                             }
                                             throw error;
@@ -848,6 +865,368 @@ class Artboard {
         }
 
         return scale;
+    }
+
+    patchDestinations(artboardID, destination) {
+        let layer = sketch.find(`[id="${artboardID}"]`)[0];
+        let destinations = Settings.layerSettingForKey(layer, DESTINATION_KEY);
+        let patchedDestinations = destinations.map((original) => {
+            if (
+                original.remote_project_id == destination.remote_project_id &&
+                original.remote_path == destination.remote_path
+            ) {
+                // Patch
+
+                return destination;
+            } else {
+                return original;
+            }
+        });
+
+        Settings.setLayerSettingForKey(layer, DESTINATION_KEY, patchedDestinations);
+    }
+
+    removeDestinations(artboard) {
+        let layer = sketch.find(`[id="${artboard.id}"]`)[0];
+        Settings.setLayerSettingForKey(layer, DESTINATION_KEY, []);
+    }
+
+    removeDestination(artboard, destination) {
+        let layer = sketch.find(`[id="${artboard.id}"]`)[0];
+        let destinations = Settings.layerSettingForKey(layer, DESTINATION_KEY);
+        let patchedDestinations = destinations.filter((original) => {
+            if (
+                original.remote_project_id == destination.remote_project_id &&
+                original.remote_path == destination.remote_path
+            ) {
+                // Remove it if it exist
+                return false;
+            } else {
+                // Keep it
+                return true;
+            }
+        });
+        Settings.setLayerSettingForKey(layer, DESTINATION_KEY, patchedDestinations);
+    }
+
+    setDestinations(artboard, brandID) {
+        let destinations = artboard.destinations;
+        destinations = destinations.map((destination) => {
+            return {
+                ...destination,
+                for: artboard.id,
+                remote_brand_id: destination.remote_brand_id ? destination.remote_brand_id : brandID,
+            };
+        });
+
+        let layer = sketch.find(`[id="${artboard.id}"]`)[0];
+        Settings.setLayerSettingForKey(layer, DESTINATION_KEY, destinations);
+    }
+
+    shaForArtboard(artboard) {
+        let layer = sketch.find(`[id="${artboard.id}"]`)[0];
+
+        return this.shaForLayer(layer);
+    }
+
+    shaForLayer(layer) {
+        return Settings.layerSettingForKey(layer, SHA_KEY);
+    }
+
+    hasDestinations(artboard) {
+        let destinations = Settings.layerSettingForKey(artboard, DESTINATION_KEY) || [];
+        return destinations.length > 0;
+    }
+
+    setSHA(artboard, sha) {
+        let layer = sketch.find(`[id="${artboard.id}"]`)[0];
+        Settings.setLayerSettingForKey(layer, SHA_KEY, sha);
+    }
+
+    getDestinations(artboard, brandID) {
+        let destinations = Settings.layerSettingForKey(artboard, DESTINATION_KEY) || [];
+
+        const invalid = destinations.find((destination) => destination.for != '' + artboard.objectID());
+        if (invalid) {
+            Settings.setLayerSettingForKey(artboard, DESTINATION_KEY, []);
+            return [];
+        }
+
+        const destinationsForBrand = destinations.filter(
+            (destination) => brandID && destination.remote_brand_id == brandID
+        );
+
+        return destinationsForBrand;
+    }
+    /**
+     * readCachedSHA
+     *
+     * This returns the layer setting containing the SHA.
+     * The SHA is computed from the exported artboard .json.
+     * The SHA is then stored on the artboard layer as a layer settting.
+     *
+     * @param { Artboard } artboard
+     * @returns String
+     */
+    readCachedSHA(artboard) {
+        return Settings.layerSettingForKey(artboard, SHA_KEY) || '';
+    }
+    sortedLayersByName(layers) {
+        return layers.sort((a, b) => {
+            return a.name > b.name ? 1 : -1;
+        });
+    }
+    nativeTypeToJavaScriptType(type) {
+        switch (type) {
+            case 'MSArtboardGroup':
+                return 'Artboard';
+            case 'MSSymbolMaster':
+                return 'Symbol';
+        }
+    }
+
+    wrapped(layer, brandID) {
+        return {
+            sha: Settings.layerSettingForKey(layer, SHA_KEY),
+            dirty: Settings.layerSettingForKey(layer, 'dirty'),
+            type: this.nativeTypeToJavaScriptType(String(layer.class())),
+            name: layer.name().replace(/\s*\/\s*/g, '/'),
+            id: '' + layer.objectID(),
+            destinations: this.getDestinations(layer, brandID),
+        };
+    }
+    getSelectedArtboardsAndSymbols(brandID) {
+        profiler.start('get selected items fast');
+
+        let nativeSketchDocument = NSDocumentController.sharedDocumentController().currentDocument();
+
+        if (!nativeSketchDocument) return;
+
+        const allLayers = nativeSketchDocument.valueForKeyPath('pages.@distinctUnionOfArrays.children');
+
+        const predicate = NSPredicate.predicateWithFormat(
+            'isSelected == true AND (className = %@ OR className = %@)',
+            'MSArtboardGroup',
+            'MSSymbolMaster'
+        );
+
+        const allArtboardsAndSymbols = allLayers.filteredArrayUsingPredicate(predicate);
+
+        let collection = [];
+        const loop = allArtboardsAndSymbols.objectEnumerator();
+        let layer;
+        while ((layer = loop.nextObject())) {
+            collection.push(this.wrapped(layer, brandID));
+        }
+
+        profiler.end();
+    }
+    emptyResult() {
+        return {
+            artboards: [],
+            total: 0,
+            selection: [],
+            success: true,
+            documentArtboards: [],
+        };
+    }
+    getAllArtboardsAndSymbols(brandID) {
+        // It is possible that a file is managed with different accounts using the plugin.
+        // The layer settings are specific to the currently active brand.
+        if (brandID) {
+            Settings.setSessionVariable('com.frontify.sketch.recent.brand.id', '' + brandID);
+        }
+
+        profiler.start('get all artboards and symbols');
+
+        try {
+            // We’re using the native Sketch document for performance reasons.
+            // This allows us to use NSPredicate to get a list of all layers much faster than using
+            // the JavaScript API.
+            let nativeSketchDocument =
+                NSDocumentController.sharedDocumentController().currentDocument() ||
+                sketch.getSelectedDocument().sketchObject;
+
+            // Early return if there’s no document
+            if (!nativeSketchDocument) return [];
+
+            // Setup NSPredicate. Look for Artboards and Symbols.
+            const allLayers = nativeSketchDocument.valueForKeyPath('pages.@distinctUnionOfArrays.children');
+            const predicate = NSPredicate.predicateWithFormat(
+                'className = %@ OR className = %@',
+                'MSArtboardGroup',
+                'MSSymbolMaster'
+            );
+            const allArtboardsAndSymbols = allLayers.filteredArrayUsingPredicate(predicate);
+
+            // Loop through the result and populate the arrays:
+            // 1. All tracked artboards and symbols
+            // 2. Selected artboards and symbols
+            const loop = allArtboardsAndSymbols.objectEnumerator();
+            let all = [];
+            let layer;
+            while ((layer = loop.nextObject())) {
+                all.push(this.wrapped(layer, brandID));
+            }
+
+            // Sort the arrays by name
+            let result = this.sortedLayersByName(all);
+
+            profiler.end();
+
+            return result;
+        } catch (error) {
+            console.error(error);
+            return { success: false };
+        }
+    }
+    getTrackedArtboardsAndSymbols(brandID) {
+        // It is possible that a file is managed with different accounts using the plugin.
+        // The layer settings are specific to the currently active brand.
+        if (brandID) {
+            Settings.setSessionVariable('com.frontify.sketch.recent.brand.id', '' + brandID);
+        }
+
+        profiler.start('get all artboards and selected');
+
+        try {
+            // We’re using the native Sketch document for performance reasons.
+            // This allows us to use NSPredicate to get a list of all layers much faster than using
+            // the JavaScript API.
+            let nativeSketchDocument =
+                NSDocumentController.sharedDocumentController().currentDocument() ||
+                sketch.getSelectedDocument().sketchObject;
+
+            // Early return if there’s no document
+            if (!nativeSketchDocument) return this.emptyResult();
+
+            let trackedArtboardsAndSymbols = [];
+            let selectedArtboardsAndSymbols = [];
+
+            // Setup NSPredicate. Look for Artboards and Symbols.
+            const allLayers = nativeSketchDocument.valueForKeyPath('pages.@distinctUnionOfArrays.children');
+            const predicate = NSPredicate.predicateWithFormat(
+                'className = %@ OR className = %@',
+                'MSArtboardGroup',
+                'MSSymbolMaster'
+            );
+            const allArtboardsAndSymbols = allLayers.filteredArrayUsingPredicate(predicate);
+
+            // Loop through the result and populate the arrays:
+            // 1. All tracked artboards and symbols
+            // 2. Selected artboards and symbols
+            const loop = allArtboardsAndSymbols.objectEnumerator();
+            let layer;
+            while ((layer = loop.nextObject())) {
+                if (this.hasDestinations(layer)) {
+                    trackedArtboardsAndSymbols.push(this.wrapped(layer, brandID));
+                }
+
+                if (layer.isSelected()) {
+                    selectedArtboardsAndSymbols.push(this.wrapped(layer, brandID));
+                }
+            }
+
+            // Sort the arrays by name
+            let trackedItems = this.sortedLayersByName(trackedArtboardsAndSymbols);
+            let selectedItems = this.sortedLayersByName(selectedArtboardsAndSymbols);
+
+            profiler.end();
+
+            let payload = {
+                artboards: selectedItems.length ? selectedItems : trackedItems,
+                documentArtboards: trackedItems,
+                hasSelection: selectedItems.length > 0,
+                selection: selectedItems,
+                success: true,
+            };
+
+            return payload;
+        } catch (error) {
+            console.error(error);
+            return { success: false };
+        }
+    }
+
+    findExistingAsset(artboard, uploadDestination) {
+        return uploadDestination.files.find((file) => file.name.replace('.png', '') == artboard.name);
+    }
+    overrideDestinations(artboards, uploadDestination) {
+        return artboards.map((artboard) => {
+            /**
+             * 2 possible scenarios:
+             *
+             * A) The artboard has no existing destinations:
+             *      -> add the new destination
+             * B) The artboard has existing destinations:
+             *      && the "remote_project_id" and the "remote_path" are:
+             *          -> same: return
+             *          -> different: replace the existing destinations with the new destination
+             */
+
+            // Replace artboard if it has the same name
+
+            let existingAsset = this.findExistingAsset(artboard, uploadDestination);
+
+            let remote_id = existingAsset ? existingAsset.id : null;
+
+            let newDestination = {
+                remote_project_id: uploadDestination.project.id,
+                remote_id: remote_id,
+                remote_folder_id: uploadDestination.folder.id,
+                remote_path: `/${uploadDestination.folderPath}/`,
+            };
+            // force override, because another artboard with that name already exists remotely
+            if (remote_id) {
+                artboard.destinations = [newDestination];
+            }
+
+            // By default, we assign a single new destination.
+            // But in case that we find an existing destination, we’ll use the original destinations.
+            let patchedDestinations = [newDestination];
+            let existingDestinations = artboard.destinations.length > 0;
+
+            if (existingDestinations) {
+                // Compare
+                let match = false;
+                artboard.destinations.forEach((destination) => {
+                    let sameProject = destination.remote_project_id == uploadDestination.project.id;
+                    let samePath = destination.remote_path == `/${uploadDestination.folderPath}/`;
+                    if (sameProject && samePath) {
+                        // keep it
+                        match = true;
+                        return;
+                    }
+                });
+
+                /**
+                 * If the location already exists, then we keep it -> this will replace the asset
+                 */
+
+                if (match) patchedDestinations = artboard.destinations;
+
+                if (!match) {
+                    /**
+                     * In theory, we could just push the new destination
+                     * This would result in *multiple* destinations.
+                     * The asset would be uploaded to one or more folders.
+                     *
+                     * NOTE: We don’t support multiple destinations right now.
+                     * There are a few open UX questions to be answered and
+                     * it makes everything more complex. The data structure supports it
+                     * (destinations is an Array) and the upload also works.
+                     * The grouping doesn’t work correctly, as the asset will be
+                     * displayed mutiple times per group.
+                     */
+                    // patchedDestinations.push(...artboard.destinations);
+                }
+            }
+
+            return {
+                ...artboard,
+                destinations: patchedDestinations,
+            };
+        });
     }
 }
 

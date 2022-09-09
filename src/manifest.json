@@ -53,7 +53,7 @@
             "script": "./commands/frontify.js",
             "handlers": {
                 "actions": {
-                    "ArtboardChanged.begin": "artboardChangedCommand"
+                    "ArtboardChanged.finish": "artboardChangedFinishCommand"
                 }
             }
         },
@@ -69,6 +69,17 @@
         },
 
         {
+            "name": "Delete",
+            "identifier": "delete",
+            "script": "./commands/frontify.js",
+            "handlers": {
+                "actions": {
+                    "onDelete": "documentChangedCommand"
+                }
+            }
+        },
+
+        {
             "name": "LayerRenamed",
             "identifier": "layer-renamed",
             "script": "./commands/frontify.js",
@@ -79,16 +90,6 @@
             }
         },
 
-        {
-            "name": "SelectionChanged",
-            "identifier": "selection-changed",
-            "script": "./commands/frontify.js",
-            "handlers": {
-                "actions": {
-                    "SelectionChanged.finish": "selectionChangedCommand"
-                }
-            }
-        },
         {
             "name": "StartUp",
             "identifier": "startup",

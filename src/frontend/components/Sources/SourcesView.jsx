@@ -86,18 +86,19 @@ export function SourcesView() {
 
     const openSource = async (document) => {
         setLoading(true);
-        await useSketch('openSource', { path: document.path });
-        await context.actions.refresh();
+        let { success } = await useSketch('openSource', { path: document.path });
+
+        if (success) await context.actions.refresh();
         setLoading(false);
-        redirectToDocument();
+        if (success) redirectToDocument();
     };
 
     const openFile = async (document) => {
         setLoading(true);
-        await useSketch('openSource', { path: document.path.replaceAll('%20', ' ') });
+        let { success } = await useSketch('openSource', { path: document.path.replaceAll('%20', ' ') });
         await context.actions.refresh();
         setLoading(false);
-        redirectToDocument();
+        if (success) redirectToDocument();
     };
 
     /**

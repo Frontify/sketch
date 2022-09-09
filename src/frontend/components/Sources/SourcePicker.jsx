@@ -91,7 +91,34 @@ export function SourcePicker() {
                     <custom-h-stack padding="medium" gap="small" separator="top" align-items="center">
                         {loading ? (
                             <custom-h-stack gap="small" align-items="center">
-                                <LoadingCircle size="Small"></LoadingCircle>
+                                <div style={{ marginRight: '8px' }}>
+                                    <svg
+                                        width="18"
+                                        height="18"
+                                        viewBox="0 0 18 18"
+                                        fill="none"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        style={{ transform: 'rotate(-90deg)' }}
+                                    >
+                                        <circle cx="9" cy="9" r="8" stroke="rgba(0,0, 0,0.16)" strokeWidth="2" />
+                                        <circle
+                                            style={{
+                                                transition: 'all 0.25s ease',
+                                                strokeDasharray: `${
+                                                    (context.transferMap[temporaryFile?.file?.id]
+                                                        ? context.transferMap[temporaryFile?.file?.id]?.progress / 100
+                                                        : 0) * 50
+                                                } 50`,
+                                            }}
+                                            cx="9"
+                                            cy="9"
+                                            r="8"
+                                            stroke="var(--box-selected-strong-color)"
+                                            strokeWidth="2"
+                                        />
+                                    </svg>
+                                </div>
+
                                 <span figures="tabular" style={{ fontSize: '14px' }}>
                                     {Math.ceil(context.transferMap[temporaryFile?.file?.id]?.progress || 0)} %
                                 </span>

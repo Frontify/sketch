@@ -30,7 +30,7 @@ import executeSafely from '../helpers/executeSafely';
  * For information on the parameters, check the implementation of the
  * function. The parameters are defined using the spread operator.
  */
-import { addSource, getSelectedArtboards, removeDestination, removeDestinations, uploadArtboards } from './actions/';
+import { addSource, uploadArtboards } from './actions/';
 import { refresh } from '../commands/frontify';
 
 // ------------------------------------------------------------------------
@@ -90,7 +90,7 @@ export default function (context) {
     // ------------------------------------------------------------------------
 
     win.on('focus', () => {
-        refresh();
+        // refresh();
     });
 
     // ------------------------------------------------------------------------
@@ -98,6 +98,7 @@ export default function (context) {
     webview.on('did-finish-load', () => {
         // Notify the frontend that the webview has loaded which will trigger a redirect.
         frontend.send('did-finish-load');
+        refresh();
     });
 
     webview.on('did-fail-load', (error) => {
@@ -141,7 +142,6 @@ export default function (context) {
 
     let actions = {
         addSource,
-        getSelectedArtboards,
         uploadArtboards,
     };
 
@@ -272,7 +272,7 @@ export default function (context) {
                     };
                 }
             }
-
+            refresh();
             // Get the latest remote info:
             return { currentDocument: entry };
         } catch (error) {
@@ -350,6 +350,14 @@ export default function (context) {
             currentPage.selected = false;
             page.selected = true;
             currentDocument.centerOnLayer(layer);
+
+            // deselect all
+            currentDocument.selectedLayers.forEach((layer) => {
+                layer.selected = false;
+            });
+
+            // select layer
+            layer.selected = true;
         } catch (error) {
             throw new Error('Could not cancel polling.');
         }
@@ -447,11 +455,11 @@ export default function (context) {
     });
 
     // ------------------------------------------------------------------------
-    frontend.on('getSelectedArtboards', async ({ brandID }) => {
+    frontend.on('getTrackedArtboardsAndSymbols', async ({ brandID }) => {
         try {
             // Performance issue: if useCachedSHA = false
-            let useCachedSHA = true;
-            let payload = actions['getSelectedArtboards'](brandID, useCachedSHA);
+
+            let payload = Artboard.getTrackedArtboardsAndSymbols(brandID);
             return payload;
         } catch (error) {
             throw new Error('Could not get selected artboards.');
@@ -607,11 +615,13 @@ export default function (context) {
     // ------------------------------------------------------------------------
 
     frontend.on('openSource', async ({ path }) => {
-        try {
-            await Source.openSourceAtPath(path);
-        } catch (error) {
-            throw new Error('Could not open source file.');
-        }
+        return Source.openSourceAtPath(path)
+            .then(() => {
+                refresh();
+            })
+            .catch((error) => {
+                throw new Error('Could not open source file.');
+            });
     });
 
     // ------------------------------------------------------------------------
@@ -648,8 +658,6 @@ export default function (context) {
             // Patch the id. Better: use a consistent payload
             source.id = source.refs?.remote_id;
 
-            let result = await Source.pullSource(source, path);
-
             // Close outdated document
             let openDocuments = sketch.getDocuments();
             openDocuments.forEach((document) => {
@@ -658,6 +666,9 @@ export default function (context) {
                     document.close();
                 }
             });
+
+            let result = await Source.pullSource(source, path);
+
             // Open path
             let document = await Source.openSketchFile(path);
 
@@ -672,6 +683,10 @@ export default function (context) {
             let remote = await Source.getAssetForLegacyAssetID(source.id);
 
             Source.checkoutSource({ id_external: uuid, ...source, remote }, path);
+
+            frontend.send('document-opened');
+
+            refresh();
 
             return { success: true, result };
         } catch (error) {
@@ -698,9 +713,9 @@ export default function (context) {
     // ------------------------------------------------------------------------
     frontend.on('removeAllDestinations', async ({ id, brandID }) => {
         try {
-            removeDestinations({ id: id });
+            Artboard.removeDestinations({ id: id });
 
-            let artboardsAfterRemovingAllDestinations = getSelectedArtboards(brandID, false);
+            let artboardsAfterRemovingAllDestinations = Artboard.getTrackedArtboardsAndSymbols(brandID);
 
             frontend.send('artboards-changed', artboardsAfterRemovingAllDestinations);
 
@@ -713,9 +728,9 @@ export default function (context) {
     // ------------------------------------------------------------------------
     frontend.on('removeDestination', async ({ id, destination, brandID }) => {
         try {
-            removeDestination({ id: id }, destination);
+            Artboard.removeDestination({ id: id }, destination);
 
-            let artboardsAfterRemovingDestination = getSelectedArtboards(brandID, false);
+            let artboardsAfterRemovingDestination = Artboard.getTrackedArtboardsAndSymbols(brandID);
 
             frontend.send('artboards-changed', artboardsAfterRemovingDestination);
 
@@ -774,6 +789,18 @@ export default function (context) {
         } catch (error) {
             throw new Error('Uploading artboards failed.');
         }
+    });
+
+    // ------------------------------------------------------------------------
+    frontend.on('uploadSelectedArtboards', async ({ destination, brandID }) => {
+        // 1. Get all tracked artboards that are selected
+        const { selection } = Artboard.getTrackedArtboardsAndSymbols(brandID);
+
+        // 2. Override destinations with the destination provided
+        const artboards = Artboard.overrideDestinations(selection, destination);
+
+        await actions['uploadArtboards']({ artboards, brandID, force: true });
+        refresh();
     });
 
     // ------------------------------------------------------------------------

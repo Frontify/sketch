@@ -3,11 +3,12 @@ export function CustomInlineTextInput({ value, onInput, onChange }) {
     const element = useRef(null);
     useEffect(() => {
         element.current.select();
+        element.current.scrollIntoView();
     }, []);
 
     return (
         <input
-            spellcheck="false"
+            spellCheck="false"
             ref={element}
             type="text"
             variant="naked"
@@ -16,7 +17,10 @@ export function CustomInlineTextInput({ value, onInput, onChange }) {
                 switch (event.keyCode) {
                     // Enter
                     case 13:
-                        onChange(event.target.value);
+                        event.stopPropagation();
+                        if (event.target.value.indexOf('/') == -1) {
+                            onChange(event.target.value);
+                        }
                         break;
                     // Escape
                     case 27:

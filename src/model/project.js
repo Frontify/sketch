@@ -2,6 +2,23 @@ import fetch from '../helpers/fetch';
 import target from './target';
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
 
+/**
+ * It’s possible on Frontify that folders with a slash are created, e.g.
+ *
+ * e.g. folder name: "Slash/in/folder"
+ *
+ * 1. I have no idea if and how v1 supports uploading to a path like that
+ * 2. the file system does not support folder names with a slash in them
+ * I think having folder names with slashes in them is a bug and should not be allowed
+ *
+ * Thus, let’s filter them and not let the plugin deal with it …
+ *
+ * @param {*} folders
+ * @returns Folders that don’t have a slash in their name
+ */
+function filterFoldersWithSlashes(folders) {
+    return folders.filter((folder) => folder.name.indexOf('/') == -1);
+}
 class Project {
     constructor() {}
 
@@ -24,7 +41,7 @@ class Project {
                 .then((result) => {
                     resolve({
                         folder: result.folder,
-                        folders: result.folders,
+                        folders: filterFoldersWithSlashes(result.folders),
                         files: result.files,
                     });
                 })
@@ -46,7 +63,7 @@ class Project {
                 .then((result) => {
                     resolve({
                         folder: result.folder,
-                        folders: result.folders,
+                        folders: filterFoldersWithSlashes(result.folders),
                     });
                 })
                 .catch((error) => reject(error));
