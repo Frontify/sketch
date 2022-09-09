@@ -184,11 +184,13 @@ function getIndicesFromPath(internalFullPath) {
 export function documentChangedCommand(context) {
     // Return early to not degrade performance when the plugin isn’t running, but the action handler is still called
     if (!isWebviewPresent('frontifymain')) return;
+    console.log('documentChangedCommand', context.actionContext);
     profiler.start('documentChangedCommand');
     var changes = context.actionContext;
     let shouldRefresh = false;
     for (var i = 0; i < changes.length; i++) {
         var change = changes[i];
+
         var obj = change.object();
 
         let layer = null;
@@ -202,6 +204,7 @@ export function documentChangedCommand(context) {
             let indices = getIndicesFromPath(change.internalFullPath());
             layer = sketch.getSelectedDocument().pages[indices.page].layers[indices.artboard];
         }
+
         let didFlag = flagParentArtboardAsDirty(layer);
         if (didFlag) {
             shouldRefresh = true;
@@ -218,7 +221,7 @@ function flagParentArtboardAsDirty(layer) {
     if (layer) {
         // we’re using try/catch here because a layer that has been removed won’t have a method "getParentArtboard()"
         try {
-            let artboard = layer.type == 'Artboard' ? layer : layer.getParentArtboard();
+            let artboard = layer.type == 'Artboard' || layer.type == 'SymbolMaster' ? layer : layer.getParentArtboard();
 
             if (artboard) {
                 let currentState = Settings.layerSettingForKey(artboard, 'dirty');
@@ -227,7 +230,16 @@ function flagParentArtboardAsDirty(layer) {
                     return true;
                 }
             }
-        } catch (error) {}
+        } catch (error) {
+            // We’ll catch cases where we know the layer, but "getParentArtboard()" is not a method which is the case for removed layers
+            // We assume that Sketch selects sibling layers of the same artboard / symbol and we use that to figure out what to mark as dirty
+            sketch.getSelectedDocument().selectedLayers.forEach((layer) => {
+                try {
+                    Settings.setLayerSettingForKey(layer.getParentArtboard(), 'dirty', true);
+                } catch (error) {}
+            });
+            return true;
+        }
     }
     return false;
 }

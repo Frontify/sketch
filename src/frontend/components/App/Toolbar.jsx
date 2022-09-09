@@ -160,7 +160,7 @@ export function Toolbar() {
                             <custom-line></custom-line>
 
                             <div tabIndex={0} role="menuitem">
-                                <MenuItem title={'Build: 9 Sep 2022 - 1'}></MenuItem>
+                                <MenuItem title={'Build: 9 Sep 2022 - 3'}></MenuItem>
                             </div>
                         </custom-v-stack>
                     </Flyout>
