@@ -10,6 +10,7 @@ import { findFirstLayer, getDocument } from '../helpers/sketch';
 import asset from './asset';
 import target from './target';
 import FileManager from './FileManager';
+import UploadManager from './UploadManager';
 
 // IPC
 import { isWebviewPresent } from 'sketch-module-web-view/remote';
@@ -604,18 +605,20 @@ class Artboard {
                                                             if (force || newAsset || (proceed && artboardDidChange)) {
                                                                 artboardChanged = true;
 
-                                                                return FileManager.uploadFile(
-                                                                    {
-                                                                        path: file.path,
-                                                                        filename: file.name + '.' + file.ext,
-                                                                        name: file.name,
-                                                                        id: file.id,
-                                                                        id_external: file.id_external,
-                                                                        pixel_ratio: this.pixelRatio,
-                                                                        folder: artboard.target.remote_path,
-                                                                        project: artboard.target.remote_project_id,
-                                                                        type: file.type,
-                                                                    },
+                                                                let fileInfo = {
+                                                                    path: file.path,
+                                                                    filename: file.name + '.' + file.ext,
+                                                                    name: file.name,
+                                                                    id: file.id,
+                                                                    id_external: file.id_external,
+                                                                    pixel_ratio: this.pixelRatio,
+                                                                    folder: artboard.target.remote_path,
+                                                                    project: artboard.target.remote_project_id,
+                                                                    type: file.type,
+                                                                };
+
+                                                                return UploadManager.uploadFile(
+                                                                    fileInfo,
                                                                     artboardProgress
                                                                 )
                                                                     .then(
@@ -714,17 +717,18 @@ class Artboard {
                                                                         '.' +
                                                                         file.ext;
                                                                 }
+                                                                let fileInfo = {
+                                                                    path: file.path,
+                                                                    filename: filename,
+                                                                    name: file.name,
+                                                                    id_external: file.id_external,
+                                                                    type: file.type,
+                                                                    asset_id: assetId,
+                                                                    pixel_ratio: file.pixel_ratio,
+                                                                };
 
-                                                                return FileManager.uploadFile(
-                                                                    {
-                                                                        path: file.path,
-                                                                        filename: filename,
-                                                                        name: file.name,
-                                                                        id_external: file.id_external,
-                                                                        type: file.type,
-                                                                        asset_id: assetId,
-                                                                        pixel_ratio: file.pixel_ratio,
-                                                                    },
+                                                                return UploadManager.uploadFile(
+                                                                    fileInfo,
                                                                     artboardProgress
                                                                 )
                                                                     .then(

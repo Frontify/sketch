@@ -796,6 +796,7 @@ export default function (context) {
         // 1. Get all tracked artboards that are selected
         const { selection } = Artboard.getTrackedArtboardsAndSymbols(brandID);
 
+        console.log(destination);
         // 2. Override destinations with the destination provided
         const artboards = Artboard.overrideDestinations(selection, destination);
 

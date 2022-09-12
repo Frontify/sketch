@@ -184,7 +184,7 @@ function getIndicesFromPath(internalFullPath) {
 export function documentChangedCommand(context) {
     // Return early to not degrade performance when the plugin isn’t running, but the action handler is still called
     if (!isWebviewPresent('frontifymain')) return;
-    console.log('documentChangedCommand', context.actionContext);
+
     profiler.start('documentChangedCommand');
     var changes = context.actionContext;
     let shouldRefresh = false;

@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+      "strict": false,
+      "checkJs": false,
+      "module": "commonjs",
+      "noImplicitAny": false,
+      "removeComments": true,
+      "preserveConstEnums": true,
+      "sourceMap": true
+    },
+    "include": ["src/**/*"],
+    "exclude": ["src/frontend/**/*"]
+  }
+  

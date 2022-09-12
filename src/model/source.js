@@ -12,6 +12,7 @@ import shaFile from '../helpers/shaFile';
 // Models
 import Target from './target';
 import FileManager from './FileManager';
+import UploadManager from './UploadManager';
 
 // IPC
 import { frontend } from '../helpers/ipc';
@@ -456,7 +457,7 @@ class Source {
             id_external: source.uuid,
             folder: target.set.path,
             project: target.project.id,
-            type: 'source',
+            type: AssetType.Source,
         };
 
         var sourceProgress = NSProgress.progressWithTotalUnitCount(10);
@@ -469,7 +470,7 @@ class Source {
             100
         );
 
-        return FileManager.uploadFile(file, sourceProgress)
+        return UploadManager.uploadFile(file, sourceProgress)
             .then(async (data) => {
                 // Payload of the response: {filesize, id, ext, modifier, filename, type, sha, modified, token}
 
@@ -557,7 +558,7 @@ class Source {
                 // This will be the new location of the file
                 let filePath = uploadTarget.path + source.filename;
 
-                FileManager.uploadFile(file, sourceProgress)
+                UploadManager.uploadFile(file, sourceProgress)
                     .then(async (data) => {
                         clearInterval(polling);
                         data.modified = data.created;
