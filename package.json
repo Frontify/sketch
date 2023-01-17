@@ -37,10 +37,10 @@
         "src/assets/js/*.js"
     ],
     "dependencies": {
-        "@babel/runtime": "^7.11.2",
-        "@skpm/builder": "^0.7.7",
-        "@skpm/child_process": "^0.4.1",
-        "mocha-js-delegate": "^0.2.0",
-        "sketch-module-web-view": "^3.1.4"
+        "@babel/runtime": "7.20.7",
+        "@skpm/builder": "0.8.0",
+        "@skpm/child_process": "0.4.2",
+        "mocha-js-delegate": "0.2.0",
+        "sketch-module-web-view": "3.5.1"
     }
 }
