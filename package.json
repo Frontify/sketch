@@ -45,6 +45,7 @@
         "sketch-module-web-view": "3.5.1"
     },
     "overrides": {
-        "loader-utils": "1.4.2"
+        "loader-utils": "1.4.2",
+        "json5": "2.2.3"
     }
 }
