@@ -27,7 +27,7 @@
         "@skpm/extract-loader": "^2.0.2",
         "copy-webpack-plugin": "^5.1.2",
         "css-loader": "^3.2.0",
-        "dot-tpl-loader": "^1.2.1",
+        "dot-tpl-loader": "1.2.1",
         "file-loader": "^1.1.11",
         "html-loader": "^0.5.5",
         "regexp-replace-loader": "^1.0.1",
@@ -43,5 +43,8 @@
         "@skpm/child_process": "0.4.2",
         "mocha-js-delegate": "0.2.0",
         "sketch-module-web-view": "3.5.1"
-    }
+    },
+  "overrides": {
+    "loader-utils": "1.4.1"
+  }
 }
