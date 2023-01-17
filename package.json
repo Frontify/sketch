@@ -24,15 +24,15 @@
     "devDependencies": {
         "@babel/plugin-syntax-async-generators": "7.8.4",
         "@babel/plugin-transform-runtime": "7.19.6",
-        "@skpm/extract-loader": "^2.0.2",
-        "copy-webpack-plugin": "^5.1.2",
-        "css-loader": "^3.2.0",
+        "@skpm/extract-loader": "2.0.3",
+        "copy-webpack-plugin": "5.1.2",
+        "css-loader": "3.2.1",
         "dot-tpl-loader": "1.2.1",
-        "file-loader": "^1.1.11",
-        "html-loader": "^0.5.5",
-        "regexp-replace-loader": "^1.0.1",
-        "style-loader": "^0.19.1",
-        "webpack-concat-plugin": "^3.0.0"
+        "file-loader": "1.1.11",
+        "html-loader": "0.5.5",
+        "regexp-replace-loader": "1.0.1",
+        "style-loader": "0.23.1",
+        "webpack-concat-plugin": "3.0.0"
     },
     "resources": [
         "src/assets/js/*.js"
@@ -45,6 +45,6 @@
         "sketch-module-web-view": "3.5.1"
     },
     "overrides": {
-        "loader-utils": "1.4.1"
+        "loader-utils": "1.4.2"
     }
 }
