@@ -1,5 +1,5 @@
 {
-    "name": "frontify-plugin",
+    "name": "@frontify/frontify-plugin",
     "description": "Connecting your brand and design worlds",
     "version": "2.3.16",
     "repository": {
