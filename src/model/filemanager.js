@@ -90,6 +90,7 @@ class FileManager {
         status.assets[asset.id] = status[asset.id] || {};
         status.assets[asset.id].id = asset.id;
         status.assets[asset.id].modified = asset.modified;
+        status.assets[asset.id].modifier = asset.modifier;
         status.assets[asset.id].sha = asset.sha;
         writeJSON('sources-' + project, status);
     }
