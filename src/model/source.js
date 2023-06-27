@@ -4,6 +4,7 @@ import fetch from '../helpers/fetch';
 import target from './target';
 import sketch from './sketch';
 import filemanager from './filemanager';
+import user from './user';
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
 
 class Source {
@@ -24,6 +25,9 @@ class Source {
                             function (files) {
                                 assets.forEach(
                                     function (asset) {
+                                        let local = status.assets[asset.id];
+                                        let remote = asset;
+
                                         files.forEach(
                                             function (file) {
                                                 if (file.filename == asset.filename) {
@@ -33,39 +37,49 @@ class Source {
                                                     status.assets[asset.id] = status.assets[asset.id] || {
                                                         id: asset.id,
                                                         modified: '0000-00-00 00:00:00',
+                                                        modifier_email: '',
                                                         sha: '0',
                                                     };
 
-                                                    if (asset.sha == file.sha) {
-                                                        // remote file and local file are the same
-                                                        asset.state = 'same';
-                                                    } else if (
-                                                        file.sha != status.assets[asset.id].sha &&
-                                                        asset.modified > status.assets[asset.id].modified
-                                                    ) {
-                                                        // there are local and remote changes
-                                                        asset.state = 'conflict';
-                                                    } else if (asset.modified > status.assets[asset.id].modified) {
-                                                        // there is a newer version of this asset on frontify
-                                                        asset.state = 'pull';
-                                                    } else if (asset.modified <= status.assets[asset.id].modified) {
-                                                        asset.state = 'push';
-                                                    }
+                                                    user.getUser().then((user) => {
+                                                        if (user && user.id) {
+                                                            const sameUser =
+                                                                local.modifier_email == remote.modifier_email;
+                                                            const sameDate = remote.modified == local.modified;
+                                                            const localChanges = local.sha !== file.sha;
 
-                                                    asset.current = file.current;
+                                                            if (sameUser && sameDate && !localChanges) {
+                                                                remote.state = 'same';
+                                                            } else if (
+                                                                localChanges &&
+                                                                remote.modified > local.modified
+                                                            ) {
+                                                                remote.state = 'conflict';
+                                                            } else if (
+                                                                !localChanges &&
+                                                                remote.modified > local.modified
+                                                            ) {
+                                                                remote.state = 'pull';
+                                                            } else if (remote.modified <= local.modified) {
+                                                                remote.state = 'push';
+                                                            }
 
-                                                    if (asset.current) {
-                                                        alreadyAdded = true;
-                                                    }
+                                                            remote.current = file.current;
+
+                                                            if (remote.current) {
+                                                                alreadyAdded = true;
+                                                            }
+                                                        }
+                                                    });
                                                 }
                                             }.bind(this)
                                         );
 
-                                        if (!asset.state) {
-                                            asset.state = 'new';
+                                        if (!remote.state) {
+                                            remote.state = 'new';
                                         }
 
-                                        sources.push(asset);
+                                        sources.push(remote);
                                     }.bind(this)
                                 );
 
@@ -161,7 +175,7 @@ class Source {
                                     filename: filename,
                                     folder: dir,
                                     path: '',
-                                    sha: shaFile(dir + '/' + filename),
+                                    sha: '' + shaFile(dir + '/' + filename),
                                 };
 
                                 if (filename == currentFilename) {
@@ -217,6 +231,7 @@ class Source {
         return this.getCurrentAsset().then(function (asset) {
             if (asset) {
                 let sha = shaFile(asset.localpath);
+
                 if (sha != asset.sha) {
                     return fetch('/v1/screen/activity/' + asset.id, {
                         method: 'POST',
@@ -292,6 +307,12 @@ class Source {
                         sendToWebview('frontifymain', 'sourceDownloaded(' + JSON.stringify(source) + ')');
                     }
 
+                    source.sha = '' + shaFile(source.localpath);
+
+                    target.getTarget('sources').then(function (target) {
+                        filemanager.updateAssetStatus(target.project.id, source);
+                    });
+
                     return path;
                 }.bind(this)
             )
@@ -354,13 +375,21 @@ class Source {
                         function (data) {
                             clearInterval(polling);
                             file.id = data.id;
-                            if (isWebviewPresent('frontifymain')) {
-                                sendToWebview('frontifymain', 'sourceUploaded(' + JSON.stringify(file) + ')');
-                            }
 
-                            filemanager.updateAssetStatus(target.project.id, data);
+                            data.sha = '' + shaFile(file.path);
 
-                            return true;
+                            user.getUser().then(function (user) {
+                                file.modifier_name = '' + user.name;
+                                if (isWebviewPresent('frontifymain')) {
+                                    sendToWebview('frontifymain', 'sourceUploaded(' + JSON.stringify(file) + ')');
+                                }
+
+                                data.modifier_email = '' + user.email;
+                                data.modifier_name = '' + user.name;
+
+                                filemanager.updateAssetStatus(target.project.id, data);
+                                return true;
+                            });
                         }.bind(this)
                     )
                     .catch(
@@ -406,7 +435,15 @@ class Source {
                         function (data) {
                             clearInterval(polling);
                             data.modified = data.created;
-                            filemanager.updateAssetStatus(target.project.id, data);
+
+                            data.sha = '' + shaFile(file.path);
+
+                            user.getUser().then(function (user) {
+                                data.modifier_email = '' + user.email;
+                                data.modifier_name = '' + user.name;
+                                filemanager.updateAssetStatus(target.project.id, data);
+                                return true;
+                            });
 
                             // reload source file list
                             return this.showSources();
