@@ -5,7 +5,6 @@ import createFolder from '../helpers/createFolder';
 import target from './target';
 import sketch from './sketch';
 import FormData from 'sketch-polyfill-fetch/lib/form-data';
-import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
 import extend from '../helpers/extend';
 import response from '../helpers/response';
 
@@ -90,7 +89,8 @@ class FileManager {
         status.assets[asset.id] = status[asset.id] || {};
         status.assets[asset.id].id = asset.id;
         status.assets[asset.id].modified = asset.modified;
-        status.assets[asset.id].modifier = asset.modifier;
+        status.assets[asset.id].modifier_email = asset.modifier_email;
+        status.assets[asset.id].modifier_name = asset.modifier_name;
         status.assets[asset.id].sha = asset.sha;
         writeJSON('sources-' + project, status);
     }
