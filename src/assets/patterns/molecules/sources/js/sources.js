@@ -185,6 +185,8 @@ Tc.Module.Sources = Tc.Module.extend({
         source.state = 'same';
         source.id = data.id;
 
+        source.modifier_name = data.modifier_name;
+
         this.updateItem($item, source);
     },
 
