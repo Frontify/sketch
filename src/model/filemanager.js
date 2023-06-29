@@ -95,6 +95,14 @@ class FileManager {
         writeJSON('sources-' + project, status);
     }
 
+    updateArtboardStatus(project, artboard) {
+        let status = readJSON('artboards-' + project) || {};
+        status.artboards = status.artboards || {};
+        status.artboards[artboard.id] = status[artboard.id] || null;
+        status.artboards[artboard.id] = artboard.sha;
+        writeJSON('artboards-' + project, status);
+    }
+
     openFile(path) {
         NSWorkspace.sharedWorkspace().openFile(path);
     }
