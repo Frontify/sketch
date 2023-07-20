@@ -1,5 +1,6 @@
 import fetch from '../helpers/fetch';
 import shaFile from '../helpers/shaFile';
+import readJSON from '../helpers/readJSON';
 import writeJSON from '../helpers/writeJSON';
 import sketch from './sketch';
 import target from './target';
@@ -477,6 +478,8 @@ class Artboard {
                 function (data) {
                     let target = data.target;
 
+                    let status = readJSON('artboards-' + target.project.id) || { artboards: {} };
+
                     // get the current state of the given artboards
                     artboards = artboards.map(
                         function (artboard) {
@@ -521,8 +524,13 @@ class Artboard {
                                                         return uploadsequence
                                                             .then(
                                                                 function (assetId) {
+                                                                    let artboardSHA = '' + shaFile(file.path);
+
                                                                     if (file.type === 'artboard') {
-                                                                        if (artboard.sha != shaFile(file.path)) {
+                                                                        let localSHA =
+                                                                            status.artboards[file.id] || null;
+
+                                                                        if (localSHA != artboardSHA) {
                                                                             artboardChanged = true;
                                                                             return filemanager
                                                                                 .uploadFile(
@@ -549,7 +557,15 @@ class Artboard {
                                                                                             artboard,
                                                                                             artboardProgress
                                                                                         );
-                                                                                        artboard.sha = data.sha;
+
+                                                                                        filemanager.updateArtboardStatus(
+                                                                                            target.project.id,
+                                                                                            {
+                                                                                                id: data.id,
+                                                                                                sha: artboardSHA,
+                                                                                            }
+                                                                                        );
+
                                                                                         artboard.id = data.id;
                                                                                         artboard.nochanges = false;
 
@@ -571,14 +587,21 @@ class Artboard {
                                                                             return artboard.id;
                                                                         }
                                                                     } else if (file.type === 'attachment') {
-                                                                        let status = this.getRemoteStatusForAttachment(
-                                                                            artboard,
-                                                                            file
-                                                                        );
+                                                                        let remoteStatus =
+                                                                            this.getRemoteStatusForAttachment(
+                                                                                artboard,
+                                                                                file
+                                                                            );
+
+                                                                        let attachmentSHA = '' + shaFile(file.path);
+                                                                        let key =
+                                                                            artboard.id + '-' + remoteStatus.filename;
+
+                                                                        let localSHA = status.artboards[key] || null;
 
                                                                         if (
                                                                             artboardChanged ||
-                                                                            status.sha != shaFile(file.path)
+                                                                            attachmentSHA != localSHA
                                                                         ) {
                                                                             let filename;
 
@@ -616,7 +639,15 @@ class Artboard {
                                                                                             artboard,
                                                                                             artboardProgress
                                                                                         );
-                                                                                        status.sha = data.sha;
+
+                                                                                        filemanager.updateArtboardStatus(
+                                                                                            target.project.id,
+                                                                                            {
+                                                                                                id: key,
+                                                                                                sha: attachmentSHA,
+                                                                                            }
+                                                                                        );
+
                                                                                         return assetId;
                                                                                     }.bind(this)
                                                                                 );

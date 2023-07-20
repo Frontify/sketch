@@ -5,7 +5,6 @@ import createFolder from '../helpers/createFolder';
 import target from './target';
 import sketch from './sketch';
 import FormData from 'sketch-polyfill-fetch/lib/form-data';
-import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
 import extend from '../helpers/extend';
 import response from '../helpers/response';
 
@@ -90,8 +89,18 @@ class FileManager {
         status.assets[asset.id] = status[asset.id] || {};
         status.assets[asset.id].id = asset.id;
         status.assets[asset.id].modified = asset.modified;
+        status.assets[asset.id].modifier_email = asset.modifier_email;
+        status.assets[asset.id].modifier_name = asset.modifier_name;
         status.assets[asset.id].sha = asset.sha;
         writeJSON('sources-' + project, status);
+    }
+
+    updateArtboardStatus(project, artboard) {
+        let status = readJSON('artboards-' + project) || {};
+        status.artboards = status.artboards || {};
+        status.artboards[artboard.id] = status[artboard.id] || null;
+        status.artboards[artboard.id] = artboard.sha;
+        writeJSON('artboards-' + project, status);
     }
 
     openFile(path) {
@@ -234,26 +243,25 @@ class FileManager {
             var task = NSURLSession.sharedSession().uploadTaskWithRequest_fromData_completionHandler(
                 request,
                 data,
-                __mocha__.createBlock_function('v32@?0@"NSData"8@"NSURLResponse"16@"NSError"24', function (
-                    data,
-                    res,
-                    error
-                ) {
-                    task.progress().setCompletedUnitCount(100);
+                __mocha__.createBlock_function(
+                    'v32@?0@"NSData"8@"NSURLResponse"16@"NSError"24',
+                    function (data, res, error) {
+                        task.progress().setCompletedUnitCount(100);
 
-                    if (fiber) {
-                        fiber.cleanup();
-                    } else {
-                        coscript.shouldKeepAround = false;
+                        if (fiber) {
+                            fiber.cleanup();
+                        } else {
+                            coscript.shouldKeepAround = false;
+                        }
+
+                        if (error) {
+                            finished = true;
+                            return reject(error);
+                        }
+
+                        return resolve(response(res, data));
                     }
-
-                    if (error) {
-                        finished = true;
-                        return reject(error);
-                    }
-
-                    return resolve(response(res, data));
-                })
+                )
             );
 
             task.resume();
@@ -344,36 +352,35 @@ class FileManager {
 
                 var task = NSURLSession.sharedSession().downloadTaskWithRequest_completionHandler(
                     request,
-                    __mocha__.createBlock_function('v32@?0@"NSURL"8@"NSURLResponse"16@"NSError"24', function (
-                        location,
-                        res,
-                        error
-                    ) {
-                        let fileManager = NSFileManager.defaultManager();
-                        let targetUrl = NSURL.fileURLWithPath(info.path);
+                    __mocha__.createBlock_function(
+                        'v32@?0@"NSURL"8@"NSURLResponse"16@"NSError"24',
+                        function (location, res, error) {
+                            let fileManager = NSFileManager.defaultManager();
+                            let targetUrl = NSURL.fileURLWithPath(info.path);
 
-                        fileManager.replaceItemAtURL_withItemAtURL_backupItemName_options_resultingItemURL_error(
-                            targetUrl,
-                            location,
-                            nil,
-                            NSFileManagerItemReplacementUsingNewMetadataOnly,
-                            nil,
-                            nil
-                        );
-                        task.progress().setCompletedUnitCount(100);
+                            fileManager.replaceItemAtURL_withItemAtURL_backupItemName_options_resultingItemURL_error(
+                                targetUrl,
+                                location,
+                                nil,
+                                NSFileManagerItemReplacementUsingNewMetadataOnly,
+                                nil,
+                                nil
+                            );
+                            task.progress().setCompletedUnitCount(100);
 
-                        if (fiber) {
-                            fiber.cleanup();
-                        } else {
-                            coscript.shouldKeepAround = false;
+                            if (fiber) {
+                                fiber.cleanup();
+                            } else {
+                                coscript.shouldKeepAround = false;
+                            }
+
+                            if (error) {
+                                finished = true;
+                                return reject(error);
+                            }
+                            return resolve(targetUrl.path());
                         }
-
-                        if (error) {
-                            finished = true;
-                            return reject(error);
-                        }
-                        return resolve(targetUrl.path());
-                    })
+                    )
                 );
 
                 task.resume();
