@@ -1,7 +1,7 @@
 {
     "name": "@frontify/frontify-plugin",
     "description": "Connecting your brand and design worlds",
-    "version": "2.3.17",
+    "version": "2.3.18",
     "repository": {
         "type": "git",
         "url": "https://github.com/Frontify/sketch.git"
