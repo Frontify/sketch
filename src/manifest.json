@@ -1,76 +1,74 @@
 {
-  "name": "Frontify",
-  "compatibleVersion": "3",
-  "identifier": "com.frontify.sketch",
-  "description": "Connecting your brand and design worlds",
-  "bundleVersion": 1,
-  "icon": "./images/drops.png",
-  "authorEmail": "hello@frontify.com",
-  "author": "Frontify AG",
-  "homepage": "https://www.frontify.com/en/integrations/sketch/",
-  "commands": [
-    {
-      "name": "Frontify",
-      "identifier": "frontify",
-      "script": "./commands/frontify.js",
-      "shortcut": "ctrl shift f",
-      "handler": "runCommand"
-    },
-    {
-      "name": "Open",
-      "identifier": "open",
-      "script": "./commands/frontify.js",
-      "handlers": {
-        "actions": {
-          "OpenDocument": "openCommand"
+    "name": "Frontify",
+    "compatibleVersion": "3",
+    "identifier": "com.frontify.sketch",
+    "description": "Connecting your brand and design worlds",
+    "bundleVersion": 1,
+    "icon": "./images/nook.png",
+    "authorEmail": "hello@frontify.com",
+    "author": "Frontify AG",
+    "homepage": "https://www.frontify.com/en/integrations/sketch/",
+    "commands": [
+        {
+            "name": "Frontify",
+            "identifier": "frontify",
+            "script": "./commands/frontify.js",
+            "shortcut": "ctrl shift f",
+            "handler": "runCommand"
+        },
+        {
+            "name": "Open",
+            "identifier": "open",
+            "script": "./commands/frontify.js",
+            "handlers": {
+                "actions": {
+                    "OpenDocument": "openCommand"
+                }
+            }
+        },
+        {
+            "name": "Close",
+            "identifier": "close",
+            "script": "./commands/frontify.js",
+            "handlers": {
+                "actions": {
+                    "CloseDocument": "closeCommand"
+                }
+            }
+        },
+        {
+            "name": "Saved",
+            "identifier": "saved",
+            "script": "./commands/frontify.js",
+            "handlers": {
+                "actions": {
+                    "DocumentSaved": "savedCommand"
+                }
+            }
+        },
+        {
+            "name": "SelectionChanged",
+            "identifier": "selection-changed",
+            "script": "./commands/frontify.js",
+            "handlers": {
+                "actions": {
+                    "SelectionChanged.finish": "selectionChangedCommand"
+                }
+            }
+        },
+        {
+            "name": "StartUp",
+            "identifier": "startup",
+            "script": "./commands/startup.js",
+            "handlers": {
+                "actions": {
+                    "Startup": "onRun"
+                }
+            }
         }
-      }
-    },
-    {
-      "name": "Close",
-      "identifier": "close",
-      "script": "./commands/frontify.js",
-      "handlers": {
-        "actions": {
-          "CloseDocument": "closeCommand"
-        }
-      }
-    },
-    {
-      "name": "Saved",
-      "identifier": "saved",
-      "script": "./commands/frontify.js",
-      "handlers": {
-        "actions": {
-          "DocumentSaved": "savedCommand"
-        }
-      }
-    },
-    {
-      "name": "SelectionChanged",
-      "identifier": "selection-changed",
-      "script": "./commands/frontify.js",
-      "handlers": {
-        "actions": {
-          "SelectionChanged.finish": "selectionChangedCommand"
-        }
-      }
-    },
-    {
-      "name": "StartUp",
-      "identifier": "startup",
-      "script": "./commands/startup.js",
-      "handlers": {
-        "actions": {
-          "Startup": "onRun"
-        }
-      }
-    }
-  ],
-  "menu": {
-    "items": [
-      "frontify"
     ],
-    "isRoot": true
-  }
+    "menu": {
+        "items": ["frontify"],
+        "isRoot": true
+    }
 }
