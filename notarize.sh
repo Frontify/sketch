@@ -9,21 +9,9 @@ then
     exit 1
 fi
 
-BUNDLE=frontify.sketchplugin
-EMAIL=$(security find-generic-password -s AC_PASSWORD | grep acct | cut -d '=' -f 2 | sed -e 's/"//g')
-PASSWORD=$(security find-generic-password -s AC_PASSWORD -w)
+echo "Notarizing "$ZIP" --keychain-profile "Sketch""
 
-if [[ -z "$EMAIL" || -z "$PASSWORD" ]];
-then
-    echo "Missing email or password. Use the following command to add the credentials to keychain for future use."
-    echo "security add-generic-password -a <email> -w <password> -s AC_PASSWORD"
-    echo "More on this in the wiki: https://weare.frontify.com/document/41#/setup/sketch-plugin/publish-the-plugin"
-    exit 1
-fi
-
-echo "Notarizing "$ZIP" with the bundle id "$BUNDLE" using the email "$EMAIL" and the password ******"
-
-OUTPUT=$(xcrun altool --notarize-app -f $ZIP  --primary-bundle-id $BUNDLE -u $EMAIL -p $PASSWORD)
+OUTPUT=$(xcrun notarytool submit $ZIP --keychain-profile "Sketch" --wait)
 
 FIRST_LINE=$(echo "$OUTPUT" | sed -n '1p')
 
@@ -37,5 +25,5 @@ else
     UUID=$(echo $SECOND_LINE| cut -d '=' -f 2)
 
     echo "Plugin sent to the notarization server. To check the status of the request (might take a few minutes), run:"
-    echo "xcrun altool --notarization-info "$UUID" -u "$EMAIL" -p ******"
+    echo "xcrun notarytool log "$UUID" --keychain-profile "Sketch" developer_log.json"
 fi
