@@ -7,8 +7,8 @@
         "url": "https://github.com/Frontify/sketch.git"
     },
     "engines": {
-        "sketch": ">=3.0",
-        "node": "~16"
+        "node": ">=22",
+        "sketch": ">=100.0"
     },
     "skpm": {
         "name": "frontify-plugin",
@@ -39,7 +39,7 @@
     ],
     "dependencies": {
         "@babel/runtime": "7.20.7",
-        "@skpm/builder": "0.8.0",
+        "@skpm/builder": "0.9.5",
         "@skpm/child_process": "0.4.2",
         "@skpm/fs": "^0.2.6",
         "mocha-js-delegate": "0.2.0",
