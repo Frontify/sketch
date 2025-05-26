@@ -345,96 +345,194 @@ class Artboard {
                     throw new Error('Could not find artboard/frame: ' + artboard.name);
                 }
 
-                // 2. Export as PNG using direct method and multiple fallbacks
+                // 2. Enhanced PNG Export with better path handling for Sketch beta
                 try {
-                    this.log('Exporting PNG');
-                    let path = filemanager.getExportPath() + artboard.name.trim() + '.png';
+                    this.log('Exporting PNG with enhanced method for Sketch beta');
+                    let fileName = artboard.name.trim() + '.png';
+                    let exportDir = filemanager.getExportPath();
+                    let fullPath = exportDir + fileName;
 
-                    // Try the most direct method first - get PNG data directly
+                    this.log('Attempting export to: ' + fullPath);
+                    this.log('Sketch version: ' + API.version.sketch + ', API version: ' + API.version.api);
+
+                    // Method 1: Try API.export with specific output handling for Sketch beta
+                    let exportSuccess = false;
+
                     try {
-                        // Check if we can get PNG representation directly
-                        const pngData = msartboard.copyAsImageDataWithOptions
-                            ? msartboard.copyAsImageDataWithOptions(nil)
-                            : null;
+                        this.log('Trying API.export method');
 
-                        if (pngData && pngData.length() > 0) {
-                            this.log('Got PNG data directly, size: ' + pngData.length() + ' bytes');
+                        // Use API.export but handle potential directory creation
+                        const exportResult = API.export(msartboard, {
+                            scales: [this.pixelRatio],
+                            formats: 'png',
+                            output: exportDir, // Export to directory, not specific file
+                            overwriting: true,
+                            'save-for-web': true, // Ensure single file output
+                        });
 
-                            // Save PNG data to disk
-                            const fileManager = NSFileManager.defaultManager();
-                            const success = pngData.writeToFile_atomically(path, true);
+                        this.log('API.export completed, checking results');
 
-                            if (success) {
-                                this.log('PNG saved successfully at: ' + path);
-                            } else {
-                                throw new Error('Failed to write PNG data to file');
-                            }
+                        // Check what was actually created
+                        const fileManager = NSFileManager.defaultManager();
+
+                        // First check if the exact file exists
+                        if (fileManager.fileExistsAtPath(fullPath)) {
+                            exportSuccess = true;
+                            this.log('Direct file export successful');
                         } else {
-                            throw new Error('Failed to get PNG data from artboard');
+                            // Check if a directory was created instead
+                            const potentialDirPath = exportDir + artboard.name.trim();
+                            let isDirectory = false;
+
+                            this.log('Checking for directory at: ' + potentialDirPath);
+
+                            if (fileManager.fileExistsAtPath_isDirectory(potentialDirPath, isDirectory)) {
+                                this.log('Path exists, isDirectory: ' + isDirectory);
+
+                                if (isDirectory) {
+                                    this.log('Directory created instead of file, searching for PNG');
+
+                                    const contents = fileManager.contentsOfDirectoryAtPath_error(potentialDirPath, nil);
+                                    if (contents) {
+                                        this.log('Directory contents count: ' + contents.count());
+
+                                        for (let i = 0; i < contents.count(); i++) {
+                                            const itemName = contents.objectAtIndex(i);
+                                            this.log('Found item: ' + itemName);
+
+                                            if (itemName.hasSuffix('.png')) {
+                                                const sourcePath = potentialDirPath + '/' + itemName;
+                                                this.log('Moving PNG from: ' + sourcePath + ' to: ' + fullPath);
+
+                                                // Move the file to the expected location
+                                                const moveSuccess = fileManager.moveItemAtPath_toPath_error(
+                                                    sourcePath,
+                                                    fullPath,
+                                                    nil,
+                                                );
+                                                if (moveSuccess) {
+                                                    // Remove the empty directory
+                                                    fileManager.removeItemAtPath_error(potentialDirPath, nil);
+                                                    exportSuccess = true;
+                                                    this.log(
+                                                        'Successfully moved PNG from directory to expected location',
+                                                    );
+                                                } else {
+                                                    this.log('Failed to move PNG file');
+                                                }
+                                                break;
+                                            }
+                                        }
+                                    } else {
+                                        this.log('Could not read directory contents');
+                                    }
+                                }
+                            }
+
+                            // Also check for files with scale suffixes (like @2x)
+                            if (!exportSuccess) {
+                                const baseNameWithoutExt = artboard.name.trim();
+                                const scaleVariants = ['@2x.png', '@1x.png', '.png'];
+
+                                for (let variant of scaleVariants) {
+                                    const variantPath = exportDir + baseNameWithoutExt + variant;
+                                    this.log('Checking for variant: ' + variantPath);
+
+                                    if (fileManager.fileExistsAtPath(variantPath)) {
+                                        this.log('Found variant file, moving to expected location');
+                                        const moveSuccess = fileManager.moveItemAtPath_toPath_error(
+                                            variantPath,
+                                            fullPath,
+                                            nil,
+                                        );
+                                        if (moveSuccess) {
+                                            exportSuccess = true;
+                                            this.log('Successfully moved variant file');
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
                         }
-                    } catch (directError) {
-                        this.log('Direct PNG export failed: ' + directError.message + ', trying alternative methods');
+                    } catch (apiExportError) {
+                        this.log('API.export failed: ' + apiExportError.message);
+                    }
 
-                        // Try API.export next (which works in Sketch 2025.1)
+                    // Method 2: Fallback - Try direct PNG data method
+                    if (!exportSuccess) {
+                        this.log('Trying direct PNG data method');
+
                         try {
-                            this.log('Trying API.export');
+                            const pngData = msartboard.copyAsImageDataWithOptions
+                                ? msartboard.copyAsImageDataWithOptions(nil)
+                                : null;
 
-                            API.export(msartboard, {
-                                scales: [this.pixelRatio],
-                                formats: 'png',
-                                output: path,
-                                overwriting: true,
-                            });
+                            if (pngData && pngData.length() > 0) {
+                                const success = pngData.writeToFile_atomically(fullPath, true);
+                                if (success) {
+                                    exportSuccess = true;
+                                    this.log('Direct PNG data export successful');
+                                } else {
+                                    throw new Error('Failed to write PNG data to file');
+                                }
+                            } else {
+                                throw new Error('Failed to get PNG data from artboard');
+                            }
+                        } catch (directError) {
+                            this.log('Direct PNG method failed: ' + directError.message);
+                        }
+                    }
 
-                            this.log('API.export completed');
-                        } catch (apiExportError) {
-                            this.log('API.export failed: ' + apiExportError.message);
+                    // Method 3: Final fallback with MSExportRequest
+                    if (!exportSuccess) {
+                        this.log('Using MSExportRequest fallback');
 
-                            // Try MSExportRequest as final fallback
-                            this.log('Trying MSExportRequest');
+                        try {
                             let imageFormat = MSExportFormat.alloc().init();
                             imageFormat.setFileFormat('png');
-                            imageFormat.setScale(this.pixelRatio); // @2x
+                            imageFormat.setScale(this.pixelRatio);
 
                             let exportRequest =
                                 MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(
                                     msartboard,
                                     [imageFormat],
-                                    true,
+                                    false, // Use layer name, not ID
                                 ).firstObject();
 
-                            doc.saveArtboardOrSlice_toFile(exportRequest, path);
-                            this.log('MSExportRequest succeeded');
+                            // Set specific file path
+                            exportRequest.setName(fileName.replace('.png', ''));
+                            doc.saveArtboardOrSlice_toFile(exportRequest, fullPath);
+                            exportSuccess = true;
+                            this.log('MSExportRequest fallback successful');
+                        } catch (msExportError) {
+                            this.log('MSExportRequest failed: ' + msExportError.message);
                         }
                     }
 
-                    // Verify the file was created
+                    // Verify final result
                     const fileManager = NSFileManager.defaultManager();
-                    if (fileManager.fileExistsAtPath(path)) {
-                        const fileAttributes = fileManager.attributesOfItemAtPath_error(path, nil);
-                        if (fileAttributes) {
-                            const fileSize = Number(fileAttributes.fileSize());
-                            this.log('Exported PNG exists with size: ' + fileSize + ' bytes');
+                    if (fileManager.fileExistsAtPath(fullPath)) {
+                        const fileAttributes = fileManager.attributesOfItemAtPath_error(fullPath, nil);
+                        const fileSize = fileAttributes ? Number(fileAttributes.fileSize()) : 0;
 
-                            if (fileSize === 0) {
-                                throw new Error('PNG file was created but is empty (0 bytes)');
-                            }
+                        if (fileSize > 0) {
+                            this.log('PNG export verified - size: ' + fileSize + ' bytes');
+
+                            files.push({
+                                name: artboard.name,
+                                ext: 'png',
+                                id_external: artboard.id_external,
+                                id: artboard.id,
+                                sha: artboard.sha,
+                                path: fullPath,
+                                type: 'artboard',
+                            });
                         } else {
-                            this.log('Warning: Could not get file attributes for size verification');
+                            throw new Error('Exported PNG file is empty (0 bytes)');
                         }
                     } else {
-                        throw new Error("PNG export failed - file doesn't exist at path: " + path);
+                        throw new Error('PNG export failed - no file created at: ' + fullPath);
                     }
-
-                    files.push({
-                        name: artboard.name,
-                        ext: 'png',
-                        id_external: artboard.id_external,
-                        id: artboard.id,
-                        sha: artboard.sha,
-                        path: path,
-                        type: 'artboard',
-                    });
                 } catch (e) {
                     this.log('All PNG export methods failed: ' + e.message);
                     throw e;
@@ -442,6 +540,8 @@ class Artboard {
 
                 // 3. Export as JSON
                 try {
+                    this.log('Starting JSON export');
+
                     // Make sure we have a JS artboard object
                     if (!jsartboard) {
                         try {
@@ -464,7 +564,9 @@ class Artboard {
 
                     // Export formats
                     try {
-                        files = files.concat(this.exportFormats(doc, jsartboard));
+                        const additionalFiles = this.exportFormats(doc, jsartboard);
+                        files = files.concat(additionalFiles);
+                        this.log('Added ' + additionalFiles.length + ' additional format files');
                     } catch (e) {
                         this.log('Error exporting formats: ' + e.message);
                         // Continue without additional formats
@@ -499,25 +601,26 @@ class Artboard {
                             const fileSize = Number(fileAttributes.fileSize());
                             this.log('Exported JSON exists with size: ' + fileSize + ' bytes');
                         }
+
+                        files.push({
+                            name: exportName,
+                            ext: 'json',
+                            id_external: artboard.id_external,
+                            id: artboard.id,
+                            path: jsonPath,
+                            type: 'attachment',
+                        });
+
+                        this.log('JSON exported successfully');
                     } else {
                         this.log('Warning: JSON file not found at path: ' + jsonPath);
                     }
-
-                    files.push({
-                        name: exportName,
-                        ext: 'json',
-                        id_external: artboard.id_external,
-                        id: artboard.id,
-                        path: jsonPath,
-                        type: 'attachment',
-                    });
-
-                    this.log('JSON exported successfully');
                 } catch (e) {
                     this.log('Error exporting JSON: ' + e.message);
                     throw e;
                 }
 
+                this.log('Export completed with ' + files.length + ' files');
                 resolve(files);
             }.bind(this),
         );
@@ -810,19 +913,42 @@ class Artboard {
                 }
 
                 const timeStamp = Date.now();
-                const path = filemanager.getExportPath() + timeStamp + '-' + name.trim() + '.' + format.fileFormat;
+                let exportPath = filemanager.getExportPath() + timeStamp + '-' + name.trim() + '.' + format.fileFormat;
 
                 try {
-                    // Try API.export first
+                    this.log(`Exporting format: ${name}.${format.fileFormat}`);
+
+                    // Try API.export first (preferred for Sketch beta)
                     if (API.export) {
                         const scale = this.getLayerScaleNumberFromSizeString(format.size, layer.frame);
+
+                        // For Sketch beta, export to directory first to handle potential directory creation
+                        const tempDir = filemanager.getExportPath() + 'temp-' + timeStamp + '/';
+
                         API.export(layer.sketchObject, {
                             scales: [scale],
                             formats: format.fileFormat,
-                            output: path,
+                            output: tempDir,
                             overwriting: true,
                         });
-                        this.log(`Format exported with API.export: ${name}.${format.fileFormat}`);
+
+                        // Check what was created and move to expected location
+                        const fileManager = NSFileManager.defaultManager();
+                        const finalPath = filemanager.validateAndCleanupExportPath(
+                            tempDir + name.trim() + '.' + format.fileFormat,
+                        );
+
+                        if (fileManager.fileExistsAtPath(finalPath)) {
+                            // Move to final location
+                            if (finalPath !== exportPath) {
+                                fileManager.moveItemAtPath_toPath_error(finalPath, exportPath, nil);
+                                // Clean up temp directory
+                                fileManager.removeItemAtPath_error(tempDir, nil);
+                            }
+                            this.log(`Format exported with API.export: ${name}.${format.fileFormat}`);
+                        } else {
+                            throw new Error('Export failed - no file created');
+                        }
                     } else {
                         // Use traditional MSExportRequest as fallback
                         const layerSizeAsScaleNumber = this.getLayerScaleNumberFromSizeString(format.size, layer.frame);
@@ -837,19 +963,25 @@ class Artboard {
                                 [layerFormat],
                                 true,
                             ).firstObject();
-                        doc.saveArtboardOrSlice_toFile(exportRequest, path);
+                        doc.saveArtboardOrSlice_toFile(exportRequest, exportPath);
                         this.log(`Format exported with MSExportRequest: ${name}.${format.fileFormat}`);
                     }
 
-                    files.push({
-                        name: name.trim(),
-                        ext: format.fileFormat,
-                        id_external: layer.id,
-                        id: layer.id,
-                        path: path,
-                        type: 'attachment',
-                        pixel_ratio: format.size,
-                    });
+                    // Verify file was created
+                    const fileManager = NSFileManager.defaultManager();
+                    if (fileManager.fileExistsAtPath(exportPath)) {
+                        files.push({
+                            name: name.trim(),
+                            ext: format.fileFormat,
+                            id_external: layer.id,
+                            id: layer.id,
+                            path: exportPath,
+                            type: 'attachment',
+                            pixel_ratio: format.size,
+                        });
+                    } else {
+                        this.log(`WARNING: Export file not found at: ${exportPath}`);
+                    }
                 } catch (e) {
                     this.log(`Error exporting format ${name}.${format.fileFormat}: ${e.message}`);
                 }
@@ -909,7 +1041,7 @@ class Artboard {
                         // Method 1: Use sketch API helper
                         doc = sketch.getDocument();
                     } catch (e) {
-                        this.logUpload('Error with sketch.getDocument(): ' + e.message);
+                        this.log('Error with sketch.getDocument(): ' + e.message);
                     }
 
                     if (!doc) {
@@ -922,13 +1054,13 @@ class Artboard {
                                 doc = doc.sketchObject;
                             }
                         } catch (e) {
-                            this.logUpload('Error with DOM.getSelectedDocument(): ' + e.message);
+                            this.log('Error with DOM.getSelectedDocument(): ' + e.message);
                         }
                     }
 
                     // Final check
                     if (!doc) {
-                        this.logUpload('ERROR: No document found after multiple attempts');
+                        this.log('ERROR: No document found after multiple attempts');
                         throw new Error('No document found');
                     }
 
