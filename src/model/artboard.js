@@ -142,8 +142,9 @@ class Artboard {
         return new Promise(
             function (resolve) {
                 let files = [];
-                let predicate = NSPredicate.predicateWithFormat('objectID == %@', artboard.id_external);
-                let msartboard = sketch.findFirstLayer(predicate, nil, MSArtboardGroup, doc);
+                let jsdocument = DOM.Document.fromNative(doc);
+                let jsartboard = jsdocument.getLayerWithID(artboard.id_external); // DOM Artboard
+                let msartboard = jsartboard.sketchObject;
 
                 // Export artboard image -> traditional MSExportRequest for better naming control
                 let imageFormat = MSExportFormat.alloc().init();
@@ -170,7 +171,6 @@ class Artboard {
                 });
 
                 // Export artboard structure -> via JS API as its not possible to export JSON with MSExportRequest
-                let jsartboard = DOM.Artboard.fromNative(msartboard);
 
                 // Export the artboard's data first to preprocess and optimize data
                 let artboardExport = DOM.export(jsartboard, {
