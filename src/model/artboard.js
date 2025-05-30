@@ -143,22 +143,20 @@ class Artboard {
             function (resolve) {
                 let files = [];
                 let jsdocument = DOM.Document.fromNative(doc);
-                let jsartboard = jsdocument.getLayerWithID(artboard.id_external); // DOM Artboard
-                let msartboard = jsartboard.sketchObject;
+                let jsartboard = jsdocument.getLayerWithID(artboard.id_external);
 
-                // Export artboard image -> traditional MSExportRequest for better naming control
-                let imageFormat = MSExportFormat.alloc().init();
-                imageFormat.setFileFormat('png');
-                imageFormat.setScale(this.pixelRatio); // @2x
+                // NB! Compared to the old Objective-C API, the new Sketch JavaScript API exports the file with a slightly different name:
+                // old - 'name of the artboard.png'
+                // new - 'name of the artboard@2x.png'
+                DOM.export(jsartboard, {
+                    formats: 'png',
+                    output: filemanager.getExportPath(),
+                    overwriting: true,
+                    scales: `${this.pixelRatio}x`,
+                    trimmed: false,
+                });
 
-                let path = filemanager.getExportPath() + artboard.name + '.png';
-                let exportRequest = MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(
-                    msartboard,
-                    [imageFormat],
-                    true
-                ).firstObject();
-
-                doc.saveArtboardOrSlice_toFile(exportRequest, path);
+                let path = filemanager.getExportPath() + artboard.name + '@' + this.pixelRatio + 'x.png';
 
                 files.push({
                     name: artboard.name,
