@@ -176,7 +176,7 @@ class Artboard {
                     output: false,
                 });
 
-                // Export formats -> traditional MSExportRequest for better naming control
+                // Export formats
                 files = files.concat(this.exportFormats(doc, jsartboard));
                 // Save origin info
                 let jsdoc = DOM.Document.fromNative(doc);
@@ -432,20 +432,24 @@ class Artboard {
                 name += format.suffix;
             }
 
-            const timeStamp = Date.now();
-            const path = filemanager.getExportPath() + timeStamp + '-' + name + '.' + format.fileFormat;
             const layerSizeAsScaleNumber = this.getLayerScaleNumberFromSizeString(format.size, layer.frame);
-            const layerFormat = MSExportFormat.alloc().init();
+            
+            // NB! Previously the exported filename also included a timestamp:
+            // const timeStamp = Date.now();
+            // const path = filemanager.getExportPath() + timeStamp + '-' + name + '.' + format.fileFormat;
+            // The path value is used in files.push. Previously we assembled it ourselves,
+            // but with DOM.export it's generated automatically and not returned.
+            // Only way to get the filename is to predict it using the export options ('1x' scale is the only one that's omitted)
+            const exportedPath = filemanager.getExportPath() + name + '.' + format.fileFormat;
+            const path = exportedPath.replace('@1x', '');
 
-            layerFormat.setFileFormat(format.fileFormat);
-            layerFormat.setScale(layerSizeAsScaleNumber);
-
-            const exportRequest = MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(
-                layer.sketchObject,
-                [layerFormat],
-                true
-            ).firstObject();
-            doc.saveArtboardOrSlice_toFile(exportRequest, path);
+            DOM.export(layer, {
+                formats: format.fileFormat,
+                output: filemanager.getExportPath(),
+                overwriting: true,
+                scales: `${layerSizeAsScaleNumber}x`,
+                trimmed: false,
+            });
 
             files.push({
                 name: name,
