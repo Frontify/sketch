@@ -80,11 +80,6 @@ class Sketch {
         return NSArray.array(); // Return an empty array if no matches were found
     }
 
-    findFirstLayer(predicate, container, layerType, doc) {
-        let filteredArray = this.findLayers(predicate, container, layerType, doc);
-        return filteredArray.firstObject();
-    }
-
     getSelection() {
         let doc = this.getDocument();
 

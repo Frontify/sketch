@@ -7,6 +7,7 @@ import target from './target';
 import filemanager from './filemanager';
 import asset from './asset';
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
+import fs from '@skpm/fs';
 
 let API = require('sketch');
 let DOM = require('sketch/dom');
@@ -142,22 +143,24 @@ class Artboard {
         return new Promise(
             function (resolve) {
                 let files = [];
-                let predicate = NSPredicate.predicateWithFormat('objectID == %@', artboard.id_external);
-                let msartboard = sketch.findFirstLayer(predicate, nil, MSArtboardGroup, doc);
+                let jsdocument = DOM.Document.fromNative(doc);
+                let jsartboard = jsdocument.getLayerWithID(artboard.id_external);
 
-                // Export artboard image -> traditional MSExportRequest for better naming control
-                let imageFormat = MSExportFormat.alloc().init();
-                imageFormat.setFileFormat('png');
-                imageFormat.setScale(this.pixelRatio); // @2x
+                // NB! Compared to the old Objective-C API, the new Sketch JavaScript API exports the file with a slightly different name:
+                // old - 'name of the artboard.png'
+                // new - 'name of the artboard@2x.png'
+                const buffer = DOM.export(jsartboard, {
+                    formats: 'png',
+                    output: false, // Export to buffer, not file
+                    scales: `${this.pixelRatio}x`,
+                    trimmed: false,
+                });
 
-                let path = filemanager.getExportPath() + artboard.name + '.png';
-                let exportRequest = MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(
-                    msartboard,
-                    [imageFormat],
-                    true
-                ).firstObject();
+                // Trim whitespace and replace problematic characters (and spaces) with underscores
+                const safeName = artboard.name.trim().replace(/[<>:"/\\|?*\s]+/g, '_');
+                const path = filemanager.getExportPath() + safeName + '@' + this.pixelRatio + 'x.png';
+                fs.writeFileSync(path, buffer);
 
-                doc.saveArtboardOrSlice_toFile(exportRequest, path);
 
                 files.push({
                     name: artboard.name,
@@ -170,7 +173,6 @@ class Artboard {
                 });
 
                 // Export artboard structure -> via JS API as its not possible to export JSON with MSExportRequest
-                let jsartboard = DOM.Artboard.fromNative(msartboard);
 
                 // Export the artboard's data first to preprocess and optimize data
                 let artboardExport = DOM.export(jsartboard, {
@@ -178,7 +180,7 @@ class Artboard {
                     output: false,
                 });
 
-                // Export formats -> traditional MSExportRequest for better naming control
+                // Export formats
                 files = files.concat(this.exportFormats(doc, jsartboard));
                 // Save origin info
                 let jsdoc = DOM.Document.fromNative(doc);
@@ -434,20 +436,24 @@ class Artboard {
                 name += format.suffix;
             }
 
-            const timeStamp = Date.now();
-            const path = filemanager.getExportPath() + timeStamp + '-' + name + '.' + format.fileFormat;
             const layerSizeAsScaleNumber = this.getLayerScaleNumberFromSizeString(format.size, layer.frame);
-            const layerFormat = MSExportFormat.alloc().init();
+            
+            // NB! Previously the exported filename also included a timestamp:
+            // const timeStamp = Date.now();
+            // const path = filemanager.getExportPath() + timeStamp + '-' + name + '.' + format.fileFormat;
+            // The path value is used in files.push. Previously we assembled it ourselves,
+            // but with DOM.export it's generated automatically and not returned.
+            // Only way to get the filename is to predict it using the export options ('1x' scale is the only one that's omitted)
+            const exportedPath = filemanager.getExportPath() + name + '.' + format.fileFormat;
+            const path = exportedPath.replace('@1x', '');
 
-            layerFormat.setFileFormat(format.fileFormat);
-            layerFormat.setScale(layerSizeAsScaleNumber);
-
-            const exportRequest = MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(
-                layer.sketchObject,
-                [layerFormat],
-                true
-            ).firstObject();
-            doc.saveArtboardOrSlice_toFile(exportRequest, path);
+            DOM.export(layer, {
+                formats: format.fileFormat,
+                output: filemanager.getExportPath(),
+                overwriting: true,
+                scales: `${layerSizeAsScaleNumber}x`,
+                trimmed: false,
+            });
 
             files.push({
                 name: name,
