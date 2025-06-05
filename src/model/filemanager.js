@@ -5,6 +5,7 @@ import createFolder from '../helpers/createFolder';
 import target from './target';
 import sketch from './sketch';
 import FormData from 'sketch-polyfill-fetch/lib/form-data';
+import fs from '@skpm/fs';
 import extend from '../helpers/extend';
 import response from '../helpers/response';
 
@@ -210,10 +211,12 @@ class FileManager {
 
             // Form encoded params
             if (options.filepath) {
+                const buffer = fs.readFileSync(options.filepath);
+                
                 formData.append('file', {
                     fileName: options.body.filename,
                     mimeType: options.body.mimetype,
-                    data: NSData.alloc().initWithContentsOfFile(options.filepath),
+                    data: buffer,
                 });
             }
 

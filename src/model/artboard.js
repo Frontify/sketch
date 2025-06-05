@@ -7,6 +7,7 @@ import target from './target';
 import filemanager from './filemanager';
 import asset from './asset';
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
+import fs from '@skpm/fs';
 
 let API = require('sketch');
 let DOM = require('sketch/dom');
@@ -148,15 +149,18 @@ class Artboard {
                 // NB! Compared to the old Objective-C API, the new Sketch JavaScript API exports the file with a slightly different name:
                 // old - 'name of the artboard.png'
                 // new - 'name of the artboard@2x.png'
-                DOM.export(jsartboard, {
+                const buffer = DOM.export(jsartboard, {
                     formats: 'png',
-                    output: filemanager.getExportPath(),
-                    overwriting: true,
+                    output: false, // Export to buffer, not file
                     scales: `${this.pixelRatio}x`,
                     trimmed: false,
                 });
 
-                let path = filemanager.getExportPath() + artboard.name + '@' + this.pixelRatio + 'x.png';
+                // Trim whitespace and replace problematic characters (and spaces) with underscores
+                const safeName = artboard.name.trim().replace(/[<>:"/\\|?*\s]+/g, '_');
+                const path = filemanager.getExportPath() + safeName + '@' + this.pixelRatio + 'x.png';
+                fs.writeFileSync(path, buffer);
+
 
                 files.push({
                     name: artboard.name,
