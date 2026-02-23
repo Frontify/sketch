@@ -1,5 +1,3 @@
-import fetch from 'sketch-polyfill-fetch';
-
 class OAuth {
     constructor() {
         this.sessionId = '';

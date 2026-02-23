@@ -4,8 +4,8 @@ import fetch from '../helpers/fetch';
 import createFolder from '../helpers/createFolder';
 import target from './target';
 import sketch from './sketch';
-import FormData from 'sketch-polyfill-fetch/lib/form-data';
-import fs from '@skpm/fs';
+import FormData from '../helpers/FormData';
+const fs = require('fs');
 import extend from '../helpers/extend';
 import response from '../helpers/response';
 

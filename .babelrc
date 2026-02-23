@@ -1,3 +1,3 @@
 {
-    "plugins": ["@babel/plugin-transform-runtime","@babel/plugin-syntax-async-generators"]
+    "plugins": ["@babel/plugin-transform-runtime","@babel/plugin-syntax-async-generators","@babel/plugin-proposal-optional-chaining"]
 }

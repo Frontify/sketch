@@ -1,6 +1,5 @@
 import readJSON from './readJSON'
 import extend from '../helpers/extend'
-import fetch from 'sketch-polyfill-fetch'
 
 export default function (uri, options) {
     // get token

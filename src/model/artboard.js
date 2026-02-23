@@ -7,7 +7,7 @@ import target from './target';
 import filemanager from './filemanager';
 import asset from './asset';
 import { isWebviewPresent, sendToWebview } from 'sketch-module-web-view/remote';
-import fs from '@skpm/fs';
+const fs = require('fs');
 
 let API = require('sketch');
 let DOM = require('sketch/dom');

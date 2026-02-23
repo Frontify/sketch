@@ -10,22 +10,18 @@
         "node": ">=22",
         "sketch": ">=100.0"
     },
-    "skpm": {
-        "name": "frontify-plugin",
-        "manifest": "src/manifest.json",
-        "main": "frontify.sketchplugin"
-    },
     "scripts": {
-        "build": "skpm-build",
-        "watch": "skpm-build --watch",
-        "start": "skpm-build --watch --run",
-        "postinstall": "npm run build && skpm-link"
+        "build": "webpack --mode production",
+        "watch": "webpack --mode development --watch",
+        "start": "webpack --mode development --watch",
+        "link": "node scripts/link.js",
+        "postinstall": "npm run build && npm run link"
     },
     "devDependencies": {
+        "@babel/plugin-proposal-optional-chaining": "^7.21.0",
         "@babel/plugin-syntax-async-generators": "^7.8.4",
         "@babel/plugin-transform-runtime": "^7.19.6",
-        "@skpm/builder": "^0.9.5",
-        "@skpm/extract-loader": "2.0.3",
+        "babel-loader": "^8.3.0",
         "copy-webpack-plugin": "5.1.2",
         "css-loader": "^5.0.0",
         "dot-tpl-loader": "1.2.1",
@@ -33,15 +29,12 @@
         "html-loader": "^1.0.0",
         "regexp-replace-loader": "1.0.1",
         "style-loader": "0.23.1",
+        "webpack": "^4.47.0",
+        "webpack-cli": "^3.3.12",
         "webpack-concat-plugin": "^3.0.0"
     },
-    "resources": [
-        "src/assets/js/*.js"
-    ],
     "dependencies": {
         "@babel/runtime": "^7.20.7",
-        "@skpm/child_process": "0.4.2",
-        "@skpm/fs": "^0.2.6",
         "mocha-js-delegate": "0.2.0",
         "sketch-module-web-view": "3.5.1"
     },
